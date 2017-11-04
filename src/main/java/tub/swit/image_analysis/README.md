@@ -1,4 +1,4 @@
-# SWIT - Image Analysis Module
+# SWIT - Image Analysis Package
 
 ## Setup
 
