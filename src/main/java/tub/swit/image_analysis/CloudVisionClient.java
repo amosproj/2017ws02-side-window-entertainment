@@ -2,6 +2,8 @@ package tub.swit.image_analysis;
 
 
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.client.http.*;
+import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.vision.v1.Vision;
@@ -9,6 +11,10 @@ import com.google.api.services.vision.v1.VisionRequestInitializer;
 import com.google.api.services.vision.v1.model.*;
 import com.google.api.services.vision.v1.model.Image;
 import com.google.common.collect.ImmutableList;
+import com.jayway.jsonpath.JsonPath;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -22,6 +28,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -101,7 +109,7 @@ public class CloudVisionClient implements LandmarkDetector {
                 .collect(Collectors.toList());
     }
 
-    private void highlightLandmarks(String path, List<String> names, List<BoundingPoly> boundingPolies) throws IOException {
+    private void highlightLandmarks(String path, List<String> names, List<String> descriptions, List<BoundingPoly> boundingPolies) throws IOException {
         BufferedImage img = ImageIO.read(new File(path));
         // Create a graphics context on the buffered image
         Graphics2D g2d = img.createGraphics();
@@ -132,11 +140,35 @@ public class CloudVisionClient implements LandmarkDetector {
             int ytext = ymax - 10;
             g2d.setFont(new Font("Serif", Font.BOLD, 16));
             g2d.drawString(names.get(k), xtext, ytext);
+            showInfoBox(descriptions.get(k), img, frame, g2d);
             k++;
         }
         g2d.dispose();
 
         showImage(img, frame);
+    }
+
+    private void showInfoBox(String description, BufferedImage img, JFrame frame, Graphics2D g2d) {
+        String desc = "<html><body style='width: 200px; padding: 5px;'>" + description;
+        JLabel textLabel = new JLabel(desc);
+        textLabel.setSize(textLabel.getPreferredSize());
+        Dimension d = textLabel.getPreferredSize();
+        BufferedImage bi = new BufferedImage(
+                d.width,
+                d.height,
+                BufferedImage.TYPE_INT_ARGB);
+        Graphics g = bi.createGraphics();
+        g.setColor(new Color(255, 255, 255, 128));
+        g.fillRoundRect(
+                0,
+                0,
+                d.width,
+                d.height,
+                15,
+                10);
+        g.setColor(Color.black);
+        textLabel.paint(g);
+        g2d.drawImage(bi, img.getWidth() / 2, 20, frame);
     }
 
     private void showImage(BufferedImage img, JFrame frame) {
@@ -168,10 +200,13 @@ public class CloudVisionClient implements LandmarkDetector {
             return;
         }
         try {
+            List<String> descriptions = app.getLandmarkDescriptions(results.stream().map(LandmarkResult::getId).collect(Collectors.toList()));
+
             app.highlightLandmarks(imagePath.toString(),
                     results.stream()
                             .map(LandmarkResult::getName)
                             .collect(Collectors.toList()),
+                    descriptions,
                     results.stream()
                             .map(LandmarkResult::getBoundlingPoly)
                             .collect(Collectors.toList()));
@@ -194,4 +229,33 @@ public class CloudVisionClient implements LandmarkDetector {
         }
     }
 
+    // get detailed descriptions using google knowledge graph api
+    private List<String> getLandmarkDescriptions(List<String> ids) {
+        try {
+            HttpTransport httpTransport = new NetHttpTransport();
+            HttpRequestFactory requestFactory = httpTransport.createRequestFactory();
+            JSONParser parser = new JSONParser();
+            GenericUrl url = new GenericUrl("https://kgsearch.googleapis.com/v1/entities:search");
+            for (String id : ids) {
+                url.put("ids", id);
+            }
+            url.put("limit", "10");
+            url.put("indent", "true");
+            url.put("key", CLOUD_VISION_API_KEY);
+            HttpRequest request = requestFactory.buildGetRequest(url);
+            HttpResponse httpResponse = request.execute();
+            JSONObject response = (JSONObject) parser.parse(httpResponse.parseAsString());
+            JSONArray elements = (JSONArray) response.get("itemListElement");
+            List<String> descriptions = new ArrayList<>();
+            for (Object element : elements) {
+                String detailedDescription = JsonPath.read(element, "$.result.detailedDescription.articleBody").toString();
+                descriptions.add(detailedDescription);
+                System.out.println(detailedDescription);
+            }
+            return descriptions;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return Collections.emptyList();
+    }
 }
