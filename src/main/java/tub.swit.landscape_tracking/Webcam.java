@@ -1,33 +1,45 @@
 package tub.swit.landscape_tracking;
 
 import org.bytedeco.javacv.*;
+import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameGrabber.Exception;
 
 import org.bytedeco.javacpp.opencv_core.IplImage;
 
 import java.awt.image.BufferedImage;
 
-import static org.bytedeco.javacpp.opencv_core.*;
-import static org.bytedeco.javacpp.opencv_imgproc.*;
+
 
 
 class Webcam {
+    OpenCVFrameGrabber grabber;
+
+    boolean running = false;
+
+    Webcam (int deviceNumber) {
+        grabber = new OpenCVFrameGrabber(deviceNumber);
+    }
 
 
-    BufferedImage takePhoto() throws Exception, org.bytedeco.javacv.FrameRecorder.Exception
-    {
-        OpenCVFrameGrabber grabber = new OpenCVFrameGrabber(0);
+
+    void start() throws Exception {
+        grabber.start();
+        running = true;
+    }
+
+    void stop() throws Exception {
+        grabber.stop();
+        running = false;
+    }
+
+    BufferedImage takePhoto() throws Exception, org.bytedeco.javacv.FrameRecorder.Exception {
         OpenCVFrameConverter.ToIplImage converter = new OpenCVFrameConverter.ToIplImage();
         IplImage grabbedImage;
         {
-            grabber.start();
             grabbedImage = converter.convert(grabber.grab());
-            grabber.stop();
         }
 
         return IplImageToBufferedImage(grabbedImage);
-
-
     }
 
     private static BufferedImage IplImageToBufferedImage(IplImage src) {
