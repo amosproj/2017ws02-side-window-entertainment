@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
 
 public class CloudVisionClient implements LandmarkDetector {
 
-    private static final String CLOUD_VISION_API_KEY = "AIzaSyCDYEQsEKR6KXY23qbQC5Daih1RoW1vEho";
+    private static final String CLOUD_VISION_API_KEY = "YOUR_API_KEY";
 
     private static final String APPLICATION_NAME = "Swit-Image-Analysis";
 
