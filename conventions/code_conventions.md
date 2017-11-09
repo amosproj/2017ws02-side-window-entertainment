@@ -10,7 +10,7 @@
 1. verweden das Prinzip von **Clean Code**. Daher versuchen sie Kommentare für Klassen, Funktionen, Eigenschaften und Variablen zu vermeiden indem sie aussagekräftige Namen verwenden. 
 
 Beispiel für java:
-'
+`
 Interface:     public interface GpsTracker { ... }
 
 Klasse:        public class GpsTrackerImplementation implements GpsTracker { ... }
@@ -24,7 +24,7 @@ Eigenschaften: private List<GpsPosition> gpsPositionHistory;
                public void setGpsPositionHistory(List<GpsPosition> gpsPositionHistory) {
                    this.gpsPositionHistory = gpsPositionHistory;
                } 
- '
+`
 Variablen: GpsTracker gpsTracker = GpsTrackerFactory.getGpsTracker();
 
 2. verwenden prägnante Kommentare um komplexe Sachverhalte innerhalb einer Methode zu verdeutlichen.
