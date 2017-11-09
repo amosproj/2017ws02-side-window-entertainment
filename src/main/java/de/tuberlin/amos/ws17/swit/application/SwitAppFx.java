@@ -6,7 +6,9 @@ import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
 public class SwitAppFx extends Application {
 
@@ -19,18 +21,15 @@ public class SwitAppFx extends Application {
         primaryStage.setTitle("Hello World!");
         Button btn = new Button();
         btn.setText("Bye Bye World!");
-        btn.setOnAction(new EventHandler<ActionEvent>() {
-
-            @Override
-            public void handle(ActionEvent event) {
-                System.out.println("Bye Bye World!");
-                primaryStage.setOpacity(primaryStage.getOpacity() - 0.25f);
-            }
-        });
+        btn.setOnAction(event -> System.out.println("Bye Bye World!"));
 
         StackPane root = new StackPane();
         root.getChildren().add(btn);
-        primaryStage.setScene(new Scene(root, 300, 250));
+        root.setStyle("-fx-background-color: transparent;");
+
+        Scene scene = new Scene(root, 300, 250, Color.TRANSPARENT);
+        primaryStage.initStyle(StageStyle.TRANSPARENT);
+        primaryStage.setScene(scene);
         primaryStage.show();
     }
 }
