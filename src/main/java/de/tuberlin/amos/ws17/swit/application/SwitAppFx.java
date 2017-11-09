@@ -18,12 +18,13 @@ public class SwitAppFx extends Application {
     public void start(Stage primaryStage) {
         primaryStage.setTitle("Hello World!");
         Button btn = new Button();
-        btn.setText("Say 'Hello World'");
+        btn.setText("Bye Bye World!");
         btn.setOnAction(new EventHandler<ActionEvent>() {
 
             @Override
             public void handle(ActionEvent event) {
-                System.out.println("Hello World!");
+                System.out.println("Bye Bye World!");
+                primaryStage.setOpacity(primaryStage.getOpacity() - 0.25f);
             }
         });
 
