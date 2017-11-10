@@ -19,9 +19,9 @@ public class WikiAPI {
         	searchWord = scanner.nextLine();
         	scanner.close();
 		}
-        
+
         searchWord = searchWord.replaceAll(" ", "_");
-        
+
         int rqt = searchArticles(searchWord);
         if(rqt == -1) {
             System.out.println("no pages found");
@@ -29,7 +29,7 @@ public class WikiAPI {
             System.out.println(getExtract(rqt));
         }
     }
-    
+
     /*
      * Getter function to retrieve the article information.
      */
@@ -39,7 +39,7 @@ public class WikiAPI {
     	article = getExtract(articleID);
     	return article;
 	}
-    
+
     /*
      * Searches for the Wikipedia article ID and returns -1 if no page was found.
      */
@@ -77,7 +77,7 @@ public class WikiAPI {
     }
 
     /*
-     * Retrieves the infobox content of a Wikipedia article with the given search term. 
+     * Retrieves the infobox content of a Wikipedia article with the given search term. Git hub is so complicated
      * TODO: requires a complex parser (maybe DBPedia is better?)
      */
     private static String getInfoBox(String searchTerm) {
@@ -90,10 +90,10 @@ public class WikiAPI {
     	System.out.println(json);
 		return json;
     }
-    
-    
+
+
     /*
-     * Reads the HTTP informations of a given URL and returns it as a string. 
+     * Reads the HTTP informations of a given URL and returns it as a string.
      */
     private static String readHTTP(String websiteURL) throws Exception {
         StringBuilder result = new StringBuilder();
