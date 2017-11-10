@@ -2,11 +2,6 @@
 
 ### Die Mitwirkenden ...
 
-1. Beschreiben Funktionen in mindesten einem Satz in einem Kommentar am Anfang der Funktion.
-2. Benennen Variablen bezeichnent und nutzen CamelCase wenn möglich, ansonsten werden Unterstriche ( _ ) genutzt um Worte zu trennen.
-3. Schreiben *keine* über ~80 Zeichen langen Codezeilen, sondern splitten diese so weit es möglich in kürze und verständliche Zeilen.
-
-### Vorschlag
 1. verweden das Prinzip von **Clean Code**. Daher versuchen sie Kommentare für Klassen, Funktionen, Eigenschaften und Variablen zu vermeiden indem sie aussagekräftige Namen verwenden. 
 
 Beispiel für java:
@@ -24,8 +19,8 @@ Eigenschaften: private List<GpsPosition> gpsPositionHistory;
                public void setGpsPositionHistory(List<GpsPosition> gpsPositionHistory) {
                    this.gpsPositionHistory = gpsPositionHistory;
                } 
-```
 Variablen: GpsTracker gpsTracker = GpsTrackerFactory.getGpsTracker();
+```
 
 2. verwenden prägnante Kommentare um komplexe Sachverhalte innerhalb einer Methode zu verdeutlichen.
 3. verwenden die für die jeweilige Programmiersprache übliche Schreibweise von Bezeichnern also camelCase oder PascalCase.
