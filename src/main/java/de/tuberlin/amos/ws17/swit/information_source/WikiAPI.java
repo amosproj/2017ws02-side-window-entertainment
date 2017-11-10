@@ -77,7 +77,7 @@ public class WikiAPI {
     }
 
     /*
-     * Retrieves the infobox content of a Wikipedia article with the given search term. Git hub is so complicated
+     * Retrieves the infobox content of a Wikipedia article with the given search term. Git hub is so complicated. but now it works .git
      * TODO: requires a complex parser (maybe DBPedia is better?)
      */
     private static String getInfoBox(String searchTerm) {
