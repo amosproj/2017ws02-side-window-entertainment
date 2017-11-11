@@ -1,16 +1,16 @@
 package de.tuberlin.amos.ws17.swit.gps;
 
 public class GpsFix {
-  public GpsFix(double stamp, double lat, double lon) {
+  public GpsFix(long stamp, double lat, double lon) {
     this.stamp = stamp;
     this.lat = lat;
     this.lon = lon;
   }
 
   /**
-   * Seconds from January 1, 1970
+   * Milliseconds from January 1, 1970
    */
-  private double stamp;
+  private long stamp;
 
   /**
    * Latitude
