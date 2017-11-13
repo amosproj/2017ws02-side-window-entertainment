@@ -35,10 +35,7 @@ class Webcam {
     BufferedImage takePhoto() throws Exception, org.bytedeco.javacv.FrameRecorder.Exception {
         OpenCVFrameConverter.ToIplImage converter = new OpenCVFrameConverter.ToIplImage();
         IplImage grabbedImage;
-        {
-            grabbedImage = converter.convert(grabber.grab());
-        }
-
+        grabbedImage = converter.convert(grabber.grab());
         return IplImageToBufferedImage(grabbedImage);
     }
 
