@@ -5,7 +5,7 @@
 * Create a project with the [Google Cloud Console][cloud-console], and enable
   the [Vision API][vision-api].
 * Create an API key for Cloud Vision
-* Insert API key in CloudVisionClient.java for testing
+* Insert API key in LandmarkDetectorImpl.java for testing
 
 	```java
 	private static final String CLOUD_VISION_API_KEY = "YOUR_API_KEY";

@@ -16,25 +16,24 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
-import javax.imageio.ImageIO;
+import javax.annotation.Nullable;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static de.tuberlin.amos.ws17.swit.image_analysis.ImageUtils.getTestImageFile;
 
-public class CloudVisionClient implements LandmarkDetector {
+public class LandmarkDetectorImpl implements LandmarkDetector {
 
     private static final String CLOUD_VISION_API_KEY = "AIzaSyB-zEWlIkLba444D8LePxwoB3C4E766Uvo";
 
@@ -44,13 +43,32 @@ public class CloudVisionClient implements LandmarkDetector {
 
     private static final Color[] HIGHLIGHT_COLORS = {Color.red, Color.green, Color.blue, Color.cyan, Color.yellow};
 
+    private static LandmarkDetector instance;
+
     private final Vision vision;
 
-    public CloudVisionClient(Vision vision) {
+    private List<LandmarkResult> landmarkResults = Collections.emptyList();
+
+    private Image image;
+
+    @Nullable
+    public static LandmarkDetector getInstance() {
+        if (instance == null) {
+            try {
+                instance = new LandmarkDetectorImpl(getVisionService());
+            } catch (IOException | GeneralSecurityException e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+        return instance;
+    }
+
+    private LandmarkDetectorImpl(Vision vision) {
         this.vision = vision;
     }
 
-    public static Vision getVisionService() throws IOException, GeneralSecurityException {
+    private static Vision getVisionService() throws IOException, GeneralSecurityException {
         JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
         VisionRequestInitializer requestInitializer = new VisionRequestInitializer(CLOUD_VISION_API_KEY);
 
@@ -60,7 +78,36 @@ public class CloudVisionClient implements LandmarkDetector {
                 .build();
     }
 
-    private List<EntityAnnotation> sendRequest(Image image, int maxResults) throws IOException {
+    @Override
+    public List<LandmarkResult> identifyLandmarks(BufferedImage bufferedImage, int maxResults) throws IOException {
+        try {
+            Image image = ImageUtils.convertToImage(bufferedImage);
+            return identifyLandmarks(image, maxResults);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return Collections.emptyList();
+    }
+
+    @Override
+    public List<LandmarkResult> identifyLandmarks(Path path, int maxResults) throws IOException {
+        byte[] data = Files.readAllBytes(path);
+        Image image = new Image().encodeContent(data);
+        return identifyLandmarks(image, maxResults);
+    }
+
+    @Override
+    public List<LandmarkResult> identifyLandmarkUrl(String gcsUrl, int maxResults) throws IOException {
+        ImageSource imageSource = new ImageSource()
+                .setImageUri(gcsUrl);
+
+        Image image = new Image()
+                .setSource(imageSource);
+        return identifyLandmarks(image, maxResults);
+    }
+
+    private List<LandmarkResult> identifyLandmarks(Image image, int maxResults) throws IOException {
+        this.image = image;
         AnnotateImageRequest request = new AnnotateImageRequest()
                 .setImage(image)
                 .setFeatures(ImmutableList.of(
@@ -83,24 +130,8 @@ public class CloudVisionClient implements LandmarkDetector {
                             ? response.getError().getMessage()
                             : "Unknown error getting image annotations");
         }
-        return response.getLandmarkAnnotations();
-    }
-
-    @Override
-    public List<LandmarkResult> identifyLandmark(Path path, int maxResults) throws IOException {
-        byte[] data = Files.readAllBytes(path);
-        Image image = new Image().encodeContent(data);
-        return convertToLandmarkResults(sendRequest(image, maxResults));
-    }
-
-    @Override
-    public List<LandmarkResult> identifyLandmarkUrl(String gcsUrl, int maxResults) throws IOException {
-        ImageSource imageSource = new ImageSource()
-                .setImageUri(gcsUrl);
-
-        Image image = new Image()
-                .setSource(imageSource);
-        return convertToLandmarkResults(sendRequest(image, maxResults));
+        landmarkResults = convertToLandmarkResults(response.getLandmarkAnnotations());
+        return landmarkResults;
     }
 
     private List<LandmarkResult> convertToLandmarkResults(List<EntityAnnotation> annotations) {
@@ -109,25 +140,27 @@ public class CloudVisionClient implements LandmarkDetector {
                 .collect(Collectors.toList());
     }
 
-    private void highlightLandmarks(String path, List<String> names, List<String> descriptions, List<BoundingPoly> boundingPolies) throws IOException {
-        BufferedImage img = ImageIO.read(new File(path));
+    @Override
+    public void showHighlightedLandmarks() {
+        BufferedImage img = ImageUtils.convertToBufferedImage(this.image);
         // Create a graphics context on the buffered image
         Graphics2D g2d = img.createGraphics();
         JFrame frame = new JFrame();
 
         int k = 0;
-        for (BoundingPoly bd : boundingPolies) {
+        for (LandmarkResult result: landmarkResults) {
+            BoundingPoly bp = result.getBoundlingPoly();
             // Draw on the buffered image
             g2d.setColor(HIGHLIGHT_COLORS[k]);
             g2d.setStroke(new BasicStroke(3));
-            int npoints = bd.getVertices().size();
+            int npoints = bp.getVertices().size();
             int xpoints[] = new int[npoints];
             int ypoints[] = new int[npoints];
             int xmin = Integer.MAX_VALUE;
             int ymax = 0;
             for (int i = 0; i < npoints; i++) {
-                xpoints[i] = bd.getVertices().get(i).getX();
-                ypoints[i] = bd.getVertices().get(i).getY();
+                xpoints[i] = bp.getVertices().get(i).getX();
+                ypoints[i] = bp.getVertices().get(i).getY();
                 if (ypoints[i] > ymax)
                     ymax = ypoints[i];
                 if (xpoints[i] < xmin) {
@@ -139,13 +172,12 @@ public class CloudVisionClient implements LandmarkDetector {
             int xtext = xmin + 10;
             int ytext = ymax - 10;
             g2d.setFont(new Font("Serif", Font.BOLD, 16));
-            g2d.drawString(names.get(k), xtext, ytext);
-            showInfoBox(descriptions.get(k), img, frame, g2d);
+            g2d.drawString(result.getName(), xtext, ytext);
             k++;
         }
         g2d.dispose();
 
-        showImage(img, frame);
+        ImageUtils.showImage(img, frame);
     }
 
     private void showInfoBox(String description, BufferedImage img, JFrame frame, Graphics2D g2d) {
@@ -171,6 +203,7 @@ public class CloudVisionClient implements LandmarkDetector {
         g2d.drawImage(bi, img.getWidth() / 2, 20, frame);
     }
 
+<<<<<<< HEAD:src/main/java/de/tuberlin/amos/ws17/swit/image_analysis/CloudVisionClient.java
     private void showImage(BufferedImage img, JFrame frame) {
         ImageIcon icon = new ImageIcon(img);
         frame.setLayout(new FlowLayout());
@@ -195,42 +228,17 @@ public class CloudVisionClient implements LandmarkDetector {
         return results.get(0).getName();
     }
 
+=======
+>>>>>>> Add option to analyze images captured from camera:src/main/java/de/tuberlin/amos/ws17/swit/image_analysis/LandmarkDetectorImpl.java
     public static void main(String[] args) throws IOException, GeneralSecurityException {
-        if (args.length != 1) {
-            System.err.println("Missing imagePath argument.");
-            System.err.println("Usage:");
-            System.err.printf("\tjava %s imagePath\n", CloudVisionClient.class.getCanonicalName());
-            System.exit(1);
-        }
-        Path imagePath = Paths.get(args[0]);
-
-        CloudVisionClient app = new CloudVisionClient(getVisionService());
-        List<LandmarkResult> results = app.identifyLandmark(imagePath, 5);
-        printLandmarks(System.out, imagePath, results);
-
-        if (results.size() == 0) {
-            System.out.println("Could not detect any landmarks");
-            return;
-        }
-        try {
-            List<String> descriptions = app.getLandmarkDescriptions(results.stream().map(LandmarkResult::getId).collect(Collectors.toList()));
-
-            app.highlightLandmarks(imagePath.toString(),
-                    results.stream()
-                            .map(LandmarkResult::getName)
-                            .collect(Collectors.toList()),
-                    descriptions,
-                    results.stream()
-                            .map(LandmarkResult::getBoundlingPoly)
-                            .collect(Collectors.toList()));
-
-        } catch (IOException e) {
-            e.printStackTrace();
+        LandmarkDetector landmarkDetector = getInstance();
+        if (landmarkDetector != null) {
+            landmarkDetector.identifyLandmarks(getTestImageFile("brandenburger-tor.jpg"), 3);
+            landmarkDetector.showHighlightedLandmarks();
         }
     }
 
-    private static void printLandmarks(PrintStream out, Path imagePath, List<LandmarkResult> landmarks) {
-        out.printf("Labels for image %s:\n", imagePath);
+    private static void printLandmarks(PrintStream out, List<LandmarkResult> landmarks) {
         for (LandmarkResult result : landmarks) {
             out.printf(
                     "\t%s (score: %.3f)\n",
@@ -244,6 +252,7 @@ public class CloudVisionClient implements LandmarkDetector {
 
     // get detailed descriptions using google knowledge graph api
     private List<String> getLandmarkDescriptions(List<String> ids) {
+        Collections.reverse(ids);
         try {
             HttpTransport httpTransport = new NetHttpTransport();
             HttpRequestFactory requestFactory = httpTransport.createRequestFactory();
