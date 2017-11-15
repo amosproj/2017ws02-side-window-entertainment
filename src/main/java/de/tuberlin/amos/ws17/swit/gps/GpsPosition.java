@@ -1,32 +1,41 @@
 package de.tuberlin.amos.ws17.swit.gps;
 
 public class GpsPosition {
-	
-	private double x;
-	
-	public double getX() {
-		return x;
+	public GpsPosition(double latitude, double longitude, long timeStamp) {
+		this.timeStamp = timeStamp;
+		this.latitude = latitude;
+		this.longitude = longitude;
 	}
-	public void setX(double x) {
-		this.x = x;
+
+	/**
+	 * Milliseconds from January 1, 1970
+	 */
+	private long timeStamp;
+
+	/**
+	 * Latitude
+	 */
+	private double latitude;
+
+	/**
+	 * Longitude
+	 */
+	private double longitude;
+
+	public double getTimeStamp() {
+		return timeStamp;
 	}
-	
-	private double y;
-	
-	public double getY() {
-		return y;
+
+	public double getLatitude() {
+		return latitude;
 	}
-	public void setY(double y) {
-		this.y = y;
+
+	public double getLongitude() {
+		return longitude;
 	}
-	
-	public GpsPosition(double x, double y) {
-		setX(x);
-		setY(y);
-	}
-	
+
 	@Override
 	public String toString() {
-		return Double.toString(getX()) + ";" + Double.toString(getY());
+		return Double.toString(latitude) + ", " + Double.toString(longitude) + " at " + Long.toString(timeStamp);
 	}
 }
