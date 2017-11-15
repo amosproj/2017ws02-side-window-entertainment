@@ -14,7 +14,7 @@ import java.awt.image.BufferedImage;
 public class Webcam {
     OpenCVFrameGrabber grabber;
 
-    boolean running = false;
+    public boolean running = false;
 
     public Webcam (int deviceNumber) {
         grabber = new OpenCVFrameGrabber(deviceNumber);

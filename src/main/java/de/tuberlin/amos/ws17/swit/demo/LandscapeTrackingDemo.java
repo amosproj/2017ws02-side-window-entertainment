@@ -10,9 +10,9 @@ public class LandscapeTrackingDemo {
 
     public static void main(String[] args) {
         LandscapeTrackerImplementation lt = LandscapeTrackerImplementation.getInstance();
-        lt.setNoCameraMode(true);
+        lt.setNoCameraMode(false);
         try {
-            lt.webcam.stop();
+            lt.webcam.start();
         } catch (FrameGrabber.Exception e) {
             e.printStackTrace();
         }
