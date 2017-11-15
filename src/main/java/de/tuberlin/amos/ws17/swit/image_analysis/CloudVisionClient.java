@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
 
 public class CloudVisionClient implements LandmarkDetector {
 
-    private static final String CLOUD_VISION_API_KEY = "YOUR_API_KEY";
+    private static final String CLOUD_VISION_API_KEY = "AIzaSyB-zEWlIkLba444D8LePxwoB3C4E766Uvo";
 
     private static final String APPLICATION_NAME = "Swit-Image-Analysis";
 
@@ -180,6 +180,19 @@ public class CloudVisionClient implements LandmarkDetector {
         frame.add(lbl);
         frame.setVisible(true);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+    }
+
+    public static String getLandmark(Path imagePath) throws IOException {
+        CloudVisionClient app = null;
+        try {
+            app = new CloudVisionClient(getVisionService());
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (GeneralSecurityException e) {
+            e.printStackTrace();
+        }
+        List<LandmarkResult> results = app.identifyLandmark(imagePath, 5);
+        return results.get(0).getName();
     }
 
     public static void main(String[] args) throws IOException, GeneralSecurityException {

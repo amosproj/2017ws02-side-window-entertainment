@@ -22,6 +22,7 @@ public class WikiAPI {
 
         searchWord = searchWord.replaceAll(" ", "_");
 
+        System.out.println(getArticle(searchWord));
         int rqt = searchArticles(searchWord);
         if(rqt == -1) {
             System.out.println("no pages found");
@@ -33,10 +34,15 @@ public class WikiAPI {
     /*
      * Getter function to retrieve the article information.
      */
-    public String getArticle(String articleName) {
+    public static String getArticle(String articleName) {
 		String article = "";
+		articleName = articleName.replaceAll(" ", "_");
 		int articleID = searchArticles(articleName);
-    	article = getExtract(articleID);
+        if(articleID == -1) {
+            System.out.println("no pages found");
+        } else {
+            article = (getExtract(articleID));
+        }
     	return article;
 	}
 
