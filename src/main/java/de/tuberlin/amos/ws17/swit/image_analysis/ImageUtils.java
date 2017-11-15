@@ -48,7 +48,7 @@ public class ImageUtils {
 
     @Nullable
     public static BufferedImage getTestImageFile(String imageName) {
-        ClassLoader classLoader = LandmarkDetectorImpl.class.getClassLoader();
+        ClassLoader classLoader = CloudVision.class.getClassLoader();
         URL resourceUrl = classLoader.getResource("test_images/" + imageName);
         if (resourceUrl != null) {
             File file = new File(resourceUrl.getFile());

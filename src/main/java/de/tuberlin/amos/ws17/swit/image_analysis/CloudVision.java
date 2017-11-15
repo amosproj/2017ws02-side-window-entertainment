@@ -2,8 +2,6 @@ package de.tuberlin.amos.ws17.swit.image_analysis;
 
 
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
-import com.google.api.client.http.*;
-import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.vision.v1.Vision;
@@ -11,10 +9,6 @@ import com.google.api.services.vision.v1.VisionRequestInitializer;
 import com.google.api.services.vision.v1.model.*;
 import com.google.api.services.vision.v1.model.Image;
 import com.google.common.collect.ImmutableList;
-import com.jayway.jsonpath.JsonPath;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 
 import javax.annotation.Nullable;
 import javax.swing.*;
@@ -26,14 +20,13 @@ import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.GeneralSecurityException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static de.tuberlin.amos.ws17.swit.image_analysis.ImageUtils.getTestImageFile;
 
-public class LandmarkDetectorImpl implements LandmarkDetector {
+public class CloudVision implements LandmarkDetector {
 
     private static final String CLOUD_VISION_API_KEY = "AIzaSyB-zEWlIkLba444D8LePxwoB3C4E766Uvo";
 
@@ -55,7 +48,7 @@ public class LandmarkDetectorImpl implements LandmarkDetector {
     public static LandmarkDetector getInstance() {
         if (instance == null) {
             try {
-                instance = new LandmarkDetectorImpl(getVisionService());
+                instance = new CloudVision(getVisionService());
             } catch (IOException | GeneralSecurityException e) {
                 e.printStackTrace();
                 return null;
@@ -64,7 +57,7 @@ public class LandmarkDetectorImpl implements LandmarkDetector {
         return instance;
     }
 
-    private LandmarkDetectorImpl(Vision vision) {
+    private CloudVision(Vision vision) {
         this.vision = vision;
     }
 
@@ -180,28 +173,6 @@ public class LandmarkDetectorImpl implements LandmarkDetector {
         ImageUtils.showImage(img, frame);
     }
 
-    private void showInfoBox(String description, BufferedImage img, JFrame frame, Graphics2D g2d) {
-        String desc = "<html><body style='width: 200px; padding: 5px;'>" + description;
-        JLabel textLabel = new JLabel(desc);
-        textLabel.setSize(textLabel.getPreferredSize());
-        Dimension d = textLabel.getPreferredSize();
-        BufferedImage bi = new BufferedImage(
-                d.width,
-                d.height,
-                BufferedImage.TYPE_INT_ARGB);
-        Graphics g = bi.createGraphics();
-        g.setColor(new Color(255, 255, 255, 128));
-        g.fillRoundRect(
-                0,
-                0,
-                d.width,
-                d.height,
-                15,
-                10);
-        g.setColor(Color.black);
-        textLabel.paint(g);
-        g2d.drawImage(bi, img.getWidth() / 2, 20, frame);
-    }
 
 <<<<<<< HEAD:src/main/java/de/tuberlin/amos/ws17/swit/image_analysis/CloudVisionClient.java
     private void showImage(BufferedImage img, JFrame frame) {
@@ -248,36 +219,5 @@ public class LandmarkDetectorImpl implements LandmarkDetector {
         if (landmarks.isEmpty()) {
             out.println("\tNo landmarks found.");
         }
-    }
-
-    // get detailed descriptions using google knowledge graph api
-    private List<String> getLandmarkDescriptions(List<String> ids) {
-        Collections.reverse(ids);
-        try {
-            HttpTransport httpTransport = new NetHttpTransport();
-            HttpRequestFactory requestFactory = httpTransport.createRequestFactory();
-            JSONParser parser = new JSONParser();
-            GenericUrl url = new GenericUrl("https://kgsearch.googleapis.com/v1/entities:search");
-            for (String id : ids) {
-                url.put("ids", id);
-            }
-            url.put("limit", "10");
-            url.put("indent", "true");
-            url.put("key", CLOUD_VISION_API_KEY);
-            HttpRequest request = requestFactory.buildGetRequest(url);
-            HttpResponse httpResponse = request.execute();
-            JSONObject response = (JSONObject) parser.parse(httpResponse.parseAsString());
-            JSONArray elements = (JSONArray) response.get("itemListElement");
-            List<String> descriptions = new ArrayList<>();
-            for (Object element : elements) {
-                String detailedDescription = JsonPath.read(element, "$.result.detailedDescription.articleBody").toString();
-                descriptions.add(detailedDescription);
-                System.out.println(detailedDescription);
-            }
-            return descriptions;
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        return Collections.emptyList();
     }
 }

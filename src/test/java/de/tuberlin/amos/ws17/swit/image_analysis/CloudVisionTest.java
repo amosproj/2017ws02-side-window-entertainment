@@ -13,14 +13,14 @@ import java.util.stream.Collectors;
 import static de.tuberlin.amos.ws17.swit.image_analysis.ImageUtils.getTestImageFile;
 
 @RunWith(JUnit4.class)
-public class LandmarkDetectorImplTest {
+public class CloudVisionTest {
     private static final int MAX_RESULTS = 3;
 
     private LandmarkDetector appUnderTest;
 
     @Before
     public void setUp() throws Exception {
-        appUnderTest = LandmarkDetectorImpl.getInstance();
+        appUnderTest = CloudVision.getInstance();
     }
 
     @Test
