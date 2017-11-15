@@ -20,7 +20,8 @@ class GpsTrackerImplementation implements GpsTracker {
 	// returns latest gps position from either the file reader or the port reader
 	public GpsPosition getGpsPosition(){
 		if(fileReader != null){
-			return fileReader.getLatestPosition();
+			return null;
+			//return fileReader.getLatestPosition();
 		}
 		else
 			return new GpsPosition(1,2,3); // fake position
@@ -33,7 +34,7 @@ class GpsTrackerImplementation implements GpsTracker {
 
 	// init for the file mode
 	private void initFileMode(String fileName) {
-		File f = new File(fileName);
+		/*File f = new File(fileName);
 		if(f != null){
 			try{
 				fileReader = new GpsFileReader(f);
@@ -41,6 +42,6 @@ class GpsTrackerImplementation implements GpsTracker {
 			catch (FileNotFoundException e){
 				System.out.println("File not found!");
 			}
-		}
+		}*/
 	}
 }
