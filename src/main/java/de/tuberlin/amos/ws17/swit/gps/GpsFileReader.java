@@ -2,18 +2,12 @@ package de.tuberlin.amos.ws17.swit.gps;
 
 import java.io.*;
 
-/*
+
 import net.sf.marineapi.nmea.event.SentenceListener;
 import net.sf.marineapi.nmea.io.SentenceReader;
 import net.sf.marineapi.nmea.sentence.GLLSentence;
 import net.sf.marineapi.nmea.sentence.SentenceId;
 import net.sf.marineapi.nmea.event.SentenceEvent;
-*/
-
-public class GpsFileReader {
-
-}
-/*
 
 public class GpsFileReader implements SentenceListener{
     private SentenceReader reader;
@@ -72,4 +66,4 @@ public class GpsFileReader implements SentenceListener{
         }
     }
 }
-*/
+

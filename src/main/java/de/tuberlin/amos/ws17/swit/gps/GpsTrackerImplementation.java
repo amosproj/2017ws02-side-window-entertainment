@@ -2,7 +2,7 @@ package de.tuberlin.amos.ws17.swit.gps;
 
 import java.io.*;
 
-class GpsTrackerImplementation implements GpsTracker {
+public class GpsTrackerImplementation implements GpsTracker {
 	
 	//private GpsPosition latestPosition;
 	private GpsFileReader fileReader;
@@ -20,8 +20,7 @@ class GpsTrackerImplementation implements GpsTracker {
 	// returns latest gps position from either the file reader or the port reader
 	public GpsPosition getGpsPosition(){
 		if(fileReader != null){
-			return null;
-			//return fileReader.getLatestPosition();
+			return fileReader.getLatestPosition();
 		}
 		else
 			return new GpsPosition(1,2,3); // fake position
@@ -34,7 +33,7 @@ class GpsTrackerImplementation implements GpsTracker {
 
 	// init for the file mode
 	private void initFileMode(String fileName) {
-		/*File f = new File(fileName);
+		File f = new File(fileName);
 		if(f != null){
 			try{
 				fileReader = new GpsFileReader(f);
@@ -42,6 +41,6 @@ class GpsTrackerImplementation implements GpsTracker {
 			catch (FileNotFoundException e){
 				System.out.println("File not found!");
 			}
-		}*/
+		}
 	}
 }

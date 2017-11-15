@@ -1,5 +1,5 @@
 package de.tuberlin.amos.ws17.swit.gps;
-/*
+
 import gnu.io.SerialPort;
 import gnu.io.CommPortIdentifier;
 
@@ -7,18 +7,13 @@ import net.sf.marineapi.nmea.event.SentenceEvent;
 import net.sf.marineapi.nmea.event.SentenceListener;
 import net.sf.marineapi.nmea.io.SentenceReader;
 import net.sf.marineapi.nmea.sentence.SentenceValidator;
-*/
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Enumeration;
 
-
-public class GpsPortReader {
-
-}
-/*
 
 public class GpsPortReader implements SentenceListener{
 
@@ -107,4 +102,3 @@ public class GpsPortReader implements SentenceListener{
         new GpsPortReader();
     }
 }
-*/
