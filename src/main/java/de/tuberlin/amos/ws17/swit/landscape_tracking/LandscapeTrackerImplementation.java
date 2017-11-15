@@ -19,7 +19,7 @@ public class LandscapeTrackerImplementation implements LandscapeTracker{
 
     private static LandscapeTrackerImplementation instance = new LandscapeTrackerImplementation();
     JFrame frame=new JFrame();
-    Webcam webcam = new Webcam(0);
+    public Webcam webcam = new Webcam(0);
     private ArrayList<String> examplePicturesNames;
     private String path = ".\\src\\main\\resources\\test_images\\";
     ArrayList<BufferedImage> examplePictures = new ArrayList<>();
@@ -105,5 +105,4 @@ public class LandscapeTrackerImplementation implements LandscapeTracker{
         }
         this.noCameraMode = noCameraMode;
     }
-
 }

@@ -1,14 +1,21 @@
-package de.tuberlin.amos.ws17.swit.landscape_tracking;
+package de.tuberlin.amos.ws17.swit.demo;
 
+import de.tuberlin.amos.ws17.swit.landscape_tracking.LandscapeTrackerImplementation;
 import org.bytedeco.javacv.CanvasFrame;
+import org.bytedeco.javacv.FrameGrabber;
 
 import java.awt.image.BufferedImage;
 
-public class Demo {
+public class LandscapeTrackingDemo {
 
     public static void main(String[] args) {
         LandscapeTrackerImplementation lt = LandscapeTrackerImplementation.getInstance();
         lt.setNoCameraMode(true);
+        try {
+            lt.webcam.stop();
+        } catch (FrameGrabber.Exception e) {
+            e.printStackTrace();
+        }
         try {
             CanvasFrame frame = new CanvasFrame("Demo Webcam");
             BufferedImage img;

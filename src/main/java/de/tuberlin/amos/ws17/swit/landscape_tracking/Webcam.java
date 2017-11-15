@@ -11,28 +11,28 @@ import java.awt.image.BufferedImage;
 
 
 
-class Webcam {
+public class Webcam {
     OpenCVFrameGrabber grabber;
 
     boolean running = false;
 
-    Webcam (int deviceNumber) {
+    public Webcam (int deviceNumber) {
         grabber = new OpenCVFrameGrabber(deviceNumber);
     }
 
 
 
-    void start() throws Exception {
+    public void start() throws Exception {
         grabber.start();
         running = true;
     }
 
-    void stop() throws Exception {
+    public void stop() throws Exception {
         grabber.stop();
         running = false;
     }
 
-    BufferedImage takePhoto() throws Exception, org.bytedeco.javacv.FrameRecorder.Exception {
+    public BufferedImage takePhoto() throws Exception, org.bytedeco.javacv.FrameRecorder.Exception {
         OpenCVFrameConverter.ToIplImage converter = new OpenCVFrameConverter.ToIplImage();
         IplImage grabbedImage;
         grabbedImage = converter.convert(grabber.grab());
