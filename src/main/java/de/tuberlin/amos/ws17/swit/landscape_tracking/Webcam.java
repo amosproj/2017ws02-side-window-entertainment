@@ -18,6 +18,11 @@ public class Webcam {
 
     public Webcam (int deviceNumber) {
         grabber = new OpenCVFrameGrabber(deviceNumber);
+        try {
+            grabber.start();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 
@@ -35,8 +40,14 @@ public class Webcam {
     public BufferedImage takePhoto() throws Exception, org.bytedeco.javacv.FrameRecorder.Exception {
         OpenCVFrameConverter.ToIplImage converter = new OpenCVFrameConverter.ToIplImage();
         IplImage grabbedImage;
-        grabbedImage = converter.convert(grabber.grab());
-        return IplImageToBufferedImage(grabbedImage);
+        try {
+            grabbedImage = converter.convert(grabber.grab());
+            return IplImageToBufferedImage(grabbedImage);
+        } catch (Exception e) {
+            System.out.println("lost frame");
+            grabber.start();
+        }
+        return null;
     }
 
     private static BufferedImage IplImageToBufferedImage(IplImage src) {
