@@ -1,6 +1,6 @@
 package de.tuberlin.amos.ws17.swit.demo;
 
-import de.tuberlin.amos.ws17.swit.image_analysis.CloudVisionClient;
+import de.tuberlin.amos.ws17.swit.image_analysis.CloudVision;
 import de.tuberlin.amos.ws17.swit.information_source.WikiAPI;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -15,7 +15,7 @@ public class ImageAnalysisInformationSourceSymbiosisDemo {
         }
 
         Path imagePath = Paths.get(args[0]);
-        String landmark = CloudVisionClient.getLandmark(imagePath);
+        String landmark = CloudVision.getLandmark(imagePath);
 
         String article = WikiAPI.getArticle(landmark);
 

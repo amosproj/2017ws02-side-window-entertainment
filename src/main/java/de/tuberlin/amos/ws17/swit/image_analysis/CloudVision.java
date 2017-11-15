@@ -173,34 +173,19 @@ public class CloudVision implements LandmarkDetector {
         ImageUtils.showImage(img, frame);
     }
 
-
-<<<<<<< HEAD:src/main/java/de/tuberlin/amos/ws17/swit/image_analysis/CloudVisionClient.java
-    private void showImage(BufferedImage img, JFrame frame) {
-        ImageIcon icon = new ImageIcon(img);
-        frame.setLayout(new FlowLayout());
-        frame.setSize(img.getWidth(), img.getHeight());
-        JLabel lbl = new JLabel();
-        lbl.setIcon(icon);
-        frame.add(lbl);
-        frame.setVisible(true);
-        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-    }
-
     public static String getLandmark(Path imagePath) throws IOException {
-        CloudVisionClient app = null;
+        CloudVision app = null;
         try {
-            app = new CloudVisionClient(getVisionService());
+            app = new CloudVision(getVisionService());
         } catch (IOException e) {
             e.printStackTrace();
         } catch (GeneralSecurityException e) {
             e.printStackTrace();
         }
-        List<LandmarkResult> results = app.identifyLandmark(imagePath, 5);
+        List<LandmarkResult> results = app.identifyLandmarks(imagePath, 5);
         return results.get(0).getName();
     }
 
-=======
->>>>>>> Add option to analyze images captured from camera:src/main/java/de/tuberlin/amos/ws17/swit/image_analysis/LandmarkDetectorImpl.java
     public static void main(String[] args) throws IOException, GeneralSecurityException {
         LandmarkDetector landmarkDetector = getInstance();
         if (landmarkDetector != null) {
