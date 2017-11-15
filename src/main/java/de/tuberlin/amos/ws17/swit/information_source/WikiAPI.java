@@ -22,7 +22,6 @@ public class WikiAPI {
 
         searchWord = searchWord.replaceAll(" ", "_");
 
-        System.out.println(getArticle(searchWord));
         int rqt = searchArticles(searchWord);
         if(rqt == -1) {
             System.out.println("no pages found");
@@ -36,7 +35,9 @@ public class WikiAPI {
      */
     public static String getArticle(String articleName) {
 		String article = "";
+        language = "en";
 		articleName = articleName.replaceAll(" ", "_");
+
 		int articleID = searchArticles(articleName);
         if(articleID == -1) {
             System.out.println("no pages found");
@@ -74,7 +75,7 @@ public class WikiAPI {
             String json = readHTTP("https://" + language + ".wikipedia.org/w/api.php?action=query&prop=extracts&exintro&explaintext&format=json&pageids=" + articleID);
             int idStartIndex = json.indexOf("extract\":\"") + 10;
             result = json.substring(idStartIndex);
-            int idEndIndex = result.indexOf("\"");
+            int idEndIndex = result.indexOf("\"}");
             result = result.substring(0, idEndIndex);
         } catch(Exception e) {
             e.printStackTrace();
