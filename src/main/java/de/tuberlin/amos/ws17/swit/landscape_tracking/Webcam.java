@@ -21,7 +21,7 @@ public class Webcam {
         try {
             grabber.start();
         } catch (Exception e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
     }
 
