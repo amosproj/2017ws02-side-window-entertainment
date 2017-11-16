@@ -28,7 +28,7 @@ import static de.tuberlin.amos.ws17.swit.image_analysis.ImageUtils.getTestImageF
 
 public class CloudVision implements LandmarkDetector {
 
-    private static final String CLOUD_VISION_API_KEY = "AIzaSyB-zEWlIkLba444D8LePxwoB3C4E766Uvo";
+    private static final String CLOUD_VISION_API_KEY = "YOUR-GOOGLE_API_KEY";
 
     private static final String APPLICATION_NAME = "Swit-Image-Analysis";
 
