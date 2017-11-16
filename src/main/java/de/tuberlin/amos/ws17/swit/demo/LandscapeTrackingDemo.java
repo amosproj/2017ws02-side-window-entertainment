@@ -14,7 +14,7 @@ public class LandscapeTrackingDemo {
         try {
             lt.webcam.start();
         } catch (FrameGrabber.Exception e) {
-            // e.printStackTrace();
+             e.printStackTrace();
         }
         try {
             CanvasFrame frame = new CanvasFrame("Demo Webcam");
