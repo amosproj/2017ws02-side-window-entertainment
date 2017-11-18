@@ -24,6 +24,24 @@
 
     <dependencies>
         <dependency>
+            <!--poi packe requirement-->
+            <groupId>com.vividsolutions</groupId>
+            <artifactId>jts</artifactId>
+            <version>1.13</version>
+        </dependency>
+        <dependency>
+            <!--poi packe requirement-->
+            <groupId>se.walkercrou</groupId>
+            <artifactId>google-places-api-java</artifactId>
+            <version>2.1.2</version>
+        </dependency>
+        <dependency>
+            <!--poi packe requirement-->
+            <groupId>com.google.http-client</groupId>
+            <artifactId>google-http-client</artifactId>
+            <version>1.23.0</version>
+        </dependency>
+        <dependency>
             <groupId>com.google.apis</groupId>
             <artifactId>google-api-services-vision</artifactId>
             <version>v1-rev364-1.23.0</version>
