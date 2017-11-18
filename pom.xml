@@ -4,9 +4,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.tub</groupId>
-    <artifactId>swit</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <groupId>de.tuberlin.amos.ws17.swit</groupId>
+    <artifactId>side-window-infotainment</artifactId>
+    <version>0.0.5-SNAPSHOT</version>
     <name>Side Window Infotainment</name>
 
     <build>
