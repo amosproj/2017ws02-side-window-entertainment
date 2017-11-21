@@ -15,6 +15,11 @@ public class TransformationBuffer {
   }
 
   public boolean insert(TransformStamped t) {
+    if(transformations.isEmpty()) {
+      transformations.addLast(t);
+      return true;
+    }
+
     if(t.getStamp() > transformations.getLast().getStamp()) {
       transformations.addLast(t);
 
@@ -30,6 +35,10 @@ public class TransformationBuffer {
   }
 
   public TransformStamped lookup(long stamp) {
+    if(transformations.isEmpty()) {
+      throw new TransformBufferException("No transformation data available!");
+    }
+
     if(stamp > transformations.getLast().getStamp()) {
       throw new TransformBufferException("Cannot extrapolate into the future!");
     }
