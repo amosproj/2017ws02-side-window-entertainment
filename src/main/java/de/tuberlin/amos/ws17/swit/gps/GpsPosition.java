@@ -22,7 +22,7 @@ public class GpsPosition {
 	 */
 	private double longitude;
 
-	public double getTimeStamp() {
+	public long getTimeStamp() {
 		return timeStamp;
 	}
 
