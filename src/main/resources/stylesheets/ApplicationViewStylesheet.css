@@ -1,16 +1,17 @@
 .label {
-    -fx-font-size: 12px;
-    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+    -fx-font-family: "Helvetica Neue";
     -fx-text-fill: #000000;
+    -fx-background-color: #FFFFFF;
 }
 
 .button {
     -fx-text-fill: white;
-    -fx-font-family: "Arial Narrow";
-    -fx-font-weight: bold;
+    -fx-font-family: "Helvetica Neue";
     -fx-background-color: linear-gradient(#999999, #333333);
 }
 
 .button:hover {
     -fx-background-color: linear-gradient(#333333, #999999);
 }
+

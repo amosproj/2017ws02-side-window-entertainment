@@ -7,6 +7,10 @@ public class ApplicationLogicImplementation implements ApplicationLogic {
 
     private List<PointOfInterest> pointsOfInterest;
 
+    public static void main(String[] args) {
+
+    }
+
     public void addPOI(int id, String name, BufferedImage image, String information) {
 
     }

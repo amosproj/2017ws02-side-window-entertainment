@@ -12,17 +12,19 @@ public interface ApplicationView {
     /*
      * Adds the specified POI to the view of camera POI at the top.
      * @param id ID of the POI that is to be displayed
-     * @param image the image of the POI
      * @param name the name of the POI
+     * @param image the image of the POI
+     * @param information information from the information source
      */
-    void displayCameraPOI(int id, Image image, String name);
+    void displayCameraPOI(int id, String name, Image image, String information);
 
     /*
      * Adds the specified POI to the view of POI from maps at the bottom
      * @param id ID of the POI
      * @param name name of the POI
+     * @param information information from the information source
      */
-    void displayMapsPOI(int id, String name);
+    void displayMapsPOI(int id, String name, String information);
 
     /*
      * Removes the specified POI from the list (either top or bottom)
@@ -33,9 +35,8 @@ public interface ApplicationView {
     /*
      * Displays the POI in the middle of the screen with more information
      * @param id ID of the POI
-     * @param information information of the POI from information source
      */
-    void expandPOI(int id, String information);
+    void expandPOI(int id);
 
     /*
      * Closes the currently expanded POI
