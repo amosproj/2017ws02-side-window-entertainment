@@ -15,6 +15,11 @@ public class TransformationBuffer {
   }
 
   public boolean insert(TransformStamped t) {
+    if(transformations.isEmpty()) {
+      transformations.addLast(t);
+      return true;
+    }
+
     if(t.getStamp() > transformations.getLast().getStamp()) {
       transformations.addLast(t);
 
