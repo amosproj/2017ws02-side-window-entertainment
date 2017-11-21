@@ -4,9 +4,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.tub</groupId>
-    <artifactId>swit</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <groupId>de.tuberlin.amos.ws17.swit</groupId>
+    <artifactId>side-window-infotainment</artifactId>
+    <version>0.0.5-SNAPSHOT</version>
     <name>Side Window Infotainment</name>
 
     <build>
@@ -23,6 +23,24 @@
     </build>
 
     <dependencies>
+        <dependency>
+            <!--poi packe requirement-->
+            <groupId>com.vividsolutions</groupId>
+            <artifactId>jts</artifactId>
+            <version>1.13</version>
+        </dependency>
+        <dependency>
+            <!--poi packe requirement-->
+            <groupId>se.walkercrou</groupId>
+            <artifactId>google-places-api-java</artifactId>
+            <version>2.1.2</version>
+        </dependency>
+        <dependency>
+            <!--poi packe requirement-->
+            <groupId>com.google.http-client</groupId>
+            <artifactId>google-http-client</artifactId>
+            <version>1.23.0</version>
+        </dependency>
         <dependency>
             <groupId>com.google.apis</groupId>
             <artifactId>google-api-services-vision</artifactId>
