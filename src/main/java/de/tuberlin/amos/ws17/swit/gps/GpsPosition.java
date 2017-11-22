@@ -18,7 +18,6 @@ public class GpsPosition {
 	// longitude
 	private double longitude;
 
-<<<<<<< HEAD
 	// course in degrees
 	private double course;
 	private boolean courseUpdate;
@@ -27,10 +26,7 @@ public class GpsPosition {
 	private double speed;
 	private boolean speedUpdate;
 
-	public double getTimeStamp() {
-=======
 	public long getTimeStamp() {
->>>>>>> 0041ac2a01e0570b1db3d4cf19bd3c9339f939be
 		return timeStamp;
 	}
 	public void setTimeStamp(long t) {
