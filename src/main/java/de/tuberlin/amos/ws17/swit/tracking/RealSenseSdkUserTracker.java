@@ -48,6 +48,7 @@ public class RealSenseSdkUserTracker implements UserTracker, Runnable {
 
         session = PXCMSession.CreateInstance();
         cameraService = new RealSenseSdkCameraService(session);
+        cameraService.loadCameras();
     }
 
     @Override
