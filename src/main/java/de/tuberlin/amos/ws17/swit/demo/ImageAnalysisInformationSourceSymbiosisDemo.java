@@ -1,10 +1,13 @@
 package de.tuberlin.amos.ws17.swit.demo;
 
+import com.google.api.services.vision.v1.model.Landmark;
 import de.tuberlin.amos.ws17.swit.image_analysis.CloudVision;
+import de.tuberlin.amos.ws17.swit.image_analysis.LandmarkResult;
 import de.tuberlin.amos.ws17.swit.information_source.WikiAPI;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 public class ImageAnalysisInformationSourceSymbiosisDemo {
 
@@ -15,10 +18,12 @@ public class ImageAnalysisInformationSourceSymbiosisDemo {
         }
 
         Path imagePath = Paths.get(args[0]);
-        String landmark = CloudVision.getLandmark(imagePath);
+        List<LandmarkResult> landmarks = CloudVision.getInstance().identifyLandmarks(imagePath, 1);
+        if (!landmarks.isEmpty()) {
+            String article = WikiAPI.getArticle(landmarks.get(0).getName());
+            System.out.println(article);
+        }
 
-        String article = WikiAPI.getArticle(landmark);
 
-        System.out.println(article);
     }
 }

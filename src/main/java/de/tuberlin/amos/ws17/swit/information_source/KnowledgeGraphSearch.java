@@ -3,13 +3,17 @@ package de.tuberlin.amos.ws17.swit.information_source;
 import com.google.api.client.http.*;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.jayway.jsonpath.JsonPath;
+import com.sun.org.apache.bcel.internal.generic.LAND;
+import de.tuberlin.amos.ws17.swit.application.ApiConfig;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
 public class KnowledgeGraphSearch implements InformationProvider {
 
-    private static final String API_KEY = "AIzaSyCDYEQsEKR6KXY23qbQC5Daih1RoW1vEho";
+    private static final String API_KEY = ApiConfig.getProperty("KnowledgeGraphSearch");
+    private static final String LANGUAGE = ApiConfig.getProperty("language");
+
 
     @Override
     public String getInfoById(String id) {
@@ -30,6 +34,7 @@ public class KnowledgeGraphSearch implements InformationProvider {
         url.put("limit", "10");
         url.put("indent", "true");
         url.put("key", API_KEY);
+        url.set("languages", LANGUAGE);
         return url;
     }
 

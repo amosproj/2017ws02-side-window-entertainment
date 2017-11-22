@@ -15,6 +15,11 @@ public class TransformationBuffer {
   }
 
   public boolean insert(TransformStamped t) {
+    if(transformations.isEmpty()) {
+      transformations.addLast(t);
+      return true;
+    }
+
     if(t.getStamp() > transformations.getLast().getStamp()) {
       transformations.addLast(t);
 
@@ -30,12 +35,24 @@ public class TransformationBuffer {
   }
 
   public TransformStamped lookup(long stamp) {
+    if(transformations.isEmpty()) {
+      throw new TransformBufferException("No transformation data available!");
+    }
+
     if(stamp > transformations.getLast().getStamp()) {
-      throw new TransformBufferException("Cannot extrapolate into the future!");
+      if(transformations.size() < 2) {
+        throw new TransformBufferException("Cannot extrapolate into the future. Not enough data!");
+      }
+
+      TransformStamped last = transformations.getLast();
+      TransformStamped lastButOne = transformations.get(transformations.size()-2);
+      double t = (double)(stamp - lastButOne.getStamp()) / (double)(last.getStamp() - lastButOne.getStamp());
+
+      return new TransformStamped(stamp, TransformInterpolation.extrapolate(lastButOne, last, t));
     }
 
     if(stamp < transformations.getFirst().getStamp()) {
-      throw new TransformBufferException("Cannot extrapolate into the past!");
+      throw new TransformBufferException("Not designed to extrapolate into the past!");
     }
 
     Iterator it = transformations.iterator();

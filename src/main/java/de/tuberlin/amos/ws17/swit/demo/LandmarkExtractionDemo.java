@@ -1,6 +1,7 @@
 package de.tuberlin.amos.ws17.swit.demo;
 
 import com.google.api.services.vision.v1.model.BoundingPoly;
+import de.tuberlin.amos.ws17.swit.image_analysis.ImageUtils;
 import de.tuberlin.amos.ws17.swit.image_analysis.LandmarkDetector;
 import de.tuberlin.amos.ws17.swit.image_analysis.CloudVision;
 import de.tuberlin.amos.ws17.swit.image_analysis.LandmarkResult;
@@ -16,7 +17,7 @@ import java.util.List;
 
 import static de.tuberlin.amos.ws17.swit.image_analysis.ImageUtils.getTestImageFile;
 
-public class LandmarkInfoDemo {
+public class LandmarkExtractionDemo {
 
     public static void main(String[] args) throws IOException, GeneralSecurityException {
         BufferedImage testImage = getTestImageFile("fernsehturm-2.jpg");
@@ -28,8 +29,8 @@ public class LandmarkInfoDemo {
             if (!results.isEmpty()) {
                 LandmarkResult firstResult = results.get(0);
                 String description = infoProvider.getInfoById(firstResult.getId());
-//                String description = infoProvider.getInfoByName(firstResult.getName());
                 showHighlightedLandmark(firstResult, testImage, description);
+                ImageUtils.showImage(firstResult.getCroppedImage(), new JFrame("Cropped POI"));
                 System.out.print(description);
             }
         }
@@ -38,7 +39,7 @@ public class LandmarkInfoDemo {
     private static void showHighlightedLandmark(LandmarkResult result, BufferedImage img, String description) {
         // Create a graphics context on the buffered image
         Graphics2D g2d = img.createGraphics();
-        JFrame frame = new JFrame();
+        JFrame frame = new JFrame("Input Image");
 
         BoundingPoly bp = result.getBoundlingPoly();
         // Draw on the buffered image

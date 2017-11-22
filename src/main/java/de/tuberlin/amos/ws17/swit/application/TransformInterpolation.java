@@ -1,6 +1,7 @@
 package de.tuberlin.amos.ws17.swit.application;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
+import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.util.FastMath;
 
@@ -64,5 +65,31 @@ public class TransformInterpolation {
 
   public static Transform interpolate(Transform t1, Transform t2, double t) {
     return new Transform(slerp(t1.getRotation(), t2.getRotation(), t), interpolate(t1.getTranslation(), t2.getTranslation(), t));
+  }
+
+  /**
+   * Extrapolates transformations
+   * @param t1 First transformation
+   * @param t2 Second transformation
+   * @param t 1 <= t extrapolation factor
+   * @return Extrapolated transformation
+   */
+  public static Transform extrapolate(Transform t1, Transform t2, double t) {
+    double dx = t2.getTranslation().getX() - t1.getTranslation().getX();
+    double dy = t2.getTranslation().getX() - t1.getTranslation().getX();
+    double dz = t2.getTranslation().getX() - t1.getTranslation().getX();
+
+    double tx = t1.getTranslation().getX() + t * dx;
+    double ty = t1.getTranslation().getY() + t * dy;
+    double tz = t1.getTranslation().getZ() + t * dz;
+
+    Rotation dr = t1.getRotation().applyInverseTo(t2.getRotation());
+    Vector3D axis = dr.getAxis(RotationConvention.VECTOR_OPERATOR);
+    double da = dr.getAngle();
+
+    Rotation newRotation = new Rotation(axis, da * t, RotationConvention.VECTOR_OPERATOR);
+    Vector3D newTranslation = new Vector3D(tx, ty, tz);
+
+    return new Transform(t1.getRotation().applyTo(newRotation), newTranslation);
   }
 }

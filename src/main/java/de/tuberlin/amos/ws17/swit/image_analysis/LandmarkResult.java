@@ -4,6 +4,7 @@ import com.google.api.services.vision.v1.model.BoundingPoly;
 import com.google.api.services.vision.v1.model.EntityAnnotation;
 import com.google.api.services.vision.v1.model.LocationInfo;
 
+import java.awt.image.BufferedImage;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,6 +24,9 @@ public class LandmarkResult {
 
     // Image region of landmark on image
     private BoundingPoly boundlingPoly;
+
+    // Cropped image of the landmark
+    private BufferedImage croppedImage;
 
     public LandmarkResult(String id, String name, Float score, List<GPSLocation> locations, BoundingPoly boundlingPoly) {
         this.id = id;
@@ -62,6 +66,14 @@ public class LandmarkResult {
                 annotation.getScore(),
                 annotation.getLocations().stream().map(GPSLocation::fromLocationInfo).collect(Collectors.toList()),
                 annotation.getBoundingPoly());
+    }
+
+    public BufferedImage getCroppedImage() {
+        return croppedImage;
+    }
+
+    public void setCroppedImage(BufferedImage croppedImage) {
+        this.croppedImage = croppedImage;
     }
 
     // adjust the score of result by providing current gps location
