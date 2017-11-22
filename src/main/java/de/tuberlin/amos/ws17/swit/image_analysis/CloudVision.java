@@ -163,7 +163,7 @@ public class CloudVision implements LandmarkDetector {
         growRect.grow(growWidth, growHeight);
 
         while (rectOutsideOfImage(growRect, bufferedImage)) {
-            System.out.println("Rect to big, resizing");
+//            System.out.println("Rect to big, resizing");
             upScale -= 0.05;
             growWidth = (int) ((width * upScale - width) / 2);
             growHeight = (int) ((height * upScale - height) / 2);
@@ -171,7 +171,6 @@ public class CloudVision implements LandmarkDetector {
             growRect.grow(growWidth, growHeight);
         }
 
-        System.out.print(growRect.toString());
         BufferedImage croppedImg = ImageUtils.cropImage(bufferedImage, growRect);
         result.setCroppedImage(croppedImg);
         return result;
