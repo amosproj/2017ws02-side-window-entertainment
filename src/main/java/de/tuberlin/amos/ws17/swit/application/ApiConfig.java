@@ -25,5 +25,9 @@ public class ApiConfig {
         if (instance == null) instance = new ApiConfig();
         return instance.getValue(key);
     }
+
+    public static String getCloudVisionKey() {
+        return getProperty("CloudVision");
+    }
 }
 
