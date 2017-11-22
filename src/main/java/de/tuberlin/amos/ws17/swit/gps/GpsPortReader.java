@@ -6,20 +6,29 @@ import gnu.io.CommPortIdentifier;
 import net.sf.marineapi.nmea.event.SentenceEvent;
 import net.sf.marineapi.nmea.event.SentenceListener;
 import net.sf.marineapi.nmea.io.SentenceReader;
-import net.sf.marineapi.nmea.sentence.SentenceValidator;
+import net.sf.marineapi.nmea.sentence.*;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Enumeration;
+import java.util.LinkedList;
 
 
 public class GpsPortReader implements SentenceListener{
 
+    private LinkedList<GpsPosition> GpsList;
+
+    private GpsPosition latestPosition;
+
     public GpsPortReader(){
         init();
     }
+
+    public LinkedList<GpsPosition> getGpsList() { return GpsList; }
+
+    public GpsPosition getLatestPosition() { return latestPosition; }
 
     public void readingStarted(){
         System.out.println("--- Started ---");
@@ -34,7 +43,81 @@ public class GpsPortReader implements SentenceListener{
     }
 
     public void sentenceRead(SentenceEvent event){
-        System.out.println(event.getSentence());
+        Sentence s = event.getSentence();
+        // Position and Time (not really necessary, since RMC has all the info and more)
+        if("GGA".equals(s.getSentenceId())){
+            GGASentence gga = (GGASentence) s;
+            System.out.println("----- GGA Sentence -----");
+            try{
+                if (latestPosition == null){
+                    latestPosition = new GpsPosition(555, 666, 0);
+                }
+                latestPosition.setLatitude(gga.getPosition().getLatitude());
+                latestPosition.setLongitude(gga.getPosition().getLongitude());
+                System.out.println("Position: lat: " + latestPosition.getLatitude() + ", lon: " + latestPosition.getLongitude());
+                System.out.println("Time: only current-day time");
+
+                // fill up GpsList
+                if (GpsList == null){
+                    GpsList = new LinkedList<GpsPosition>();
+                }
+                GpsList.add(new GpsPosition(latestPosition.getLatitude(), latestPosition.getLongitude(), 0));
+
+                // in the future: reset GpsList, if a new day starts (a new element comes in with a timestamp of another day)
+                // ^will be done when I figure out timestamp generation
+                while (GpsList.size() >= 100) {
+                    GpsList.removeLast();
+                }
+            }
+            catch (net.sf.marineapi.nmea.parser.DataNotAvailableException e) {
+                // do nothing
+            }
+        }
+
+        // time and date, position, speed, course
+        if("RMC".equals(s.getSentenceId())){
+            RMCSentence rmc = (RMCSentence) s;
+            System.out.println("----- RMC Sentence -----");
+            try{
+                if (latestPosition != null){
+                    latestPosition.setCourse(rmc.getCorrectedCourse());
+                }
+                //System.out.println("Position: " + latestPosition.getLatitude() + ", " + latestPosition.getLongitude());
+                //System.out.println("Date: " + rmc.getDate().getDay() + "." + rmc.getDate().getMonth() + "." + rmc.getDate().getYear());
+                System.out.println("Speed: " + rmc.getSpeed() + " knots");
+                System.out.println("Course: " + rmc.getCourse());
+            }
+            catch (net.sf.marineapi.nmea.parser.DataNotAvailableException e){
+                // do nothing
+            }
+
+            // generate Timestamp from separate data: maybe later, when we actually need it
+            //net.sf.marineapi.nmea.util.Date date = rmc.getDate();
+            //Time time = rmc.getTime();
+            //GregorianCalendar calendar = new GregorianCalendar(date.getYear(), date.getMonth(), date.getDay());
+            //latestPosition.setTimeStamp(time);
+        }
+
+        // course and speed (interesting: speed in km/h)
+        if("VTG".equals(s.getSentenceId())){
+            VTGSentence vtg = (VTGSentence) s;
+            System.out.println("----- VTG Sentence -----");
+            try{
+                System.out.println("Speed: " + vtg.getSpeedKmh() + "km/h");
+                System.out.println("Course: " + vtg.getMagneticCourse() + "°");
+            }
+            catch (net.sf.marineapi.nmea.parser.DataNotAvailableException e){
+                // do nothing
+            }
+
+
+            if (latestPosition == null){
+                latestPosition = new GpsPosition(555, 666, 0);
+            }
+
+            latestPosition.setSpeed(vtg.getSpeedKmh());
+
+        }
     }
 
     private SerialPort getSerialPort(){
@@ -58,7 +141,7 @@ public class GpsPortReader implements SentenceListener{
                     System.out.println("Scanning port " + sp.getName());
 
                     // try each port few times before giving up
-                    for (int i = 0; i < 5; i++) {
+                    for (int i = 0; i < 50; i++) {
                         try {
                             String data = buf.readLine();
                             if (SentenceValidator.isValid(data)) {
@@ -66,7 +149,7 @@ public class GpsPortReader implements SentenceListener{
                                 return sp;
                             }
                         } catch (Exception ex) {
-                            ex.printStackTrace();
+                            //ex.printStackTrace();
                         }
                     }
                     is.close();
@@ -77,7 +160,7 @@ public class GpsPortReader implements SentenceListener{
             System.out.println("NMEA data was not found..");
 
         } catch (Exception e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
 
         return null;
@@ -94,7 +177,7 @@ public class GpsPortReader implements SentenceListener{
             }
         }
         catch (IOException e){
-            e.printStackTrace();
+            //e.printStackTrace();
         }
     }
 
