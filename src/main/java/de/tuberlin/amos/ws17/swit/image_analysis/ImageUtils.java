@@ -15,12 +15,14 @@ import java.net.URL;
 
 public class ImageUtils {
 
+    @Nullable
     public static BufferedImage createImageFromBytes(byte[] imageData) {
         ByteArrayInputStream bais = new ByteArrayInputStream(imageData);
         try {
             return ImageIO.read(bais);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
+            return null;
         }
     }
 
@@ -31,14 +33,16 @@ public class ImageUtils {
         return new Image().encodeContent(data);
     }
 
+    @Nullable
     public static BufferedImage convertToBufferedImage(Image image) {
         return createImageFromBytes(image.decodeContent());
     }
 
     public static void showImage(BufferedImage img, JFrame frame) {
+        if (img == null) { return; }
         ImageIcon icon = new ImageIcon(img);
         frame.setLayout(new FlowLayout());
-        frame.setSize(img.getWidth(), img.getHeight());
+        frame.setSize(img.getWidth() + 10, img.getHeight() + 20);
         JLabel lbl = new JLabel();
         lbl.setIcon(icon);
         frame.add(lbl);
@@ -59,6 +63,14 @@ public class ImageUtils {
             }
         }
         return null;
+    }
+
+    public static BufferedImage cropImage(BufferedImage image, Rectangle rect) {
+        BufferedImage img = image.getSubimage(rect.x, rect.y, rect.width, rect.height);
+        BufferedImage copyOfImage = new BufferedImage(img.getWidth(), img.getHeight(), BufferedImage.TYPE_INT_RGB);
+        Graphics g = copyOfImage.createGraphics();
+        g.drawImage(img, 0, 0, null);
+        return copyOfImage;
     }
 
 }

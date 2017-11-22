@@ -9,6 +9,7 @@ import com.google.api.services.vision.v1.VisionRequestInitializer;
 import com.google.api.services.vision.v1.model.*;
 import com.google.api.services.vision.v1.model.Image;
 import com.google.common.collect.ImmutableList;
+import de.tuberlin.amos.ws17.swit.application.ApiConfig;
 
 import javax.annotation.Nullable;
 import javax.swing.*;
@@ -16,7 +17,6 @@ import java.awt.*;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.GeneralSecurityException;
@@ -28,7 +28,9 @@ import static de.tuberlin.amos.ws17.swit.image_analysis.ImageUtils.getTestImageF
 
 public class CloudVision implements LandmarkDetector {
 
-    private static final String CLOUD_VISION_API_KEY = "YOUR-GOOGLE_API_KEY";
+    private static final String CLOUD_VISION_API_KEY = ApiConfig.getCloudVisionKey();
+
+    private static final String LANGUAGE = ApiConfig.getProperty("language");
 
     private static final String APPLICATION_NAME = "Swit-Image-Analysis";
 
@@ -42,7 +44,7 @@ public class CloudVision implements LandmarkDetector {
 
     private List<LandmarkResult> landmarkResults = Collections.emptyList();
 
-    private Image image;
+    private BufferedImage bufferedImage;
 
     @Nullable
     public static LandmarkDetector getInstance() {
@@ -100,13 +102,20 @@ public class CloudVision implements LandmarkDetector {
     }
 
     private List<LandmarkResult> identifyLandmarks(Image image, int maxResults) throws IOException {
-        this.image = image;
+        if (this.vision == null) {
+            System.err.print("Cloud Vision service unavailable.");
+            return Collections.emptyList();
+        }
+        this.bufferedImage = ImageUtils.convertToBufferedImage(image);
         AnnotateImageRequest request = new AnnotateImageRequest()
                 .setImage(image)
                 .setFeatures(ImmutableList.of(
                         new Feature()
                                 .setType(LANDMARK_DETECTION_FEATURE)
-                                .setMaxResults(maxResults)));
+                                .setMaxResults(maxResults)))
+                .setImageContext(
+                        new ImageContext()
+                                .setLanguageHints(ImmutableList.of(LANGUAGE)));
 
         Vision.Images.Annotate annotate =
                 vision.images()
@@ -130,18 +139,65 @@ public class CloudVision implements LandmarkDetector {
     private List<LandmarkResult> convertToLandmarkResults(List<EntityAnnotation> annotations) {
         return annotations.stream()
                 .map(LandmarkResult::fromEntityAnnotation)
+                .map(this::setCroppedImage)
                 .collect(Collectors.toList());
+    }
+
+    private LandmarkResult setCroppedImage(LandmarkResult result) {
+        float upScale = 2f;
+
+        List<Vertex> vertices = result.getBoundlingPoly().getVertices();
+        // early exit
+        if (bufferedImage == null || vertices.size() != 4) {
+            return result;
+        }
+        int x = vertices.get(0).getX();
+        int y = vertices.get(0).getY();
+        int width = vertices.get(1).getX() - x;
+        int height = vertices.get(3).getY() - y;
+        Rectangle originalRect = new Rectangle(x, y, width, height);
+
+        int growWidth = (int) ((width * upScale - width) / 2);
+        int growHeight = (int) ((height * upScale - height) / 2);
+        Rectangle growRect = new Rectangle(originalRect);
+        growRect.grow(growWidth, growHeight);
+
+        while (rectOutsideOfImage(growRect, bufferedImage)) {
+            System.out.println("Rect to big, resizing");
+            upScale -= 0.05;
+            growWidth = (int) ((width * upScale - width) / 2);
+            growHeight = (int) ((height * upScale - height) / 2);
+            growRect = new Rectangle(originalRect);
+            growRect.grow(growWidth, growHeight);
+        }
+
+        System.out.print(growRect.toString());
+        BufferedImage croppedImg = ImageUtils.cropImage(bufferedImage, growRect);
+        result.setCroppedImage(croppedImg);
+        return result;
+    }
+
+    private boolean rectOutsideOfImage(Rectangle rect, BufferedImage image) {
+        if (rect.x < 0 || rect.y < 0)  {
+            return true;
+        } else if (rect.x + rect.width > image.getWidth() || rect.y + rect.getHeight() > image.getHeight()) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     @Override
     public void showHighlightedLandmarks() {
-        BufferedImage img = ImageUtils.convertToBufferedImage(this.image);
+        if (bufferedImage == null) {
+            return;
+        }
         // Create a graphics context on the buffered image
-        Graphics2D g2d = img.createGraphics();
+        Graphics2D g2d = bufferedImage.createGraphics();
         JFrame frame = new JFrame();
 
         int k = 0;
-        for (LandmarkResult result: landmarkResults) {
+        for (LandmarkResult result : landmarkResults) {
             BoundingPoly bp = result.getBoundlingPoly();
             // Draw on the buffered image
             g2d.setColor(HIGHLIGHT_COLORS[k]);
@@ -170,39 +226,6 @@ public class CloudVision implements LandmarkDetector {
         }
         g2d.dispose();
 
-        ImageUtils.showImage(img, frame);
-    }
-
-    public static String getLandmark(Path imagePath) throws IOException {
-        CloudVision app = null;
-        try {
-            app = new CloudVision(getVisionService());
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (GeneralSecurityException e) {
-            e.printStackTrace();
-        }
-        List<LandmarkResult> results = app.identifyLandmarks(imagePath, 5);
-        return results.get(0).getName();
-    }
-
-    public static void main(String[] args) throws IOException, GeneralSecurityException {
-        LandmarkDetector landmarkDetector = getInstance();
-        if (landmarkDetector != null) {
-            landmarkDetector.identifyLandmarks(getTestImageFile("brandenburger-tor.jpg"), 3);
-            landmarkDetector.showHighlightedLandmarks();
-        }
-    }
-
-    private static void printLandmarks(PrintStream out, List<LandmarkResult> landmarks) {
-        for (LandmarkResult result : landmarks) {
-            out.printf(
-                    "\t%s (score: %.3f)\n",
-                    result.getName(),
-                    result.getScore());
-        }
-        if (landmarks.isEmpty()) {
-            out.println("\tNo landmarks found.");
-        }
+        ImageUtils.showImage(bufferedImage, frame);
     }
 }
