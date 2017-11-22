@@ -123,7 +123,15 @@
             <scope>system</scope>
             <systemPath>${project.basedir}/src/main/resources/jcoord-1.0.jar</systemPath>
         </dependency>
-             
+
+        <!-- https://mvnrepository.com/artifact/org.apache.jena/jena-arq -->
+        <dependency>
+            <groupId>org.apache.jena</groupId>
+            <artifactId>jena-arq</artifactId>
+            <version>3.5.0</version>
+        </dependency>
+
+
     </dependencies>
     
 </project>
