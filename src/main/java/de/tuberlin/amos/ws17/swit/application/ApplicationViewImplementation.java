@@ -82,7 +82,7 @@ public class ApplicationViewImplementation extends Application implements Applic
         btn.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                controller.ChangeTitle();
+                controller.changeTitle();
             }
         });
         pnFoundation.setCenter(btn);
@@ -90,7 +90,7 @@ public class ApplicationViewImplementation extends Application implements Applic
         btn.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                controller.SortList();
+                controller.sortList();
             }
         });
         pnPOIcamera.getChildren().add(btn2);
