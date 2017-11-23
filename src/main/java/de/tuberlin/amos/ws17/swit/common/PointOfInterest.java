@@ -1,12 +1,12 @@
-package de.tuberlin.amos.ws17.swit.application;
+package de.tuberlin.amos.ws17.swit.common;
 
-import java.awt.image.BufferedImage;
+import javafx.scene.image.Image;
 
 public class PointOfInterest {
 
     private int id;
     private String name;
-    private BufferedImage image;
+    private Image image;
     private String informationAbstract;
 
     public int getId() {
@@ -25,11 +25,11 @@ public class PointOfInterest {
         this.name = name;
     }
 
-    public BufferedImage getImage() {
+    public Image getImage() {
         return image;
     }
 
-    public void setImage(BufferedImage image) {
+    public void setImage(Image image) {
         this.image = image;
     }
 

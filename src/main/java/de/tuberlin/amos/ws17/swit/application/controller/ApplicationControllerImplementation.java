@@ -1,6 +1,7 @@
 package de.tuberlin.amos.ws17.swit.application.controller;
 
-import de.tuberlin.amos.ws17.swit.application.PointOfInterest;
+import de.tuberlin.amos.ws17.swit.application.model.PoiViewModel;
+import de.tuberlin.amos.ws17.swit.common.PointOfInterest;
 
 import java.awt.image.BufferedImage;
 import java.util.List;
