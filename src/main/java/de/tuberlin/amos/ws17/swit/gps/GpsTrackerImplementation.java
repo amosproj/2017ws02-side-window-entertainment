@@ -30,7 +30,6 @@ public class GpsTrackerImplementation implements GpsTracker {
 		return null;
 	}
 
-	@Override
 	public LinkedList<GpsPosition> getGpsList() {
 		if(portReader != null){
 			return portReader.getGpsList();
