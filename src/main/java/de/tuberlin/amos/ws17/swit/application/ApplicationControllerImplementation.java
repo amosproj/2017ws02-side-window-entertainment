@@ -8,6 +8,7 @@ import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class ApplicationControllerImplementation implements ApplicationController {
@@ -35,8 +36,15 @@ public class ApplicationControllerImplementation implements ApplicationControlle
 
     public ApplicationControllerImplementation() {
         List<PoiViewModel> l = new ArrayList<PoiViewModel>();
-        l.add(new PoiViewModel("Hallo"));
-        l.add(new PoiViewModel("Welt"));
+
+
+        l.add(new PoiViewModel("2"));
+        l.add(new PoiViewModel("5"));
+        l.add(new PoiViewModel("3"));
+        l.add(new PoiViewModel("1"));
+        l.add(new PoiViewModel("4"));
+
+        l.add(new PoiViewModel("6"));
         observableList = FXCollections.observableList(l);
 
 
@@ -58,8 +66,23 @@ public class ApplicationControllerImplementation implements ApplicationControlle
     public void ChangeTitle() {
         setTitle("Hello World!");
 
-        observableList.add(new PoiViewModel("Test 1"));
+        PoiViewModel poe = observableList.get(3);
+        observableList.remove(poe);
+        observableList.add(0, poe);
+
+        poe = observableList.get(5);
+        observableList.remove(poe);
+        observableList.add(0, poe);
     }
 
+
+    public void SortList() {
+        observableList.sort(new Comparator<PoiViewModel>() {
+            @Override
+            public int compare(PoiViewModel o1, PoiViewModel o2) {
+                return o1.name.compareTo(o2.name) ;
+            }
+        });
+    }
 
 }
