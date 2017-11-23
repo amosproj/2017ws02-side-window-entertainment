@@ -5,6 +5,7 @@ import javafx.collections.ListChangeListener;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
+import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -117,6 +118,7 @@ public class ApplicationViewImplementation extends Application implements Applic
         ListView<PoiViewModel> list = new ListView<PoiViewModel>();
         pnFoundation.setTop(list);
         list.itemsProperty().bindBidirectional(controller.getTestSimpleListProperty());
+        list.setOrientation(Orientation.HORIZONTAL);
         list.setCellFactory(new Callback<ListView<PoiViewModel>, ListCell<PoiViewModel>>() {
             @Override
             public ListCell<PoiViewModel> call(ListView<PoiViewModel> param) {
@@ -124,16 +126,14 @@ public class ApplicationViewImplementation extends Application implements Applic
                     @Override
                     public void updateItem(PoiViewModel item, boolean empty) {
                         if(item != null) {
-                            poiInformation.add(item.informationAbstract);
+                            //Label lblInformation = new Label(item.informationAbstract);
                             File domfile = new File(ApplicationViewImplementation.app.getClass().getResource("/test_images/berliner-dom.jpg").getPath());
                             Image domimage = new Image(domfile.toURI().toString());
                             ImageView view = new ImageView(domimage);
                             view.setPreserveRatio(true);
                             view.setFitHeight(100);
-                            poiImage.add(view);
                             Label lblName = new Label(item.name);
                             lblName.setFont(new Font(FONTNAME, 13));
-                            poiName.add(lblName);
                             BorderPane pane = new BorderPane();
                             pane.setTop(lblName);
                             pane.setCenter(view);
@@ -143,7 +143,7 @@ public class ApplicationViewImplementation extends Application implements Applic
 
                                 }
                             });
-                            poiPane.add(pane);
+                            setGraphic(pane);
                         }
                     }
                 };
