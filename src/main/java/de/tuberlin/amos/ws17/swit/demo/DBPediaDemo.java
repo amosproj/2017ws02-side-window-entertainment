@@ -9,17 +9,18 @@ public class DBPediaDemo {
 
     public static void main(String[] args) {
 
-        System.out.println(String.join(" ", args));
+        String desiredPOI = "Berlin Cathedral";
 
         String requestString = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \n" +
                 "PREFIX dbpedia0: <http://dbpedia.org/ontology/> \n" +
                 "PREFIX dbpedia2: <http://dbpedia.org/property/> \n" +
+                "PREFIX dbp: <http://dbpedia.org/property/> \n" +
                 "SELECT ?label ?architect ?name ?location WHERE { \n" +
                 "?label a dbpedia0:Building. \n" +
                 "?label dbpedia2:architect ?architect. \n" +
                 "?label rdfs:label ?name. \n" +
                 "?label dbp:location ?location. \n" +
-                "FILTER (?name=\"" + String.join(" ", args) +"\"@en) }";
+                "FILTER (?name=\"" + desiredPOI +"\"@en) }";
 
         ParameterizedSparqlString parameterizedSparqlRequestString = new ParameterizedSparqlString(requestString);
 
