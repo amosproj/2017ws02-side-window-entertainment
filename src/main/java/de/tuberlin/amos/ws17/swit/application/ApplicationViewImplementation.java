@@ -94,7 +94,7 @@ public class ApplicationViewImplementation extends Application implements Applic
 
         this.primaryStage = stage;
         primaryStage.setTitle(controller.getTitle());
-        primaryStage.initStyle(StageStyle.TRANSPARENT);
+        //primaryStage.initStyle(StageStyle.TRANSPARENT);
         //primaryStage.setMaximized(true);
 
         Scene scene = new Scene(pnFoundation, 500, 500, Color.TRANSPARENT);
