@@ -1,10 +1,13 @@
 package de.tuberlin.amos.ws17.swit.application;
 
 import de.tuberlin.amos.ws17.swit.common.PointOfInterest;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.util.ArrayList;
 import java.util.List;
 
 public class ApplicationControllerImplementation implements ApplicationController {
@@ -15,6 +18,7 @@ public class ApplicationControllerImplementation implements ApplicationControlle
     private List<PoiViewModel> LandscapePois;
 
     private List<PointOfInterest> pointsOfInterest;
+    private ObservableList<PoiViewModel> observableList;
 
     private String title;
 
@@ -30,6 +34,12 @@ public class ApplicationControllerImplementation implements ApplicationControlle
     }
 
     public ApplicationControllerImplementation() {
+        List<PoiViewModel> l = new ArrayList<PoiViewModel>();
+        l.add(new PoiViewModel("Hallo"));
+        l.add(new PoiViewModel("Welt"));
+        observableList = FXCollections.observableList(l);
+
+
         setTitle("Ist mir ja völlig egal");
     }
 
@@ -47,6 +57,8 @@ public class ApplicationControllerImplementation implements ApplicationControlle
 
     public void ChangeTitle() {
         setTitle("Hello World!");
+
+        observableList.add(new PoiViewModel("Test 1"));
     }
 
 
