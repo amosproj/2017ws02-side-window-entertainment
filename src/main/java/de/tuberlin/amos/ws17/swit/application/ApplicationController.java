@@ -1,4 +1,4 @@
-package de.tuberlin.amos.ws17.swit.application.controller;
+package de.tuberlin.amos.ws17.swit.application;
 
 import java.awt.image.BufferedImage;
 

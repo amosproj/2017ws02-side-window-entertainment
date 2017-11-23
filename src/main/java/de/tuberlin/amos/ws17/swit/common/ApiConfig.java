@@ -1,4 +1,4 @@
-package de.tuberlin.amos.ws17.swit.application;
+package de.tuberlin.amos.ws17.swit.common;
 
 import java.util.Properties;
 

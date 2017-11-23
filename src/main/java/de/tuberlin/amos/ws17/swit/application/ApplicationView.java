@@ -1,4 +1,4 @@
-package de.tuberlin.amos.ws17.swit.application.view;
+package de.tuberlin.amos.ws17.swit.application;
 
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;

@@ -9,7 +9,7 @@ import com.google.api.services.vision.v1.VisionRequestInitializer;
 import com.google.api.services.vision.v1.model.*;
 import com.google.api.services.vision.v1.model.Image;
 import com.google.common.collect.ImmutableList;
-import de.tuberlin.amos.ws17.swit.application.ApiConfig;
+import de.tuberlin.amos.ws17.swit.common.ApiConfig;
 
 import javax.annotation.Nullable;
 import javax.swing.*;
@@ -23,8 +23,6 @@ import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static de.tuberlin.amos.ws17.swit.image_analysis.ImageUtils.getTestImageFile;
 
 public class CloudVision implements LandmarkDetector {
 

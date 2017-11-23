@@ -1,4 +1,4 @@
-package de.tuberlin.amos.ws17.swit.application.view;
+package de.tuberlin.amos.ws17.swit.application;
 
 import javafx.application.Application;
 import javafx.event.ActionEvent;

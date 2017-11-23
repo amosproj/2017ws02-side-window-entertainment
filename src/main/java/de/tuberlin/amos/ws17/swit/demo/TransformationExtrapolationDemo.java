@@ -2,8 +2,8 @@ package de.tuberlin.amos.ws17.swit.demo;
 
 
 
-import de.tuberlin.amos.ws17.swit.application.TransformStamped;
-import de.tuberlin.amos.ws17.swit.application.TransformationBuffer;
+import de.tuberlin.amos.ws17.swit.transform.TransformStamped;
+import de.tuberlin.amos.ws17.swit.transform.TransformationBuffer;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.chart.NumberAxis;

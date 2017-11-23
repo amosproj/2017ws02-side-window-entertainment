@@ -1,7 +1,7 @@
 package de.tuberlin.amos.ws17.swit.gps;
 
-import de.tuberlin.amos.ws17.swit.application.TransformStamped;
-import de.tuberlin.amos.ws17.swit.application.TransformationBuffer;
+import de.tuberlin.amos.ws17.swit.transform.TransformStamped;
+import de.tuberlin.amos.ws17.swit.transform.TransformationBuffer;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import uk.me.jstott.jcoord.LatLng;

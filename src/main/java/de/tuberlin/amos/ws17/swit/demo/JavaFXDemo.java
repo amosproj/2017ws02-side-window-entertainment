@@ -1,6 +1,6 @@
 package de.tuberlin.amos.ws17.swit.demo;
 
-import de.tuberlin.amos.ws17.swit.application.view.ApplicationViewImplementation;
+import de.tuberlin.amos.ws17.swit.application.ApplicationViewImplementation;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.image.Image;
