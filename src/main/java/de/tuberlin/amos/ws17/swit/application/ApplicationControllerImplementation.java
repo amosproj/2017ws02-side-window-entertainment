@@ -49,8 +49,7 @@ public class ApplicationControllerImplementation implements ApplicationControlle
         l.add(new PoiViewModel("6"));
         observableList = FXCollections.observableList(l);
 
-
-        setTestSimpleString("Ist mir ja auch völlig egal");
+        testSimpleString = new SimpleStringProperty("Ist mir ja auch völlig egal");
         setTitle("Ist mir ja völlig egal");
     }
 
