@@ -1,8 +1,8 @@
-package de.tuberlin.amos.ws17.swit.application;
+package de.tuberlin.amos.ws17.swit.application.controller;
 
 import java.awt.image.BufferedImage;
 
-public interface ApplicationLogic {
+public interface ApplicationController {
 
     /*
      * Adds a new POI to the list of current POI

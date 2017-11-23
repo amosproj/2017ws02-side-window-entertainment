@@ -184,6 +184,13 @@
         </dependency>
 
 
+        <!-- https://mvnrepository.com/artifact/org.apache.jena/jena-arq -->
+        <!--<dependency>
+            <groupId>org.apache.jena</groupId>
+            <artifactId>jena-arq</artifactId>
+            <version>3.4.0</version>
+        </dependency>-->
+
 
         <dependency>
             <groupId>intel</groupId>
