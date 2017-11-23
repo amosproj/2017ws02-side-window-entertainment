@@ -58,9 +58,11 @@ public class ApplicationControllerImplementation implements ApplicationControlle
         int min = 10;
         int max = 100;
         setTestSimpleListProperty(new SimpleListProperty<PoiViewModel>());
+        List<PoiViewModel> newL = new ArrayList<PoiViewModel>();
         for (int i = 0; i < 10; i++) {
-            getTestSimpleListProperty().add(new PoiViewModel(Integer.toString(ThreadLocalRandom.current().nextInt(min, max + 1))));
+            newL.add(new PoiViewModel(Integer.toString(ThreadLocalRandom.current().nextInt(min, max + 1))));
         }
+        getTestSimpleListProperty().set(FXCollections.observableList(newL));
     }
 
     public void addPOI(int id, String name, BufferedImage image, String information) {

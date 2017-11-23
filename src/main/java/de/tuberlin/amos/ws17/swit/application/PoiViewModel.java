@@ -11,4 +11,8 @@ public class PoiViewModel {
     public PoiViewModel(String name) {
         this.name = name;
     }
+
+    public String toString() {
+        return name;
+    }
 }
