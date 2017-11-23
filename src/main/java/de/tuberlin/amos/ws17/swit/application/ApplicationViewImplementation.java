@@ -95,8 +95,9 @@ public class ApplicationViewImplementation extends Application implements Applic
         controller.observableList.addListener(new ListChangeListener<PoiViewModel>() {
             @Override
             public void onChanged(Change<? extends PoiViewModel> c) {
+                pnPOImaps.getChildren().remove(0, pnPOImaps.getChildren().size());
                 c.next();
-                for(PoiViewModel poi: c.getAddedSubList()) {
+                for(PoiViewModel poi: c.getList()) {
                     displayButton(poi);
                 }
             }
@@ -194,11 +195,6 @@ public class ApplicationViewImplementation extends Application implements Applic
         pnPOIcamera.getChildren().add(pane);
     }
 
-    public void displayButton(PoiViewModel poi) {
-        Button btn = new Button(poi.name);
-        pnPOImaps.getChildren().add(btn);
-    }
-
     public void removePOI(int id) {
         int index = poiID.indexOf(id);
         pnPOIcamera.getChildren().remove(poiPane.get(index));
@@ -224,6 +220,11 @@ public class ApplicationViewImplementation extends Application implements Applic
         } else {
             return false;
         }
+    }
+
+    public void displayButton(PoiViewModel poi) {
+        Button btn = new Button(poi.name);
+        pnPOImaps.getChildren().add(btn);
     }
 
     @Override
