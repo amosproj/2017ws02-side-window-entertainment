@@ -86,6 +86,14 @@ public class ApplicationViewImplementation extends Application implements Applic
             }
         });
         pnFoundation.setCenter(btn);
+        Button btn2 = new Button("SORT");
+        btn.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                controller.SortList();
+            }
+        });
+        pnPOIcamera.getChildren().add(btn2);
     }
 
     @Override
