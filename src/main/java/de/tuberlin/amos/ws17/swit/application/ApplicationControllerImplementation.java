@@ -1,6 +1,7 @@
 package de.tuberlin.amos.ws17.swit.application;
 
 import de.tuberlin.amos.ws17.swit.common.PointOfInterest;
+import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -25,6 +26,8 @@ public class ApplicationControllerImplementation implements ApplicationControlle
 
     private String title;
     private SimpleStringProperty testSimpleString;
+
+    private SimpleListProperty<PoiViewModel> testSimpleListProperty;
 
     public String getTitle() {
         return title;
@@ -51,6 +54,13 @@ public class ApplicationControllerImplementation implements ApplicationControlle
 
         testSimpleString = new SimpleStringProperty("Ist mir ja auch völlig egal");
         setTitle("Ist mir ja völlig egal");
+
+        int min = 10;
+        int max = 100;
+        setTestSimpleListProperty(new SimpleListProperty<PoiViewModel>());
+        for (int i = 0; i < 10; i++) {
+            getTestSimpleListProperty().add(new PoiViewModel(Integer.toString(ThreadLocalRandom.current().nextInt(min, max + 1))));
+        }
     }
 
     public void addPOI(int id, String name, BufferedImage image, String information) {
@@ -72,7 +82,7 @@ public class ApplicationControllerImplementation implements ApplicationControlle
         int min = 10;
         int max = 100;
         observableList.add(new PoiViewModel(Integer.toString(ThreadLocalRandom.current().nextInt(min, max + 1))));
-
+        getTestSimpleListProperty().add(new PoiViewModel(Integer.toString(ThreadLocalRandom.current().nextInt(min, max + 1))));
 //        PoiViewModel poe = observableList.get(3);
 //        observableList.remove(poe);
 //        observableList.add(0, poe);
@@ -83,6 +93,13 @@ public class ApplicationControllerImplementation implements ApplicationControlle
     }
 
     public void sortList() {
+
+        getTestSimpleListProperty().sort(new Comparator<PoiViewModel>() {
+            @Override
+            public int compare(PoiViewModel o1, PoiViewModel o2) {
+                return o1.name.compareTo(o2.name) ;
+            }
+        });
 
         observableList.sort(new Comparator<PoiViewModel>() {
             @Override
@@ -98,5 +115,13 @@ public class ApplicationControllerImplementation implements ApplicationControlle
 
     public void setTestSimpleString(String testSimpleString) {
         this.testSimpleString.set(testSimpleString);
+    }
+
+    public SimpleListProperty<PoiViewModel> getTestSimpleListProperty() {
+        return testSimpleListProperty;
+    }
+
+    public void setTestSimpleListProperty(SimpleListProperty<PoiViewModel> testSimpleListProperty) {
+        this.testSimpleListProperty = testSimpleListProperty;
     }
 }
