@@ -10,6 +10,7 @@ import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class ApplicationControllerImplementation implements ApplicationController {
 
@@ -63,20 +64,24 @@ public class ApplicationControllerImplementation implements ApplicationControlle
         propertyChangeSupport.removePropertyChangeListener(listener);
     }
 
-    public void ChangeTitle() {
+    public void changeTitle() {
         setTitle("Hello World!");
 
-        PoiViewModel poe = observableList.get(3);
-        observableList.remove(poe);
-        observableList.add(0, poe);
+        int min = 10;
+        int max = 100;
+        observableList.add(new PoiViewModel(Integer.toString(ThreadLocalRandom.current().nextInt(min, max + 1))));
 
-        poe = observableList.get(5);
-        observableList.remove(poe);
-        observableList.add(0, poe);
+//        PoiViewModel poe = observableList.get(3);
+//        observableList.remove(poe);
+//        observableList.add(0, poe);
+//
+//        poe = observableList.get(5);
+//        observableList.remove(poe);
+//        observableList.add(0, poe);
     }
 
+    public void sortList() {
 
-    public void SortList() {
         observableList.sort(new Comparator<PoiViewModel>() {
             @Override
             public int compare(PoiViewModel o1, PoiViewModel o2) {
