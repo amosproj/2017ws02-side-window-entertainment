@@ -1,6 +1,7 @@
 package de.tuberlin.amos.ws17.swit.application;
 
 import de.tuberlin.amos.ws17.swit.common.PointOfInterest;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
@@ -23,7 +24,7 @@ public class ApplicationControllerImplementation implements ApplicationControlle
     public ObservableList<PoiViewModel> observableList;
 
     private String title;
-
+    private SimpleStringProperty testSimpleString;
 
     public String getTitle() {
         return title;
@@ -49,6 +50,7 @@ public class ApplicationControllerImplementation implements ApplicationControlle
         observableList = FXCollections.observableList(l);
 
 
+        setTestSimpleString("Ist mir ja auch völlig egal");
         setTitle("Ist mir ja völlig egal");
     }
 
@@ -66,6 +68,7 @@ public class ApplicationControllerImplementation implements ApplicationControlle
 
     public void changeTitle() {
         setTitle("Hello World!");
+        setTestSimpleString("Helloa");
 
         int min = 10;
         int max = 100;
@@ -90,4 +93,11 @@ public class ApplicationControllerImplementation implements ApplicationControlle
         });
     }
 
+    public SimpleStringProperty getTestSimpleString() {
+        return testSimpleString;
+    }
+
+    public void setTestSimpleString(String testSimpleString) {
+        this.testSimpleString.set(testSimpleString);
+    }
 }
