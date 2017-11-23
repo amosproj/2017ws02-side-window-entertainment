@@ -29,8 +29,8 @@ public class ApplicationControllerImplementation implements ApplicationControlle
         propertyChangeSupport.firePropertyChange("title", oldTitle, title);
     }
 
-    public static void main(String[] args) {
-
+    public ApplicationControllerImplementation() {
+        setTitle("Ist mir ja völlig egal");
     }
 
     public void addPOI(int id, String name, BufferedImage image, String information) {
@@ -44,5 +44,10 @@ public class ApplicationControllerImplementation implements ApplicationControlle
     public void removePropertyChangeListener(PropertyChangeListener listener) {
         propertyChangeSupport.removePropertyChangeListener(listener);
     }
+
+    public void ChangeTitle() {
+        setTitle("Hello World!");
+    }
+
 
 }
