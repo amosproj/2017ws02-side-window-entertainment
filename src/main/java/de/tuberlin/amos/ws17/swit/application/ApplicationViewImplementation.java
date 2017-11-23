@@ -106,6 +106,14 @@ public class ApplicationViewImplementation extends Application implements Applic
             public void onChanged(Change<? extends PoiViewModel> c) {
                 pnPOImaps.getChildren().remove(0, pnPOImaps.getChildren().size());
                 c.next();
+                Button btn2 = new Button("SORT");
+                btn2.setOnAction(new EventHandler<ActionEvent>() {
+                    @Override
+                    public void handle(ActionEvent event) {
+                        controller.sortList();
+                    }
+                });
+                pnPOImaps.getChildren().add(btn2);
                 for(PoiViewModel poi: c.getList()) {
                     displayButton(poi);
                 }
