@@ -87,7 +87,7 @@ public class ApplicationViewImplementation extends Application implements Applic
         });
         pnFoundation.setCenter(btn);
         Button btn2 = new Button("SORT");
-        btn.setOnAction(new EventHandler<ActionEvent>() {
+        btn2.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 controller.sortList();
