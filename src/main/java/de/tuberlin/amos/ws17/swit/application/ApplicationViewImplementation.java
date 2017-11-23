@@ -1,6 +1,7 @@
 package de.tuberlin.amos.ws17.swit.application;
 
 import javafx.application.Application;
+import javafx.collections.ListChangeListener;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -91,6 +92,15 @@ public class ApplicationViewImplementation extends Application implements Applic
     public void start(Stage stage) {
         controller = new ApplicationControllerImplementation();
         controller.addPropertyChangeListener(this);
+        controller.observableList.addListener(new ListChangeListener<PoiViewModel>() {
+            @Override
+            public void onChanged(Change<? extends PoiViewModel> c) {
+                c.next();
+                for(PoiViewModel poi: c.getAddedSubList()) {
+                    displayButton(poi);
+                }
+            }
+        });
 
         this.primaryStage = stage;
         primaryStage.setTitle(controller.getTitle());
@@ -184,6 +194,11 @@ public class ApplicationViewImplementation extends Application implements Applic
         pnPOIcamera.getChildren().add(pane);
     }
 
+    public void displayButton(PoiViewModel poi) {
+        Button btn = new Button(poi.name);
+        pnPOImaps.getChildren().add(btn);
+    }
+
     public void removePOI(int id) {
         int index = poiID.indexOf(id);
         pnPOIcamera.getChildren().remove(poiPane.get(index));
@@ -214,6 +229,6 @@ public class ApplicationViewImplementation extends Application implements Applic
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         System.out.println(evt.getPropertyName());
-
+        primaryStage.setTitle((String)evt.getNewValue());
     }
 }

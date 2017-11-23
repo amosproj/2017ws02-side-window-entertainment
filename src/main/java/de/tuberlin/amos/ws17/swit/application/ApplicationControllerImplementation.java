@@ -18,7 +18,7 @@ public class ApplicationControllerImplementation implements ApplicationControlle
     private List<PoiViewModel> LandscapePois;
 
     private List<PointOfInterest> pointsOfInterest;
-    private ObservableList<PoiViewModel> observableList;
+    public ObservableList<PoiViewModel> observableList;
 
     private String title;
 
