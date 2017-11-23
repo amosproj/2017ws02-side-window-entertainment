@@ -9,6 +9,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -110,6 +111,13 @@ public class ApplicationViewImplementation extends Application implements Applic
                 }
             }
         });
+        Label lbl = new Label();
+        pnPOIcamera.getChildren().add(lbl);
+        lbl.textProperty().bindBidirectional(controller.getTestSimpleString());
+
+        ListView<PoiViewModel> list = new ListView<PoiViewModel>();
+        pnFoundation.setTop(list);
+        list.itemsProperty().bindBidirectional(controller.getTestSimpleListProperty());
 
         this.primaryStage = stage;
         primaryStage.setTitle(controller.getTitle());
