@@ -1,11 +1,12 @@
 package de.tuberlin.amos.ws17.swit.gps;
 
 import java.io.*;
+import java.util.LinkedList;
 
 public class GpsTrackerImplementation implements GpsTracker {
-	
-	//private GpsPosition latestPosition;
+
 	private GpsFileReader fileReader;
+	private GpsPortReader portReader;
 
 	// constructor for file mode
 	public GpsTrackerImplementation(String fileName) {
@@ -14,21 +15,31 @@ public class GpsTrackerImplementation implements GpsTracker {
 
 	// constructor for port mode
 	public GpsTrackerImplementation() {
-		// initPortMode() not implemented yet
+		initPortMode();
 	}
 
 	// returns latest gps position from either the file reader or the port reader
 	public GpsPosition getGpsPosition(){
-		if(fileReader != null){
-			return fileReader.getLatestPosition();
-		}
-		else
-			return new GpsPosition(1,2,3); // fake position
-		/* not implemented yet
+		// port reader is prioritized
 		if(portReader != null){
 			return portReader.getLatestPosition();
 		}
-		*/
+		if(fileReader != null){
+			return fileReader.getLatestPosition();
+		}
+		return null;
+	}
+
+	public LinkedList<GpsPosition> getGpsList() {
+		if(portReader != null){
+			return portReader.getGpsList();
+		}
+		else return null;
+	}
+
+	// init for the port mode
+	private void initPortMode(){
+		portReader = new GpsPortReader();
 	}
 
 	// init for the file mode

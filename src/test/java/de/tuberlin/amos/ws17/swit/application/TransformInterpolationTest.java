@@ -1,5 +1,7 @@
 package de.tuberlin.amos.ws17.swit.application;
 
+import de.tuberlin.amos.ws17.swit.transform.Transform;
+import de.tuberlin.amos.ws17.swit.transform.TransformInterpolation;
 import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.RotationConvention;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;

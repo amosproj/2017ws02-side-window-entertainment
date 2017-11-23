@@ -1,7 +1,7 @@
 package de.tuberlin.amos.ws17.swit.application;
 
 import javafx.application.Application;
-import javafx.application.Platform;
+import javafx.collections.ListChangeListener;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -12,23 +12,20 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
-import java.awt.image.BufferedImage;
-import java.io.File;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ApplicationViewImplementation extends Application implements ApplicationView {
+public class ApplicationViewImplementation extends Application implements ApplicationView, PropertyChangeListener {
 
     private BorderPane pnFoundation;
     private HBox pnPOIcamera;
@@ -51,6 +48,8 @@ public class ApplicationViewImplementation extends Application implements Applic
 
     private static final String FONTNAME = "Helvetica Neue";
     public static ApplicationViewImplementation app;
+    private static ApplicationControllerImplementation controller;
+    private Stage primaryStage;
 
     //public static void main(String[] args) {launch(args);}
 
@@ -78,12 +77,43 @@ public class ApplicationViewImplementation extends Application implements Applic
 
         initView();
         initExpansion();
+
+        Button btn = new Button("TEST");
+        btn.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                controller.changeTitle();
+            }
+        });
+        pnFoundation.setCenter(btn);
+        Button btn2 = new Button("SORT");
+        btn2.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                controller.sortList();
+            }
+        });
+        pnPOIcamera.getChildren().add(btn2);
     }
 
     @Override
-    public void start(Stage primaryStage) {
-        primaryStage.setTitle("Hello World!");
-        primaryStage.initStyle(StageStyle.TRANSPARENT);
+    public void start(Stage stage) {
+        controller = new ApplicationControllerImplementation();
+        controller.addPropertyChangeListener(this);
+        controller.observableList.addListener(new ListChangeListener<PoiViewModel>() {
+            @Override
+            public void onChanged(Change<? extends PoiViewModel> c) {
+                pnPOImaps.getChildren().remove(0, pnPOImaps.getChildren().size());
+                c.next();
+                for(PoiViewModel poi: c.getList()) {
+                    displayButton(poi);
+                }
+            }
+        });
+
+        this.primaryStage = stage;
+        primaryStage.setTitle(controller.getTitle());
+        //primaryStage.initStyle(StageStyle.TRANSPARENT);
         //primaryStage.setMaximized(true);
 
         Scene scene = new Scene(pnFoundation, 500, 500, Color.TRANSPARENT);
@@ -198,5 +228,16 @@ public class ApplicationViewImplementation extends Application implements Applic
         } else {
             return false;
         }
+    }
+
+    public void displayButton(PoiViewModel poi) {
+        Button btn = new Button(poi.name);
+        pnPOImaps.getChildren().add(btn);
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        System.out.println(evt.getPropertyName());
+        primaryStage.setTitle((String)evt.getNewValue());
     }
 }
