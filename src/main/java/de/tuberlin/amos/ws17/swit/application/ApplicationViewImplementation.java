@@ -19,10 +19,12 @@ import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ApplicationViewImplementation extends Application implements ApplicationView {
+public class ApplicationViewImplementation extends Application implements ApplicationView, PropertyChangeListener {
 
     private BorderPane pnFoundation;
     private HBox pnPOIcamera;
@@ -45,6 +47,8 @@ public class ApplicationViewImplementation extends Application implements Applic
 
     private static final String FONTNAME = "Helvetica Neue";
     public static ApplicationViewImplementation app;
+    private static ApplicationControllerImplementation controller;
+    private Stage primaryStage;
 
     //public static void main(String[] args) {launch(args);}
 
@@ -72,11 +76,24 @@ public class ApplicationViewImplementation extends Application implements Applic
 
         initView();
         initExpansion();
+
+        Button btn = new Button("TEST");
+        btn.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                controller.ChangeTitle();
+            }
+        });
+        pnFoundation.setCenter(btn);
     }
 
     @Override
-    public void start(Stage primaryStage) {
-        primaryStage.setTitle("Hello World!");
+    public void start(Stage stage) {
+        controller = new ApplicationControllerImplementation();
+        controller.addPropertyChangeListener(this);
+
+        this.primaryStage = stage;
+        primaryStage.setTitle(controller.getTitle());
         primaryStage.initStyle(StageStyle.TRANSPARENT);
         //primaryStage.setMaximized(true);
 
@@ -192,5 +209,11 @@ public class ApplicationViewImplementation extends Application implements Applic
         } else {
             return false;
         }
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        System.out.println(evt.getPropertyName());
+
     }
 }
