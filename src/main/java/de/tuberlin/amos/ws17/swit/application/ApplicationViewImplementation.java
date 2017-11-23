@@ -7,10 +7,7 @@ import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.ScrollPane;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -20,9 +17,11 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javafx.util.Callback;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -118,6 +117,38 @@ public class ApplicationViewImplementation extends Application implements Applic
         ListView<PoiViewModel> list = new ListView<PoiViewModel>();
         pnFoundation.setTop(list);
         list.itemsProperty().bindBidirectional(controller.getTestSimpleListProperty());
+        list.setCellFactory(new Callback<ListView<PoiViewModel>, ListCell<PoiViewModel>>() {
+            @Override
+            public ListCell<PoiViewModel> call(ListView<PoiViewModel> param) {
+                return new ListCell<PoiViewModel>() {
+                    @Override
+                    public void updateItem(PoiViewModel item, boolean empty) {
+                        if(item != null) {
+                            poiInformation.add(item.informationAbstract);
+                            File domfile = new File(ApplicationViewImplementation.app.getClass().getResource("/test_images/berliner-dom.jpg").getPath());
+                            Image domimage = new Image(domfile.toURI().toString());
+                            ImageView view = new ImageView(domimage);
+                            view.setPreserveRatio(true);
+                            view.setFitHeight(100);
+                            poiImage.add(view);
+                            Label lblName = new Label(item.name);
+                            lblName.setFont(new Font(FONTNAME, 13));
+                            poiName.add(lblName);
+                            BorderPane pane = new BorderPane();
+                            pane.setTop(lblName);
+                            pane.setCenter(view);
+                            pane.setOnMouseClicked(new EventHandler<MouseEvent>() {
+                                @Override
+                                public void handle(MouseEvent event) {
+
+                                }
+                            });
+                            poiPane.add(pane);
+                        }
+                    }
+                };
+            }
+        });
 
         this.primaryStage = stage;
         primaryStage.setTitle(controller.getTitle());
