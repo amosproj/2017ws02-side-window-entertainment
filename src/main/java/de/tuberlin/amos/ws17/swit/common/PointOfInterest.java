@@ -2,18 +2,19 @@ package de.tuberlin.amos.ws17.swit.common;
 
 import javafx.scene.image.Image;
 
+import java.awt.image.BufferedImage;
+
 public class PointOfInterest {
-
-    private int id;
+    private String id; //TODO: ist id als String auszudrücken?
     private String name;
-    private Image image;
-    private String informationAbstract;
+    private GpsPosition gpsPosition;
+    private BufferedImage image;
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 
-    public void SetId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -25,20 +26,20 @@ public class PointOfInterest {
         this.name = name;
     }
 
-    public Image getImage() {
+    public GpsPosition getGpsPosition() {
+        return gpsPosition;
+    }
+
+    public void setGpsPosition(GpsPosition gpsPosition) {
+        this.gpsPosition = gpsPosition;
+    }
+
+    public BufferedImage getImage() {
         return image;
     }
 
-    public void setImage(Image image) {
+    public void setImage(BufferedImage image) {
         this.image = image;
-    }
-
-    public String getInformationAbstract() {
-        return informationAbstract;
-    }
-
-    public void setInformationAbstract(String informationAbstract) {
-        this.informationAbstract = informationAbstract;
     }
 
     @Override
@@ -48,9 +49,9 @@ public class PointOfInterest {
 
         PointOfInterest that = (PointOfInterest) o;
 
-        if (id != that.id) return false;
+        if (id != null ? !id.equals(that.id) : that.id != null) return false;
         if (name != null ? !name.equals(that.name) : that.name != null) return false;
-        if (image != null ? !image.equals(that.image) : that.image != null) return false;
-        return informationAbstract != null ? informationAbstract.equals(that.informationAbstract) : that.informationAbstract == null;
+        if (gpsPosition != null ? !gpsPosition.equals(that.gpsPosition) : that.gpsPosition != null) return false;
+        return image != null ? image.equals(that.image) : that.image == null;
     }
 }

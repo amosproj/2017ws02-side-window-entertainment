@@ -1,6 +1,7 @@
 package de.tuberlin.amos.ws17.swit.tracking;
 
-import de.tuberlin.amos.ws17.swit.common.Point3D;
+import de.tuberlin.amos.ws17.swit.common.UserExpressions;
+import de.tuberlin.amos.ws17.swit.common.Vector3D;
 import de.tuberlin.amos.ws17.swit.tracking.camera.Camera;
 import de.tuberlin.amos.ws17.swit.tracking.camera.CameraService;
 import de.tuberlin.amos.ws17.swit.tracking.camera.RealSenseSdkCameraService;
@@ -270,7 +271,7 @@ public class RealSenseSdkUserTracker implements UserTracker, Runnable {
         if (poseData.QueryHeadPosition(headPosition) && poseData.QueryPoseAngles(poseAngles))
         {
             userHeadPose.isTracked = true;
-            userHeadPose.centerOfHead = new Point3D(headPosition.x, headPosition.y, headPosition.z);
+            userHeadPose.centerOfHead = new Vector3D(headPosition.x, headPosition.y, headPosition.z);
 //            {
 //                X = headPosition.headCenter.x,
 //                Y = headPosition.headCenter.y,
@@ -300,15 +301,15 @@ public class RealSenseSdkUserTracker implements UserTracker, Runnable {
             && expressionsData.QueryExpression(PXCMFaceData.ExpressionsData.FaceExpression.EXPRESSION_SMILE, faceExpressionResultSmile)
             && expressionsData.QueryExpression(PXCMFaceData.ExpressionsData.FaceExpression.EXPRESSION_MOUTH_OPEN, faceExpressionResultMouthOpen))
         {
-            userExpressions.isTracked = true;
-            userExpressions.isKiss = faceExpressionResultKiss.intensity == 100;
-            userExpressions.isTongueOut = faceExpressionResultTongueOut.intensity == 100;
-            userExpressions.isSmile = faceExpressionResultSmile.intensity > 55;
-            userExpressions.isMouthOpen = faceExpressionResultMouthOpen.intensity > 55;
+            //TODO userExpressions.isTracked = true;
+            userExpressions.setKiss(faceExpressionResultKiss.intensity == 100);
+            userExpressions.setTongueOut(faceExpressionResultTongueOut.intensity == 100);
+            userExpressions.setSmile(faceExpressionResultSmile.intensity > 55);
+            userExpressions.setMouthOpen(faceExpressionResultMouthOpen.intensity > 55);
         }
         else
         {
-            userExpressions.isTracked = false;
+            //TODO userExpressions.isTracked = false;
         }
     }
 

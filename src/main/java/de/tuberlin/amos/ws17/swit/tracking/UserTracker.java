@@ -1,6 +1,6 @@
 package de.tuberlin.amos.ws17.swit.tracking;
 
-import de.tuberlin.amos.ws17.swit.tracking.camera.CameraService;
+import de.tuberlin.amos.ws17.swit.common.UserExpressions;
 
 public interface UserTracker {
 

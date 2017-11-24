@@ -1,12 +1,12 @@
 package de.tuberlin.amos.ws17.swit.tracking;
 
-import de.tuberlin.amos.ws17.swit.common.Point3D;
+import de.tuberlin.amos.ws17.swit.common.Vector3D;
 
 public class UserHeadPose {
 
     public boolean isTracked;
 
-    public Point3D centerOfHead;
+    public Vector3D centerOfHead;
 
     public float yaw;
     public float pitch;
