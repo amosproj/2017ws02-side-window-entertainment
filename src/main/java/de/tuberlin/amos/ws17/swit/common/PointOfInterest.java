@@ -9,6 +9,7 @@ public class PointOfInterest {
     private String name;
     private GpsPosition gpsPosition;
     private BufferedImage image;
+    private String informationAbstract;
 
     public String getId() {
         return id;
@@ -42,6 +43,14 @@ public class PointOfInterest {
         this.image = image;
     }
 
+    public String getInformationAbstract() {
+        return informationAbstract;
+    }
+
+    public void setInformationAbstract(String informationAbstract) {
+        this.informationAbstract = informationAbstract;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -52,6 +61,7 @@ public class PointOfInterest {
         if (id != null ? !id.equals(that.id) : that.id != null) return false;
         if (name != null ? !name.equals(that.name) : that.name != null) return false;
         if (gpsPosition != null ? !gpsPosition.equals(that.gpsPosition) : that.gpsPosition != null) return false;
-        return image != null ? image.equals(that.image) : that.image == null;
+        if (image != null ? !image.equals(that.image) : that.image != null) return false;
+        return informationAbstract != null ? informationAbstract.equals(that.informationAbstract) : that.informationAbstract == null;
     }
 }
