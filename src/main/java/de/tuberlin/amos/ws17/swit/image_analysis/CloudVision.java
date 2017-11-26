@@ -105,6 +105,7 @@ public class CloudVision implements LandmarkDetector {
             return Collections.emptyList();
         }
         this.bufferedImage = ImageUtils.convertToBufferedImage(image);
+        // TODO: reduce image size if necessary
         AnnotateImageRequest request = new AnnotateImageRequest()
                 .setImage(image)
                 .setFeatures(ImmutableList.of(
@@ -144,7 +145,7 @@ public class CloudVision implements LandmarkDetector {
     private LandmarkResult setCroppedImage(LandmarkResult result) {
         float upScale = 2f;
 
-        List<Vertex> vertices = result.getBoundlingPoly().getVertices();
+        List<Vertex> vertices = result.getBoundingPoly().getVertices();
         // early exit
         if (bufferedImage == null || vertices.size() != 4) {
             return result;
@@ -195,7 +196,7 @@ public class CloudVision implements LandmarkDetector {
 
         int k = 0;
         for (LandmarkResult result : landmarkResults) {
-            BoundingPoly bp = result.getBoundlingPoly();
+            BoundingPoly bp = result.getBoundingPoly();
             // Draw on the buffered image
             g2d.setColor(HIGHLIGHT_COLORS[k]);
             g2d.setStroke(new BasicStroke(3));

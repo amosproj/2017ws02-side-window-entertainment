@@ -41,7 +41,7 @@ public class LandmarkExtractionDemo {
         Graphics2D g2d = img.createGraphics();
         JFrame frame = new JFrame("Input Image");
 
-        BoundingPoly bp = result.getBoundlingPoly();
+        BoundingPoly bp = result.getBoundingPoly();
         // Draw on the buffered image
         g2d.setColor(Color.RED);
         g2d.setStroke(new BasicStroke(3));

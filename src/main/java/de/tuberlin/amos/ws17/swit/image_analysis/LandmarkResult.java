@@ -3,6 +3,7 @@ package de.tuberlin.amos.ws17.swit.image_analysis;
 import com.google.api.services.vision.v1.model.BoundingPoly;
 import com.google.api.services.vision.v1.model.EntityAnnotation;
 import com.google.api.services.vision.v1.model.LocationInfo;
+import de.tuberlin.amos.ws17.swit.common.GpsPosition;
 
 import java.awt.image.BufferedImage;
 import java.util.List;
@@ -20,20 +21,20 @@ public class LandmarkResult {
     private Float score;
 
     // location of entity, can be multiple (location of landmark + location where image was taken)
-    private List<GPSLocation> locations;
+    private List<GpsPosition> locations;
 
     // Image region of landmark on image
-    private BoundingPoly boundlingPoly;
+    private BoundingPoly boundingPoly;
 
     // Cropped image of the landmark
     private BufferedImage croppedImage;
 
-    public LandmarkResult(String id, String name, Float score, List<GPSLocation> locations, BoundingPoly boundlingPoly) {
+    public LandmarkResult(String id, String name, Float score, List<GpsPosition> locations, BoundingPoly boundingPoly) {
         this.id = id;
         this.name = name;
         this.score = score;
         this.locations = locations;
-        this.boundlingPoly = boundlingPoly;
+        this.boundingPoly = boundingPoly;
     }
 
     public String getId() {
@@ -52,19 +53,19 @@ public class LandmarkResult {
         this.score = score;
     }
 
-    public List<GPSLocation> getLocations() {
+    public List<GpsPosition> getLocations() {
         return locations;
     }
 
-    public BoundingPoly getBoundlingPoly() {
-        return boundlingPoly;
+    public BoundingPoly getBoundingPoly() {
+        return boundingPoly;
     }
 
     public static LandmarkResult fromEntityAnnotation(EntityAnnotation annotation) {
         return new LandmarkResult(annotation.getMid(),
                 annotation.getDescription(),
                 annotation.getScore(),
-                annotation.getLocations().stream().map(GPSLocation::fromLocationInfo).collect(Collectors.toList()),
+                annotation.getLocations().stream().map(LandmarkResult::fromLocationInfo).collect(Collectors.toList()),
                 annotation.getBoundingPoly());
     }
 
@@ -76,8 +77,12 @@ public class LandmarkResult {
         this.croppedImage = croppedImage;
     }
 
+    private static GpsPosition fromLocationInfo(LocationInfo locationInfo) {
+        return new GpsPosition(locationInfo.getLatLng().getLatitude(),
+                locationInfo.getLatLng().getLongitude());
+    }
     // adjust the score of result by providing current gps location
-    public void adjustScore(LocationInfo currentLocation) {
+    public void adjustScore(GpsPosition currentLocation) {
         // TODO: create formula which takes current location into consideration
     }
 }
