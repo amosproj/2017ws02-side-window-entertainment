@@ -107,6 +107,7 @@ public class ApplicationViewImplementation extends Application implements Applic
     @Override
     public void start(Stage stage) {
         controller = new ApplicationControllerImplementation();
+        controller.setView(this);
         controller.addPropertyChangeListener(this);
         controller.observableList.addListener(new ListChangeListener<PoiViewModel>() {
             @Override
@@ -283,6 +284,21 @@ public class ApplicationViewImplementation extends Application implements Applic
         } else {
             return false;
         }
+    }
+
+    @Override
+    public void showPoiInfo(PoiViewModel poi) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(poi.name);
+        ImageView imageView = new ImageView(SwingFXUtils.toFXImage(poi.image, null));
+        imageView.setFitHeight(200);
+        imageView.setPreserveRatio(true);
+        alert.setGraphic(imageView);
+        alert.setHeight(200);
+        alert.setWidth(200);
+        alert.setHeaderText(null);
+        alert.setContentText(poi.informationAbstract);
+        alert.show();
     }
 
     public void displayButton(PoiViewModel poi) {

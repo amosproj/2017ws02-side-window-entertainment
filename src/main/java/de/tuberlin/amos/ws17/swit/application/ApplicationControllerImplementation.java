@@ -11,7 +11,7 @@ import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import org.apache.jena.base.Sys;
+import org.apache.commons.lang3.StringUtils;
 
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeListener;
@@ -26,6 +26,7 @@ import static de.tuberlin.amos.ws17.swit.image_analysis.ImageUtils.getRandomTest
 
 public class ApplicationControllerImplementation implements ApplicationController {
 
+    private ApplicationView view;
     private PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
 
     private List<PoiViewModel> GpsPois;
@@ -78,6 +79,11 @@ public class ApplicationControllerImplementation implements ApplicationControlle
     }
 
     @Override
+    public void setView(ApplicationView view) {
+        this.view = view;
+    }
+
+    @Override
     public void addPOI(int id, String name, BufferedImage image, String information) {
 
     }
@@ -91,7 +97,9 @@ public class ApplicationControllerImplementation implements ApplicationControlle
                 // update UI on FX thread
                 Platform.runLater(() -> {
                     for (LandmarkResult l : landmarks) {
-                        testSimpleListProperty.add(0, new PoiViewModel(l.getName(), l.getCroppedImage(), ""));
+                        PoiViewModel poi = new PoiViewModel(l.getName(), l.getCroppedImage(), "");
+                        poi.id = l.getId();
+                        testSimpleListProperty.add(0, poi);
                     }
                 });
             } catch (IOException e) {
@@ -108,14 +116,18 @@ public class ApplicationControllerImplementation implements ApplicationControlle
 
     @Override
     public void onPoiClicked(PoiViewModel poi) {
-        new Thread(() -> {
-            InformationProvider kgs = KnowledgeGraphSearch.getInstance();
-            String info = kgs.getInfoByName(poi.name);
-            Platform.runLater(() -> {
-                // TODO: Show poi info
-                System.out.println(info);
-            });
-        }).start();
+        if (!StringUtils.isEmpty(poi.informationAbstract)) {
+            view.showPoiInfo(poi);
+        } else {
+            new Thread(() -> {
+                InformationProvider kgs = KnowledgeGraphSearch.getInstance();
+                String info = poi.id != null ? kgs.getInfoById(poi.id) : kgs.getInfoByName(poi.name);
+                Platform.runLater(() -> {
+                    poi.informationAbstract = info;
+                    view.showPoiInfo(poi);
+                });
+            }).start();
+        }
     }
 
     public void addPropertyChangeListener(PropertyChangeListener listener) {

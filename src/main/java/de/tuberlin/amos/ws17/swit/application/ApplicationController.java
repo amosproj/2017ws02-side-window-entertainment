@@ -5,6 +5,12 @@ import java.awt.image.BufferedImage;
 public interface ApplicationController {
 
     /**
+     * Sets the view
+     * @param view View for the controller
+     */
+    void setView(ApplicationView view);
+
+    /**
      * Adds a new POI to the list of current POI
      * @param id ID of the POI
      * @param name name of the POI
