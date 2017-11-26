@@ -4,12 +4,11 @@ import de.tuberlin.amos.ws17.swit.common.PointOfInterest;
 import de.tuberlin.amos.ws17.swit.image_analysis.CloudVision;
 import de.tuberlin.amos.ws17.swit.image_analysis.LandmarkDetector;
 import de.tuberlin.amos.ws17.swit.image_analysis.LandmarkResult;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.embed.swing.SwingFXUtils;
-import org.apache.jena.base.Sys;
 
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeListener;
@@ -21,7 +20,6 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static de.tuberlin.amos.ws17.swit.image_analysis.ImageUtils.getRandomTestImage;
-import static de.tuberlin.amos.ws17.swit.image_analysis.ImageUtils.getTestImageFile;
 
 public class ApplicationControllerImplementation implements ApplicationController {
 
@@ -84,16 +82,13 @@ public class ApplicationControllerImplementation implements ApplicationControlle
     @Override
     public void analyzeImage() {
         BufferedImage image = captureImage();
-        try {
-            List<LandmarkResult> landmarks = cloudVision.identifyLandmarks(image, 5);
-            if (!landmarks.isEmpty()) {
-                for (LandmarkResult l : landmarks) {
-                    testSimpleListProperty.add(0, new PoiViewModel(l.getName(), l.getCroppedImage(), ""));
-                }
+
+        new Thread(new CloudVisionRunnable(image, landmarkResults -> Platform.runLater(() -> {
+            // update UI on FX thread
+            for (LandmarkResult l : landmarkResults) {
+                testSimpleListProperty.add(0, new PoiViewModel(l.getName(), l.getCroppedImage(), ""));
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        }))).start();
     }
 
     @Override
@@ -159,5 +154,32 @@ public class ApplicationControllerImplementation implements ApplicationControlle
 
     public void setTestSimpleListProperty(SimpleListProperty<PoiViewModel> testSimpleListProperty) {
         this.testSimpleListProperty = testSimpleListProperty;
+    }
+
+    interface CloudVisionCallback {
+        void onFinished(List<LandmarkResult> landmarkResults); // would be in any signature
+    }
+
+    class CloudVisionRunnable implements Runnable {
+
+        CloudVisionCallback callback;
+
+        BufferedImage image;
+
+        public CloudVisionRunnable(BufferedImage image, CloudVisionCallback callback) {
+            this.callback = callback;
+            this.image = image;
+        }
+
+        public void run() {
+            // run in background
+            try {
+                List<LandmarkResult> landmarks = cloudVision.identifyLandmarks(image, 5);
+                this.callback.onFinished(landmarks);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        }
     }
 }
