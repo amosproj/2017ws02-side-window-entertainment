@@ -1,25 +1,34 @@
 package de.tuberlin.amos.ws17.swit.application;
 
 import de.tuberlin.amos.ws17.swit.common.PointOfInterest;
+import de.tuberlin.amos.ws17.swit.image_analysis.CloudVision;
+import de.tuberlin.amos.ws17.swit.image_analysis.LandmarkDetector;
+import de.tuberlin.amos.ws17.swit.image_analysis.LandmarkResult;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.embed.swing.SwingFXUtils;
+import org.apache.jena.base.Sys;
 
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
+
+import static de.tuberlin.amos.ws17.swit.image_analysis.ImageUtils.getRandomTestImage;
+import static de.tuberlin.amos.ws17.swit.image_analysis.ImageUtils.getTestImageFile;
 
 public class ApplicationControllerImplementation implements ApplicationController {
 
     private PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
 
     private List<PoiViewModel> GpsPois;
-    private List<PoiViewModel> LandscapePois;
+    private List<PoiViewModel> cameraPois;
 
     private List<PointOfInterest> pointsOfInterest;
     public ObservableList<PoiViewModel> observableList;
@@ -28,6 +37,8 @@ public class ApplicationControllerImplementation implements ApplicationControlle
     private SimpleStringProperty testSimpleString;
 
     private SimpleListProperty<PoiViewModel> testSimpleListProperty;
+
+    private LandmarkDetector cloudVision = CloudVision.getInstance();
 
     public String getTitle() {
         return title;
@@ -65,9 +76,32 @@ public class ApplicationControllerImplementation implements ApplicationControlle
         getTestSimpleListProperty().set(FXCollections.observableList(newL));
     }
 
+    @Override
     public void addPOI(int id, String name, BufferedImage image, String information) {
 
     }
+
+    @Override
+    public void analyzeImage() {
+        BufferedImage image = captureImage();
+        try {
+            List<LandmarkResult> landmarks = cloudVision.identifyLandmarks(image, 5);
+            if (!landmarks.isEmpty()) {
+                for (LandmarkResult l : landmarks) {
+                    testSimpleListProperty.add(0, new PoiViewModel(l.getName(), l.getCroppedImage(), ""));
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public BufferedImage captureImage() {
+        BufferedImage testImage = getRandomTestImage();
+        return testImage;
+    }
+
 
     public void addPropertyChangeListener(PropertyChangeListener listener) {
         propertyChangeSupport.addPropertyChangeListener(listener);

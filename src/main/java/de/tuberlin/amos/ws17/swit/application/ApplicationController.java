@@ -4,7 +4,7 @@ import java.awt.image.BufferedImage;
 
 public interface ApplicationController {
 
-    /*
+    /**
      * Adds a new POI to the list of current POI
      * @param id ID of the POI
      * @param name name of the POI
@@ -13,5 +13,14 @@ public interface ApplicationController {
      */
     void addPOI(int id, String name, BufferedImage image, String information);
 
+    /**
+     * Analyze given image and add detected POIs to list
+     */
+    void analyzeImage();
 
+    /**
+     * Capture image from camera
+     * @return Image taken from camera
+     */
+    BufferedImage captureImage();
 }

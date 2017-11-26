@@ -12,6 +12,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class ImageUtils {
 
@@ -52,10 +53,26 @@ public class ImageUtils {
 
     @Nullable
     public static BufferedImage getTestImageFile(String imageName) {
-        ClassLoader classLoader = CloudVision.class.getClassLoader();
+        ClassLoader classLoader = ImageUtils.class.getClassLoader();
         URL resourceUrl = classLoader.getResource("test_images/" + imageName);
         if (resourceUrl != null) {
             File file = new File(resourceUrl.getFile());
+            try {
+                return ImageIO.read(file);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
+    }
+
+    public static BufferedImage getRandomTestImage() {
+        ClassLoader classLoader = ImageUtils.class.getClassLoader();
+        URL resourceUrl = classLoader.getResource("test_images/");
+        File[] files = new File(resourceUrl.getPath()).listFiles();
+        if (files != null) {
+            int rnd = ThreadLocalRandom.current().nextInt(0, files.length);
+            File file = files[rnd];
             try {
                 return ImageIO.read(file);
             } catch (IOException e) {

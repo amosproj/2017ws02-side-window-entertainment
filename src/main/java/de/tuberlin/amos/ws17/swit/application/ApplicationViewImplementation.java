@@ -2,6 +2,7 @@ package de.tuberlin.amos.ws17.swit.application;
 
 import javafx.application.Application;
 import javafx.collections.ListChangeListener;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -79,6 +80,12 @@ public class ApplicationViewImplementation extends Application implements Applic
         initView();
         initExpansion();
 
+        Button btnPOIDetection = new Button("Detect");
+        btnPOIDetection.setOnAction(event -> {
+            controller.analyzeImage();
+        });
+        pnFoundation.setRight(btnPOIDetection);
+
         Button btn = new Button("TEST");
         btn.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -86,6 +93,7 @@ public class ApplicationViewImplementation extends Application implements Applic
                 controller.changeTitle();
             }
         });
+
         pnFoundation.setCenter(btn);
         Button btn2 = new Button("SORT");
         btn2.setOnAction(new EventHandler<ActionEvent>() {
@@ -124,6 +132,7 @@ public class ApplicationViewImplementation extends Application implements Applic
         lbl.textProperty().bindBidirectional(controller.getTestSimpleString());
 
         ListView<PoiViewModel> list = new ListView<PoiViewModel>();
+        list.setPrefHeight(200.0);
         pnFoundation.setTop(list);
         list.itemsProperty().bindBidirectional(controller.getTestSimpleListProperty());
         list.setOrientation(Orientation.HORIZONTAL);
@@ -135,16 +144,22 @@ public class ApplicationViewImplementation extends Application implements Applic
                     public void updateItem(PoiViewModel item, boolean empty) {
                         if(item != null) {
                             //Label lblInformation = new Label(item.informationAbstract);
-                            File domfile = new File(ApplicationViewImplementation.app.getClass().getResource("/test_images/berliner-dom.jpg").getPath());
-                            Image domimage = new Image(domfile.toURI().toString());
-                            ImageView view = new ImageView(domimage);
-                            view.setPreserveRatio(true);
-                            view.setFitHeight(100);
+                            ImageView imageView;
+                            if (item.image != null) {
+                                Image image = SwingFXUtils.toFXImage(item.image, null);
+                                imageView = new ImageView(image);
+                            } else {
+                                File domfile = new File(ApplicationViewImplementation.app.getClass().getResource("/test_images/berliner-dom.jpg").getPath());
+                                Image domimage = new Image(domfile.toURI().toString());
+                                imageView = new ImageView(domimage);
+                            }
+                            imageView.setPreserveRatio(true);
+                            imageView.setFitHeight(100);
                             Label lblName = new Label(item.name);
                             lblName.setFont(new Font(FONTNAME, 13));
                             BorderPane pane = new BorderPane();
                             pane.setTop(lblName);
-                            pane.setCenter(view);
+                            pane.setCenter(imageView);
                             pane.setOnMouseClicked(new EventHandler<MouseEvent>() {
                                 @Override
                                 public void handle(MouseEvent event) {
@@ -162,7 +177,6 @@ public class ApplicationViewImplementation extends Application implements Applic
         primaryStage.setTitle(controller.getTitle());
         //primaryStage.initStyle(StageStyle.TRANSPARENT);
         //primaryStage.setMaximized(true);
-
         Scene scene = new Scene(pnFoundation, 500, 500, Color.TRANSPARENT);
         scene.getStylesheets().add("/stylesheets/ApplicationViewStylesheet.css");
         primaryStage.setScene(scene);
