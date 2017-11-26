@@ -4,11 +4,14 @@ import de.tuberlin.amos.ws17.swit.common.PointOfInterest;
 import de.tuberlin.amos.ws17.swit.image_analysis.CloudVision;
 import de.tuberlin.amos.ws17.swit.image_analysis.LandmarkDetector;
 import de.tuberlin.amos.ws17.swit.image_analysis.LandmarkResult;
+import de.tuberlin.amos.ws17.swit.information_source.InformationProvider;
+import de.tuberlin.amos.ws17.swit.information_source.KnowledgeGraphSearch;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import org.apache.jena.base.Sys;
 
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeListener;
@@ -88,7 +91,6 @@ public class ApplicationControllerImplementation implements ApplicationControlle
                 // update UI on FX thread
                 Platform.runLater(() -> {
                     for (LandmarkResult l : landmarks) {
-                        System.out.print(l.getName());
                         testSimpleListProperty.add(0, new PoiViewModel(l.getName(), l.getCroppedImage(), ""));
                     }
                 });
@@ -104,6 +106,17 @@ public class ApplicationControllerImplementation implements ApplicationControlle
         return testImage;
     }
 
+    @Override
+    public void onPoiClicked(PoiViewModel poi) {
+        new Thread(() -> {
+            InformationProvider kgs = KnowledgeGraphSearch.getInstance();
+            String info = kgs.getInfoByName(poi.name);
+            Platform.runLater(() -> {
+                // TODO: Show poi info
+                System.out.println(info);
+            });
+        }).start();
+    }
 
     public void addPropertyChangeListener(PropertyChangeListener listener) {
         propertyChangeSupport.addPropertyChangeListener(listener);

@@ -22,7 +22,7 @@ public class LandmarkExtractionDemo {
     public static void main(String[] args) throws IOException, GeneralSecurityException {
         BufferedImage testImage = getTestImageFile("fernsehturm-2.jpg");
         LandmarkDetector landmarkDetector = CloudVision.getInstance();
-        InformationProvider infoProvider = new KnowledgeGraphSearch();
+        InformationProvider infoProvider = KnowledgeGraphSearch.getInstance();
 
         if (landmarkDetector != null) {
             List<LandmarkResult> results = landmarkDetector.identifyLandmarks(testImage, 3);

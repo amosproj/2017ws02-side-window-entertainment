@@ -23,4 +23,10 @@ public interface ApplicationController {
      * @return Image taken from camera
      */
     BufferedImage captureImage();
+
+    /**
+     * React when user clicks on POI
+     * @param poi clicked POI by user
+     */
+    void onPoiClicked(PoiViewModel poi);
 }

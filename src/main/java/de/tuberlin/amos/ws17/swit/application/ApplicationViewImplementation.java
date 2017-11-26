@@ -18,7 +18,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 import javafx.util.Callback;
 
 import java.beans.PropertyChangeEvent;
@@ -160,12 +159,7 @@ public class ApplicationViewImplementation extends Application implements Applic
                             BorderPane pane = new BorderPane();
                             pane.setTop(lblName);
                             pane.setCenter(imageView);
-                            pane.setOnMouseClicked(new EventHandler<MouseEvent>() {
-                                @Override
-                                public void handle(MouseEvent event) {
-
-                                }
-                            });
+                            pane.setOnMouseClicked(event -> controller.onPoiClicked(item));
                             setGraphic(pane);
                         }
                     }
