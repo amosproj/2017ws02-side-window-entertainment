@@ -82,13 +82,20 @@ public class ApplicationControllerImplementation implements ApplicationControlle
     @Override
     public void analyzeImage() {
         BufferedImage image = captureImage();
-
-        new Thread(new CloudVisionRunnable(image, landmarkResults -> Platform.runLater(() -> {
-            // update UI on FX thread
-            for (LandmarkResult l : landmarkResults) {
-                testSimpleListProperty.add(0, new PoiViewModel(l.getName(), l.getCroppedImage(), ""));
+        new Thread(() -> {
+            try {
+                List<LandmarkResult> landmarks = cloudVision.identifyLandmarks(image, 5);
+                // update UI on FX thread
+                Platform.runLater(() -> {
+                    for (LandmarkResult l : landmarks) {
+                        System.out.print(l.getName());
+                        testSimpleListProperty.add(0, new PoiViewModel(l.getName(), l.getCroppedImage(), ""));
+                    }
+                });
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        }))).start();
+        }).start();
     }
 
     @Override
@@ -154,32 +161,5 @@ public class ApplicationControllerImplementation implements ApplicationControlle
 
     public void setTestSimpleListProperty(SimpleListProperty<PoiViewModel> testSimpleListProperty) {
         this.testSimpleListProperty = testSimpleListProperty;
-    }
-
-    interface CloudVisionCallback {
-        void onFinished(List<LandmarkResult> landmarkResults); // would be in any signature
-    }
-
-    class CloudVisionRunnable implements Runnable {
-
-        CloudVisionCallback callback;
-
-        BufferedImage image;
-
-        public CloudVisionRunnable(BufferedImage image, CloudVisionCallback callback) {
-            this.callback = callback;
-            this.image = image;
-        }
-
-        public void run() {
-            // run in background
-            try {
-                List<LandmarkResult> landmarks = cloudVision.identifyLandmarks(image, 5);
-                this.callback.onFinished(landmarks);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-        }
     }
 }
