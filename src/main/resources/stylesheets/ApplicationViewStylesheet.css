@@ -8,10 +8,10 @@
 .button {
     -fx-text-fill: white;
     -fx-font-family: "Helvetica Neue";
-    -fx-background-color: linear-gradient(#999999, #333333);
+    -fx-background-color: black;
 }
 
 .button:hover {
-    -fx-background-color: linear-gradient(#333333, #999999);
+    -fx-background-color: grey;
 }
 

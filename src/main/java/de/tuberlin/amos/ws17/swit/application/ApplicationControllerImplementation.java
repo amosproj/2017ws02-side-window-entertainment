@@ -34,6 +34,10 @@ public class ApplicationControllerImplementation implements ApplicationControlle
 
     private List<PointOfInterest> pointsOfInterest;
     public ObservableList<PoiViewModel> observableList;
+    public PoiViewModel expandedPOI;
+    public SimpleStringProperty expandedPOIname;
+    public SimpleStringProperty expandedPOIinformationAbstract;
+    //public SimpleImageProperty expandedPOIimage;
 
     private String title;
     private SimpleStringProperty testSimpleString;
@@ -76,6 +80,9 @@ public class ApplicationControllerImplementation implements ApplicationControlle
             newL.add(new PoiViewModel(Integer.toString(ThreadLocalRandom.current().nextInt(min, max + 1))));
         }
         getTestSimpleListProperty().set(FXCollections.observableList(newL));
+
+        expandedPOIname = new SimpleStringProperty();
+        expandedPOIinformationAbstract = new SimpleStringProperty();
     }
 
     @Override
@@ -128,6 +135,30 @@ public class ApplicationControllerImplementation implements ApplicationControlle
                 });
             }).start();
         }
+    }
+
+    public void expandPOI(String id) {
+        System.out.println(id);
+        int index = 0;
+        for(PoiViewModel item: observableList) {
+            if(item.id == id) {
+                index = observableList.indexOf(item);
+                break;
+            }
+        }
+        setExpandedPOI(observableList.get(index));
+    }
+
+    public void minimizePOI() {
+        expandedPOI = null;
+        expandedPOIname.set("");
+        expandedPOIinformationAbstract.set("");
+    }
+
+    public void setExpandedPOI(PoiViewModel item) {
+        expandedPOI = item;
+        expandedPOIname.set(item.name);
+        expandedPOIinformationAbstract.set(item.informationAbstract);
     }
 
     public void addPropertyChangeListener(PropertyChangeListener listener) {
