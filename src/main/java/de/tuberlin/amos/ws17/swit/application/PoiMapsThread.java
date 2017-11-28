@@ -26,7 +26,7 @@ public class PoiMapsThread extends Thread {
             List<PointOfInterest> pois = new ArrayList<PointOfInterest>();
             //TODO @Leander Anfrage an das POI Modul, welches eine Liste von POIs in der Nähe zurückgibt
 
-            //TODO @JulianL Anfrage an das information source Modul, welches für jeden POI in der Liste die Daten abruft
+            //TODO @JulianS Anfrage an das information source Modul, welches für jeden POI in der Liste die Daten abruft
 
             for(PointOfInterest poi: pois) {
                 controller.addPOI(poi);

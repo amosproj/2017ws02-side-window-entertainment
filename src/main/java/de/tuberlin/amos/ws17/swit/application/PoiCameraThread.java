@@ -24,7 +24,7 @@ public class PoiCameraThread extends Thread {
             PointOfInterest poi = new PointOfInterest();
             //TODO @Chinh Anfrage an die Bildanalyse mit Hilfe des aufgenommenen Bildes
 
-            //TODO @JulianL Anfrage an information source mit ermitteltem POI
+            //TODO @JulianS Anfrage an information source mit ermitteltem POI
 
             controller.addPOI(poi);
         }
