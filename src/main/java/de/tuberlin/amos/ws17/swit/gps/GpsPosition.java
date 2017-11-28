@@ -1,7 +1,9 @@
 package de.tuberlin.amos.ws17.swit.gps;
 
+import org.joda.time.DateTime;
+
 public class GpsPosition {
-	public GpsPosition(double latitude, double longitude, long timeStamp) {
+	public GpsPosition(double latitude, double longitude, DateTime timeStamp) {
 		this.timeStamp = timeStamp;
 		this.latitude = latitude;
 		this.longitude = longitude;
@@ -9,8 +11,8 @@ public class GpsPosition {
 		courseUpdate = false;
 	}
 
-	// milliseconds from January 1, 1970
-	private long timeStamp;
+	// DateTime from Joda
+	private DateTime timeStamp;
 
 	// latitude
 	private double latitude;
@@ -26,10 +28,10 @@ public class GpsPosition {
 	private double speed;
 	private boolean speedUpdate;
 
-	public long getTimeStamp() {
+	public DateTime getTimeStamp() {
 		return timeStamp;
 	}
-	public void setTimeStamp(long t) {
+	public void setTimeStamp(DateTime t) {
 		this.timeStamp = t;
 	}
 
@@ -71,6 +73,6 @@ public class GpsPosition {
 
 	@Override
 	public String toString() {
-		return Double.toString(latitude) + ", " + Double.toString(longitude) + " at " + Long.toString(timeStamp);
+		return Double.toString(latitude) + ", " + Double.toString(longitude) + " at " + timeStamp.toString();
 	}
 }

@@ -2,6 +2,8 @@ package de.tuberlin.amos.ws17.swit.application;
 
 import de.tuberlin.amos.ws17.swit.common.PointOfInterest;
 import de.tuberlin.amos.ws17.swit.gps.GpsTracker;
+import de.tuberlin.amos.ws17.swit.gps.GpsTrackerFactory;
+import de.tuberlin.amos.ws17.swit.gps.GpsTrackerImplementation;
 import de.tuberlin.amos.ws17.swit.image_analysis.CloudVision;
 import de.tuberlin.amos.ws17.swit.image_analysis.LandmarkDetector;
 import de.tuberlin.amos.ws17.swit.image_analysis.LandmarkResult;
@@ -36,6 +38,8 @@ public class ApplicationControllerImplementation implements ApplicationControlle
     public LandmarkDetector cloudVision;
     //TODO @alle fügt hier die Hauptklassen eures Moduls hinzu, initiiert werden diese aber erst im Konstruktor
 
+    public GpsTracker gpsTracker;
+
     //Threads
     public Object lock;
     public boolean run;
@@ -59,6 +63,8 @@ public class ApplicationControllerImplementation implements ApplicationControlle
         this.view = view;
         //cloudVision = CloudVision.getInstance();
         //TODO @alle initiiert hier die Hauptklassen eurer Module
+        gpsTracker = GpsTrackerFactory.GetGpsTracker();
+        gpsTracker.start();
 
         pointsOfInterest = new ArrayList<PointOfInterest>();
         expandedPOI = new PoiViewModel();

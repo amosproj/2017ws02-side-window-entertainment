@@ -1,17 +1,21 @@
 package de.tuberlin.amos.ws17.swit.gps;
 
+import de.tuberlin.amos.ws17.swit.common.KinematicProperties;
+
 import java.io.*;
 import java.util.LinkedList;
+import org.joda.time.DateTime;
 
 public class GpsTrackerImplementation implements GpsTracker {
 
-	private GpsFileReader fileReader;
+//	private GpsFileReader fileReader;
 	private GpsPortReader portReader;
+	private KinematicProperties kinematicProperties;
 
 	// constructor for file mode
-	public GpsTrackerImplementation(String fileName) {
-		initFileMode(fileName);
-	}
+//	public GpsTrackerImplementation(String fileName) {
+//		initFileMode(fileName);
+//	}
 
 	// constructor for port mode
 	public GpsTrackerImplementation() {
@@ -24,10 +28,17 @@ public class GpsTrackerImplementation implements GpsTracker {
 		if(portReader != null){
 			return portReader.getLatestPosition();
 		}
-		if(fileReader != null){
-			return fileReader.getLatestPosition();
-		}
+//		if(fileReader != null){
+//			return fileReader.getLatestPosition();
+//		}
 		return null;
+	}
+
+	// takes a data dump object and fills it information (pass by reference)
+	// may not fill up all the attributes
+	// returns true if success, false if not
+	public void setDumpObject(KinematicProperties kinProp){
+		portReader.setKinematicProperties(kinProp);
 	}
 
 	public LinkedList<GpsPosition> getGpsList() {
@@ -37,11 +48,19 @@ public class GpsTrackerImplementation implements GpsTracker {
 		else return null;
 	}
 
+	public void start(){
+		portReader.start();
+	}
+
+	public void stop(){
+		// HOW DO I STOP THIS MADNESS??
+	}
+
 	// init for the port mode
 	private void initPortMode(){
 		portReader = new GpsPortReader();
 	}
-
+/*
 	// init for the file mode
 	private void initFileMode(String fileName) {
 		File f = new File(fileName);
@@ -53,5 +72,5 @@ public class GpsTrackerImplementation implements GpsTracker {
 				System.out.println("File not found!");
 			}
 		}
-	}
+	} */
 }

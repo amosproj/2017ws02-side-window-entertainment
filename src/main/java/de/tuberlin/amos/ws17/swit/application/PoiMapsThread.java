@@ -1,6 +1,8 @@
 package de.tuberlin.amos.ws17.swit.application;
 
 import de.tuberlin.amos.ws17.swit.common.*;
+import de.tuberlin.amos.ws17.swit.gps.GpsTracker;
+import de.tuberlin.amos.ws17.swit.gps.GpsTrackerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +20,14 @@ public class PoiMapsThread extends Thread {
         while(controller.run) {
             KinematicProperties kinematicProperties = new KinematicProperties();
             //TODO @Vlad Anfrage an das GPS Modul stellen, welches die GPS Daten zurückgibt
+            KinematicProperties kinProps = new KinematicProperties();
+            if(controller.gpsTracker.fillKinematicProperties(kinProps)){
+                // celebrate
+            }
+            else{
+                // do something
+            }
+
 
             List<PointOfInterest> pois = new ArrayList<PointOfInterest>();
             //TODO @Leander Anfrage an das POI Modul, welches eine Liste von POIs in der Nähe zurückgibt

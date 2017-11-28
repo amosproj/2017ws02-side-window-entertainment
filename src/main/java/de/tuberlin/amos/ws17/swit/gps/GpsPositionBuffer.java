@@ -17,7 +17,7 @@ public class GpsPositionBuffer {
     // convert geographic coordinate to UTM referenced position
     LatLng latLng = new LatLng(fix.getLatitude(), fix.getLongitude());
     UTMRef utmCoord = latLng.toUTMRef();
-    TransformStamped pos = new TransformStamped(fix.getTimeStamp(), Rotation.IDENTITY, new Vector3D(utmCoord.getEasting(), utmCoord.getNorthing(), 0.0));
+    TransformStamped pos = new TransformStamped(fix.getTimeStamp().getMillis(), Rotation.IDENTITY, new Vector3D(utmCoord.getEasting(), utmCoord.getNorthing(), 0.0));
 
     // insert into buffer
     buffer.insert(pos);

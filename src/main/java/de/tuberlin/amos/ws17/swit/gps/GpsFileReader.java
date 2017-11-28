@@ -9,6 +9,11 @@ import net.sf.marineapi.nmea.sentence.GLLSentence;
 import net.sf.marineapi.nmea.sentence.SentenceId;
 import net.sf.marineapi.nmea.event.SentenceEvent;
 
+/* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ * !!!!!!!!!!!!!!!!!!!!  OUTDATED AS HELL !!!!!!!!!!!!!!!!!!!!
+ * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ */
+/*
 public class GpsFileReader implements SentenceListener{
     private SentenceReader reader;
     private GpsPosition latestPosition;
@@ -66,4 +71,4 @@ public class GpsFileReader implements SentenceListener{
         }
     }
 }
-
+*/
