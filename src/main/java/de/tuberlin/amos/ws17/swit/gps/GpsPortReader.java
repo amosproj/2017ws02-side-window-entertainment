@@ -175,7 +175,7 @@ public class GpsPortReader implements SentenceListener{
         return null;
     }
 
-    public void start(){
+    public boolean start(){
         if (!running){
             try {
                 SerialPort sp = getSerialPort();
@@ -185,11 +185,15 @@ public class GpsPortReader implements SentenceListener{
                     sr.addSentenceListener(this);
                     sr.start();
                 }
+                else{
+                    return false;
+                }
             }
             catch (IOException e){
                 //e.printStackTrace();
             }
         }
+        return true;
     }
 
     public void stop(){

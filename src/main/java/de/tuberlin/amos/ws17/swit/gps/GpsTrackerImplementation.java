@@ -48,8 +48,10 @@ public class GpsTrackerImplementation implements GpsTracker {
 		else return null;
 	}
 
-	public void start(){
-		portReader.start();
+	public void start() throws SensorNotFoundException{
+		if (portReader.start() == false){
+			throw new SensorNotFoundException("No GPS sensor found!");
+		}
 	}
 
 	public void stop(){

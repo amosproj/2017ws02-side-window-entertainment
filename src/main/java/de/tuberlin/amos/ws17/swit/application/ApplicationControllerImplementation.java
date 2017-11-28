@@ -4,6 +4,7 @@ import de.tuberlin.amos.ws17.swit.common.PointOfInterest;
 import de.tuberlin.amos.ws17.swit.gps.GpsTracker;
 import de.tuberlin.amos.ws17.swit.gps.GpsTrackerFactory;
 import de.tuberlin.amos.ws17.swit.gps.GpsTrackerImplementation;
+import de.tuberlin.amos.ws17.swit.gps.SensorNotFoundException;
 import de.tuberlin.amos.ws17.swit.image_analysis.CloudVision;
 import de.tuberlin.amos.ws17.swit.image_analysis.LandmarkDetector;
 import de.tuberlin.amos.ws17.swit.image_analysis.LandmarkResult;
@@ -64,7 +65,12 @@ public class ApplicationControllerImplementation implements ApplicationControlle
         //cloudVision = CloudVision.getInstance();
         //TODO @alle initiiert hier die Hauptklassen eurer Module
         gpsTracker = GpsTrackerFactory.GetGpsTracker();
-        gpsTracker.start();
+        try {
+            gpsTracker.start();
+        }
+        catch (SensorNotFoundException e){
+            e.printStackTrace();
+        }
 
         pointsOfInterest = new ArrayList<PointOfInterest>();
         expandedPOI = new PoiViewModel();
