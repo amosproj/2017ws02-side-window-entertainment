@@ -20,13 +20,7 @@ public class PoiMapsThread extends Thread {
         while(controller.run) {
             KinematicProperties kinematicProperties = new KinematicProperties();
             //TODO @Vlad Anfrage an das GPS Modul stellen, welches die GPS Daten zurückgibt
-            KinematicProperties kinProps = new KinematicProperties();
-            if(controller.gpsTracker.fillKinematicProperties(kinProps)){
-                // celebrate
-            }
-            else{
-                // do something
-            }
+            controller.gpsTracker.setDumpObject(kinematicProperties);
 
 
             List<PointOfInterest> pois = new ArrayList<PointOfInterest>();
