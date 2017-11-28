@@ -1,10 +1,13 @@
 package de.tuberlin.amos.ws17.swit.application;
 
 import javafx.application.Application;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.event.EventType;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
@@ -26,19 +29,11 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ApplicationViewImplementation extends Application implements ApplicationView, PropertyChangeListener {
+public class ApplicationViewImplementation extends Application implements ApplicationView {
 
     private BorderPane pnFoundation;
-    private HBox pnPOIcamera;
-    private HBox pnPOImaps;
-    private ScrollPane spPOIcamera;
-    private ScrollPane spPOImaps;
-
-    private List<Integer> poiID;
-    private List<String> poiInformation;
-    private List<Label> poiName;
-    private List<ImageView> poiImage;
-    private List<BorderPane> poiPane;
+    private ListView<PoiViewModel> listPOIcamera;
+    private ListView<PoiViewModel> listPOImaps;
 
     private BorderPane expansionPane;
     private BorderPane expansionTopPane;
@@ -47,32 +42,18 @@ public class ApplicationViewImplementation extends Application implements Applic
     private Label expansionInformation;
     private ImageView expansionImage;
 
-    private ListView<PoiViewModel> listPOIcamera;
-    private ListView<PoiViewModel> listPOImaps;
-
     private static final String FONTNAME = "Helvetica Neue";
     public static ApplicationViewImplementation app;
     private static ApplicationControllerImplementation controller;
     private Stage primaryStage;
 
-    //public static void main(String[] args) {launch(args);}
-
     public void init() {
         app = this;
-        listPOIcamera = new ListView<PoiViewModel>();
-        listPOImaps = new ListView<PoiViewModel>();
 
         pnFoundation = new BorderPane();
-        pnPOIcamera = new HBox();
-        pnPOImaps = new HBox();
-        spPOIcamera = new ScrollPane();
-        spPOImaps = new ScrollPane();
-
-        poiID = new ArrayList<Integer>();
-        poiInformation = new ArrayList<String>();
-        poiName = new ArrayList<Label>();
-        poiImage = new ArrayList<ImageView>();
-        poiPane = new ArrayList<BorderPane>();
+        pnFoundation.setStyle("-fx-background-color: white;");
+        listPOIcamera = new ListView<PoiViewModel>();
+        listPOImaps = new ListView<PoiViewModel>();
 
         expansionPane = new BorderPane();
         expansionTopPane = new BorderPane();
@@ -81,140 +62,61 @@ public class ApplicationViewImplementation extends Application implements Applic
         expansionInformation = new Label();
         expansionImage = new ImageView();
 
-        initView();
         initExpansion();
-
-        Button btnPOIDetection = new Button("Detect");
-        btnPOIDetection.setOnAction(event -> {
-            controller.analyzeImage();
-        });
-        pnFoundation.setRight(btnPOIDetection);
-
-        Button btn = new Button("TEST");
-        btn.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                controller.changeTitle();
-            }
-        });
-        pnFoundation.setLeft(btn);
-
-        Button btn2 = new Button("SORT");
-        btn2.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                controller.sortList();
-            }
-        });
-        pnPOIcamera.getChildren().add(btn2);
     }
 
     @Override
     public void start(Stage stage) {
-        controller = new ApplicationControllerImplementation();
-        controller.setView(this);
-        controller.addPropertyChangeListener(this);
-        controller.observableList.addListener(new ListChangeListener<PoiViewModel>() {
-            @Override
-            public void onChanged(Change<? extends PoiViewModel> c) {
-                pnPOImaps.getChildren().remove(0, pnPOImaps.getChildren().size());
-                c.next();
-                Button btn2 = new Button("SORT");
-                btn2.setOnAction(new EventHandler<ActionEvent>() {
-                    @Override
-                    public void handle(ActionEvent event) {
-                        controller.sortList();
-                    }
-                });
-                pnPOImaps.getChildren().add(btn2);
-                for(PoiViewModel poi: c.getList()) {
-                    displayButton(poi);
-                }
-            }
-        });
-        Label lbl = new Label();
-        pnPOIcamera.getChildren().add(lbl);
-        lbl.textProperty().bindBidirectional(controller.getTestSimpleString());
+        controller = new ApplicationControllerImplementation(this);
 
-        expansionName.textProperty().bindBidirectional(controller.expandedPOIname);
-        expansionInformation.textProperty().bindBidirectional(controller.expandedPOIinformationAbstract);
+        expansionName.textProperty().bindBidirectional(controller.expandedPOInameProperty());
+        expansionImage.imageProperty().bindBidirectional(controller.expandedPOIimageProperty());
+        expansionInformation.textProperty().bindBidirectional(controller.expandedPOIinformationAbstractProperty());
 
-        listPOIcamera.setPrefHeight(150.0);
-        listPOIcamera.setStyle("-fx-background-color: white;");
-        listPOIcamera.itemsProperty().bindBidirectional(controller.getTestSimpleListProperty());
-        listPOIcamera.setOrientation(Orientation.HORIZONTAL);
-        listPOIcamera.setCellFactory(new Callback<ListView<PoiViewModel>, ListCell<PoiViewModel>>() {
+        Callback<ListView<PoiViewModel>, ListCell<PoiViewModel>> callback = new Callback<ListView<PoiViewModel>, ListCell<PoiViewModel>>() {
             @Override
             public ListCell<PoiViewModel> call(ListView<PoiViewModel> param) {
                 return new ListCell<PoiViewModel>() {
                     @Override
                     public void updateItem(PoiViewModel item, boolean empty) {
-                        if(item != null) {
-                            //Label lblInformation = new Label(item.informationAbstract);
-                            ImageView imageView;
-                            if (item.image != null) {
-                                Image image = SwingFXUtils.toFXImage(item.image, null);
-                                imageView = new ImageView(image);
-                            } else {
-                                File domfile = new File(ApplicationViewImplementation.app.getClass().getResource("/test_images/berliner-dom.jpg").getPath());
-                                Image domimage = new Image(domfile.toURI().toString());
-                                imageView = new ImageView(domimage);
-                            }
+                        super.updateItem(item, empty);
+                        if(empty || item == null) {
+                            setGraphic(null);
+                            setText(null);
+                        } else {
+                            ImageView imageView = new ImageView(item.getImage());
                             imageView.setPreserveRatio(true);
                             imageView.setFitHeight(100);
-                            Label lblName = new Label(item.name);
+                            Label lblName = new Label(item.getName());
                             lblName.setFont(new Font(FONTNAME, 13));
                             BorderPane pane = new BorderPane();
                             pane.setTop(lblName);
                             pane.setCenter(imageView);
-                            pane.setOnMouseClicked(event -> controller.expandPOI(item.id));
+                            pane.setOnMouseClicked(event -> controller.expandPOI(item.getId()));
                             setGraphic(pane);
+                            listPOIcamera.refresh();
                         }
                     }
                 };
             }
-        });
+        };
+
+        listPOIcamera.setPrefHeight(150.0);
+        listPOIcamera.setStyle("-fx-background-color: white;");
+        listPOIcamera.itemsProperty().bindBidirectional(controller.propertyPOIcameraProperty());
+        listPOIcamera.setOrientation(Orientation.HORIZONTAL);
+        listPOIcamera.setCellFactory(callback);
         pnFoundation.setTop(listPOIcamera);
 
         listPOImaps.setPrefHeight(150.0);
         listPOImaps.setStyle("-fx-background-color: white;");
-        listPOImaps.itemsProperty().bindBidirectional(controller.getTestSimpleListProperty());
+        listPOImaps.itemsProperty().bindBidirectional(controller.propertyPOImapsProperty());
         listPOImaps.setOrientation(Orientation.HORIZONTAL);
-        listPOImaps.setCellFactory(new Callback<ListView<PoiViewModel>, ListCell<PoiViewModel>>() {
-            @Override
-            public ListCell<PoiViewModel> call(ListView<PoiViewModel> param) {
-                return new ListCell<PoiViewModel>() {
-                    @Override
-                    public void updateItem(PoiViewModel item, boolean empty) {
-                        if(item != null) {
-                            //Label lblInformation = new Label(item.informationAbstract);
-                            ImageView imageView;
-                            if (item.image != null) {
-                                Image image = SwingFXUtils.toFXImage(item.image, null);
-                                imageView = new ImageView(image);
-                            } else {
-                                File domfile = new File(ApplicationViewImplementation.app.getClass().getResource("/test_images/berliner-dom.jpg").getPath());
-                                Image domimage = new Image(domfile.toURI().toString());
-                                imageView = new ImageView(domimage);
-                            }
-                            imageView.setPreserveRatio(true);
-                            imageView.setFitHeight(100);
-                            Label lblName = new Label(item.name);
-                            lblName.setFont(new Font(FONTNAME, 13));
-                            BorderPane pane = new BorderPane();
-                            pane.setTop(lblName);
-                            pane.setCenter(imageView);
-                            pane.setOnMouseClicked(event -> controller.expandPOI(item.id));
-                            setGraphic(pane);
-                        }
-                    }
-                };
-            }
-        });
+        listPOImaps.setCellFactory(callback);
         pnFoundation.setBottom(listPOImaps);
 
         this.primaryStage = stage;
-        primaryStage.setTitle(controller.getTitle());
+        primaryStage.setTitle("Side Window Infotainment");
         //primaryStage.initStyle(StageStyle.TRANSPARENT);
         //primaryStage.setMaximized(true);
         Scene scene = new Scene(pnFoundation, 500, 500, Color.TRANSPARENT);
@@ -223,35 +125,24 @@ public class ApplicationViewImplementation extends Application implements Applic
         primaryStage.show();
     }
 
-    private void initView() {
-        pnPOIcamera.setPadding(new Insets(5, 5, 5, 5));
-        pnPOIcamera.setSpacing(5);
-        pnPOIcamera.setStyle("-fx-background-color: white;");
-
-        spPOIcamera.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        spPOIcamera.setStyle("-fx-background-color: white;");
-        spPOIcamera.setContent(pnPOIcamera);
-
-        pnPOImaps.setPadding(new Insets(5, 5, 5, 5));
-        pnPOImaps.setSpacing(5);
-        pnPOImaps.setStyle("-fx-background-color: white;");
-
-        spPOImaps.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        spPOImaps.setStyle("-fx-background-color: white;");
-        spPOImaps.setContent(pnPOImaps);
-
-        pnFoundation.setStyle("-fx-background-color: white;");
-        pnFoundation.setTop(spPOIcamera);
-        pnFoundation.setBottom(spPOImaps);
-    }
-
     private void initExpansion() {
         expansionName.setAlignment(Pos.TOP_LEFT);
+        /*expansionName.textProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                if(newValue == null || newValue.equals("")) {
+                    expansionButton.setVisible(false);
+                } else {
+                    expansionButton.setVisible(true);
+                }
+            }
+        });*/
         expansionInformation.setAlignment(Pos.TOP_CENTER);
         expansionInformation.setWrapText(true);
         expansionImage.setPreserveRatio(true);
         expansionImage.setFitHeight(200);
         expansionButton.setFont(new Font(FONTNAME, 13));
+        //expansionButton.setVisible(false);
         expansionButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -266,7 +157,7 @@ public class ApplicationViewImplementation extends Application implements Applic
         pnFoundation.setCenter(expansionPane);
     }
 
-    public void displayCameraPOI(int id, String name, Image image, String information) {
+    /*public void displayCameraPOI(int id, String name, Image image, String information) {
         poiID.add(id);
         poiInformation.add(information);
         ImageView view = new ImageView(image);
@@ -334,20 +225,20 @@ public class ApplicationViewImplementation extends Application implements Applic
     @Override
     public void showPoiInfo(PoiViewModel poi) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle(poi.name);
-        ImageView imageView = new ImageView(SwingFXUtils.toFXImage(poi.image, null));
+        alert.setTitle(poi.getName());
+        ImageView imageView = new ImageView(poi.getImage());
         imageView.setFitHeight(200);
         imageView.setPreserveRatio(true);
         alert.setGraphic(imageView);
         alert.setHeight(200);
         alert.setWidth(200);
         alert.setHeaderText(null);
-        alert.setContentText(poi.informationAbstract);
+        alert.setContentText(poi.getInformationAbstract());
         alert.show();
     }
 
     public void displayButton(PoiViewModel poi) {
-        Button btn = new Button(poi.name);
+        Button btn = new Button(poi.getName());
         pnPOImaps.getChildren().add(btn);
     }
 
@@ -355,5 +246,5 @@ public class ApplicationViewImplementation extends Application implements Applic
     public void propertyChange(PropertyChangeEvent evt) {
         System.out.println(evt.getPropertyName());
         primaryStage.setTitle((String)evt.getNewValue());
-    }
+    }*/
 }

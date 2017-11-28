@@ -16,7 +16,7 @@ public interface ApplicationView {
      * @param image the image of the POI
      * @param information information from the information source
      */
-    void displayCameraPOI(int id, String name, Image image, String information);
+    //void displayCameraPOI(int id, String name, Image image, String information);
 
     /**
      * Adds the specified POI to the view of POI from maps at the bottom
@@ -24,29 +24,29 @@ public interface ApplicationView {
      * @param name name of the POI
      * @param information information from the information source
      */
-    void displayMapsPOI(int id, String name, String information);
+    //void displayMapsPOI(int id, String name, String information);
 
     /**
      * Removes the specified POI from the list (either top or bottom)
      * œparam id ID of the POI
      */
-    void removePOI(int id);
+    //void removePOI(int id);
 
     /**
      * Displays the POI in the middle of the screen with more information
      * @param id ID of the POI
      */
-    void expandPOI(int id);
+    //void expandPOI(int id);
 
     /**
      * Closes the currently expanded POI
      * @return returns true if the POI was closed and false if no POI was expanded
      */
-    boolean minimizePOI();
+    //boolean minimizePOI();
 
     /**
      * Show detailed information about POI
      * @param poi
      */
-    void showPoiInfo(PoiViewModel poi);
+    //void showPoiInfo(PoiViewModel poi);
 }
