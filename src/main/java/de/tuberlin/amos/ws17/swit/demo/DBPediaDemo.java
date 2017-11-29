@@ -9,20 +9,23 @@ public class DBPediaDemo {
 
     public static void main(String[] args) {
 
-        String desiredPOI = "Berlin Cathedral";
+        String desiredPOI = "Reichstag building";
 
         String requestString = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \n" +
                 "PREFIX dbpedia0: <http://dbpedia.org/ontology/> \n" +
-                "PREFIX dbpedia2: <http://dbpedia.org/property/> \n" +
                 "PREFIX dbp: <http://dbpedia.org/property/> \n" +
-                "SELECT ?label ?architect ?name ?location WHERE { \n" +
+                "SELECT ?label ?architect ?name ?location ?abstract WHERE { \n" +
                 "?label a dbpedia0:Building. \n" +
-                "?label dbpedia2:architect ?architect. \n" +
+                //"?label dbp:architect ?architect. \n" +
                 "?label rdfs:label ?name. \n" +
-                "?label dbp:location ?location. \n" +
+                //"?label dbp:location ?location. \n" +
+                //"?label dbp:status ?status. \n" +
+                "?label dbpedia0:abstract ?abstract. \n" +
                 "FILTER (?name=\"" + desiredPOI +"\"@en) }";
 
-        ParameterizedSparqlString parameterizedSparqlRequestString = new ParameterizedSparqlString(requestString);
+        String everything = "select * where {<http://dbpedia.org/resource/Berlin_Cathedral> ?property ?value}";
+
+        ParameterizedSparqlString parameterizedSparqlRequestString = new ParameterizedSparqlString(everything);
 
         System.out.println(parameterizedSparqlRequestString);
 
