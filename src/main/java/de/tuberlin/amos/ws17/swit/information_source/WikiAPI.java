@@ -1,5 +1,7 @@
 package de.tuberlin.amos.ws17.swit.information_source;
 
+import org.apache.commons.lang3.StringEscapeUtils;
+
 import java.io.*;
 import java.net.*;
 import java.util.Scanner;
@@ -26,7 +28,9 @@ public class WikiAPI {
         if(rqt == -1) {
             System.out.println("no pages found");
         } else {
-            System.out.println(getExtract(rqt));
+            String test = getExtract(rqt);
+            System.out.println(test);
+            System.out.println(StringEscapeUtils.unescapeJava(test));
         }
     }
 
