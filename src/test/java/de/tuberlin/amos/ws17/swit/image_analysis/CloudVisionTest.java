@@ -35,6 +35,7 @@ public class CloudVisionTest {
         assert getDescriptions(landmarks).contains("Berlin Cathedral");
     }
 
+    /*
     @Test
     public void identifyFromWebcamImage() throws Exception {
         LandscapeTracker landscapeTracker = LandscapeTrackerImplementation.getInstance();
@@ -42,6 +43,7 @@ public class CloudVisionTest {
         appUnderTest.showHighlightedLandmarks();
         Thread.sleep(5000);
     }
+    */
 
     private List<String> getDescriptions(List<LandmarkResult> annotations) {
         return annotations.stream()

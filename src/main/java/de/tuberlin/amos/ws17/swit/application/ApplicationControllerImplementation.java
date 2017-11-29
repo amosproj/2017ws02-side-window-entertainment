@@ -10,6 +10,10 @@ import de.tuberlin.amos.ws17.swit.image_analysis.LandmarkDetector;
 import de.tuberlin.amos.ws17.swit.image_analysis.LandmarkResult;
 import de.tuberlin.amos.ws17.swit.information_source.InformationProvider;
 import de.tuberlin.amos.ws17.swit.information_source.KnowledgeGraphSearch;
+import de.tuberlin.amos.ws17.swit.landscape_tracking.LandscapeTracker;
+import de.tuberlin.amos.ws17.swit.landscape_tracking.LandscapeTrackerImplementation;
+import de.tuberlin.amos.ws17.swit.landscape_tracking.WebcamBuilder;
+import de.tuberlin.amos.ws17.swit.landscape_tracking.WebcamImplementation;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -20,6 +24,7 @@ import javafx.scene.image.Image;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
@@ -37,6 +42,8 @@ public class ApplicationControllerImplementation implements ApplicationControlle
     //Module
     public ApplicationView view;
     public LandmarkDetector cloudVision;
+    public LandscapeTracker landscapeTracker;
+    private WebcamBuilder webcamBuilder;
     //TODO @alle fügt hier die Hauptklassen eures Moduls hinzu, initiiert werden diese aber erst im Konstruktor
 
     public GpsTracker gpsTracker;
@@ -64,6 +71,9 @@ public class ApplicationControllerImplementation implements ApplicationControlle
         this.view = view;
         //cloudVision = CloudVision.getInstance();
         //TODO @alle initiiert hier die Hauptklassen eurer Module
+        WebcamImplementation webcamImplementation = new WebcamBuilder().setViewSize(new Dimension(640, 480)).build();
+        landscapeTracker = new LandscapeTrackerImplementation(webcamImplementation);
+
         gpsTracker = GpsTrackerFactory.GetGpsTracker();
         try {
             gpsTracker.start();

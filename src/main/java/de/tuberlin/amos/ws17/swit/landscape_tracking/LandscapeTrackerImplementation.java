@@ -1,9 +1,6 @@
 package de.tuberlin.amos.ws17.swit.landscape_tracking;
 
 
-import org.bytedeco.javacv.FrameGrabber;
-import org.bytedeco.javacv.FrameRecorder;
-
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
@@ -16,30 +13,16 @@ import java.util.ArrayList;
 public class LandscapeTrackerImplementation implements LandscapeTracker{
 
     public boolean noCameraMode = false;
-
-    private static LandscapeTrackerImplementation instance = new LandscapeTrackerImplementation();
+    public WebcamImplementation webcamImp;
     JFrame frame=new JFrame();
-    public Webcam webcam = new Webcam(0);
     private ArrayList<String> examplePicturesNames;
     private String path = ".\\src\\main\\resources\\test_images\\";
     ArrayList<BufferedImage> examplePictures = new ArrayList<>();
     private BufferedImage lastImage;
 
-    public static LandscapeTrackerImplementation getInstance() {
-        return instance;
-    }
+    public LandscapeTrackerImplementation(WebcamImplementation webcamImplementation) {
 
-    private LandscapeTrackerImplementation() {
-        try {
-            webcam.start();
-        } catch (FrameGrabber.Exception e) {
-            System.out.println("Fehler beim Laden der Kamera! \n Wechsel zu noCameraMode!");
-            setNoCameraMode(true);
-        }
-
-        if(!webcam.running) {
-            setNoCameraMode(true);
-        }
+        this.webcamImp = webcamImplementation;
 
         examplePicturesNames = new ArrayList<>();
         examplePicturesNames.add("berliner-dom.jpg");
@@ -60,49 +43,7 @@ public class LandscapeTrackerImplementation implements LandscapeTracker{
 
     @Override
     public BufferedImage getImage() throws IOException {
-        if(noCameraMode || !webcam.running) {
-            int rand = (int) Math.floor(Math.random()*6);
-            lastImage = examplePictures.get(rand);
-        }
-        else {
-            lastImage = webcam.takePhoto();
-        }
-        return lastImage;
-    }
-
-    @Override
-    public BufferedImage getLastImage() {
-        return lastImage;
-    }
-
-    public void showImage() {
-
-        BufferedImage img = null;
-        try {
-            img = getImage();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        ImageIcon icon = new ImageIcon(img);
-
-        frame.setLayout(new FlowLayout());
-        frame.setSize(img.getWidth(),img.getHeight());
-        JLabel lbl=new JLabel();
-        lbl.setIcon(icon);
-        frame.add(lbl);
-        frame.setVisible(true);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    }
-
-    public void setNoCameraMode(boolean noCameraMode) {
-        if(noCameraMode && webcam.running) {
-            try {
-                webcam.stop();
-            } catch (FrameGrabber.Exception e) {
-                e.printStackTrace();
-            }
-        }
-        this.noCameraMode = noCameraMode;
+        if(!webcamImp.getWebcam().isOpen()) webcamImp.getWebcam().open();
+        return webcamImp.getWebcam().getImage();
     }
 }
