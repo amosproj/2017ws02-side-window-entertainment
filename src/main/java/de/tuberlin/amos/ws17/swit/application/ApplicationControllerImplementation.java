@@ -69,10 +69,10 @@ public class ApplicationControllerImplementation implements ApplicationControlle
 //Konstruktor
     public ApplicationControllerImplementation(ApplicationView view) {
         this.view = view;
-        //cloudVision = CloudVision.getInstance();
         //TODO @alle initiiert hier die Hauptklassen eurer Module
         WebcamImplementation webcamImplementation = new WebcamBuilder().setViewSize(new Dimension(640, 480)).build();
         landscapeTracker = new LandscapeTrackerImplementation(webcamImplementation);
+        cloudVision = CloudVision.getInstance();
 
         gpsTracker = GpsTrackerFactory.GetGpsTracker();
         try {

@@ -4,7 +4,7 @@ public interface InformationProvider {
 
     /**
      * Get additional information about an object
-     * @param id Id of object (right now only for Google Knowledge Graph API
+     * @param id Id of object (right now only for Google Knowledge Graph API)
      * @return short description of the object
      */
     String getInfoById(String id);
