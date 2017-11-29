@@ -1,5 +1,6 @@
 package de.tuberlin.amos.ws17.swit.gps;
 
+import de.tuberlin.amos.ws17.swit.common.KinematicProperties;
 import gnu.io.SerialPort;
 import gnu.io.CommPortIdentifier;
 
@@ -7,11 +8,13 @@ import net.sf.marineapi.nmea.event.SentenceEvent;
 import net.sf.marineapi.nmea.event.SentenceListener;
 import net.sf.marineapi.nmea.io.SentenceReader;
 import net.sf.marineapi.nmea.sentence.*;
+import org.joda.time.DateTime;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.LinkedList;
 
@@ -21,9 +24,12 @@ public class GpsPortReader implements SentenceListener{
     private LinkedList<GpsPosition> GpsList;
 
     private GpsPosition latestPosition;
+    private boolean running;
+    private KinematicProperties kinematicProperties;
 
     public GpsPortReader(){
-        init();
+        kinematicProperties = null;
+        running = false;
     }
 
     public LinkedList<GpsPosition> getGpsList() { return GpsList; }
@@ -49,19 +55,20 @@ public class GpsPortReader implements SentenceListener{
             GGASentence gga = (GGASentence) s;
             System.out.println("----- GGA Sentence -----");
             try{
-                if (latestPosition == null){
-                    latestPosition = new GpsPosition(555, 666, 0);
-                }
-                latestPosition.setLatitude(gga.getPosition().getLatitude());
-                latestPosition.setLongitude(gga.getPosition().getLongitude());
-                System.out.println("Position: lat: " + latestPosition.getLatitude() + ", lon: " + latestPosition.getLongitude());
-                System.out.println("Time: only current-day time");
-
+                //if (latestPosition == null){
+                //    latestPosition = new GpsPosition(555, 666, null);
+                //}
+                //latestPosition.setLatitude(gga.getPosition().getLatitude());
+                //latestPosition.setLongitude(gga.getPosition().getLongitude());
+                kinematicProperties.setLatitude(gga.getPosition().getLatitude());
+                kinematicProperties.setLongitude(gga.getPosition().getLongitude());
                 // fill up GpsList
                 if (GpsList == null){
                     GpsList = new LinkedList<GpsPosition>();
                 }
-                GpsList.add(new GpsPosition(latestPosition.getLatitude(), latestPosition.getLongitude(), 0));
+                Date juDate = new Date();
+                DateTime dt = new DateTime(juDate);
+                GpsList.add(new GpsPosition(gga.getPosition().getLatitude(), gga.getPosition().getLongitude(), dt));
 
                 // in the future: reset GpsList, if a new day starts (a new element comes in with a timestamp of another day)
                 // ^will be done when I figure out timestamp generation
@@ -79,13 +86,14 @@ public class GpsPortReader implements SentenceListener{
             RMCSentence rmc = (RMCSentence) s;
             System.out.println("----- RMC Sentence -----");
             try{
-                if (latestPosition != null){
-                    latestPosition.setCourse(rmc.getCorrectedCourse());
-                }
+                //if (latestPosition != null){
+                //    latestPosition.setCourse(rmc.getCorrectedCourse());
+                //}
                 //System.out.println("Position: " + latestPosition.getLatitude() + ", " + latestPosition.getLongitude());
                 //System.out.println("Date: " + rmc.getDate().getDay() + "." + rmc.getDate().getMonth() + "." + rmc.getDate().getYear());
                 System.out.println("Speed: " + rmc.getSpeed() + " knots");
                 System.out.println("Course: " + rmc.getCourse());
+                kinematicProperties.setCourse(rmc.getCourse());
             }
             catch (net.sf.marineapi.nmea.parser.DataNotAvailableException e){
                 // do nothing
@@ -111,11 +119,12 @@ public class GpsPortReader implements SentenceListener{
             }
 
 
-            if (latestPosition == null){
-                latestPosition = new GpsPosition(555, 666, 0);
-            }
+            //if (latestPosition == null){
+            //    latestPosition = new GpsPosition(555, 666, null);
+            //}
 
-            latestPosition.setSpeed(vtg.getSpeedKmh());
+            //latestPosition.setSpeed(vtg.getSpeedKmh());
+            kinematicProperties.setVelocity(vtg.getSpeedKmh());
 
         }
     }
@@ -166,19 +175,36 @@ public class GpsPortReader implements SentenceListener{
         return null;
     }
 
-    private void init(){
-        try {
-            SerialPort sp = getSerialPort();
-            if(sp != null){
-                InputStream is = sp.getInputStream();
-                SentenceReader sr = new SentenceReader(is);
-                sr.addSentenceListener(this);
-                sr.start();
+    public boolean start(){
+        if (!running){
+            try {
+                SerialPort sp = getSerialPort();
+                if(sp != null){
+                    InputStream is = sp.getInputStream();
+                    SentenceReader sr = new SentenceReader(is);
+                    sr.addSentenceListener(this);
+                    sr.start();
+                }
+                else{
+                    return false;
+                }
+            }
+            catch (IOException e){
+                //e.printStackTrace();
             }
         }
-        catch (IOException e){
-            //e.printStackTrace();
+        return true;
+    }
+
+    public void stop(){
+        if (running){
+            // HOW DO I STOP THIS MADNESS??
         }
+        running = false;
+    }
+
+    void setKinematicProperties(KinematicProperties kinProp){
+        kinematicProperties = kinProp;
     }
 
     public static void main(String[] args) {

@@ -5,6 +5,8 @@ import de.tuberlin.amos.ws17.swit.gps.GpsTrackerImplementation;
 
 import java.util.LinkedList;
 
+// OUDATED: DOES NOT FOLLOW NEW FORMAT WITH SEPARATE START() AND STORING DATA IN A KINEMATICPROPERTIES OBJECT
+
 public class GpsTrackerImplementationDemo {
 
     public static void main(String[] args){
