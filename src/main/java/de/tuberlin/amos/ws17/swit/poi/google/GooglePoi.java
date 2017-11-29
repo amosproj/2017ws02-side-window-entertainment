@@ -1,14 +1,15 @@
 package de.tuberlin.amos.ws17.swit.poi.google;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Polygon;
-import de.tuberlin.amos.ws17.swit.poi.Poi;
+import de.tuberlin.amos.ws17.swit.common.GpsPosition;
 import de.tuberlin.amos.ws17.swit.poi.PoiType;
 import se.walkercrou.places.Place;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 
-public class GooglePoi implements Poi {
+public class GooglePoi {
+
+	//TODO: replace GooglePoi with common PointOfInterest
 
 	private Place p;
 
@@ -16,12 +17,10 @@ public class GooglePoi implements Poi {
 		this.p=p;
 	}
 
-	@Override
 	public String getId() {
 		return p.getPlaceId();
 	}
 
-	@Override
 	public Set<PoiType> getPoiTypes() {
 
 		GoogleTypeMap map= new GoogleTypeMap();
@@ -38,16 +37,8 @@ public class GooglePoi implements Poi {
 		return set;
 	}
 
-	public Coordinate getPosition() {
-		return new Coordinate(p.getLongitude(), p.getLatitude());
-	}
-
-	public Polygon getAreal() {
-		return null;
-	}
-
-	public PoiSource getPoisource() {
-		return PoiSource.googlePlacesApi;
+	public GpsPosition getPosition() {
+		return new GpsPosition(p.getLongitude(), p.getLatitude());
 	}
 
 	public String getNameForUser() {
@@ -77,13 +68,13 @@ public class GooglePoi implements Poi {
 			}
 		}
 
-
 		return types;
 	}
 
 	public Place getPlace() {
 		return p;
 	}
+
 
 	@Override
 	public String toString() {
@@ -92,8 +83,6 @@ public class GooglePoi implements Poi {
 				", id=" + getId() +
 				", types=" + getPoiTypes().toString() +
 				", position=" + getPosition() +
-				", areal=" + getAreal() +
-				", poisource=" + getPoisource() +
 				", descriptionForUser='" + getDescriptionForUser() + '\'' +
 				", url='" + getUrl() + '\'' +
 				'}';

@@ -108,10 +108,10 @@ public class FixedRequestHandler implements RequestHandler {
     public String get(String uri) throws IOException {
 
     	final HttpRequest request = HttpUtils.constructHttpRequest(HttpMethods.GET, uri);
-    	
-    	
-    	try {
-    		  return request.execute().parseAsString();
+
+            try {
+                com.google.api.client.http.HttpResponse response= request.execute();
+                return response.parseAsString();
 		} catch (HttpResponseException e) {
 			System.err.println(e.getStatusMessage());
 

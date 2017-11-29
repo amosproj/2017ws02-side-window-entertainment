@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
  */
 class GoogleTypeMap extends HashMap<GoogleType, PoiType> {
 
+    //TODO: missing mappings
     {
         this.put(GoogleType.accounting, PoiType.INFRASTRUCTURE);
         this.put(GoogleType.airport, PoiType.TRANSPORT);
@@ -45,15 +46,15 @@ class GoogleTypeMap extends HashMap<GoogleType, PoiType> {
         this.put(GoogleType.electrician, PoiType.OF_NO_INTEREST);
         this.put(GoogleType.electronics_store, PoiType.SHOPPING);
         this.put(GoogleType.embassy, PoiType.INFRASTRUCTURE);
-        this.put(GoogleType.fire_station, PoiType.NOT_DEFINED);
+        this.put(GoogleType.fire_station, PoiType.INFRASTRUCTURE);
         this.put(GoogleType.florist, PoiType.SHOPPING);
-        this.put(GoogleType.funeral_home, PoiType.NOT_DEFINED);
-        this.put(GoogleType.furniture_store, PoiType.NOT_DEFINED);
-        this.put(GoogleType.gas_station, PoiType.NOT_DEFINED);
-        this.put(GoogleType.gym, PoiType.NOT_DEFINED);
-        this.put(GoogleType.hair_care, PoiType.NOT_DEFINED);
-        this.put(GoogleType.hardware_store, PoiType.NOT_DEFINED);
-        this.put(GoogleType.hindu_temple, PoiType.NOT_DEFINED);
+        this.put(GoogleType.funeral_home, PoiType.OF_NO_INTEREST);
+        this.put(GoogleType.furniture_store, PoiType.SHOPPING);
+        this.put(GoogleType.gas_station, PoiType.INFRASTRUCTURE);
+        this.put(GoogleType.gym, PoiType.LEISURE);
+        this.put(GoogleType.hair_care, PoiType.LEISURE);
+        this.put(GoogleType.hardware_store, PoiType.SHOPPING);
+        this.put(GoogleType.hindu_temple, PoiType.INFRASTRUCTURE);
         this.put(GoogleType.home_goods_store, PoiType.NOT_DEFINED);
         this.put(GoogleType.hospital, PoiType.NOT_DEFINED);
         this.put(GoogleType.insurance_agency, PoiType.NOT_DEFINED);
