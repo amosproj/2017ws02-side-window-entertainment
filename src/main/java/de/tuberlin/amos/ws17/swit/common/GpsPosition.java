@@ -1,6 +1,10 @@
 package de.tuberlin.amos.ws17.swit.common;
 
 public class GpsPosition {
+
+    //for integer operations
+    final private double xyConversionFactor=10000000;
+
     private double longitude;
     private double latitude;
 
@@ -25,6 +29,18 @@ public class GpsPosition {
     public GpsPosition(double longitude, double latitude) {
         this.longitude = longitude;
         this.latitude = latitude;
+    }
+
+    public GpsPosition(int x, int y) {
+        this.longitude = x/xyConversionFactor;
+        this.latitude = y/xyConversionFactor;
+    }
+
+    public int getX(){
+        return (int) (longitude*xyConversionFactor);
+    }
+    public int getY(){
+        return (int) (latitude*xyConversionFactor);
     }
 
     @Override
