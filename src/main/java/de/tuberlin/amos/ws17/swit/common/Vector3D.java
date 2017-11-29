@@ -46,4 +46,9 @@ public class Vector3D {
         if (Double.compare(vector3D.y, y) != 0) return false;
         return Double.compare(vector3D.z, z) == 0;
     }
+
+    @Override
+    public String toString() {
+        return "(" + x + "," + y + "," + z + ")";
+    }
 }

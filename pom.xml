@@ -199,11 +199,11 @@
         </dependency>
 
         <dependency>
-            <groupId>intel</groupId>
-            <artifactId>realsense</artifactId>
+            <groupId>com.javonet</groupId>
+            <artifactId>api</artifactId>
             <version>1.0</version>
             <scope>system</scope>
-            <systemPath>${project.basedir}/libs/libpxcclr.java.jar</systemPath>
+            <systemPath>${project.basedir}/libs/javonet-1.4hf34.jar</systemPath>
         </dependency>
 
     </dependencies>

@@ -1,5 +1,6 @@
 package de.tuberlin.amos.ws17.swit.tracking;
 
+import de.tuberlin.amos.ws17.swit.common.UserPosition;
 import javafx.application.Application;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -29,11 +30,17 @@ public class UserTrackingPrototyp extends Application {
 
         Button buttonCreateUserTracker = new Button();
         buttonCreateUserTracker.setText("createUserTracker");
-        buttonCreateUserTracker.setOnAction(event -> userTracker = new RealSenseSdkUserTracker());
+        buttonCreateUserTracker.setOnAction(event -> userTracker = new JavoNetUserTracker());
 
         Button buttonStartTracking = new Button();
         buttonStartTracking.setText("startTracking");
-        buttonStartTracking.setOnAction(event -> userTracker.startTracking());
+        buttonStartTracking.setOnAction(event -> {
+            try {
+                userTracker.startTracking();
+            } catch (Exception e) {
+                printText(e.getMessage());
+            }
+        });
 
         Button buttonGetTrackingDetails = new Button();
         buttonGetTrackingDetails.setText("getTrackingDetails");
@@ -46,6 +53,7 @@ public class UserTrackingPrototyp extends Application {
         HBox hBox = new HBox();
         hBox.getChildren().add(buttonCreateUserTracker);
         hBox.getChildren().add(buttonStartTracking);
+        hBox.getChildren().add(buttonGetTrackingDetails);
         hBox.getChildren().add(buttonStopTracking);
 
         vBox = new VBox();
@@ -61,7 +69,12 @@ public class UserTrackingPrototyp extends Application {
     }
 
     private void printTrackingDetails() {
-
+        boolean isUserTracked = userTracker.getIsUserTracked();
+        printText("IsUserTracked: " + isUserTracked);
+        if (isUserTracked) {
+            UserPosition userPosition = userTracker.getUserPosition();
+            printText("IsUserTracked: " + userPosition.toString());
+        }
     }
 
     private void printText(String text) {

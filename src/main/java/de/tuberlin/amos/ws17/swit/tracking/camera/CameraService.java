@@ -1,11 +1,9 @@
 package de.tuberlin.amos.ws17.swit.tracking.camera;
 
-import de.tuberlin.amos.ws17.swit.tracking.camera.Camera;
-
-public interface CameraService {
+public interface CameraService extends AutoCloseable {
 
     void loadCameras();
-    Camera GetUserTrackingCamera();
-    Camera GetLandscapeTrackingCamera();
-    Resolution_ColorDepth_FrameRateCombination getResolution_ColorDepth_FrameRateCombination(Camera camera);
+    void selectUserTrackingCamera() throws CameraNotFoundException;
+    void selectLandscapeTrackingCamera() throws CameraNotFoundException;
+    //Resolution_ColorDepth_FrameRateCombination getResolution_ColorDepth_FrameRateCombination(Camera camera);
 }

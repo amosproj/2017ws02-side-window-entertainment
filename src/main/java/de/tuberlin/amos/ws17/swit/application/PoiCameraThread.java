@@ -15,7 +15,7 @@ public class PoiCameraThread extends Thread {
 
     public void run() {
         while(controller.run) {
-            UserPosition userPosition = new UserPosition();
+            //UserPosition userPosition = new UserPosition();
             //TODO @Christian User Position vom User Tracking ermittelt
 
             BufferedImage image;
