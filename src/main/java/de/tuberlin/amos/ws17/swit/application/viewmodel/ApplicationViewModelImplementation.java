@@ -1,7 +1,5 @@
 package de.tuberlin.amos.ws17.swit.application.viewmodel;
 
-import de.tuberlin.amos.ws17.swit.application.PoiCameraThread;
-import de.tuberlin.amos.ws17.swit.application.PoiMapsThread;
 import de.tuberlin.amos.ws17.swit.application.view.ApplicationView;
 import de.tuberlin.amos.ws17.swit.application.view.ApplicationViewImplementation;
 import de.tuberlin.amos.ws17.swit.common.KinematicProperties;
@@ -9,23 +7,18 @@ import de.tuberlin.amos.ws17.swit.common.PointOfInterest;
 import de.tuberlin.amos.ws17.swit.common.UserExpressions;
 import de.tuberlin.amos.ws17.swit.common.UserPosition;
 import de.tuberlin.amos.ws17.swit.gps.GpsTracker;
-import de.tuberlin.amos.ws17.swit.gps.GpsTrackerFactory;
-import de.tuberlin.amos.ws17.swit.gps.SensorNotFoundException;
-import de.tuberlin.amos.ws17.swit.image_analysis.CloudVision;
 import de.tuberlin.amos.ws17.swit.image_analysis.LandmarkDetector;
 import de.tuberlin.amos.ws17.swit.landscape_tracking.LandscapeTracker;
-import de.tuberlin.amos.ws17.swit.landscape_tracking.LandscapeTrackerImplementation;
 import de.tuberlin.amos.ws17.swit.landscape_tracking.WebcamBuilder;
-import de.tuberlin.amos.ws17.swit.landscape_tracking.WebcamImplementation;
-import de.tuberlin.amos.ws17.swit.tracking.JavoNetUserTracker;
 import de.tuberlin.amos.ws17.swit.tracking.UserTracker;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.Image;
+import javafx.event.EventHandler;
+import javafx.event.ActionEvent;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -33,17 +26,16 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeoutException;
 
 public class ApplicationViewModelImplementation implements ApplicationViewModel {
 
     //Module
-    public ApplicationView view;
-    public LandmarkDetector cloudVision;
-    public LandscapeTracker landscapeTracker;
+    private ApplicationView view;
+    private LandmarkDetector cloudVision;
+    private LandscapeTracker landscapeTracker;
     private WebcamBuilder webcamBuilder;
     private UserTracker userTracker;
-    public GpsTracker gpsTracker;
+    private GpsTracker gpsTracker;
     //TODO @alle fügt hier die Hauptklassen eures Moduls hinzu, initiiert werden diese aber erst im Konstruktor
 
     //Threads
@@ -57,12 +49,13 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     private UserPositionViewModel vmUserPosition;
     private SimpleListProperty<PoiViewModel> propertyPOImaps;
     private SimpleListProperty<PoiViewModel> propertyPOIcamera;
+    private SimpleObjectProperty<EventHandler<ActionEvent>> propertyCloseButton;
 
 //Konstruktor
     public ApplicationViewModelImplementation(ApplicationView view) {
         this.view = view;
         //TODO @alle initiiert hier die Hauptklassen eurer Module
-        WebcamImplementation webcamImplementation = null;
+        /*WebcamImplementation webcamImplementation = null;
         try {
             webcamImplementation = new WebcamBuilder().setViewSize(new Dimension(640, 480)).setWebcamDiscoveryTimeout(10000).build();
         } catch (TimeoutException e) {
@@ -79,7 +72,15 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         }
         catch (SensorNotFoundException e){
             e.printStackTrace();
-        }
+        }*/
+
+        propertyCloseButton = new SimpleObjectProperty<EventHandler<ActionEvent>>();
+        propertyCloseButton.set(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                minimizePOI();
+            }
+        });
 
         pointsOfInterest = new ArrayList<PointOfInterest>();
         expandedPOI = new PoiViewModel();
@@ -97,10 +98,10 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
             public void run() {
                 int iterations = 0;
                 while (run) {
-                    trackUser();
+                    //trackUser();
                     if(iterations % 10 == 0) {
-                        loadCameraPoi();
-                        loadMapsPoi();
+                        //loadCameraPoi();
+                        //loadMapsPoi();
                     }
                     try {
                         Thread.sleep(1000);
@@ -199,6 +200,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         if (image == null) {
             return;
         }
+
         //Analyse Bild
         List<PointOfInterest> pois = cloudVision.identifyPOIs(image);
         if (pois.isEmpty()) {
@@ -289,6 +291,18 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
 
     public void setPropertyPOIcamera(ObservableList<PoiViewModel> propertyPOIcamera) {
         this.propertyPOIcamera.set(propertyPOIcamera);
+    }
+
+    public EventHandler getPropertyCloseButton() {
+        return propertyCloseButton.get();
+    }
+
+    public SimpleObjectProperty<EventHandler<ActionEvent>> propertyCloseButtonProperty() {
+        return propertyCloseButton;
+    }
+
+    public void setPropertyCloseButton(EventHandler propertyCloseButton) {
+        this.propertyCloseButton.set(propertyCloseButton);
     }
 
 //Testdaten

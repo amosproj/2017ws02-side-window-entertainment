@@ -19,7 +19,7 @@ public class PoiMapsThread extends Thread {
         while(controller.run) {
             //TODO ACHTUNG!!! DIESER THREAD WIRD NICHT MEHR VERWENDET UND IST DAHER DEPRECATED
 
-            KinematicProperties kinematicProperties = new KinematicProperties();
+            /*KinematicProperties kinematicProperties = new KinematicProperties();
             controller.gpsTracker.setDumpObject(kinematicProperties);
 
 
@@ -28,7 +28,7 @@ public class PoiMapsThread extends Thread {
 
             for(PointOfInterest poi: pois) {
                 controller.addPOI(poi);
-            }
+            }*/
         }
     }
 }

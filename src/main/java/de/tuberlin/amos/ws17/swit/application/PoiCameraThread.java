@@ -25,7 +25,7 @@ public class PoiCameraThread extends Thread {
             //TODO ACHTUNG!!! DIESER THREAD WIRD NICHT MEHR VERWENDET UND IST DAHER DEPRECATED
 
             //UserPosition userPosition = new UserPosition();
-            BufferedImage image = null;
+            /*BufferedImage image = null;
             try {
                 image = this.controller.landscapeTracker.getImage();
             } catch (IOException e) {
@@ -45,7 +45,7 @@ public class PoiCameraThread extends Thread {
             for (PointOfInterest poi: pois) {
                 controller.addPOI(poi);
             }
-            break;
+            break;*/
         }
     }
 
