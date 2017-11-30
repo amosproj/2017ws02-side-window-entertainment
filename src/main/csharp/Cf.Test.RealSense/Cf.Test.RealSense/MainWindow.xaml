@@ -1,0 +1,35 @@
+﻿<Window x:Class="Cf.Test.RealSense.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Cf.Test.RealSense"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="350" Width="525">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        
+        <StackPanel>
+            <Button Name="ButtonStartTracking" Content="StartTracking" Click="ButtonStartTracking_Click"/>
+            <Button Name="ButtonGetPose" Content="GetPose" Click="ButtonGetPose_Click"/>
+            <Button Name="ButtonGetExpressions" Content="GetExpressions" Click="ButtonGetExpressions_Click"/>
+            <Button Name="ButtonGetImage" Content="GetImage" Click="ButtonGetImage_Click"/>
+            <Button Name="ButtonStopTracking" Content="StopTracking" Click="ButtonStopTracking_Click"/>
+        </StackPanel>
+        
+        <StackPanel Name="StackPanel" Grid.Row="1"/>
+
+
+        <Image Name="Image"
+               Grid.Column="1"
+               Grid.RowSpan="2"/>
+    </Grid>
+</Window>
