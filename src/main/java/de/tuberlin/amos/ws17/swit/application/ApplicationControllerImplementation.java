@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeoutException;
 
 import static de.tuberlin.amos.ws17.swit.image_analysis.ImageUtils.getRandomTestImage;
 
@@ -70,7 +71,12 @@ public class ApplicationControllerImplementation implements ApplicationControlle
     public ApplicationControllerImplementation(ApplicationView view) {
         this.view = view;
         //TODO @alle initiiert hier die Hauptklassen eurer Module
-        WebcamImplementation webcamImplementation = new WebcamBuilder().setViewSize(new Dimension(640, 480)).build();
+        WebcamImplementation webcamImplementation = null;
+        try {
+            webcamImplementation = new WebcamBuilder(10000).setViewSize(new Dimension(640, 480)).build();
+        } catch (TimeoutException e) {
+            e.printStackTrace();
+        }
         landscapeTracker = new LandscapeTrackerImplementation(webcamImplementation);
         cloudVision = CloudVision.getInstance();
 

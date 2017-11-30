@@ -1,13 +1,18 @@
 package de.tuberlin.amos.ws17.swit.landscape_tracking;
 
 import java.awt.*;
+import java.util.concurrent.TimeoutException;
 
 public class WebcamBuilder {
 
     private WebcamImplementation webcamImplementation;
 
 
-    public WebcamBuilder() {
+    public WebcamBuilder(int timeout) throws TimeoutException {
+        webcamImplementation = new WebcamImplementation(timeout);
+    }
+
+    public WebcamBuilder() throws TimeoutException {
         webcamImplementation = new WebcamImplementation();
     }
 

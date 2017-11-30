@@ -11,11 +11,17 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.concurrent.TimeoutException;
 
 public class WebcamDemo {
 
     public static void main(String[] args) {
-        LandscapeTrackerImplementation lst = new LandscapeTrackerImplementation(new WebcamBuilder().setViewSize(new Dimension(640, 480)).build());
+        LandscapeTrackerImplementation lst = null;
+        try {
+            lst = new LandscapeTrackerImplementation(new WebcamBuilder(10000).setViewSize(new Dimension(640, 480)).build());
+        } catch (TimeoutException e) {
+            e.printStackTrace();
+        }
         BufferedImage img = null;
 
         try {
