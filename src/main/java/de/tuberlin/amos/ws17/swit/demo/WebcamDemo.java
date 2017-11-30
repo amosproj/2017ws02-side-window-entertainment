@@ -18,9 +18,12 @@ public class WebcamDemo {
     public static void main(String[] args) {
         LandscapeTrackerImplementation lst = null;
         try {
-            lst = new LandscapeTrackerImplementation(new WebcamBuilder(10000).setViewSize(new Dimension(640, 480)).build());
+            lst = new LandscapeTrackerImplementation(new WebcamBuilder().setViewSize(new Dimension(640, 480)).setWebcamDiscoveryTimeout(10000).setWebcamName("Logitech Webcam 600 0").build());
         } catch (TimeoutException e) {
+            System.out.println("Zeitüberschreitung bei der Anfrage der Kamera.");
             e.printStackTrace();
+        } catch (NullPointerException npe) {
+            System.out.println("Kamera konnte nicht geladen werden.");
         }
         BufferedImage img = null;
 
@@ -51,6 +54,8 @@ public class WebcamDemo {
         frame.getContentPane().add(imgLable);
         frame.pack();
         frame.setVisible(true);
+
+        System.out.println(WebcamBuilder.getDiscoveredWebcams());
 
         while(true) {
             try {

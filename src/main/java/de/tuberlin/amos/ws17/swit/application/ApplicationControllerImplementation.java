@@ -73,7 +73,7 @@ public class ApplicationControllerImplementation implements ApplicationControlle
         //TODO @alle initiiert hier die Hauptklassen eurer Module
         WebcamImplementation webcamImplementation = null;
         try {
-            webcamImplementation = new WebcamBuilder(10000).setViewSize(new Dimension(640, 480)).build();
+            webcamImplementation = new WebcamBuilder().setViewSize(new Dimension(640, 480)).setWebcamDiscoveryTimeout(10000).build();
         } catch (TimeoutException e) {
             e.printStackTrace();
         }
