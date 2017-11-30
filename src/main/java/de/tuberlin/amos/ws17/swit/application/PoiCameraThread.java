@@ -22,11 +22,10 @@ public class PoiCameraThread extends Thread {
 
     public void run() {
         while(controller.run) {
-            //UserPosition userPosition = new UserPosition();
-            //TODO @Christian User Position vom User Tracking ermittelt
+            //TODO ACHTUNG!!! DIESER THREAD WIRD NICHT MEHR VERWENDET UND IST DAHER DEPRECATED
 
+            //UserPosition userPosition = new UserPosition();
             BufferedImage image = null;
-            //TODO @JulianL Anfrage an Landscape Tracking mit der userPosition, um Bild zu erhalten
             try {
                 image = this.controller.landscapeTracker.getImage();
             } catch (IOException e) {
@@ -43,7 +42,6 @@ public class PoiCameraThread extends Thread {
             // no poi detected -> skip
             if (pois.isEmpty()) { continue; }
 
-            //TODO @JulianS Anfrage an information source mit ermitteltem POI
             for (PointOfInterest poi: pois) {
                 controller.addPOI(poi);
             }
