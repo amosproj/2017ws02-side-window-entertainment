@@ -24,6 +24,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.Image;
 
 import java.awt.*;
@@ -50,12 +51,10 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     public Thread modelviewThread;
     public Thread updateThread;
 
-    //Listen und Objekte
+    //Listen und Binding
     private List<PointOfInterest> pointsOfInterest;
     private PoiViewModel expandedPOI;
     private UserPositionViewModel vmUserPosition;
-
-    //Binding
     private SimpleListProperty<PoiViewModel> propertyPOImaps;
     private SimpleListProperty<PoiViewModel> propertyPOIcamera;
 
@@ -118,55 +117,61 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         //TODO deprecated -> loeschen
     }
 
-    private void addPOIcamera(PoiViewModel poi) {
-        //TODO @Magnus work in progress
+    private void addPOIcamera(PointOfInterest poi) {
+        PoiViewModel item = convertPOI(poi);
+        pointsOfInterest.add(poi);
+        propertyPOIcamera.add(item);
     }
 
-    private void removePOIcamera(String id) {
-        System.out.println(id);
-        int index = 0;
+    private boolean removePOIcamera(String id) {
         for(PoiViewModel item: propertyPOIcamera) {
             if(item.getId() == id) {
-                index = propertyPOIcamera.indexOf(item);
-                break;
+                propertyPOIcamera.remove(item);
+                return true;
             }
         }
-        propertyPOIcamera.remove(propertyPOIcamera.get(index));
+        return false;
     }
 
-    private void addPOImaps(PoiViewModel poi) {
-        //TODO @Magnus work in progress
+    private void addPOImaps(PointOfInterest poi) {
+        PoiViewModel item = convertPOI(poi);
+        pointsOfInterest.add(poi);
+        propertyPOImaps.add(item);
     }
 
-    private void removePOImaps(String id) {
-        System.out.println(id);
-        int index = 0;
+    private boolean removePOImaps(String id) {
         for(PoiViewModel item: propertyPOImaps) {
             if(item.getId() == id) {
-                index = propertyPOImaps.indexOf(item);
-                break;
+                propertyPOImaps.remove(item);
+                return true;
             }
         }
-        propertyPOImaps.remove(propertyPOImaps.get(index));
+        return false;
     }
 
-    private PoiViewModel transormPOI(PointOfInterest poi) {
+    private PoiViewModel convertPOI(PointOfInterest poi) {
         PoiViewModel result = new PoiViewModel();
-        //TODO @Magnus work in progress
+        result.setId(poi.getId());
+        result.setName(poi.getName());
+        result.setImage(SwingFXUtils.toFXImage(poi.getImage(), null ));
+        result.setInformationAbstract(poi.getInformationAbstract());
         return result;
     }
 
-    public void expandPOI(String id) {
-        //TODO @Magnus umschreiben
-        System.out.println(id);
-        int index = 0;
+    public boolean expandPOI(String id) {
         for(PoiViewModel item: propertyPOIcamera) {
             if(item.getId() == id) {
-                index = propertyPOIcamera.indexOf(item);
-                break;
+                setExpandedPOI(item);
+                return true;
             }
         }
-        setExpandedPOI(propertyPOIcamera.get(index));
+        for(PoiViewModel item: propertyPOImaps) {
+            if(item.getId() == id) {
+                setExpandedPOI(item);
+                return true;
+            }
+        }
+        return false;
     }
 
     public void minimizePOI() {
@@ -174,9 +179,6 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         expandedPOI.setName("");
         expandedPOI.setImage(null);
         expandedPOI.setInformationAbstract("");
-        /*expandedPOIname.set("");
-        expandedPOIimage.set(null);
-        expandedPOIinformationAbstract.set("");*/
     }
 
     private void setExpandedPOI(PoiViewModel item) {
@@ -184,9 +186,6 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         expandedPOI.setName(item.getName());
         expandedPOI.setImage(item.getImage());
         expandedPOI.setInformationAbstract(item.getInformationAbstract());
-        /*expandedPOIname.set(item.getName());
-        expandedPOIimage.set(item.getImage());
-        expandedPOIinformationAbstract.set(item.getInformationAbstract());*/
     }
 
     private void loadCameraPoi() {
@@ -209,15 +208,16 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         //Abfrage Informationen
         //TODO @JulianS Anfrage an information source mit ermitteltem POI
 
+
         for (PointOfInterest poi: pois) {
-            addPOI(poi);
+            addPOIcamera(poi);
         }
     }
 
     private void loadMapsPoi() {
         KinematicProperties kinematicProperties = new KinematicProperties();
         //Abfrage GPS Koordinaten
-        //TODO @Vlad Anfrage an das GPS Modul stellen, welches die GPS Daten zurückgibt + Ergebnis zurückgeben, anstatt call by reference
+        //TODO @Vlad Ergebnis zurückgeben, anstatt call by reference
         gpsTracker.setDumpObject(kinematicProperties);
         if(kinematicProperties == null) {
             return;
@@ -237,7 +237,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
 
 
         for(PointOfInterest poi: pois) {
-            addPOI(poi);
+            addPOImaps(poi);
         }
     }
 
