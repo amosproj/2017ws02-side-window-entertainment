@@ -1,8 +1,8 @@
 package de.tuberlin.amos.ws17.swit.application;
 
+import de.tuberlin.amos.ws17.swit.application.viewmodel.ApplicationViewModelImplementation;
 import de.tuberlin.amos.ws17.swit.common.*;
 import de.tuberlin.amos.ws17.swit.image_analysis.LandmarkResult;
-import de.tuberlin.amos.ws17.swit.landscape_tracking.LandscapeTracker;
 
 import javax.annotation.Nullable;
 import java.awt.image.BufferedImage;
@@ -11,9 +11,9 @@ import java.util.List;
 
 public class PoiCameraThread extends Thread {
 
-    ApplicationControllerImplementation controller;
+    ApplicationViewModelImplementation controller;
 
-    public PoiCameraThread(ApplicationControllerImplementation controller) {
+    public PoiCameraThread(ApplicationViewModelImplementation controller) {
         super();
         this.controller = controller;
     }

@@ -1,17 +1,16 @@
 package de.tuberlin.amos.ws17.swit.application;
 
+import de.tuberlin.amos.ws17.swit.application.viewmodel.ApplicationViewModelImplementation;
 import de.tuberlin.amos.ws17.swit.common.*;
-import de.tuberlin.amos.ws17.swit.gps.GpsTracker;
-import de.tuberlin.amos.ws17.swit.gps.GpsTrackerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class PoiMapsThread extends Thread {
 
-    ApplicationControllerImplementation controller;
+    ApplicationViewModelImplementation controller;
 
-    public PoiMapsThread(ApplicationControllerImplementation controller) {
+    public PoiMapsThread(ApplicationViewModelImplementation controller) {
         super();
         this.controller = controller;
     }

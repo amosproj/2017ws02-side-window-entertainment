@@ -1,8 +1,8 @@
-package de.tuberlin.amos.ws17.swit.application;
+package de.tuberlin.amos.ws17.swit.application.viewmodel;
 
 import java.awt.image.BufferedImage;
 
-public interface ApplicationController {
+public interface ApplicationViewModel {
 
     /**
      * Sets the view

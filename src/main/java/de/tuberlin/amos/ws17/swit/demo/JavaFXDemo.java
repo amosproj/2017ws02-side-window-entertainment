@@ -1,12 +1,8 @@
 package de.tuberlin.amos.ws17.swit.demo;
 
-import de.tuberlin.amos.ws17.swit.application.ApplicationViewImplementation;
+import de.tuberlin.amos.ws17.swit.application.view.ApplicationViewImplementation;
 import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.scene.image.Image;
 import javafx.stage.Stage;
-
-import java.io.File;
 
 public class JavaFXDemo extends Application {
 

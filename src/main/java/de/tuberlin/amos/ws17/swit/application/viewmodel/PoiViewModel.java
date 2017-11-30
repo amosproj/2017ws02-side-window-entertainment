@@ -1,64 +1,73 @@
-package de.tuberlin.amos.ws17.swit.application;
+package de.tuberlin.amos.ws17.swit.application.viewmodel;
 
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.image.Image;
-
-import java.awt.image.BufferedImage;
 
 public class PoiViewModel {
 
-    private String id;
-    private String name;
-    private Image image;
-    private String informationAbstract;
+    private SimpleStringProperty id;
+    private SimpleStringProperty name;
+    private SimpleObjectProperty<Image> image;
+    private SimpleStringProperty informationAbstract;
 
     public PoiViewModel() {
-        id = "";
-        name = "";
-        informationAbstract = "";
-    }
-
-    public PoiViewModel(String name) {
-        this.name = name;
+        this(null, null,null, null);
     }
 
     public PoiViewModel(String id, String name, Image image, String informationAbstract) {
-        this.id = id;
-        this.name = name;
-        this.image = image;
-        this.informationAbstract = informationAbstract;
+        this.id = new SimpleStringProperty(id);
+        this.name = new SimpleStringProperty(name);
+        this.image = new SimpleObjectProperty<Image>(image);
+        this.informationAbstract = new SimpleStringProperty(informationAbstract);
     }
 
     public String getId() {
+        return id.get();
+    }
 
+    public SimpleStringProperty idProperty() {
         return id;
     }
 
     public void setId(String id) {
-        this.id = id;
+        this.id.set(id);
     }
 
     public String getName() {
+        return name.get();
+    }
+
+    public SimpleStringProperty nameProperty() {
         return name;
     }
 
     public void setName(String name) {
-        this.name = name;
+        this.name.set(name);
     }
 
     public Image getImage() {
+        return image.get();
+    }
+
+    public SimpleObjectProperty<Image> imageProperty() {
         return image;
     }
 
     public void setImage(Image image) {
-        this.image = image;
+        this.image.set(image);
     }
 
     public String getInformationAbstract() {
+        return informationAbstract.get();
+    }
+
+    public SimpleStringProperty informationAbstractProperty() {
         return informationAbstract;
     }
 
     public void setInformationAbstract(String informationAbstract) {
-        this.informationAbstract = informationAbstract;
+        this.informationAbstract.set(informationAbstract);
     }
 
     @Override

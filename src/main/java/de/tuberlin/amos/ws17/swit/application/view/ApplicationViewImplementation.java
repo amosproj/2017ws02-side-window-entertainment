@@ -1,33 +1,20 @@
-package de.tuberlin.amos.ws17.swit.application;
+package de.tuberlin.amos.ws17.swit.application.view;
 
+import de.tuberlin.amos.ws17.swit.application.viewmodel.ApplicationViewModelImplementation;
+import de.tuberlin.amos.ws17.swit.application.viewmodel.PoiViewModel;
 import javafx.application.Application;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.ListChangeListener;
-import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.event.EventType;
-import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.util.Callback;
-
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
 public class ApplicationViewImplementation extends Application implements ApplicationView {
 
@@ -44,7 +31,7 @@ public class ApplicationViewImplementation extends Application implements Applic
 
     private static final String FONTNAME = "Helvetica Neue";
     public static ApplicationViewImplementation app;
-    private static ApplicationControllerImplementation controller;
+    private static ApplicationViewModelImplementation controller;
     private Stage primaryStage;
 
     public void init() {
@@ -67,11 +54,11 @@ public class ApplicationViewImplementation extends Application implements Applic
 
     @Override
     public void start(Stage stage) {
-        controller = new ApplicationControllerImplementation(this);
+        controller = new ApplicationViewModelImplementation(this);
 
-        expansionName.textProperty().bindBidirectional(controller.expandedPOInameProperty());
-        expansionImage.imageProperty().bindBidirectional(controller.expandedPOIimageProperty());
-        expansionInformation.textProperty().bindBidirectional(controller.expandedPOIinformationAbstractProperty());
+        expansionName.textProperty().bindBidirectional(controller.getExpandedPOI().nameProperty());
+        expansionImage.imageProperty().bindBidirectional(controller.getExpandedPOI().imageProperty());
+        expansionInformation.textProperty().bindBidirectional(controller.getExpandedPOI().informationAbstractProperty());
 
         Callback<ListView<PoiViewModel>, ListCell<PoiViewModel>> callback = new Callback<ListView<PoiViewModel>, ListCell<PoiViewModel>>() {
             @Override

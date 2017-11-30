@@ -1,74 +1,66 @@
-package de.tuberlin.amos.ws17.swit.application;
+package de.tuberlin.amos.ws17.swit.application.viewmodel;
 
+import de.tuberlin.amos.ws17.swit.application.PoiCameraThread;
+import de.tuberlin.amos.ws17.swit.application.PoiMapsThread;
+import de.tuberlin.amos.ws17.swit.application.view.ApplicationView;
+import de.tuberlin.amos.ws17.swit.application.view.ApplicationViewImplementation;
+import de.tuberlin.amos.ws17.swit.common.KinematicProperties;
 import de.tuberlin.amos.ws17.swit.common.PointOfInterest;
+import de.tuberlin.amos.ws17.swit.common.UserExpressions;
+import de.tuberlin.amos.ws17.swit.common.UserPosition;
 import de.tuberlin.amos.ws17.swit.gps.GpsTracker;
 import de.tuberlin.amos.ws17.swit.gps.GpsTrackerFactory;
-import de.tuberlin.amos.ws17.swit.gps.GpsTrackerImplementation;
 import de.tuberlin.amos.ws17.swit.gps.SensorNotFoundException;
 import de.tuberlin.amos.ws17.swit.image_analysis.CloudVision;
 import de.tuberlin.amos.ws17.swit.image_analysis.LandmarkDetector;
-import de.tuberlin.amos.ws17.swit.image_analysis.LandmarkResult;
-import de.tuberlin.amos.ws17.swit.information_source.InformationProvider;
-import de.tuberlin.amos.ws17.swit.information_source.KnowledgeGraphSearch;
 import de.tuberlin.amos.ws17.swit.landscape_tracking.LandscapeTracker;
 import de.tuberlin.amos.ws17.swit.landscape_tracking.LandscapeTrackerImplementation;
 import de.tuberlin.amos.ws17.swit.landscape_tracking.WebcamBuilder;
 import de.tuberlin.amos.ws17.swit.landscape_tracking.WebcamImplementation;
-import javafx.application.Platform;
+import de.tuberlin.amos.ws17.swit.tracking.JavoNetUserTracker;
+import de.tuberlin.amos.ws17.swit.tracking.UserTracker;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.image.Image;
-import org.apache.commons.lang3.StringUtils;
 
-import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeoutException;
 
-import static de.tuberlin.amos.ws17.swit.image_analysis.ImageUtils.getRandomTestImage;
-
-public class ApplicationControllerImplementation implements ApplicationController {
+public class ApplicationViewModelImplementation implements ApplicationViewModel {
 
     //Module
     public ApplicationView view;
     public LandmarkDetector cloudVision;
     public LandscapeTracker landscapeTracker;
     private WebcamBuilder webcamBuilder;
+    private UserTracker userTracker;
+    public GpsTracker gpsTracker;
     //TODO @alle fügt hier die Hauptklassen eures Moduls hinzu, initiiert werden diese aber erst im Konstruktor
 
-    public GpsTracker gpsTracker;
-
     //Threads
-    public Object lock;
     public boolean run;
-    public PoiMapsThread mapsThread;
-    public PoiCameraThread cameraThread;
-    public Thread controllerThread;
+    public Thread modelviewThread;
+    public Thread updateThread;
 
     //Listen und Objekte
     private List<PointOfInterest> pointsOfInterest;
     private PoiViewModel expandedPOI;
+    private UserPositionViewModel vmUserPosition;
 
     //Binding
-    private SimpleStringProperty expandedPOIname;
-    private SimpleObjectProperty<Image> expandedPOIimage;
-    private SimpleStringProperty expandedPOIinformationAbstract;
     private SimpleListProperty<PoiViewModel> propertyPOImaps;
     private SimpleListProperty<PoiViewModel> propertyPOIcamera;
 
 //Konstruktor
-    public ApplicationControllerImplementation(ApplicationView view) {
+    public ApplicationViewModelImplementation(ApplicationView view) {
         this.view = view;
         //TODO @alle initiiert hier die Hauptklassen eurer Module
         WebcamImplementation webcamImplementation = null;
@@ -79,7 +71,9 @@ public class ApplicationControllerImplementation implements ApplicationControlle
         }
         landscapeTracker = new LandscapeTrackerImplementation(webcamImplementation);
         cloudVision = CloudVision.getInstance();
-
+        userTracker = new JavoNetUserTracker();
+        userTracker.startTracking();
+        //TODO @Vlad Exception handling in deine Klasse (siehe userTracker)
         gpsTracker = GpsTrackerFactory.GetGpsTracker();
         try {
             gpsTracker.start();
@@ -90,28 +84,45 @@ public class ApplicationControllerImplementation implements ApplicationControlle
 
         pointsOfInterest = new ArrayList<PointOfInterest>();
         expandedPOI = new PoiViewModel();
+        vmUserPosition = new UserPositionViewModel();
 
-        expandedPOIname = new SimpleStringProperty();
-        expandedPOIimage = new SimpleObjectProperty();
-        expandedPOIinformationAbstract = new SimpleStringProperty();
         propertyPOImaps = new SimpleListProperty();
         propertyPOIcamera = new SimpleListProperty();
 
         initTestData();
 
-        lock = new Object();
         run = true;
-        mapsThread = new PoiMapsThread(this);
-        cameraThread = new PoiCameraThread(this);
-        controllerThread = Thread.currentThread();
-        //TODO @Magnus Threadsteuerung
+        modelviewThread = Thread.currentThread();
+        updateThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                int iterations = 0;
+                while (run) {
+                    trackUser();
+                    if(iterations % 10 == 0) {
+                        loadCameraPoi();
+                        loadMapsPoi();
+                    }
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    iterations++;
+                }
+            }
+        });
     }
 
     public void addPOI(PointOfInterest poi) {
+        //TODO deprecated -> loeschen
+    }
+
+    private void addPOIcamera(PoiViewModel poi) {
         //TODO @Magnus work in progress
     }
 
-    public void removePOIcamera(String id) {
+    private void removePOIcamera(String id) {
         System.out.println(id);
         int index = 0;
         for(PoiViewModel item: propertyPOIcamera) {
@@ -123,11 +134,11 @@ public class ApplicationControllerImplementation implements ApplicationControlle
         propertyPOIcamera.remove(propertyPOIcamera.get(index));
     }
 
-    public void addPOIcamera(PoiViewModel poi) {
+    private void addPOImaps(PoiViewModel poi) {
         //TODO @Magnus work in progress
     }
 
-    public void removePOImaps(String id) {
+    private void removePOImaps(String id) {
         System.out.println(id);
         int index = 0;
         for(PoiViewModel item: propertyPOImaps) {
@@ -139,7 +150,14 @@ public class ApplicationControllerImplementation implements ApplicationControlle
         propertyPOImaps.remove(propertyPOImaps.get(index));
     }
 
+    private PoiViewModel transormPOI(PointOfInterest poi) {
+        PoiViewModel result = new PoiViewModel();
+        //TODO @Magnus work in progress
+        return result;
+    }
+
     public void expandPOI(String id) {
+        //TODO @Magnus umschreiben
         System.out.println(id);
         int index = 0;
         for(PoiViewModel item: propertyPOIcamera) {
@@ -152,17 +170,90 @@ public class ApplicationControllerImplementation implements ApplicationControlle
     }
 
     public void minimizePOI() {
-        expandedPOI = null;
-        expandedPOIname.set("");
+        expandedPOI.setId("");
+        expandedPOI.setName("");
+        expandedPOI.setImage(null);
+        expandedPOI.setInformationAbstract("");
+        /*expandedPOIname.set("");
         expandedPOIimage.set(null);
-        expandedPOIinformationAbstract.set("");
+        expandedPOIinformationAbstract.set("");*/
     }
 
     private void setExpandedPOI(PoiViewModel item) {
-        expandedPOI = item;
-        expandedPOIname.set(item.getName());
+        expandedPOI.setId(item.getId());
+        expandedPOI.setName(item.getName());
+        expandedPOI.setImage(item.getImage());
+        expandedPOI.setInformationAbstract(item.getInformationAbstract());
+        /*expandedPOIname.set(item.getName());
         expandedPOIimage.set(item.getImage());
-        expandedPOIinformationAbstract.set(item.getInformationAbstract());
+        expandedPOIinformationAbstract.set(item.getInformationAbstract());*/
+    }
+
+    private void loadCameraPoi() {
+        BufferedImage image = null;
+        //Aufnahme Bild
+        try {
+            image = landscapeTracker.getImage();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if (image == null) {
+            return;
+        }
+
+        PointOfInterest poi = new PointOfInterest();
+        //Analyse Bild
+        //TODO @Chinh die Funktion analyzeImage soll in deine KLasse, hier soll deine Funktion nur aufgerufen werden
+        //PointOfInterest poi = analyzeImage(image);
+        if (poi == null) {
+            return;
+        }
+
+        //Abfrage Informationen
+        //TODO @JulianS Anfrage an information source mit ermitteltem POI
+
+
+        addPOI(poi);
+    }
+
+    private void loadMapsPoi() {
+        KinematicProperties kinematicProperties = new KinematicProperties();
+        //Abfrage GPS Koordinaten
+        //TODO @Vlad Anfrage an das GPS Modul stellen, welches die GPS Daten zurückgibt + Ergebnis zurückgeben, anstatt call by reference
+        gpsTracker.setDumpObject(kinematicProperties);
+        if(kinematicProperties == null) {
+            return;
+        }
+
+        List<PointOfInterest> pois = new ArrayList<PointOfInterest>();
+        //Abfrage POIs
+        //TODO @Leander Anfrage an das POI Modul, welches eine Liste von POIs in der Nähe zurückgibt
+
+
+        if(pois.size() == 0) {
+            return;
+        }
+
+        //Abfrage Informationen
+        //TODO @JulianS Anfrage an das information source Modul, welches für jeden POI in der Liste die Daten abruft
+
+
+        for(PointOfInterest poi: pois) {
+            addPOI(poi);
+        }
+    }
+
+    private void trackUser() {
+        UserPosition userPosition = null;
+        UserExpressions userExpressions = null;
+        //TODO @Christian User Position vom User Tracking ermittelt
+        if(userTracker.getIsUserTracked()) {
+            userPosition = userTracker.getUserPosition();
+            userExpressions = userTracker.getUserExpressions();
+        } else {
+            return;
+        }
+
     }
 
 //Getter und Setter
@@ -176,42 +267,6 @@ public class ApplicationControllerImplementation implements ApplicationControlle
 
     public PoiViewModel getExpandedPOI() {
         return expandedPOI;
-    }
-
-    public String getExpandedPOIname() {
-        return expandedPOIname.get();
-    }
-
-    public SimpleStringProperty expandedPOInameProperty() {
-        return expandedPOIname;
-    }
-
-    public void setExpandedPOIname(String expandedPOIname) {
-        this.expandedPOIname.set(expandedPOIname);
-    }
-
-    public Image getExpandedPOIimage() {
-        return expandedPOIimage.get();
-    }
-
-    public SimpleObjectProperty<Image> expandedPOIimageProperty() {
-        return expandedPOIimage;
-    }
-
-    public void setExpandedPOIimage(Image expandedPOIimage) {
-        this.expandedPOIimage.set(expandedPOIimage);
-    }
-
-    public String getExpandedPOIinformationAbstract() {
-        return expandedPOIinformationAbstract.get();
-    }
-
-    public SimpleStringProperty expandedPOIinformationAbstractProperty() {
-        return expandedPOIinformationAbstract;
-    }
-
-    public void setExpandedPOIinformationAbstract(String expandedPOIinformationAbstract) {
-        this.expandedPOIinformationAbstract.set(expandedPOIinformationAbstract);
     }
 
     public ObservableList<PoiViewModel> getPropertyPOImaps() {
