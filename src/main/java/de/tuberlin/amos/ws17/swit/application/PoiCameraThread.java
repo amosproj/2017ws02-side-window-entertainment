@@ -2,7 +2,9 @@ package de.tuberlin.amos.ws17.swit.application;
 
 import de.tuberlin.amos.ws17.swit.application.viewmodel.ApplicationViewModelImplementation;
 import de.tuberlin.amos.ws17.swit.common.*;
+import de.tuberlin.amos.ws17.swit.image_analysis.ImageUtils;
 import de.tuberlin.amos.ws17.swit.image_analysis.LandmarkResult;
+import org.apache.jena.base.Sys;
 
 import javax.annotation.Nullable;
 import java.awt.image.BufferedImage;
@@ -31,38 +33,22 @@ public class PoiCameraThread extends Thread {
                 e.printStackTrace();
             }
 
+            image = ImageUtils.getRandomTestImage();
+
             // no image -> skip
             if (image == null) { continue; }
 
-            PointOfInterest poi = analyzeImage(image);
+            List<PointOfInterest> pois = controller.cloudVision.identifyPOIs(image);
 
             // no poi detected -> skip
-            if (poi == null) { continue; }
+            if (pois.isEmpty()) { continue; }
 
             //TODO @JulianS Anfrage an information source mit ermitteltem POI
-
-            controller.addPOI(poi);
-        }
-    }
-
-    @Nullable
-    private PointOfInterest analyzeImage(BufferedImage image) {
-        PointOfInterest poi = null;
-        try {
-            List<LandmarkResult> results = controller.cloudVision.identifyLandmarks(image, 5);
-            // return only first result
-            if (!results.isEmpty()) {
-                LandmarkResult firstResult = results.get(0);
-                poi = new PointOfInterest();
-                poi.setId(firstResult.getId());
-                poi.setName(firstResult.getName());
-                poi.setGpsPosition(!firstResult.getLocations().isEmpty() ? firstResult.getLocations().get(0) : null);
-                poi.setImage(firstResult.getCroppedImage());
+            for (PointOfInterest poi: pois) {
+                controller.addPOI(poi);
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+            break;
         }
-
-        return poi;
     }
+
 }

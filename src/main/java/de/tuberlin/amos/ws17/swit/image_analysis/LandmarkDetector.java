@@ -1,5 +1,8 @@
 package de.tuberlin.amos.ws17.swit.image_analysis;
 
+import de.tuberlin.amos.ws17.swit.common.PointOfInterest;
+
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -33,7 +36,9 @@ public interface LandmarkDetector {
     List<LandmarkResult> identifyLandmarkUrl(String gcsUrl, int maxResults) throws IOException;
 
     /**
-     * Shows image with found landmarks highlighted
+     * Identify landmarks and convert them to POIs
+     * @param image Taken image
+     * @return List of found POIs on image
      */
-    void showHighlightedLandmarks();
+    List<PointOfInterest> identifyPOIs(BufferedImage image);
 }

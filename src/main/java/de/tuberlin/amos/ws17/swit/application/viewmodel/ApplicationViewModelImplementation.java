@@ -200,20 +200,18 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         if (image == null) {
             return;
         }
-
-        PointOfInterest poi = new PointOfInterest();
         //Analyse Bild
-        //TODO @Chinh die Funktion analyzeImage soll in deine KLasse, hier soll deine Funktion nur aufgerufen werden
-        //PointOfInterest poi = analyzeImage(image);
-        if (poi == null) {
+        List<PointOfInterest> pois = cloudVision.identifyPOIs(image);
+        if (pois.isEmpty()) {
             return;
         }
 
         //Abfrage Informationen
         //TODO @JulianS Anfrage an information source mit ermitteltem POI
 
-
-        addPOI(poi);
+        for (PointOfInterest poi: pois) {
+            addPOI(poi);
+        }
     }
 
     private void loadMapsPoi() {

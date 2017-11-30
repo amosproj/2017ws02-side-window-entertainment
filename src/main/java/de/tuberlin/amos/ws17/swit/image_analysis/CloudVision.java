@@ -10,6 +10,7 @@ import com.google.api.services.vision.v1.model.*;
 import com.google.api.services.vision.v1.model.Image;
 import com.google.common.collect.ImmutableList;
 import de.tuberlin.amos.ws17.swit.common.ApiConfig;
+import de.tuberlin.amos.ws17.swit.common.PointOfInterest;
 
 import javax.annotation.Nullable;
 import javax.swing.*;
@@ -99,6 +100,29 @@ public class CloudVision implements LandmarkDetector {
         return identifyLandmarks(image, maxResults);
     }
 
+    @Override
+    public List<PointOfInterest> identifyPOIs(BufferedImage image) {
+        try {
+            List<LandmarkResult> results = identifyLandmarks(image, 5);
+            return results.stream()
+                    .map(CloudVision::convertToPOI)
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return Collections.emptyList();
+    }
+
+    private static PointOfInterest convertToPOI(LandmarkResult landmark) {
+        PointOfInterest poi = new PointOfInterest();
+        poi.setId(landmark.getId());
+        poi.setName(landmark.getName());
+        poi.setGpsPosition(!landmark.getLocations().isEmpty() ? landmark.getLocations().get(0) : null);
+        poi.setImage(landmark.getCroppedImage());
+        return poi;
+    }
+
     private List<LandmarkResult> identifyLandmarks(Image image, int maxResults) throws IOException {
         if (this.vision == null) {
             System.err.print("Cloud Vision service unavailable.");
@@ -185,7 +209,6 @@ public class CloudVision implements LandmarkDetector {
         }
     }
 
-    @Override
     public void showHighlightedLandmarks() {
         if (bufferedImage == null) {
             return;
