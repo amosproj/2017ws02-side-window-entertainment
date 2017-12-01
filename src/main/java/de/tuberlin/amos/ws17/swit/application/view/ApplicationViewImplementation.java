@@ -3,6 +3,7 @@ package de.tuberlin.amos.ws17.swit.application.view;
 import de.tuberlin.amos.ws17.swit.application.viewmodel.ApplicationViewModelImplementation;
 import de.tuberlin.amos.ws17.swit.application.viewmodel.PoiViewModel;
 import javafx.application.Application;
+import javafx.beans.binding.Bindings;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Orientation;
@@ -56,6 +57,7 @@ public class ApplicationViewImplementation extends Application implements Applic
     public void start(Stage stage) {
         controller = new ApplicationViewModelImplementation(this);
 
+        expansionButton.visibleProperty().bind(Bindings.equal(controller.getExpandedPOI().nameProperty(), "").not());
         expansionButton.onActionProperty().bindBidirectional(controller.propertyCloseButtonProperty());
         expansionName.textProperty().bindBidirectional(controller.getExpandedPOI().nameProperty());
         expansionImage.imageProperty().bindBidirectional(controller.getExpandedPOI().imageProperty());
@@ -117,7 +119,6 @@ public class ApplicationViewImplementation extends Application implements Applic
         expansionInformation.setWrapText(true);
         expansionImage.setPreserveRatio(true);
         expansionImage.setFitHeight(200);
-        expansionButton.setFont(new Font(FONTNAME, 13));
         expansionTopPane.setCenter(expansionName);
         expansionTopPane.setRight(expansionButton);
         expansionPane.setTop(expansionTopPane);

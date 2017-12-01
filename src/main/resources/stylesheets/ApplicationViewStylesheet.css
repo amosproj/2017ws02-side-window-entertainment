@@ -18,6 +18,10 @@
     -fx-background-color: grey;
 }
 
+.list-view {
+    -fx-background-color: white;
+}
+
 .list-cell {
     -fx-background-color: white;
 }
