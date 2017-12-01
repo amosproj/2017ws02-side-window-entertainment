@@ -332,46 +332,4 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         //listPOIcamera = FXCollections.observableList(testData);
         propertyPOIcamera.set(FXCollections.observableList(testData));
     }
-
-    /*@Override
-    public void analyzeImage() {
-        BufferedImage image = captureImage();
-        new Thread(() -> {
-            try {
-                List<LandmarkResult> landmarks = cloudVision.identifyLandmarks(image, 5);
-                // update UI on FX thread
-                Platform.runLater(() -> {
-                    for (LandmarkResult l : landmarks) {
-                        PoiViewModel poi = new PoiViewModel(l.getId(), l.getName(), l.getCroppedImage(), "");
-                        poi.setId(l.getId());
-                        testSimpleListProperty.add(0, poi);
-                    }
-                });
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }).start();
-    }
-
-    @Override
-    public BufferedImage captureImage() {
-        BufferedImage testImage = getRandomTestImage();
-        return testImage;
-    }
-
-    @Override
-    public void onPoiClicked(PoiViewModel poi) {
-        if (!StringUtils.isEmpty(poi.informationAbstract)) {
-            view.showPoiInfo(poi);
-        } else {
-            new Thread(() -> {
-                InformationProvider kgs = KnowledgeGraphSearch.getInstance();
-                String info = poi.id != null ? kgs.getInfoById(poi.id) : kgs.getInfoByName(poi.name);
-                Platform.runLater(() -> {
-                    poi.informationAbstract = info;
-                    view.showPoiInfo(poi);
-                });
-            }).start();
-        }
-    }*/
 }

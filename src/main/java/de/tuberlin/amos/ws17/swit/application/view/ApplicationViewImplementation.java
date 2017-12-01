@@ -90,14 +90,12 @@ public class ApplicationViewImplementation extends Application implements Applic
         };
 
         listPOIcamera.setPrefHeight(150.0);
-        listPOIcamera.setStyle("-fx-background-color: white;");
         listPOIcamera.itemsProperty().bindBidirectional(controller.propertyPOIcameraProperty());
         listPOIcamera.setOrientation(Orientation.HORIZONTAL);
         listPOIcamera.setCellFactory(callback);
         pnFoundation.setTop(listPOIcamera);
 
         listPOImaps.setPrefHeight(150.0);
-        listPOImaps.setStyle("-fx-background-color: white;");
         listPOImaps.itemsProperty().bindBidirectional(controller.propertyPOImapsProperty());
         listPOImaps.setOrientation(Orientation.HORIZONTAL);
         listPOImaps.setCellFactory(callback);
