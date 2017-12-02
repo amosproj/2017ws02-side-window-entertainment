@@ -17,19 +17,18 @@ public class PoiMapsThread extends Thread {
 
     public void run() {
         while(controller.run) {
-            KinematicProperties kinematicProperties = new KinematicProperties();
-            //TODO @Vlad Anfrage an das GPS Modul stellen, welches die GPS Daten zurückgibt
+            //TODO ACHTUNG!!! DIESER THREAD WIRD NICHT MEHR VERWENDET UND IST DAHER DEPRECATED
+
+            /*KinematicProperties kinematicProperties = new KinematicProperties();
             controller.gpsTracker.setDumpObject(kinematicProperties);
 
 
             List<PointOfInterest> pois = new ArrayList<PointOfInterest>();
-            //TODO @Leander Anfrage an das POI Modul, welches eine Liste von POIs in der Nähe zurückgibt
 
-            //TODO @JulianS Anfrage an das information source Modul, welches für jeden POI in der Liste die Daten abruft
 
             for(PointOfInterest poi: pois) {
                 controller.addPOI(poi);
-            }
+            }*/
         }
     }
 }
