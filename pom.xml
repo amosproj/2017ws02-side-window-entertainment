@@ -182,8 +182,6 @@
             <groupId>uk.org.mygrid.resources.jcoord</groupId>
             <artifactId>jcoord</artifactId>
             <version>1.0</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/jcoord-1.0.jar</systemPath>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.apache.jena/jena-arq -->
@@ -212,8 +210,6 @@
             <groupId>com.javonet</groupId>
             <artifactId>javonet</artifactId>
             <version>1.4hf34</version>
-            <!--<scope>system</scope>-->
-            <!--<systemPath>${project.basedir}/libs/javonet-1.4hf34.jar</systemPath>-->
         </dependency>
 
     </dependencies>
