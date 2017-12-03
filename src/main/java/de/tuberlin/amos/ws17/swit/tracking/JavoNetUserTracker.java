@@ -62,18 +62,21 @@ public class JavoNetUserTracker implements UserTracker {
 
     @Override
     public UserExpressions getUserExpressions() {
-        UserExpressions result = new UserExpressions();
-        try {
-            boolean isKiss = dotNetUserTracker.get("UserExpressionKiss");
-            boolean isToungueOut = dotNetUserTracker.get("UserExpressionTongueOut");
-            boolean isSmile = dotNetUserTracker.get("UserExpressionSmile");
-            boolean isMouthOpen = dotNetUserTracker.get("UserExpressionMouthOpen");
-            result.setKiss(isKiss);
-            result.setTongueOut(isToungueOut);
-            result.setSmile(isSmile);
-            result.setMouthOpen(isMouthOpen);
-        }catch (JavonetException e) {
-            return null;
+        UserExpressions result = null;
+        if (getIsUserTracked()) {
+            try {
+                boolean isKiss = dotNetUserTracker.get("UserExpressionKiss");
+                boolean isToungueOut = dotNetUserTracker.get("UserExpressionTongueOut");
+                boolean isSmile = dotNetUserTracker.get("UserExpressionSmile");
+                boolean isMouthOpen = dotNetUserTracker.get("UserExpressionMouthOpen");
+                result =  new UserExpressions();
+                result.setKiss(isKiss);
+                result.setTongueOut(isToungueOut);
+                result.setSmile(isSmile);
+                result.setMouthOpen(isMouthOpen);
+            } catch (JavonetException e) {
+                e.printStackTrace();
+            }
         }
         return result;
     }
