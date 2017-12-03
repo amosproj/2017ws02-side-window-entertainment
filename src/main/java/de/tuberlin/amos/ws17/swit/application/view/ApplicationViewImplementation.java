@@ -23,6 +23,7 @@ public class ApplicationViewImplementation extends Application implements Applic
     private ListView<PoiViewModel> listPOIcamera;
     private ListView<PoiViewModel> listPOImaps;
     private TextArea taDebugLog;
+    private ListView<String> listDebugLog;
 
     private BorderPane expansionPane;
     private BorderPane expansionTopPane;
@@ -46,6 +47,8 @@ public class ApplicationViewImplementation extends Application implements Applic
 
         taDebugLog = new TextArea();
         taDebugLog.setEditable(false);
+        listDebugLog = new ListView<>();
+        pnFoundation.setRight(listDebugLog);
 
         expansionPane = new BorderPane();
         expansionTopPane = new BorderPane();
@@ -66,6 +69,7 @@ public class ApplicationViewImplementation extends Application implements Applic
         expansionName.textProperty().bindBidirectional(controller.getExpandedPOI().nameProperty());
         expansionImage.imageProperty().bindBidirectional(controller.getExpandedPOI().imageProperty());
         expansionInformation.textProperty().bindBidirectional(controller.getExpandedPOI().informationAbstractProperty());
+
 
         Callback<ListView<PoiViewModel>, ListCell<PoiViewModel>> callback = new Callback<ListView<PoiViewModel>, ListCell<PoiViewModel>>() {
             @Override
@@ -94,6 +98,28 @@ public class ApplicationViewImplementation extends Application implements Applic
                 };
             }
         };
+
+        listDebugLog.itemsProperty().bindBidirectional(controller.propertyDebugLogProperty());
+        listDebugLog.setCellFactory(new Callback<ListView<String>, ListCell<String>>() {
+            @Override
+            public ListCell<String> call(ListView<String> param) {
+                return new ListCell<String>() {
+                    @Override
+                    public void updateItem(String item, boolean empty) {
+                        super.updateItem(item, empty);
+                        if(empty || item == null) {
+                            setGraphic(null);
+                            setText(null);
+                        } else {
+                            Label debugText = new Label(item);
+                            //setText(item);
+                            setGraphic(debugText);
+                            listPOIcamera.refresh();
+                        }
+                    }
+                };
+            }
+        });
 
         listPOIcamera.setPrefHeight(150.0);
         listPOIcamera.itemsProperty().bindBidirectional(controller.propertyPOIcameraProperty());
