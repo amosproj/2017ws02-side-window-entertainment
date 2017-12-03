@@ -1,15 +1,13 @@
 .label {
-    -fx-font-size: 13px;
+    -fx-font-size: 20px;
     -fx-font-family: "Helvetica Neue";
-    -fx-font-weight: bold;
     -fx-text-fill: black;
     -fx-background-color: white;
 }
 
 .button {
-    -fx-font-size: 13px;
+    -fx-font-size: 20px;
     -fx-font-family: "Helvetica Neue";
-    -fx-font-weight: bold;
     -fx-text-fill: white;
     -fx-background-color: black;
 }

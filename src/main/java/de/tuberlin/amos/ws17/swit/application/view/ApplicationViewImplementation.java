@@ -22,6 +22,7 @@ public class ApplicationViewImplementation extends Application implements Applic
     private BorderPane pnFoundation;
     private ListView<PoiViewModel> listPOIcamera;
     private ListView<PoiViewModel> listPOImaps;
+    private TextArea taDebugLog;
 
     private BorderPane expansionPane;
     private BorderPane expansionTopPane;
@@ -42,6 +43,9 @@ public class ApplicationViewImplementation extends Application implements Applic
         pnFoundation.setStyle("-fx-background-color: white;");
         listPOIcamera = new ListView<PoiViewModel>();
         listPOImaps = new ListView<PoiViewModel>();
+
+        taDebugLog = new TextArea();
+        taDebugLog.setEditable(false);
 
         expansionPane = new BorderPane();
         expansionTopPane = new BorderPane();
