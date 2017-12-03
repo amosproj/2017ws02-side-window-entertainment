@@ -262,6 +262,8 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
             return;
         }
 
+        DebugLog.log("Latitude: " + kinematicProperties.getLatitude() + " , Longitude: " + kinematicProperties.getLongitude(), this);
+
         List<PointOfInterest> pois = new ArrayList<PointOfInterest>();
         //Abfrage POIs
         //TODO @Leander Anfrage an das POI Modul, welches eine Liste von POIs in der Nähe zurückgibt
@@ -278,6 +280,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         for(PointOfInterest poi: pois) {
             addPOImaps(poi);
         }
+
     }
 
     private void trackUser() {
