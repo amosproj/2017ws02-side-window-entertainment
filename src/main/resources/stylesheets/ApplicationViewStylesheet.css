@@ -20,6 +20,14 @@
     -fx-background-color: white;
 }
 
+#listDebugLog .label{
+    -fx-font-size: 10px;
+}
+
+#listDebugLog {
+    -fx-min-width: 400px;
+}
+
 .list-cell {
     -fx-background-color: white;
 }

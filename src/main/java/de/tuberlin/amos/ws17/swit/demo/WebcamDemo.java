@@ -18,7 +18,8 @@ public class WebcamDemo {
     public static void main(String[] args) {
         LandscapeTrackerImplementation lst = null;
         try {
-            lst = new LandscapeTrackerImplementation(new WebcamBuilder().setViewSize(new Dimension(640, 480)).setWebcamDiscoveryTimeout(10000).setWebcamName("Logitech Webcam 600 0").build());
+            lst = null; //new LandscapeTrackerImplementation(new WebcamBuilder().setViewSize(new Dimension(640, 480)).setWebcamDiscoveryTimeout(10000).setWebcamName("Logitech Webcam 600 0").build());
+            throw new TimeoutException();
         } catch (TimeoutException e) {
             System.out.println("Zeitüberschreitung bei der Anfrage der Kamera.");
             e.printStackTrace();

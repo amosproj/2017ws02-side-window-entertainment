@@ -16,7 +16,7 @@ public class WebcamBuilder {
     Dimension viewSize;
     String webcamName;
 
-    public WebcamImplementation build() throws TimeoutException {
+    public WebcamImplementation build() throws Exception {
 
         if(useTimeout) {
             if(webcamName != null) {
