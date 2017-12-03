@@ -2,14 +2,16 @@ package de.tuberlin.amos.ws17.swit.application.viewmodel;
 
 import de.tuberlin.amos.ws17.swit.application.view.ApplicationView;
 import de.tuberlin.amos.ws17.swit.application.view.ApplicationViewImplementation;
-import de.tuberlin.amos.ws17.swit.common.KinematicProperties;
-import de.tuberlin.amos.ws17.swit.common.PointOfInterest;
-import de.tuberlin.amos.ws17.swit.common.UserExpressions;
-import de.tuberlin.amos.ws17.swit.common.UserPosition;
+import de.tuberlin.amos.ws17.swit.common.*;
 import de.tuberlin.amos.ws17.swit.gps.GpsTracker;
+import de.tuberlin.amos.ws17.swit.gps.GpsTrackerFactory;
+import de.tuberlin.amos.ws17.swit.gps.SensorNotFoundException;
+import de.tuberlin.amos.ws17.swit.image_analysis.CloudVision;
 import de.tuberlin.amos.ws17.swit.image_analysis.LandmarkDetector;
 import de.tuberlin.amos.ws17.swit.landscape_tracking.LandscapeTracker;
+import de.tuberlin.amos.ws17.swit.landscape_tracking.LandscapeTrackerImplementation;
 import de.tuberlin.amos.ws17.swit.landscape_tracking.WebcamBuilder;
+import de.tuberlin.amos.ws17.swit.landscape_tracking.WebcamImplementation;
 import de.tuberlin.amos.ws17.swit.tracking.UserTracker;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -22,10 +24,10 @@ import javafx.event.ActionEvent;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeoutException;
 
 public class ApplicationViewModelImplementation implements ApplicationViewModel {
 
@@ -36,6 +38,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     private WebcamBuilder webcamBuilder;
     private UserTracker userTracker;
     private GpsTracker gpsTracker;
+    private DebugLog debugLog = new DebugLog();
     //TODO @alle fügt hier die Hauptklassen eures Moduls hinzu, initiiert werden diese aber erst im Konstruktor
 
     //Threads
@@ -50,9 +53,13 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     private SimpleListProperty<PoiViewModel> propertyPOImaps;
     private SimpleListProperty<PoiViewModel> propertyPOIcamera;
     private SimpleObjectProperty<EventHandler<ActionEvent>> propertyCloseButton;
+    private SimpleListProperty<String> propertyDebugLog;
 
 //Konstruktor
     public ApplicationViewModelImplementation(ApplicationView view) {
+
+        bindDebugLog();
+
         this.view = view;
         //TODO @alle initiiert hier die Hauptklassen eurer Module
         /*WebcamImplementation webcamImplementation = null;
@@ -63,8 +70,8 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         }
         landscapeTracker = new LandscapeTrackerImplementation(webcamImplementation);
         cloudVision = CloudVision.getInstance();
-        userTracker = new JavoNetUserTracker();
-        userTracker.startTracking();
+        //userTracker = new JavoNetUserTracker();
+        //userTracker.startTracking();
         //TODO @Vlad Exception handling in deine Klasse (siehe userTracker)
         gpsTracker = GpsTrackerFactory.GetGpsTracker();
         try {
@@ -72,15 +79,17 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         }
         catch (SensorNotFoundException e){
             e.printStackTrace();
-        }*/
-
+        }
+        */
         propertyCloseButton = new SimpleObjectProperty<EventHandler<ActionEvent>>();
         propertyCloseButton.set(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
+                DebugLog.log("minimized", this);
                 minimizePOI();
             }
         });
+
 
         pointsOfInterest = new ArrayList<PointOfInterest>();
         expandedPOI = new PoiViewModel();
@@ -112,6 +121,11 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 }
             }
         });
+    }
+
+
+    private void exception() throws Exception {
+        throw new Exception("TestException");
     }
 
     public void addPOI(PointOfInterest poi) {
@@ -256,6 +270,26 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
 
     }
 
+    private void bindDebugLog() {
+        this.propertyDebugLog = new SimpleListProperty<String>();
+        this.propertyDebugLog.set(DebugLog.debugLog);
+
+        // systemoutprintline redirect
+        //ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        //PrintStream old = System.out;
+        System.setOut(new PrintStream(System.out) {
+
+            public void println(String s) {
+                propertyDebugLog.get().add(s);
+                //super.println(s);
+            }
+
+            public void print(String s) {
+                propertyDebugLog.get().add(s);
+            }
+        });
+    }
+
 //Getter und Setter
     public List<PointOfInterest> getPointsOfInterest() {
         return pointsOfInterest;
@@ -303,6 +337,14 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
 
     public void setPropertyCloseButton(EventHandler propertyCloseButton) {
         this.propertyCloseButton.set(propertyCloseButton);
+    }
+
+    public ObservableList<String> getPropertyDebugLog() {
+        return propertyDebugLog.get();
+    }
+
+    public SimpleListProperty<String> propertyDebugLogProperty() {
+        return propertyDebugLog;
     }
 
 //Testdaten

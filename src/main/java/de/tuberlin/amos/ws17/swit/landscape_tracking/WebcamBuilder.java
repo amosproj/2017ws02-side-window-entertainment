@@ -40,6 +40,7 @@ public class WebcamBuilder {
     }
 
     public WebcamBuilder setViewSize(Dimension viewSize) {
+        //System.out.println("Testtest");
         this.viewSize = viewSize;
         return this;
     }
