@@ -5,6 +5,7 @@ import de.tuberlin.amos.ws17.swit.application.view.ApplicationViewImplementation
 import de.tuberlin.amos.ws17.swit.common.*;
 import de.tuberlin.amos.ws17.swit.gps.GpsTracker;
 import de.tuberlin.amos.ws17.swit.image_analysis.LandmarkDetector;
+import de.tuberlin.amos.ws17.swit.information_source.WikiAbstractProvider;
 import de.tuberlin.amos.ws17.swit.landscape_tracking.LandscapeTracker;
 import de.tuberlin.amos.ws17.swit.landscape_tracking.LandscapeTrackerImplementation;
 import de.tuberlin.amos.ws17.swit.tracking.UserTracker;
@@ -36,6 +37,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     private UserTracker userTracker;
     private GpsTracker gpsTracker;
     private DebugLog debugLog = new DebugLog();
+    private WikiAbstractProvider abstractProvider;
     //TODO @alle fügt hier die Hauptklassen eures Moduls hinzu, initiiert werden diese aber erst im Konstruktor
 
     //Threads
@@ -96,7 +98,10 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         }
         */
         landscapeTracker = new LandscapeTrackerImplementation();
+        abstractProvider = new WikiAbstractProvider();
+
         moduleList.add(landscapeTracker);
+        moduleList.add(abstractProvider);
         /*
         moduleList.add(cloudVision);
         moduleList.add(userTracker);
@@ -246,7 +251,9 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
 
         //Abfrage Informationen
         //TODO @JulianS Anfrage an information source mit ermitteltem POI
-
+        for (PointOfInterest poi: pois) {
+            poi = abstractProvider.provideAbstract(poi);
+        }
 
         for (PointOfInterest poi: pois) {
             addPOIcamera(poi);
@@ -275,7 +282,9 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
 
         //Abfrage Informationen
         //TODO @JulianS Anfrage an das information source Modul, welches für jeden POI in der Liste die Daten abruft
-
+        for (PointOfInterest poi: pois) {
+            poi = abstractProvider.provideAbstract(poi);
+        }
 
         for(PointOfInterest poi: pois) {
             addPOImaps(poi);
