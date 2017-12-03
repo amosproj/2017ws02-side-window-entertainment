@@ -31,7 +31,7 @@
                             <goal>copy-dependencies</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${project.build.directory}/classes/libs</outputDirectory>
+                            <outputDirectory>${project.build.directory}/libs</outputDirectory>
                             <overWriteReleases>false</overWriteReleases>
                             <overWriteSnapshots>false</overWriteSnapshots>
                             <overWriteIfNewer>true</overWriteIfNewer>
@@ -47,32 +47,21 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                             <classpathPrefix>lib</classpathPrefix>
+                            <classpathPrefix>libs/</classpathPrefix>
                              <mainClass>de.tuberlin.amos.ws17.swit.application.view.ApplicationViewImplementation</mainClass>
                         </manifest>
-                        <manifestEntries>
-                            <Class-Path>libs/</Class-Path>
-                        </manifestEntries>
                     </archive>
-                </configuration>
-            </plugin>
-            <plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <mainClass>de.tuberlin.amos.ws17.swit.application.view.ApplicationViewImplementation</mainClass>
-                        </manifest>
-                    </archive>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
                 </configuration>
             </plugin>
         </plugins>
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
+            </resource>
+            <resource>
+                <directory>libs</directory>
+                <targetPath>libs</targetPath>
+                <filtering>true</filtering>
                 <includes>
                     <include>**/*</include>
                 </includes>
@@ -221,12 +210,20 @@
 
         <dependency>
             <groupId>com.javonet</groupId>
-            <artifactId>api</artifactId>
-            <version>1.0</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/libs/javonet-1.4hf34.jar</systemPath>
+            <artifactId>javonet</artifactId>
+            <version>1.4hf34</version>
+            <!--<scope>system</scope>-->
+            <!--<systemPath>${project.basedir}/libs/javonet-1.4hf34.jar</systemPath>-->
         </dependency>
 
     </dependencies>
+
+    <repositories>
+        <repository>
+            <id>local-maven-repo</id>
+            <url>file:///${project.basedir}/local-maven-repo</url>
+        </repository>
+    </repositories>
+
 
 </project>
