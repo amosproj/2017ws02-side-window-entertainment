@@ -8,7 +8,7 @@ public interface AbstractProvider {
      * Provides an abstract for a POI
      * @param poi PointOfInterest object, already contains either a name of a poi or its poi
      */
-    void provideAbstract(PointOfInterest poi);
+    PointOfInterest provideAbstract(PointOfInterest poi);
 
 
 }
