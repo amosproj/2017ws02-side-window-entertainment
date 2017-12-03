@@ -2,14 +2,19 @@ package de.tuberlin.amos.ws17.swit.application.view;
 
 import de.tuberlin.amos.ws17.swit.application.viewmodel.ApplicationViewModelImplementation;
 import de.tuberlin.amos.ws17.swit.application.viewmodel.PoiViewModel;
+import de.tuberlin.amos.ws17.swit.common.Module;
 import javafx.application.Application;
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.Property;
+import javafx.collections.ObservableList;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.paint.Color;
@@ -22,8 +27,8 @@ public class ApplicationViewImplementation extends Application implements Applic
     private BorderPane pnFoundation;
     private ListView<PoiViewModel> listPOIcamera;
     private ListView<PoiViewModel> listPOImaps;
-    private TextArea taDebugLog;
     private ListView<String> listDebugLog;
+    private ListView<Module> listModuleNotWorking;
 
     private BorderPane expansionPane;
     private BorderPane expansionTopPane;
@@ -45,9 +50,11 @@ public class ApplicationViewImplementation extends Application implements Applic
         listPOIcamera = new ListView<PoiViewModel>();
         listPOImaps = new ListView<PoiViewModel>();
 
-        taDebugLog = new TextArea();
-        taDebugLog.setEditable(false);
+        listModuleNotWorking = new ListView<>();
+        pnFoundation.setLeft(listModuleNotWorking);
+
         listDebugLog = new ListView<>();
+        listDebugLog.setId("listDebugLog");
         pnFoundation.setRight(listDebugLog);
 
         expansionPane = new BorderPane();
@@ -69,7 +76,6 @@ public class ApplicationViewImplementation extends Application implements Applic
         expansionName.textProperty().bindBidirectional(controller.getExpandedPOI().nameProperty());
         expansionImage.imageProperty().bindBidirectional(controller.getExpandedPOI().imageProperty());
         expansionInformation.textProperty().bindBidirectional(controller.getExpandedPOI().informationAbstractProperty());
-
 
         Callback<ListView<PoiViewModel>, ListCell<PoiViewModel>> callback = new Callback<ListView<PoiViewModel>, ListCell<PoiViewModel>>() {
             @Override
@@ -114,6 +120,29 @@ public class ApplicationViewImplementation extends Application implements Applic
                             Label debugText = new Label(item);
                             //setText(item);
                             setGraphic(debugText);
+                            listPOIcamera.refresh();
+                        }
+                    }
+                };
+            }
+        });
+
+        listModuleNotWorking.itemsProperty().bindBidirectional(controller.listModuleNotWorkingProperty());
+        listModuleNotWorking.setCellFactory(new Callback<ListView<Module>, ListCell<Module>>() {
+            @Override
+            public ListCell<Module> call(ListView<Module> param) {
+                return new ListCell<Module>() {
+                    @Override
+                    public void updateItem(Module item, boolean empty) {
+                        super.updateItem(item, empty);
+                        if(empty || item == null) {
+                            setGraphic(null);
+                            setText(null);
+                        } else {
+                            ImageView imageView = new ImageView(SwingFXUtils.toFXImage(item.getModuleImage(), null));
+                            imageView.setPreserveRatio(true);
+                            imageView.setFitHeight(100);
+                            setGraphic(imageView);
                             listPOIcamera.refresh();
                         }
                     }

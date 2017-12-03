@@ -4,30 +4,28 @@ import de.tuberlin.amos.ws17.swit.application.view.ApplicationView;
 import de.tuberlin.amos.ws17.swit.application.view.ApplicationViewImplementation;
 import de.tuberlin.amos.ws17.swit.common.*;
 import de.tuberlin.amos.ws17.swit.gps.GpsTracker;
-import de.tuberlin.amos.ws17.swit.gps.GpsTrackerFactory;
-import de.tuberlin.amos.ws17.swit.gps.SensorNotFoundException;
-import de.tuberlin.amos.ws17.swit.image_analysis.CloudVision;
 import de.tuberlin.amos.ws17.swit.image_analysis.LandmarkDetector;
 import de.tuberlin.amos.ws17.swit.landscape_tracking.LandscapeTracker;
 import de.tuberlin.amos.ws17.swit.landscape_tracking.LandscapeTrackerImplementation;
-import de.tuberlin.amos.ws17.swit.landscape_tracking.WebcamBuilder;
-import de.tuberlin.amos.ws17.swit.landscape_tracking.WebcamImplementation;
 import de.tuberlin.amos.ws17.swit.tracking.UserTracker;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleListProperty;
+import javafx.beans.property.SimpleMapProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.Image;
 import javafx.event.EventHandler;
 import javafx.event.ActionEvent;
 
-import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.TimeoutException;
+import java.util.Map;
 
 public class ApplicationViewModelImplementation implements ApplicationViewModel {
 
@@ -35,7 +33,6 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     private ApplicationView view;
     private LandmarkDetector cloudVision;
     private LandscapeTracker landscapeTracker;
-    private WebcamBuilder webcamBuilder;
     private UserTracker userTracker;
     private GpsTracker gpsTracker;
     private DebugLog debugLog = new DebugLog();
@@ -54,21 +51,38 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     private SimpleListProperty<PoiViewModel> propertyPOIcamera;
     private SimpleObjectProperty<EventHandler<ActionEvent>> propertyCloseButton;
     private SimpleListProperty<String> propertyDebugLog;
+    private SimpleListProperty<Image> propertyModuleNotWorkingImageList;
+    private SimpleMapProperty<Module, SimpleBooleanProperty> propertyModuleIsWorkingMap;
+    private SimpleListProperty<Module> listModuleNotWorking;
+    private List<Module> moduleList;
+
 
 //Konstruktor
     public ApplicationViewModelImplementation(ApplicationView view) {
 
         bindDebugLog();
 
+        listModuleNotWorking = new SimpleListProperty<>();
+        listModuleNotWorking.set(FXCollections.observableList(new ArrayList<Module>()));
+
+        pointsOfInterest = new ArrayList<PointOfInterest>();
+        expandedPOI = new PoiViewModel();
+        vmUserPosition = new UserPositionViewModel();
+
+        propertyPOImaps = new SimpleListProperty();
+        propertyPOIcamera = new SimpleListProperty();
+
+        propertyModuleNotWorkingImageList = new SimpleListProperty<>();
+        propertyModuleNotWorkingImageList.set(FXCollections.observableList(new ArrayList<>()));
+
+        propertyModuleIsWorkingMap = new SimpleMapProperty<>();
+        propertyModuleIsWorkingMap.set(FXCollections.observableMap(new HashMap<>()));
+
+        moduleList = new ArrayList<>();
+
         this.view = view;
         //TODO @alle initiiert hier die Hauptklassen eurer Module
-        /*WebcamImplementation webcamImplementation = null;
-        try {
-            webcamImplementation = new WebcamBuilder().setViewSize(new Dimension(640, 480)).setWebcamDiscoveryTimeout(10000).build();
-        } catch (TimeoutException e) {
-            e.printStackTrace();
-        }
-        landscapeTracker = new LandscapeTrackerImplementation(webcamImplementation);
+        /*
         cloudVision = CloudVision.getInstance();
         //userTracker = new JavoNetUserTracker();
         //userTracker.startTracking();
@@ -81,6 +95,18 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
             e.printStackTrace();
         }
         */
+        landscapeTracker = new LandscapeTrackerImplementation();
+        moduleList.add(landscapeTracker);
+        /*
+        moduleList.add(cloudVision);
+        moduleList.add(userTracker);
+        moduleList.add(gpsTracker);
+        */
+
+        moduleList.forEach(module -> {
+            startModule(module);
+        });
+
         propertyCloseButton = new SimpleObjectProperty<EventHandler<ActionEvent>>();
         propertyCloseButton.set(new EventHandler<ActionEvent>() {
             @Override
@@ -89,14 +115,6 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 minimizePOI();
             }
         });
-
-
-        pointsOfInterest = new ArrayList<PointOfInterest>();
-        expandedPOI = new PoiViewModel();
-        vmUserPosition = new UserPositionViewModel();
-
-        propertyPOImaps = new SimpleListProperty();
-        propertyPOIcamera = new SimpleListProperty();
 
         initTestData();
 
@@ -107,7 +125,12 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
             public void run() {
                 int iterations = 0;
                 while (run) {
-                    //trackUser();
+                    /*trackUser();
+                    UserExpressions userexpressions = userTracker.getUserExpressions();
+                    if(userexpressions.isKiss()) {
+                        loadCameraPoi();
+                        loadMapsPoi();
+                    }*/
                     if(iterations % 10 == 0) {
                         //loadCameraPoi();
                         //loadMapsPoi();
@@ -123,13 +146,13 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         });
     }
 
-
-    private void exception() throws Exception {
-        throw new Exception("TestException");
-    }
-
-    public void addPOI(PointOfInterest poi) {
-        //TODO deprecated -> loeschen
+    private void startModule(Module module) {
+        try {
+            module.startModule();
+            listModuleNotWorking.remove(module);
+        } catch (ModuleNotWorkingException e) {
+            listModuleNotWorking.add(module);
+        }
     }
 
     private void addPOIcamera(PointOfInterest poi) {
@@ -239,6 +262,8 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
             return;
         }
 
+        DebugLog.log("Latitude: " + kinematicProperties.getLatitude() + " , Longitude: " + kinematicProperties.getLongitude(), this);
+
         List<PointOfInterest> pois = new ArrayList<PointOfInterest>();
         //Abfrage POIs
         //TODO @Leander Anfrage an das POI Modul, welches eine Liste von POIs in der Nähe zurückgibt
@@ -255,6 +280,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         for(PointOfInterest poi: pois) {
             addPOImaps(poi);
         }
+
     }
 
     private void trackUser() {
@@ -275,8 +301,6 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         this.propertyDebugLog.set(DebugLog.debugLog);
 
         // systemoutprintline redirect
-        //ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        //PrintStream old = System.out;
         System.setOut(new PrintStream(System.out) {
 
             public void println(String s) {
@@ -288,6 +312,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 propertyDebugLog.get().add(s);
             }
         });
+
     }
 
 //Getter und Setter
@@ -345,6 +370,22 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
 
     public SimpleListProperty<String> propertyDebugLogProperty() {
         return propertyDebugLog;
+    }
+
+    public ObservableList<Image> getPropertyModuleNotWorkingImageList() {
+        return propertyModuleNotWorkingImageList.get();
+    }
+
+    public SimpleListProperty<Image> propertyModuleNotWorkingImageListProperty() {
+        return propertyModuleNotWorkingImageList;
+    }
+
+    public ObservableList<Module> getListModuleNotWorking() {
+        return listModuleNotWorking.get();
+    }
+
+    public SimpleListProperty<Module> listModuleNotWorkingProperty() {
+        return listModuleNotWorking;
     }
 
 //Testdaten
