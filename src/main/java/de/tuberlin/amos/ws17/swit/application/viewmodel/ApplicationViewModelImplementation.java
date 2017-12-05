@@ -264,8 +264,11 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         KinematicProperties kinematicProperties = new KinematicProperties();
         //Abfrage GPS Koordinaten
         //TODO @Vlad Ergebnis zurückgeben, anstatt call by reference
-        gpsTracker.setDumpObject(kinematicProperties);
-        if(kinematicProperties == null) {
+        try{
+            gpsTracker.fillDumpObject(kinematicProperties);
+        }
+        catch (ModuleNotWorkingException e){
+            // handle exception
             return;
         }
 
