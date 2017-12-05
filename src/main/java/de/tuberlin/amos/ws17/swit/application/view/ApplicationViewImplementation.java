@@ -46,11 +46,15 @@ public class ApplicationViewImplementation extends Application implements Applic
         app = this;
 
         pnFoundation = new BorderPane();
+        pnFoundation.setId("pnFoundation");
         pnFoundation.setStyle("-fx-background-color: white;");
         listPOIcamera = new ListView<PoiViewModel>();
+        listPOIcamera.setId("listPOIcamera");
         listPOImaps = new ListView<PoiViewModel>();
+        listPOImaps.setId("listPOImaps");
 
         listModuleNotWorking = new ListView<>();
+        listModuleNotWorking.setId("listModuleNotWorking");
         pnFoundation.setLeft(listModuleNotWorking);
 
         listDebugLog = new ListView<>();
@@ -58,11 +62,17 @@ public class ApplicationViewImplementation extends Application implements Applic
         pnFoundation.setRight(listDebugLog);
 
         expansionPane = new BorderPane();
+        expansionPane.setId("expansionPane");
         expansionTopPane = new BorderPane();
+        expansionTopPane.setId("expansionTopPane");
         expansionButton = new Button("X");
+        expansionButton.setId("expansionButton");
         expansionName = new Label();
+        expansionName.setId("expansionPane");
         expansionInformation = new Label();
+        expansionInformation.setId("expansionInformation");
         expansionImage = new ImageView();
+        expansionImage.setId("expansionImage");
 
         initExpansion();
     }
@@ -118,7 +128,6 @@ public class ApplicationViewImplementation extends Application implements Applic
                             setText(null);
                         } else {
                             Label debugText = new Label(item);
-                            //setText(item);
                             setGraphic(debugText);
                             listPOIcamera.refresh();
                         }
@@ -128,6 +137,7 @@ public class ApplicationViewImplementation extends Application implements Applic
         });
 
         listModuleNotWorking.itemsProperty().bindBidirectional(controller.listModuleNotWorkingProperty());
+        listModuleNotWorking.setMaxWidth(70);
         listModuleNotWorking.setCellFactory(new Callback<ListView<Module>, ListCell<Module>>() {
             @Override
             public ListCell<Module> call(ListView<Module> param) {
@@ -141,7 +151,7 @@ public class ApplicationViewImplementation extends Application implements Applic
                         } else {
                             ImageView imageView = new ImageView(SwingFXUtils.toFXImage(item.getModuleImage(), null));
                             imageView.setPreserveRatio(true);
-                            imageView.setFitHeight(100);
+                            imageView.setFitWidth(50);
                             setGraphic(imageView);
                             listPOIcamera.refresh();
                         }
@@ -166,7 +176,7 @@ public class ApplicationViewImplementation extends Application implements Applic
         primaryStage.setTitle("Side Window Infotainment");
         //primaryStage.initStyle(StageStyle.TRANSPARENT);
         //primaryStage.setMaximized(true);
-        Scene scene = new Scene(pnFoundation, 500, 500, Color.TRANSPARENT);
+        Scene scene = new Scene(pnFoundation, 800, 600, Color.WHITE);
         scene.getStylesheets().add("/stylesheets/ApplicationViewStylesheet.css");
         primaryStage.setScene(scene);
         primaryStage.show();
@@ -183,6 +193,15 @@ public class ApplicationViewImplementation extends Application implements Applic
         expansionPane.setTop(expansionTopPane);
         expansionPane.setLeft(expansionImage);
         expansionPane.setCenter(expansionInformation);
+        expansionPane.setMaxWidth(500);
+        expansionPane.setMaxHeight(400);
+        BorderPane.setAlignment(expansionPane, Pos.CENTER_RIGHT);
+        BorderPane.setAlignment(expansionImage, Pos.CENTER_LEFT);
         pnFoundation.setCenter(expansionPane);
+    }
+
+    @Override
+    public void stop(){
+        controller.run = false;
     }
 }
