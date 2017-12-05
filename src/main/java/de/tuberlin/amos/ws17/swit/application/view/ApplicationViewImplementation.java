@@ -10,6 +10,7 @@ import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -36,6 +37,7 @@ public class ApplicationViewImplementation extends Application implements Applic
     private Label expansionName;
     private Label expansionInformation;
     private ImageView expansionImage;
+    private ScrollPane expansionScrollPane;
 
     private static final String FONTNAME = "Helvetica Neue";
     public static ApplicationViewImplementation app;
@@ -45,13 +47,36 @@ public class ApplicationViewImplementation extends Application implements Applic
     public void init() {
         app = this;
 
+        initElements();
+        initExpansion();
+
+        controller = new ApplicationViewModelImplementation(this);
+
+        initBindings();
+        initCellFactories();
+    }
+
+    @Override
+    public void start(Stage stage) {
+        this.primaryStage = stage;
+        primaryStage.setTitle("Side Window Infotainment");
+        //primaryStage.initStyle(StageStyle.TRANSPARENT);
+        //primaryStage.setMaximized(true);
+        Scene scene = new Scene(pnFoundation, 800, 600, Color.WHITE);
+        scene.getStylesheets().add("/stylesheets/ApplicationViewStylesheet.css");
+        primaryStage.setScene(scene);
+        primaryStage.show();
+    }
+
+    private void initElements() {
         pnFoundation = new BorderPane();
         pnFoundation.setId("pnFoundation");
-        pnFoundation.setStyle("-fx-background-color: white;");
         listPOIcamera = new ListView<PoiViewModel>();
         listPOIcamera.setId("listPOIcamera");
+        pnFoundation.setTop(listPOIcamera);
         listPOImaps = new ListView<PoiViewModel>();
         listPOImaps.setId("listPOImaps");
+        pnFoundation.setBottom(listPOImaps);
 
         listModuleNotWorking = new ListView<>();
         listModuleNotWorking.setId("listModuleNotWorking");
@@ -68,25 +93,48 @@ public class ApplicationViewImplementation extends Application implements Applic
         expansionButton = new Button("X");
         expansionButton.setId("expansionButton");
         expansionName = new Label();
-        expansionName.setId("expansionPane");
+        expansionName.setId("expansionName");
         expansionInformation = new Label();
         expansionInformation.setId("expansionInformation");
         expansionImage = new ImageView();
         expansionImage.setId("expansionImage");
-
-        initExpansion();
+        expansionScrollPane = new ScrollPane();
+        expansionScrollPane.setId("expansionScrollPane");
     }
 
-    @Override
-    public void start(Stage stage) {
-        controller = new ApplicationViewModelImplementation(this);
+    private void initExpansion() {
+        expansionName.setAlignment(Pos.TOP_LEFT);
+        expansionInformation.setAlignment(Pos.TOP_CENTER);
+        expansionScrollPane.setContent(expansionInformation);
+        expansionImage.setPreserveRatio(true);
+        expansionImage.setFitHeight(300);
+        expansionImage.setFitWidth(150);
+        expansionTopPane.setLeft(expansionName);
+        expansionTopPane.setRight(expansionButton);
+        expansionPane.setTop(expansionTopPane);
+        expansionPane.setLeft(expansionImage);
+        expansionPane.setCenter(expansionScrollPane);
+        pnFoundation.setCenter(expansionPane);
+        BorderPane.setAlignment(expansionPane, Pos.CENTER_RIGHT);
+        BorderPane.setAlignment(expansionName, Pos.CENTER_LEFT);
+        BorderPane.setAlignment(expansionImage, Pos.CENTER_LEFT);
+        expansionScrollPane.setFitToWidth(true);
+    }
 
+    private void initBindings() {
         expansionButton.visibleProperty().bind(Bindings.equal(controller.getExpandedPOI().nameProperty(), "").not());
         expansionButton.onActionProperty().bindBidirectional(controller.propertyCloseButtonProperty());
         expansionName.textProperty().bindBidirectional(controller.getExpandedPOI().nameProperty());
         expansionImage.imageProperty().bindBidirectional(controller.getExpandedPOI().imageProperty());
         expansionInformation.textProperty().bindBidirectional(controller.getExpandedPOI().informationAbstractProperty());
+        listDebugLog.itemsProperty().bindBidirectional(controller.propertyDebugLogProperty());
+        listModuleNotWorking.itemsProperty().bindBidirectional(controller.listModuleNotWorkingProperty());
+        listPOIcamera.itemsProperty().bindBidirectional(controller.propertyPOIcameraProperty());
+        listPOImaps.itemsProperty().bindBidirectional(controller.propertyPOImapsProperty());
 
+    }
+
+    private void initCellFactories() {
         Callback<ListView<PoiViewModel>, ListCell<PoiViewModel>> callback = new Callback<ListView<PoiViewModel>, ListCell<PoiViewModel>>() {
             @Override
             public ListCell<PoiViewModel> call(ListView<PoiViewModel> param) {
@@ -114,8 +162,9 @@ public class ApplicationViewImplementation extends Application implements Applic
                 };
             }
         };
+        listPOIcamera.setCellFactory(callback);
+        listPOImaps.setCellFactory(callback);
 
-        listDebugLog.itemsProperty().bindBidirectional(controller.propertyDebugLogProperty());
         listDebugLog.setCellFactory(new Callback<ListView<String>, ListCell<String>>() {
             @Override
             public ListCell<String> call(ListView<String> param) {
@@ -136,8 +185,6 @@ public class ApplicationViewImplementation extends Application implements Applic
             }
         });
 
-        listModuleNotWorking.itemsProperty().bindBidirectional(controller.listModuleNotWorkingProperty());
-        listModuleNotWorking.setMaxWidth(70);
         listModuleNotWorking.setCellFactory(new Callback<ListView<Module>, ListCell<Module>>() {
             @Override
             public ListCell<Module> call(ListView<Module> param) {
@@ -159,45 +206,6 @@ public class ApplicationViewImplementation extends Application implements Applic
                 };
             }
         });
-
-        listPOIcamera.setPrefHeight(150.0);
-        listPOIcamera.itemsProperty().bindBidirectional(controller.propertyPOIcameraProperty());
-        listPOIcamera.setOrientation(Orientation.HORIZONTAL);
-        listPOIcamera.setCellFactory(callback);
-        pnFoundation.setTop(listPOIcamera);
-
-        listPOImaps.setPrefHeight(150.0);
-        listPOImaps.itemsProperty().bindBidirectional(controller.propertyPOImapsProperty());
-        listPOImaps.setOrientation(Orientation.HORIZONTAL);
-        listPOImaps.setCellFactory(callback);
-        pnFoundation.setBottom(listPOImaps);
-
-        this.primaryStage = stage;
-        primaryStage.setTitle("Side Window Infotainment");
-        //primaryStage.initStyle(StageStyle.TRANSPARENT);
-        //primaryStage.setMaximized(true);
-        Scene scene = new Scene(pnFoundation, 800, 600, Color.WHITE);
-        scene.getStylesheets().add("/stylesheets/ApplicationViewStylesheet.css");
-        primaryStage.setScene(scene);
-        primaryStage.show();
-    }
-
-    private void initExpansion() {
-        expansionName.setAlignment(Pos.TOP_LEFT);
-        expansionInformation.setAlignment(Pos.TOP_CENTER);
-        expansionInformation.setWrapText(true);
-        expansionImage.setPreserveRatio(true);
-        expansionImage.setFitHeight(200);
-        expansionTopPane.setCenter(expansionName);
-        expansionTopPane.setRight(expansionButton);
-        expansionPane.setTop(expansionTopPane);
-        expansionPane.setLeft(expansionImage);
-        expansionPane.setCenter(expansionInformation);
-        expansionPane.setMaxWidth(500);
-        expansionPane.setMaxHeight(400);
-        BorderPane.setAlignment(expansionPane, Pos.CENTER_RIGHT);
-        BorderPane.setAlignment(expansionImage, Pos.CENTER_LEFT);
-        pnFoundation.setCenter(expansionPane);
     }
 
     @Override

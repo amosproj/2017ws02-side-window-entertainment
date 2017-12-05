@@ -425,7 +425,12 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         //File siegfile = new File(ApplicationViewImplementation.app.getClass().getResource("/test_images/sieges-saeule.jpg").getPath());
         Image siegimg = new Image("/test_images/sieges-saeule.jpg");
         testData.add(new PoiViewModel("8", "Siegessäule", siegimg, "Die Siegessäule. Da hat wohl jemand was gewonnen und hat direkt mal Geld investiert, " +
-                "um es jeden wissen zu lassen. Und jetzt weiß auch du, dass hier irgendwer gewonnen hat. Wahnsinn!"));
+                "um es jeden wissen zu lassen. Und jetzt weiß auch du, dass hier irgendwer gewonnen hat. Wahnsinn! " +
+                "Noch viel wahnsinniger ist, dass ich mir jetzt einen unglaublich langen Text ausdenken muss um zu sehen, " +
+                "ob das Layout der Oberfläche gut funktioniert oder nicht. Dazu möchte ich schauen, ob es eine ScrollBar gibt, " +
+                "falls der Text zu lange ist, was ja durchaus vorkommen kann. Vorallem wenn wir das Abstract von Wikipedia anzeigen, " +
+                "welches gerne mal sehr lang sein kann. Da muss das natürlich gut funktionieren. Deswegen teste ist das jetzt aus. " +
+                "Hoffentlich funktioniert es. Solltest du das hier lesen kann es gut sein, dass es erfolgreich war. "));
 
         //listPOIcamera = FXCollections.observableList(testData);
         propertyPOIcamera.set(FXCollections.observableList(testData));
