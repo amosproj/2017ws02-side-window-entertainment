@@ -4,10 +4,12 @@ import de.tuberlin.amos.ws17.swit.application.view.ApplicationView;
 import de.tuberlin.amos.ws17.swit.application.view.ApplicationViewImplementation;
 import de.tuberlin.amos.ws17.swit.common.*;
 import de.tuberlin.amos.ws17.swit.gps.GpsTracker;
+import de.tuberlin.amos.ws17.swit.image_analysis.CloudVision;
 import de.tuberlin.amos.ws17.swit.image_analysis.LandmarkDetector;
 import de.tuberlin.amos.ws17.swit.information_source.WikiAbstractProvider;
 import de.tuberlin.amos.ws17.swit.landscape_tracking.LandscapeTracker;
 import de.tuberlin.amos.ws17.swit.landscape_tracking.LandscapeTrackerImplementation;
+import de.tuberlin.amos.ws17.swit.tracking.JavoNetUserTracker;
 import de.tuberlin.amos.ws17.swit.tracking.UserTracker;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleListProperty;
@@ -98,10 +100,10 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         }
         */
         landscapeTracker = new LandscapeTrackerImplementation();
-        abstractProvider = new WikiAbstractProvider();
-
         moduleList.add(landscapeTracker);
+        abstractProvider = new WikiAbstractProvider();
         moduleList.add(abstractProvider);
+
         /*
         moduleList.add(cloudVision);
         moduleList.add(userTracker);
@@ -149,6 +151,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 }
             }
         });
+        updateThread.start();
     }
 
     private void startModule(Module module) {
@@ -313,15 +316,15 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         System.setOut(new PrintStream(System.out) {
 
             public void println(String s) {
-                propertyDebugLog.get().add(s);
+                propertyDebugLog.add(s);
                 //super.println(s);
             }
 
             public void print(String s) {
-                propertyDebugLog.get().add(s);
+                propertyDebugLog.add(s);
+                //super.println(s);
             }
         });
-
     }
 
 //Getter und Setter

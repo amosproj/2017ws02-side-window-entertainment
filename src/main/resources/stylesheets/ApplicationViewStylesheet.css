@@ -1,3 +1,22 @@
+#listModuleNotWorking {
+    -fx-min-width:70px;
+    -fx-max-width:70px;
+}
+
+#listDebugLog {
+    -fx-min-width:150px;
+    -fx-max-width: 150px;
+}
+
+#listDebugLog .label {
+    -fx-font-size: 10px;
+}
+
+#expansionPane {
+    -fx-max-width:500px;
+    -fx-max-height: 400px;
+}
+
 .label {
     -fx-font-size: 20px;
     -fx-font-family: "Helvetica Neue";
@@ -18,14 +37,6 @@
 
 .list-view {
     -fx-background-color: white;
-}
-
-#listDebugLog .label{
-    -fx-font-size: 10px;
-}
-
-#listDebugLog {
-    -fx-min-width: 400px;
 }
 
 .list-cell {
