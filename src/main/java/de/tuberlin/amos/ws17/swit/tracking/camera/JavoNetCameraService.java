@@ -6,13 +6,18 @@ import com.javonet.JavonetFramework;
 import com.javonet.api.NAssembly;
 import com.javonet.api.NObject;
 import com.javonet.api.NType;
+import org.apache.jena.base.Sys;
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class JavoNetCameraService implements CameraService {
 
     private NObject dotNetCameraService;
 
     public JavoNetCameraService() throws JavonetException {
-        Javonet.addReference("C:/Users/CFengler/Documents/Visual Studio 2017/Projects/Cf.Test.RealSense/DotNetTracking/bin/Release/DotNetTracking.dll");
+        String path = Paths.get("libs/DotNetTracking.dll").toAbsolutePath().toString();
+        Javonet.addReference(path);
         dotNetCameraService = Javonet.New("CameraService");
     }
 

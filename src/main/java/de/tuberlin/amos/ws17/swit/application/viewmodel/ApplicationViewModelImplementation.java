@@ -4,10 +4,12 @@ import de.tuberlin.amos.ws17.swit.application.view.ApplicationView;
 import de.tuberlin.amos.ws17.swit.application.view.ApplicationViewImplementation;
 import de.tuberlin.amos.ws17.swit.common.*;
 import de.tuberlin.amos.ws17.swit.gps.GpsTracker;
+import de.tuberlin.amos.ws17.swit.image_analysis.CloudVision;
 import de.tuberlin.amos.ws17.swit.image_analysis.LandmarkDetector;
 import de.tuberlin.amos.ws17.swit.information_source.WikiAbstractProvider;
 import de.tuberlin.amos.ws17.swit.landscape_tracking.LandscapeTracker;
 import de.tuberlin.amos.ws17.swit.landscape_tracking.LandscapeTrackerImplementation;
+import de.tuberlin.amos.ws17.swit.tracking.JavoNetUserTracker;
 import de.tuberlin.amos.ws17.swit.tracking.UserTracker;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleListProperty;
@@ -98,10 +100,10 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         }
         */
         landscapeTracker = new LandscapeTrackerImplementation();
-        abstractProvider = new WikiAbstractProvider();
-
         moduleList.add(landscapeTracker);
+        abstractProvider = new WikiAbstractProvider();
         moduleList.add(abstractProvider);
+
         /*
         moduleList.add(cloudVision);
         moduleList.add(userTracker);
@@ -149,6 +151,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 }
             }
         });
+        updateThread.start();
     }
 
     private void startModule(Module module) {
@@ -264,8 +267,11 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         KinematicProperties kinematicProperties = new KinematicProperties();
         //Abfrage GPS Koordinaten
         //TODO @Vlad Ergebnis zurückgeben, anstatt call by reference
-        gpsTracker.setDumpObject(kinematicProperties);
-        if(kinematicProperties == null) {
+        try{
+            gpsTracker.fillDumpObject(kinematicProperties);
+        }
+        catch (ModuleNotWorkingException e){
+            // handle exception
             return;
         }
 
@@ -313,15 +319,15 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         System.setOut(new PrintStream(System.out) {
 
             public void println(String s) {
-                propertyDebugLog.get().add(s);
+                propertyDebugLog.add(s);
                 //super.println(s);
             }
 
             public void print(String s) {
-                propertyDebugLog.get().add(s);
+                propertyDebugLog.add(s);
+                //super.println(s);
             }
         });
-
     }
 
 //Getter und Setter
@@ -401,25 +407,30 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     private void initTestData() {
         List<PoiViewModel> testData = new ArrayList<PoiViewModel>();
 
-        File domfile = new File(ApplicationViewImplementation.app.getClass().getResource("/test_images/berliner-dom.jpg").getPath());
-        Image domimage = new Image(domfile.toURI().toString());
+        //File domfile = new File(ApplicationViewImplementation.app.getClass().getResource("/test_images/berliner-dom.jpg").getPath());
+        Image domimage = new Image("/test_images/berliner-dom.jpg");
         testData.add(new PoiViewModel("5", "Berliner Dom", domimage, "Das ist der Berliner Dom, lalala. Das hier ist ein ganz langer Text um zu testen, " +
                 "ob bei einem Label der Text automatisch auf die nächste Zeile springt. Offensichtlich tut er das nur, wenn man eine Variable dafür setzt. "));
 
-        File torfile = new File(ApplicationViewImplementation.app.getClass().getResource("/test_images/brandenburger-tor.jpg").getPath());
-        Image torimg = new Image(torfile.toURI().toString());
+        //File torfile = new File(ApplicationViewImplementation.app.getClass().getResource("/test_images/brandenburger-tor.jpg").getPath());
+        Image torimg = new Image("/test_images/brandenburger-tor.jpg");
         testData.add(new PoiViewModel("6", "Brandenburger Tor", torimg, "Das Brandenburger Tor. Offensichtlich. " +
                 "Wer das nicht kennt muss aber echt unter nem Stein leben. Naja. Infos geb ich dir nicht, solltest du doch alles wissen. Kulturbanause!"));
 
-        File turmfile = new File(ApplicationViewImplementation.app.getClass().getResource("/test_images/fernsehturm.jpg").getPath());
-        Image turmimg = new Image(turmfile.toURI().toString());
+        //File turmfile = new File(ApplicationViewImplementation.app.getClass().getResource("/test_images/fernsehturm.jpg").getPath());
+        Image turmimg = new Image("/test_images/fernsehturm.jpg");
         testData.add(new PoiViewModel("7", "Fernsehturm", turmimg, "Vom Fernsehturm kommt das Fernsehen her. Oder so. " +
                 "Heute kommt das Fernsehen aus der Steckdose und stirbt aus. Hah! Video On Demand, hell yeah!"));
 
-        File siegfile = new File(ApplicationViewImplementation.app.getClass().getResource("/test_images/sieges-saeule.jpg").getPath());
-        Image siegimg = new Image(siegfile.toURI().toString());
+        //File siegfile = new File(ApplicationViewImplementation.app.getClass().getResource("/test_images/sieges-saeule.jpg").getPath());
+        Image siegimg = new Image("/test_images/sieges-saeule.jpg");
         testData.add(new PoiViewModel("8", "Siegessäule", siegimg, "Die Siegessäule. Da hat wohl jemand was gewonnen und hat direkt mal Geld investiert, " +
-                "um es jeden wissen zu lassen. Und jetzt weiß auch du, dass hier irgendwer gewonnen hat. Wahnsinn!"));
+                "um es jeden wissen zu lassen. Und jetzt weiß auch du, dass hier irgendwer gewonnen hat. Wahnsinn! " +
+                "Noch viel wahnsinniger ist, dass ich mir jetzt einen unglaublich langen Text ausdenken muss um zu sehen, " +
+                "ob das Layout der Oberfläche gut funktioniert oder nicht. Dazu möchte ich schauen, ob es eine ScrollBar gibt, " +
+                "falls der Text zu lange ist, was ja durchaus vorkommen kann. Vorallem wenn wir das Abstract von Wikipedia anzeigen, " +
+                "welches gerne mal sehr lang sein kann. Da muss das natürlich gut funktionieren. Deswegen teste ist das jetzt aus. " +
+                "Hoffentlich funktioniert es. Solltest du das hier lesen kann es gut sein, dass es erfolgreich war. "));
 
         //listPOIcamera = FXCollections.observableList(testData);
         propertyPOIcamera.set(FXCollections.observableList(testData));

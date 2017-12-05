@@ -1,3 +1,55 @@
+#listModuleNotWorking {
+    -fx-pref-width: 70px;
+    -fx-max-width:70px;
+}
+
+#listDebugLog {
+    -fx-min-width: 150px;
+    -fx-max-width: 150px;
+}
+
+#listDebugLog .label {
+    -fx-font-size: 10px;
+}
+
+#expansionPane {
+    -fx-max-width: 500px;
+    -fx-max-height: 400px;
+    -fx-alignment: center-right;
+}
+
+#expansionImage {
+    -fx-fit-to-width: 150px;
+    -fx-fit-to-height: 300px;
+    -fx-alignment: center-left;
+}
+
+#expansionInformation {
+    -fx-padding: 5px;
+    -fx-background-color: white;
+    -fx-wrap-text: true;
+}
+
+#expansionScrollPane {
+    -fx-background-color: white;
+}
+
+#listPOImaps {
+    -fx-orientation: horizontal;
+    -fx-pref-height: 150px;
+    -fx-max-height: 150px;
+}
+
+#listPOIcamera {
+    -fx-orientation: horizontal;
+    -fx-pref-height: 150px;
+    -fx-max-height: 150px;
+}
+
+#pnFoundation {
+    -fx-background-color: white;
+}
+
 .label {
     -fx-font-size: 20px;
     -fx-font-family: "Helvetica Neue";
@@ -8,6 +60,7 @@
 .button {
     -fx-font-size: 20px;
     -fx-font-family: "Helvetica Neue";
+    -fx-font-weight: bold;
     -fx-text-fill: white;
     -fx-background-color: black;
 }
@@ -16,16 +69,16 @@
     -fx-background-color: dimgrey;
 }
 
-.list-view {
+.scroll-pane > .viewport {
+    -fx-background-color: transparent;
+}
+
+.scroll-pane {
     -fx-background-color: white;
 }
 
-#listDebugLog .label{
-    -fx-font-size: 10px;
-}
-
-#listDebugLog {
-    -fx-min-width: 400px;
+.list-view {
+    -fx-background-color: white;
 }
 
 .list-cell {
