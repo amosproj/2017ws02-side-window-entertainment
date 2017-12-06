@@ -9,6 +9,8 @@ import de.tuberlin.amos.ws17.swit.image_analysis.LandmarkDetector;
 import de.tuberlin.amos.ws17.swit.information_source.WikiAbstractProvider;
 import de.tuberlin.amos.ws17.swit.landscape_tracking.LandscapeTracker;
 import de.tuberlin.amos.ws17.swit.landscape_tracking.LandscapeTrackerImplementation;
+import de.tuberlin.amos.ws17.swit.poi.google.GooglePoi;
+import de.tuberlin.amos.ws17.swit.poi.google.GooglePoiLoader;
 import de.tuberlin.amos.ws17.swit.tracking.JavoNetUserTracker;
 import de.tuberlin.amos.ws17.swit.tracking.UserTracker;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -74,7 +76,9 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         vmUserPosition = new UserPositionViewModel();
 
         propertyPOImaps = new SimpleListProperty();
+        propertyPOImaps.set(FXCollections.observableList(new ArrayList<PoiViewModel>()));
         propertyPOIcamera = new SimpleListProperty();
+        propertyPOIcamera.set(FXCollections.observableList(new ArrayList<PoiViewModel>()));
 
         propertyModuleNotWorkingImageList = new SimpleListProperty<>();
         propertyModuleNotWorkingImageList.set(FXCollections.observableList(new ArrayList<>()));
@@ -88,8 +92,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         //TODO @alle initiiert hier die Hauptklassen eurer Module
         /*
         cloudVision = CloudVision.getInstance();
-        //userTracker = new JavoNetUserTracker();
-        //userTracker.startTracking();
+
         //TODO @Vlad Exception handling in deine Klasse (siehe userTracker)
         gpsTracker = GpsTrackerFactory.GetGpsTracker();
         try {
@@ -99,6 +102,9 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
             e.printStackTrace();
         }
         */
+        userTracker = new JavoNetUserTracker();
+        userTracker.startTracking();
+
         landscapeTracker = new LandscapeTrackerImplementation();
         moduleList.add(landscapeTracker);
         abstractProvider = new WikiAbstractProvider();
@@ -123,27 +129,31 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
             }
         });
 
-        initTestData();
+        //initTestData();
 
         run = true;
         modelviewThread = Thread.currentThread();
         updateThread = new Thread(new Runnable() {
             @Override
             public void run() {
-                int iterations = 0;
+                int iterations = 10;
+                int lastExpression = 0;
+                UserExpressions userExpressions;
                 while (run) {
-                    /*trackUser();
-                    UserExpressions userexpressions = userTracker.getUserExpressions();
-                    if(userexpressions.isKiss()) {
-                        loadCameraPoi();
-                        loadMapsPoi();
-                    }*/
+                    userExpressions = null;
+                    if(userTracker.getIsUserTracked()) {
+                        userExpressions = userTracker.getUserExpressions();
+                        if(userExpressions.isKiss() && (iterations - lastExpression) >= 10) {
+                            lastExpression = iterations;
+                            loadCameraPoi();
+                        }
+                    }
                     if(iterations % 10 == 0) {
                         //loadCameraPoi();
-                        //loadMapsPoi();
+                        loadMapsPoi();
                     }
                     try {
-                        Thread.sleep(1000);
+                        Thread.sleep(500);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -280,7 +290,10 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         List<PointOfInterest> pois = new ArrayList<PointOfInterest>();
         //Abfrage POIs
         //TODO @Leander Anfrage an das POI Modul, welches eine Liste von POIs in der Nähe zurückgibt
-
+        GooglePoiLoader loader = new GooglePoiLoader(500, 800);
+        List<GooglePoi> gPois = loader.loadPlaceForCircleAndType(kinematicProperties,300);
+        loader.downloadImages(gPois);
+        pois = (List) gPois;
 
         if(pois.size() == 0) {
             return;
@@ -294,19 +307,6 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
 
         for(PointOfInterest poi: pois) {
             addPOImaps(poi);
-        }
-
-    }
-
-    private void trackUser() {
-        UserPosition userPosition = null;
-        UserExpressions userExpressions = null;
-        //TODO @Christian User Position vom User Tracking ermittelt
-        if(userTracker.getIsUserTracked()) {
-            userPosition = userTracker.getUserPosition();
-            userExpressions = userTracker.getUserExpressions();
-        } else {
-            return;
         }
 
     }
@@ -401,6 +401,10 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
 
     public SimpleListProperty<Module> listModuleNotWorkingProperty() {
         return listModuleNotWorking;
+    }
+
+    public List<Module> getModuleList() {
+        return moduleList;
     }
 
 //Testdaten

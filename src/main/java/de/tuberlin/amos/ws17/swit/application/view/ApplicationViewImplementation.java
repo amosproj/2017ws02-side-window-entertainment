@@ -211,5 +211,8 @@ public class ApplicationViewImplementation extends Application implements Applic
     @Override
     public void stop(){
         controller.run = false;
+        for(Module m: controller.getModuleList()) {
+            m.stopModule();
+        }
     }
 }

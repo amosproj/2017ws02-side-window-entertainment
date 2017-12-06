@@ -38,7 +38,7 @@ public class MidThermGooglePlacesApiDemo {
         List<PointOfInterest> pois=(List) gPois;
 
         //here the seen pois are calculated by the current position and a previous position
-        Set<PointOfInterest> poisInView =sightFinder.getPoisInViewAngle(previousPostion, currentPostion, pois).keySet();
+        Set<PointOfInterest> poisInView = sightFinder.getPoisInViewAngle(previousPostion, currentPostion, pois).keySet();
 
     }
 }
