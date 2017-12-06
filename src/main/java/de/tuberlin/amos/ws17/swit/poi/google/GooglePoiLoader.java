@@ -81,7 +81,7 @@ public class GooglePoiLoader {
 	}
 
 	public List<GooglePoi> loadPlaceForCircleAndType(GpsPosition center, int radius, GoogleType... types) throws InvalidRequestException{
-
+		//TODO koennte fehlerhaft sein
 		Param[] params=new Param[types.length];
 		for(int i=0; i<types.length; i++){
 			params[i]=new Param("type").value(types[i]);
@@ -123,6 +123,10 @@ public class GooglePoiLoader {
 	}
 	private static List<Place> getPlacesDetails(List<Place> places){
 
+    	if (places == null) {
+    		return new ArrayList<Place>();
+		}
+
 		List<Place> detailedPlaces=new ArrayList<>();
 		
 		for(Place p: places){
@@ -133,12 +137,20 @@ public class GooglePoiLoader {
 	}
 
 	public void downloadImages(Collection<GooglePoi> poisToAddPhotosTo){
+    	if (poisToAddPhotosTo == null) {
+    		return;
+		}
+
 		for(GooglePoi poi:poisToAddPhotosTo){
 			downloadImage(poi);
 		}
 	}
 
 	private void downloadImage(GooglePoi poi) {
+    	if (poi == null) {
+    		return;
+		}
+
 		if(poi.getPhotoreference()!=null) {
 			Photo photo = poi.getPhotoreference();
 			BufferedImage image = photo.download(xResolution, yResolution).getImage();

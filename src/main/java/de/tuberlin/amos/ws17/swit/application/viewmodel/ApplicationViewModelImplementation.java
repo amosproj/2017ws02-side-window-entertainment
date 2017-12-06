@@ -4,15 +4,20 @@ import de.tuberlin.amos.ws17.swit.application.view.ApplicationView;
 import de.tuberlin.amos.ws17.swit.application.view.ApplicationViewImplementation;
 import de.tuberlin.amos.ws17.swit.common.*;
 import de.tuberlin.amos.ws17.swit.gps.GpsTracker;
+import de.tuberlin.amos.ws17.swit.gps.GpsTrackerFactory;
 import de.tuberlin.amos.ws17.swit.image_analysis.CloudVision;
+import de.tuberlin.amos.ws17.swit.image_analysis.ImageUtils;
 import de.tuberlin.amos.ws17.swit.image_analysis.LandmarkDetector;
 import de.tuberlin.amos.ws17.swit.information_source.WikiAbstractProvider;
 import de.tuberlin.amos.ws17.swit.landscape_tracking.LandscapeTracker;
 import de.tuberlin.amos.ws17.swit.landscape_tracking.LandscapeTrackerImplementation;
+import de.tuberlin.amos.ws17.swit.poi.PoiType;
 import de.tuberlin.amos.ws17.swit.poi.google.GooglePoi;
 import de.tuberlin.amos.ws17.swit.poi.google.GooglePoiLoader;
+import de.tuberlin.amos.ws17.swit.poi.google.GoogleType;
 import de.tuberlin.amos.ws17.swit.tracking.JavoNetUserTracker;
 import de.tuberlin.amos.ws17.swit.tracking.UserTracker;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleMapProperty;
@@ -62,11 +67,24 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     private SimpleListProperty<Module> listModuleNotWorking;
     private List<Module> moduleList;
 
+    public Image getPropertyCameraImage() {
+        return propertyCameraImage.get();
+    }
+
+    public SimpleObjectProperty<Image> propertyCameraImageProperty() {
+        return propertyCameraImage;
+    }
+
+    private SimpleObjectProperty<Image> propertyCameraImage;
+    private BufferedImage cameraImage;
+
 
 //Konstruktor
     public ApplicationViewModelImplementation(ApplicationView view) {
 
-        bindDebugLog();
+        propertyCameraImage = new SimpleObjectProperty<Image>();
+
+        //bindDebugLog();
 
         listModuleNotWorking = new SimpleListProperty<>();
         listModuleNotWorking.set(FXCollections.observableList(new ArrayList<Module>()));
@@ -90,18 +108,18 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
 
         this.view = view;
         //TODO @alle initiiert hier die Hauptklassen eurer Module
-        /*
+
         cloudVision = CloudVision.getInstance();
 
         //TODO @Vlad Exception handling in deine Klasse (siehe userTracker)
         gpsTracker = GpsTrackerFactory.GetGpsTracker();
         try {
-            gpsTracker.start();
+            gpsTracker.startModule();
         }
-        catch (SensorNotFoundException e){
+        catch (ModuleNotWorkingException e){
             e.printStackTrace();
         }
-        */
+
         userTracker = new JavoNetUserTracker();
         userTracker.startTracking();
 
@@ -143,9 +161,24 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                     userExpressions = null;
                     if(userTracker.getIsUserTracked()) {
                         userExpressions = userTracker.getUserExpressions();
-                        if(userExpressions.isKiss() && (iterations - lastExpression) >= 10) {
+                        if(userExpressions.isKiss() /*&& (iterations - lastExpression) >= 10*/) {
                             lastExpression = iterations;
-                            loadCameraPoi();
+                            BufferedImage image = null;
+                            try {
+                                image = landscapeTracker.getImage();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                            if (image != null) {
+                                cameraImage = image;
+                                Platform.runLater(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        propertyCameraImage.set(SwingFXUtils.toFXImage(cameraImage, null ));
+                                    }
+                                });
+                            }
+                            //loadCameraPoi();
                         }
                     }
                     if(iterations % 10 == 0) {
@@ -192,7 +225,12 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     private void addPOImaps(PointOfInterest poi) {
         PoiViewModel item = convertPOI(poi);
         pointsOfInterest.add(poi);
-        propertyPOImaps.add(item);
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                propertyPOImaps.add(item);
+            }
+        });
     }
 
     private boolean removePOImaps(String id) {
@@ -209,7 +247,8 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         PoiViewModel result = new PoiViewModel();
         result.setId(poi.getId());
         result.setName(poi.getName());
-        result.setImage(SwingFXUtils.toFXImage(poi.getImage(), null ));
+        if(poi.getImage() == null)
+            result.setImage(SwingFXUtils.toFXImage(poi.getImage(), null ));
         result.setInformationAbstract(poi.getInformationAbstract());
         return result;
     }
@@ -255,6 +294,13 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         if (image == null) {
             return;
         }
+        cameraImage = image;
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                propertyCameraImage.set(SwingFXUtils.toFXImage(cameraImage, null ));
+            }
+        });
 
         //Analyse Bild
         List<PointOfInterest> pois = cloudVision.identifyPOIs(image);
@@ -271,43 +317,66 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         for (PointOfInterest poi: pois) {
             addPOIcamera(poi);
         }
+        System.out.println("camera POI Zyklus zu Ende");
     }
 
     private void loadMapsPoi() {
         KinematicProperties kinematicProperties = new KinematicProperties();
-        //Abfrage GPS Koordinaten
-        //TODO @Vlad Ergebnis zurückgeben, anstatt call by reference
+
+        //double tiergartenLng2=13.33490991;
+        //double tiergartenLat2=52.5085468;
+        //GpsPosition currentPostion= new GpsPosition(tiergartenLng2, tiergartenLat2);
+        //kinematicProperties.setLatitude(tiergartenLat2);
+        //kinematicProperties.setLongitude(tiergartenLng2);
+
         try{
             gpsTracker.fillDumpObject(kinematicProperties);
+
+            DebugLog.log("Latitude: " + kinematicProperties.getLatitude() + " , Longitude: " + kinematicProperties.getLongitude(), this);
+
+            List<PointOfInterest> pois = new ArrayList<PointOfInterest>();
+            //Abfrage POIs
+            //TODO @Leander Anfrage an das POI Modul, welches eine Liste von POIs in der Nähe zurückgibt
+            GooglePoiLoader loader = new GooglePoiLoader(500, 800);
+            List<GooglePoi> gPois = loader.loadPlaceForCircleAndType(kinematicProperties,300, GoogleType.food
+                    /*,GoogleType.zoo, GoogleType.airport, GoogleType.aquarium, GoogleType.church, GoogleType.city_hall,
+                    GoogleType.hospital, GoogleType.library, GoogleType.mosque, GoogleType.museum, GoogleType.park,
+                    GoogleType.school, GoogleType.stadium, GoogleType.synagogue, GoogleType.university,
+                    GoogleType.point_of_interest, GoogleType.place_of_worship, GoogleType.gas_station, GoogleType.food,
+                    GoogleType.restaurant, GoogleType.store*/);
+            gPois.addAll(loader.loadPlaceForCircleAndType(kinematicProperties,300, GoogleType.gas_station));
+
+            String names = "";
+            if(gPois != null) {
+                for (GooglePoi g: gPois) {
+                    names += g.getName() + System.lineSeparator();
+                    names.length();
+                }
+            }
+
+            loader.downloadImages(gPois);
+            pois = (List) gPois;
+
+            if(pois.size() == 0) {
+                return;
+            }
+
+            //Abfrage Informationen
+            //TODO @JulianS Anfrage an das information source Modul, welches für jeden POI in der Liste die Daten abruft
+            for (PointOfInterest poi: pois) {
+                poi = abstractProvider.provideAbstract(poi);
+            }
+
+            for(PointOfInterest poi: pois) {
+                addPOImaps(poi);
+            }
+
         }
         catch (ModuleNotWorkingException e){
             // handle exception
             return;
         }
 
-        DebugLog.log("Latitude: " + kinematicProperties.getLatitude() + " , Longitude: " + kinematicProperties.getLongitude(), this);
-
-        List<PointOfInterest> pois = new ArrayList<PointOfInterest>();
-        //Abfrage POIs
-        //TODO @Leander Anfrage an das POI Modul, welches eine Liste von POIs in der Nähe zurückgibt
-        GooglePoiLoader loader = new GooglePoiLoader(500, 800);
-        List<GooglePoi> gPois = loader.loadPlaceForCircleAndType(kinematicProperties,300);
-        loader.downloadImages(gPois);
-        pois = (List) gPois;
-
-        if(pois.size() == 0) {
-            return;
-        }
-
-        //Abfrage Informationen
-        //TODO @JulianS Anfrage an das information source Modul, welches für jeden POI in der Liste die Daten abruft
-        for (PointOfInterest poi: pois) {
-            poi = abstractProvider.provideAbstract(poi);
-        }
-
-        for(PointOfInterest poi: pois) {
-            addPOImaps(poi);
-        }
 
     }
 
@@ -320,12 +389,12 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
 
             public void println(String s) {
                 propertyDebugLog.add(s);
-                //super.println(s);
+                super.println(s);
             }
 
             public void print(String s) {
                 propertyDebugLog.add(s);
-                //super.println(s);
+                super.println(s);
             }
         });
     }

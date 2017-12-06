@@ -29,6 +29,7 @@ public class WikiAbstractProvider implements AbstractProvider, Module {
 
         int wikiApiID = searchArticles(poiName);
         if(wikiApiID == -1) {
+            wikiAbstract = "no pages found";
             System.out.println("no pages found");
         } else {
             wikiAbstract = getExtract(wikiApiID);

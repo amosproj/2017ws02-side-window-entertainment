@@ -26,7 +26,12 @@ public class WebcamImplementation {
     protected WebcamImplementation(String webcamName, int timeout) throws TimeoutException {
         List<Webcam> webcamList = Webcam.getWebcams(timeout);
         try{
-            webcam = webcamList.parallelStream().filter(w -> w.getName().equals(webcamName)).collect(Collectors.toList()).get(0);
+            for (Webcam tempWebcam: webcamList) {
+                if (tempWebcam.toString().startsWith("Webcam Logitech")) {
+                    webcam = tempWebcam;
+                }
+            }
+            //webcam = webcamList.parallelStream().filter(w -> w.getName().equals(webcamName)).collect(Collectors.toList()).get(0);
         } catch (IndexOutOfBoundsException ioobe) {
             System.out.println("Keine Kamera mit den Namen " + webcamName + " gefunden.");
         }

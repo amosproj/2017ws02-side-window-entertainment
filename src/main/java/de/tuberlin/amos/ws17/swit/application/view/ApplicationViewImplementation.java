@@ -4,6 +4,7 @@ import de.tuberlin.amos.ws17.swit.application.viewmodel.ApplicationViewModelImpl
 import de.tuberlin.amos.ws17.swit.application.viewmodel.PoiViewModel;
 import de.tuberlin.amos.ws17.swit.common.Module;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 import javafx.collections.ObservableList;
@@ -22,6 +23,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.util.Callback;
+import org.bridj.cpp.com.IDispatch;
 
 public class ApplicationViewImplementation extends Application implements ApplicationView {
 
@@ -122,15 +124,25 @@ public class ApplicationViewImplementation extends Application implements Applic
     }
 
     private void initBindings() {
-        expansionButton.visibleProperty().bind(Bindings.equal(controller.getExpandedPOI().nameProperty(), "").not());
-        expansionButton.onActionProperty().bindBidirectional(controller.propertyCloseButtonProperty());
-        expansionName.textProperty().bindBidirectional(controller.getExpandedPOI().nameProperty());
-        expansionImage.imageProperty().bindBidirectional(controller.getExpandedPOI().imageProperty());
-        expansionInformation.textProperty().bindBidirectional(controller.getExpandedPOI().informationAbstractProperty());
-        listDebugLog.itemsProperty().bindBidirectional(controller.propertyDebugLogProperty());
-        listModuleNotWorking.itemsProperty().bindBidirectional(controller.listModuleNotWorkingProperty());
-        listPOIcamera.itemsProperty().bindBidirectional(controller.propertyPOIcameraProperty());
-        listPOImaps.itemsProperty().bindBidirectional(controller.propertyPOImapsProperty());
+        ImageView cameraImage = new ImageView();
+        pnFoundation.setRight(cameraImage);
+        cameraImage.imageProperty().bindBidirectional(controller.propertyCameraImageProperty());
+
+        try {
+            expansionButton.visibleProperty().bind(Bindings.equal(controller.getExpandedPOI().nameProperty(), "").not());
+            expansionButton.onActionProperty().bindBidirectional(controller.propertyCloseButtonProperty());
+            expansionName.textProperty().bindBidirectional(controller.getExpandedPOI().nameProperty());
+            expansionImage.imageProperty().bindBidirectional(controller.getExpandedPOI().imageProperty());
+            expansionInformation.textProperty().bindBidirectional(controller.getExpandedPOI().informationAbstractProperty());
+            //listDebugLog.itemsProperty().bindBidirectional(controller.propertyDebugLogProperty());
+            listModuleNotWorking.itemsProperty().bindBidirectional(controller.listModuleNotWorkingProperty());
+            listPOIcamera.itemsProperty().bindBidirectional(controller.propertyPOIcameraProperty());
+            listPOImaps.itemsProperty().bindBidirectional(controller.propertyPOImapsProperty());
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+
 
     }
 
@@ -177,8 +189,13 @@ public class ApplicationViewImplementation extends Application implements Applic
                             setText(null);
                         } else {
                             Label debugText = new Label(item);
-                            setGraphic(debugText);
-                            listPOIcamera.refresh();
+                            Platform.runLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    setGraphic(debugText);
+                                    listPOIcamera.refresh();
+                                }
+                            });
                         }
                     }
                 };

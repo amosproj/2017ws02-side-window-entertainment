@@ -56,6 +56,8 @@ public class GpsPortReader implements SentenceListener{
 
     public void sentenceRead(SentenceEvent event){
         Sentence s = event.getSentence();
+
+        System.out.println(s.toString());
         // Position and Time (not really necessary, since RMC has all the info and more)
         if("GGA".equals(s.getSentenceId())){
             GGASentence gga = (GGASentence) s;

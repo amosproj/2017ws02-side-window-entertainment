@@ -9,17 +9,16 @@ import de.tuberlin.amos.ws17.swit.common.UserPosition;
 import de.tuberlin.amos.ws17.swit.common.Vector3D;
 import de.tuberlin.amos.ws17.swit.tracking.camera.CameraService;
 import de.tuberlin.amos.ws17.swit.tracking.camera.JavoNetCameraService;
+import de.tuberlin.amos.ws17.swit.tracking.javonet.JavoNetService;
 
 public class JavoNetUserTracker implements UserTracker {
 
-    private NObject dotNetUserTracker;
     private CameraService cameraService;
 
     public JavoNetUserTracker() {
         try {
-            Javonet.activate("christian.fengler@campus.tu-berlin.de", "Hs52-Rz97-Bi4j-z5RF-Ee2d", JavonetFramework.v45);
+            JavoNetService.initialize();
             cameraService = new JavoNetCameraService();
-            dotNetUserTracker = Javonet.New("UserTracker");
         } catch (JavonetException e) {
             e.printStackTrace();
         }
@@ -28,7 +27,7 @@ public class JavoNetUserTracker implements UserTracker {
     @Override
     public boolean getIsUserTracked() {
         try {
-            boolean result = dotNetUserTracker.get("IsUserTracked");
+            boolean result = JavoNetService.dotNetUserTracker.get("IsUserTracked");
             return result;
         } catch (JavonetException e) {
             e.printStackTrace();
@@ -41,13 +40,13 @@ public class JavoNetUserTracker implements UserTracker {
         UserPosition result = null;
         if (getIsUserTracked()) {
             try {
-                float userHeadPositionX = dotNetUserTracker.get("UserHeadPositionX");
-                float userHeadPositionY = dotNetUserTracker.get("UserHeadPositionY");
-                float userHeadPositionZ = dotNetUserTracker.get("UserHeadPositionZ");
+                float userHeadPositionX = JavoNetService.dotNetUserTracker.get("UserHeadPositionX");
+                float userHeadPositionY = JavoNetService.dotNetUserTracker.get("UserHeadPositionY");
+                float userHeadPositionZ = JavoNetService.dotNetUserTracker.get("UserHeadPositionZ");
 
-                float userHeadPositionYaw = dotNetUserTracker.get("UserHeadPositionYaw");
-                float userHeadPositionPitch = dotNetUserTracker.get("UserHeadPositionPitch");
-                float userHeadPositionRoll = dotNetUserTracker.get("UserHeadPositionRoll");
+                float userHeadPositionYaw = JavoNetService.dotNetUserTracker.get("UserHeadPositionYaw");
+                float userHeadPositionPitch = JavoNetService.dotNetUserTracker.get("UserHeadPositionPitch");
+                float userHeadPositionRoll = JavoNetService.dotNetUserTracker.get("UserHeadPositionRoll");
 
                 result = new UserPosition(
                         new Vector3D(userHeadPositionX, userHeadPositionY, userHeadPositionZ),
@@ -65,10 +64,10 @@ public class JavoNetUserTracker implements UserTracker {
         UserExpressions result = null;
         if (getIsUserTracked()) {
             try {
-                boolean isKiss = dotNetUserTracker.get("UserExpressionKiss");
-                boolean isToungueOut = dotNetUserTracker.get("UserExpressionTongueOut");
-                boolean isSmile = dotNetUserTracker.get("UserExpressionSmile");
-                boolean isMouthOpen = dotNetUserTracker.get("UserExpressionMouthOpen");
+                boolean isKiss = JavoNetService.dotNetUserTracker.get("UserExpressionKiss");
+                boolean isToungueOut = JavoNetService.dotNetUserTracker.get("UserExpressionTongueOut");
+                boolean isSmile = JavoNetService.dotNetUserTracker.get("UserExpressionSmile");
+                boolean isMouthOpen = JavoNetService.dotNetUserTracker.get("UserExpressionMouthOpen");
                 result =  new UserExpressions();
                 result.setKiss(isKiss);
                 result.setTongueOut(isToungueOut);
@@ -84,7 +83,7 @@ public class JavoNetUserTracker implements UserTracker {
     @Override
     public boolean startTracking() {
         try {
-            dotNetUserTracker.invoke("StartTracking");
+            JavoNetService.dotNetUserTracker.invoke("StartTracking");
         } catch (JavonetException e) {
             return false;
         }
@@ -94,7 +93,7 @@ public class JavoNetUserTracker implements UserTracker {
     @Override
     public boolean stopTracking() {
         try {
-            dotNetUserTracker.invoke("StopTracking");
+            JavoNetService.dotNetUserTracker.invoke("StopTracking");
         } catch (JavonetException e) {
             return false;
         }

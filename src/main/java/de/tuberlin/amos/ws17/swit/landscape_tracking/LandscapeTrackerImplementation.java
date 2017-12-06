@@ -48,7 +48,10 @@ public class LandscapeTrackerImplementation implements LandscapeTracker{
     public void startModule() throws ModuleNotWorkingException {
         WebcamImplementation webcamImplementation = null;
         try {
-            webcamImplementation = new WebcamBuilder().setViewSize(new Dimension(640, 480)).setWebcamDiscoveryTimeout(10000).build();
+            webcamImplementation = new WebcamBuilder()
+                    .setWebcamName("Webcam Logitech HD Pro Webcam C920 1")
+                    .setViewSize(new Dimension(640, 480))
+                    .setWebcamDiscoveryTimeout(10000).build();
         } catch (Exception e) {
             throw new ModuleNotWorkingException();
         }
