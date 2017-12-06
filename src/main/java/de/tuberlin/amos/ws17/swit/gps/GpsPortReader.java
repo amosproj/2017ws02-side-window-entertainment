@@ -1,6 +1,7 @@
 package de.tuberlin.amos.ws17.swit.gps;
 
 import de.tuberlin.amos.ws17.swit.common.KinematicProperties;
+import de.tuberlin.amos.ws17.swit.common.ModuleNotWorkingException;
 import gnu.io.SerialPort;
 import gnu.io.CommPortIdentifier;
 
@@ -23,12 +24,17 @@ public class GpsPortReader implements SentenceListener{
 
     private LinkedList<GpsPosition> GpsList;
 
-    private GpsPosition latestPosition;
+    private GpsPosition latestPosition; // outdated, kept for compatibility reasons
     private boolean running;
-    private KinematicProperties kinematicProperties;
+    private boolean update;
+
+    private double latitude;
+    private double longitude;
+    private double course;
+    private double velocity;
 
     public GpsPortReader(){
-        kinematicProperties = null;
+        update = false;
         running = false;
     }
 
@@ -55,14 +61,19 @@ public class GpsPortReader implements SentenceListener{
             GGASentence gga = (GGASentence) s;
             System.out.println("----- GGA Sentence -----");
             try{
-                //if (latestPosition == null){
-                //    latestPosition = new GpsPosition(555, 666, null);
-                //}
-                //latestPosition.setLatitude(gga.getPosition().getLatitude());
-                //latestPosition.setLongitude(gga.getPosition().getLongitude());
-                kinematicProperties.setLatitude(gga.getPosition().getLatitude());
-                kinematicProperties.setLongitude(gga.getPosition().getLongitude());
-                // fill up GpsList
+                // set values 'latitude' and 'longitude' and set 'update' to true for filling up KinematicProperties object
+                latitude = gga.getPosition().getLatitude();
+                longitude = gga.getPosition().getLongitude();
+                update = true;
+
+                // fill 'latestPosition'. It is only kept for compatibility
+                if (latestPosition == null){
+                    latestPosition = new GpsPosition(555, 666, null);
+                }
+                latestPosition.setLatitude(gga.getPosition().getLatitude());
+                latestPosition.setLongitude(gga.getPosition().getLongitude());
+
+                // fill up GpsList  ( do we use it anymore?? )
                 if (GpsList == null){
                     GpsList = new LinkedList<GpsPosition>();
                 }
@@ -77,7 +88,7 @@ public class GpsPortReader implements SentenceListener{
                 }
             }
             catch (net.sf.marineapi.nmea.parser.DataNotAvailableException e) {
-                // do nothing
+                // do nothing. Broken messages are ok
             }
         }
 
@@ -86,17 +97,21 @@ public class GpsPortReader implements SentenceListener{
             RMCSentence rmc = (RMCSentence) s;
             System.out.println("----- RMC Sentence -----");
             try{
-                //if (latestPosition != null){
-                //    latestPosition.setCourse(rmc.getCorrectedCourse());
-                //}
+                // fill 'latestPosition'. It is only kept for compatibility
+                if (latestPosition != null){
+                    latestPosition.setCourse(rmc.getCorrectedCourse());
+                }
+                latestPosition.setCourse(rmc.getCourse());
                 //System.out.println("Position: " + latestPosition.getLatitude() + ", " + latestPosition.getLongitude());
                 //System.out.println("Date: " + rmc.getDate().getDay() + "." + rmc.getDate().getMonth() + "." + rmc.getDate().getYear());
-                System.out.println("Speed: " + rmc.getSpeed() + " knots");
-                System.out.println("Course: " + rmc.getCourse());
-                kinematicProperties.setCourse(rmc.getCourse());
+                //System.out.println("Speed: " + rmc.getSpeed() + " knots");
+                //System.out.println("Course: " + rmc.getCourse());
+
+                // set course for filling up KinematicProperties object
+                course = rmc.getCourse();
             }
             catch (net.sf.marineapi.nmea.parser.DataNotAvailableException e){
-                // do nothing
+                // do nothing. Broken messages are ok
             }
 
             // generate Timestamp from separate data: maybe later, when we actually need it
@@ -115,16 +130,17 @@ public class GpsPortReader implements SentenceListener{
                 System.out.println("Course: " + vtg.getMagneticCourse() + "°");
             }
             catch (net.sf.marineapi.nmea.parser.DataNotAvailableException e){
-                // do nothing
+                // do nothing. Broken messages are ok
             }
 
+            // fill 'latestPosition'. It is only kept for compatibility
+            if (latestPosition == null){
+                latestPosition = new GpsPosition(555, 666, null);
+            }
+            latestPosition.setSpeed(vtg.getSpeedKmh());
 
-            //if (latestPosition == null){
-            //    latestPosition = new GpsPosition(555, 666, null);
-            //}
-
-            //latestPosition.setSpeed(vtg.getSpeedKmh());
-            kinematicProperties.setVelocity(vtg.getSpeedKmh());
+            // set 'velocity' for filling up KinematicProperties object
+            velocity = vtg.getSpeedKmh();
 
         }
     }
@@ -167,7 +183,6 @@ public class GpsPortReader implements SentenceListener{
                 }
             }
             System.out.println("NMEA data was not found..");
-
         } catch (Exception e) {
             //e.printStackTrace();
         }
@@ -175,7 +190,9 @@ public class GpsPortReader implements SentenceListener{
         return null;
     }
 
-    public boolean start(){
+    public boolean isUpdated(){ return update; }
+
+    public boolean start() throws ModuleNotWorkingException{
         if (!running){
             try {
                 SerialPort sp = getSerialPort();
@@ -186,7 +203,7 @@ public class GpsPortReader implements SentenceListener{
                     sr.start();
                 }
                 else{
-                    return false;
+                    throw new ModuleNotWorkingException();
                 }
             }
             catch (IOException e){
@@ -196,15 +213,16 @@ public class GpsPortReader implements SentenceListener{
         return true;
     }
 
-    public void stop(){
-        if (running){
-            // HOW DO I STOP THIS MADNESS??
-        }
-        running = false;
-    }
+    // returns an object filled with the current available information.
+    // Latitude and longitude are new values, the others may be outdated (but still the most actual)
+    KinematicProperties fillKinematicProperties(KinematicProperties kinProp){
+        kinProp.setLatitude(latitude);
+        kinProp.setLongitude(longitude);
+        kinProp.setVelocity(velocity);
+        kinProp.setCourse(course);
+        update = false;
 
-    void setKinematicProperties(KinematicProperties kinProp){
-        kinematicProperties = kinProp;
+        return kinProp;
     }
 
     public static void main(String[] args) {

@@ -1,21 +1,27 @@
 package de.tuberlin.amos.ws17.swit.information_source;
 
+import de.tuberlin.amos.ws17.swit.common.Module;
+import de.tuberlin.amos.ws17.swit.common.ModuleNotWorkingException;
 import de.tuberlin.amos.ws17.swit.common.PointOfInterest;
 import org.apache.commons.lang3.StringEscapeUtils;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-public class WikiAbstractProvider implements AbstractProvider {
+public class WikiAbstractProvider implements AbstractProvider, Module {
     /**
      * Provides an abstract for a POI
      *
      * @param poi PointOfInterest object, already contains either a name of a poi or its poi
      */
     @Override
-    public void provideAbstract(PointOfInterest poi) {
+    public PointOfInterest provideAbstract(PointOfInterest poi) {
 
         String poiName = poi.getName();
         poiName = poiName.replaceAll(" ", "_");
@@ -29,6 +35,8 @@ public class WikiAbstractProvider implements AbstractProvider {
         }
 
         poi.setInformationAbstract(StringEscapeUtils.unescapeJava(wikiAbstract));
+
+        return poi;
     }
 
     /*
@@ -84,4 +92,53 @@ public class WikiAbstractProvider implements AbstractProvider {
         return result.toString();
     }
 
+    /**
+     * Startet das Modul, sodass es Einsatzbereit ist. Voraussetzung ist die Initialisierung einer Instanz.
+     *
+     * @throws ModuleNotWorkingException
+     */
+    @Override
+    public void startModule() throws ModuleNotWorkingException {
+
+    }
+
+    /**
+     * Beendet das Modul, sodass Threads geschlossen werden und die Funktionalität nichtmehr verfügbar ist.
+     *
+     * @return
+     */
+    @Override
+    public boolean stopModule() {
+        return false;
+    }
+
+    /**
+     * Falls das Modul nicht funktioniert, wird dieses Bild als Hinweis auf der Oberfläche angezeigt.
+     * Bilder, die hier aufgerufen werden, gehören in "/resources/module_images/"
+     *
+     * @return
+     */
+    @Override
+    public BufferedImage getModuleImage() {
+        String path = "";
+        try {
+            this.getClass();
+            this.getClass().getResource("");
+            path = this.getClass().getClassLoader().getResource("module_images/informatin_source.jpg").getPath();
+            return ImageIO.read(new File(path));
+        } catch (IOException e) {
+            System.out.println(path);
+        }
+        return null;
+    }
+
+    /**
+     * Gibt den Namen des Moduls zurück.
+     *
+     * @return
+     */
+    @Override
+    public String getModuleName() {
+        return "Information Source - WikiAbstractProvider";
+    }
 }

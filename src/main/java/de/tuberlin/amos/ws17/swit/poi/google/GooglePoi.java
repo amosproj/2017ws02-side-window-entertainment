@@ -1,25 +1,22 @@
 package de.tuberlin.amos.ws17.swit.poi.google;
 
 import de.tuberlin.amos.ws17.swit.common.GpsPosition;
+import de.tuberlin.amos.ws17.swit.common.PointOfInterest;
 import de.tuberlin.amos.ws17.swit.poi.PoiType;
-import se.walkercrou.places.Place;
+import se.walkercrou.places.Photo;
 
 import java.util.HashSet;
 import java.util.Set;
 
-public class GooglePoi {
+public class GooglePoi extends PointOfInterest{
 
-	//TODO: replace GooglePoi with common PointOfInterest
-
-	private Place p;
-
-	GooglePoi(Place p){
-		this.p=p;
+	GooglePoi(String id, String name, GpsPosition gpsPosition, Set<GoogleType> types) {
+		super(id, name, gpsPosition);
+		this.types = types;
 	}
 
-	public String getId() {
-		return p.getPlaceId();
-	}
+	private Set<GoogleType> types= new HashSet<>();
+	private Photo photoreference;
 
 	public Set<PoiType> getPoiTypes() {
 
@@ -37,54 +34,22 @@ public class GooglePoi {
 		return set;
 	}
 
-	public GpsPosition getPosition() {
-		return new GpsPosition(p.getLongitude(), p.getLatitude());
-	}
-
-	public String getNameForUser() {
-		return p.getName();
-	}
-
-	public String getDescriptionForUser() {
-		//TODO
-		return p.getTypes().toString();
-	}
-
-	public String getUrl() {
-		return p.getWebsite();
-	}
-
 	public Set<GoogleType> getTypes(){
-		Set<GoogleType> types= new HashSet<>();
-
-		for(String type: p.getTypes()){
-
-			try {
-				types.add(GoogleType.valueOf(type));
-
-			} catch (IllegalArgumentException ex) {
-				System.err.println("Enum of places Api does not match current google enums for enum: " +type);
-				ex.printStackTrace();
-			}
-		}
 
 		return types;
 	}
 
-	public Place getPlace() {
-		return p;
+	void setPhotoreference(Photo photoreference) {
+		this.photoreference = photoreference;
+	}
+
+	Photo getPhotoreference() {
+		return photoreference;
+	}
+
+	void setTypes(Set<GoogleType> types) {
+		this.types = types;
 	}
 
 
-	@Override
-	public String toString() {
-		return "GooglePoi{" +
-				"nameForUser='" + getNameForUser() + '\'' +
-				", id=" + getId() +
-				", types=" + getPoiTypes().toString() +
-				", position=" + getPosition() +
-				", descriptionForUser='" + getDescriptionForUser() + '\'' +
-				", url='" + getUrl() + '\'' +
-				'}';
-	}
 }

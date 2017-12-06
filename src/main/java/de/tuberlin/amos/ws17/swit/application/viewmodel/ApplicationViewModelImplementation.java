@@ -2,30 +2,33 @@ package de.tuberlin.amos.ws17.swit.application.viewmodel;
 
 import de.tuberlin.amos.ws17.swit.application.view.ApplicationView;
 import de.tuberlin.amos.ws17.swit.application.view.ApplicationViewImplementation;
-import de.tuberlin.amos.ws17.swit.common.KinematicProperties;
-import de.tuberlin.amos.ws17.swit.common.PointOfInterest;
-import de.tuberlin.amos.ws17.swit.common.UserExpressions;
-import de.tuberlin.amos.ws17.swit.common.UserPosition;
+import de.tuberlin.amos.ws17.swit.common.*;
 import de.tuberlin.amos.ws17.swit.gps.GpsTracker;
+import de.tuberlin.amos.ws17.swit.image_analysis.CloudVision;
 import de.tuberlin.amos.ws17.swit.image_analysis.LandmarkDetector;
+import de.tuberlin.amos.ws17.swit.information_source.WikiAbstractProvider;
 import de.tuberlin.amos.ws17.swit.landscape_tracking.LandscapeTracker;
-import de.tuberlin.amos.ws17.swit.landscape_tracking.WebcamBuilder;
+import de.tuberlin.amos.ws17.swit.landscape_tracking.LandscapeTrackerImplementation;
+import de.tuberlin.amos.ws17.swit.tracking.JavoNetUserTracker;
 import de.tuberlin.amos.ws17.swit.tracking.UserTracker;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleListProperty;
+import javafx.beans.property.SimpleMapProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.Image;
 import javafx.event.EventHandler;
 import javafx.event.ActionEvent;
 
-import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ApplicationViewModelImplementation implements ApplicationViewModel {
 
@@ -33,9 +36,10 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     private ApplicationView view;
     private LandmarkDetector cloudVision;
     private LandscapeTracker landscapeTracker;
-    private WebcamBuilder webcamBuilder;
     private UserTracker userTracker;
     private GpsTracker gpsTracker;
+    private DebugLog debugLog = new DebugLog();
+    private WikiAbstractProvider abstractProvider;
     //TODO @alle fügt hier die Hauptklassen eures Moduls hinzu, initiiert werden diese aber erst im Konstruktor
 
     //Threads
@@ -50,37 +54,20 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     private SimpleListProperty<PoiViewModel> propertyPOImaps;
     private SimpleListProperty<PoiViewModel> propertyPOIcamera;
     private SimpleObjectProperty<EventHandler<ActionEvent>> propertyCloseButton;
+    private SimpleListProperty<String> propertyDebugLog;
+    private SimpleListProperty<Image> propertyModuleNotWorkingImageList;
+    private SimpleMapProperty<Module, SimpleBooleanProperty> propertyModuleIsWorkingMap;
+    private SimpleListProperty<Module> listModuleNotWorking;
+    private List<Module> moduleList;
+
 
 //Konstruktor
     public ApplicationViewModelImplementation(ApplicationView view) {
-        this.view = view;
-        //TODO @alle initiiert hier die Hauptklassen eurer Module
-        /*WebcamImplementation webcamImplementation = null;
-        try {
-            webcamImplementation = new WebcamBuilder().setViewSize(new Dimension(640, 480)).setWebcamDiscoveryTimeout(10000).build();
-        } catch (TimeoutException e) {
-            e.printStackTrace();
-        }
-        landscapeTracker = new LandscapeTrackerImplementation(webcamImplementation);
-        cloudVision = CloudVision.getInstance();
-        userTracker = new JavoNetUserTracker();
-        userTracker.startTracking();
-        //TODO @Vlad Exception handling in deine Klasse (siehe userTracker)
-        gpsTracker = GpsTrackerFactory.GetGpsTracker();
-        try {
-            gpsTracker.start();
-        }
-        catch (SensorNotFoundException e){
-            e.printStackTrace();
-        }*/
 
-        propertyCloseButton = new SimpleObjectProperty<EventHandler<ActionEvent>>();
-        propertyCloseButton.set(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                minimizePOI();
-            }
-        });
+        bindDebugLog();
+
+        listModuleNotWorking = new SimpleListProperty<>();
+        listModuleNotWorking.set(FXCollections.observableList(new ArrayList<Module>()));
 
         pointsOfInterest = new ArrayList<PointOfInterest>();
         expandedPOI = new PoiViewModel();
@@ -88,6 +75,53 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
 
         propertyPOImaps = new SimpleListProperty();
         propertyPOIcamera = new SimpleListProperty();
+
+        propertyModuleNotWorkingImageList = new SimpleListProperty<>();
+        propertyModuleNotWorkingImageList.set(FXCollections.observableList(new ArrayList<>()));
+
+        propertyModuleIsWorkingMap = new SimpleMapProperty<>();
+        propertyModuleIsWorkingMap.set(FXCollections.observableMap(new HashMap<>()));
+
+        moduleList = new ArrayList<>();
+
+        this.view = view;
+        //TODO @alle initiiert hier die Hauptklassen eurer Module
+        /*
+        cloudVision = CloudVision.getInstance();
+        //userTracker = new JavoNetUserTracker();
+        //userTracker.startTracking();
+        //TODO @Vlad Exception handling in deine Klasse (siehe userTracker)
+        gpsTracker = GpsTrackerFactory.GetGpsTracker();
+        try {
+            gpsTracker.start();
+        }
+        catch (SensorNotFoundException e){
+            e.printStackTrace();
+        }
+        */
+        landscapeTracker = new LandscapeTrackerImplementation();
+        moduleList.add(landscapeTracker);
+        abstractProvider = new WikiAbstractProvider();
+        moduleList.add(abstractProvider);
+
+        /*
+        moduleList.add(cloudVision);
+        moduleList.add(userTracker);
+        moduleList.add(gpsTracker);
+        */
+
+        moduleList.forEach(module -> {
+            startModule(module);
+        });
+
+        propertyCloseButton = new SimpleObjectProperty<EventHandler<ActionEvent>>();
+        propertyCloseButton.set(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                DebugLog.log("minimized", this);
+                minimizePOI();
+            }
+        });
 
         initTestData();
 
@@ -98,7 +132,12 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
             public void run() {
                 int iterations = 0;
                 while (run) {
-                    //trackUser();
+                    /*trackUser();
+                    UserExpressions userexpressions = userTracker.getUserExpressions();
+                    if(userexpressions.isKiss()) {
+                        loadCameraPoi();
+                        loadMapsPoi();
+                    }*/
                     if(iterations % 10 == 0) {
                         //loadCameraPoi();
                         //loadMapsPoi();
@@ -112,10 +151,16 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 }
             }
         });
+        updateThread.start();
     }
 
-    public void addPOI(PointOfInterest poi) {
-        //TODO deprecated -> loeschen
+    private void startModule(Module module) {
+        try {
+            module.startModule();
+            listModuleNotWorking.remove(module);
+        } catch (ModuleNotWorkingException e) {
+            listModuleNotWorking.add(module);
+        }
     }
 
     private void addPOIcamera(PointOfInterest poi) {
@@ -209,7 +254,9 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
 
         //Abfrage Informationen
         //TODO @JulianS Anfrage an information source mit ermitteltem POI
-
+        for (PointOfInterest poi: pois) {
+            poi = abstractProvider.provideAbstract(poi);
+        }
 
         for (PointOfInterest poi: pois) {
             addPOIcamera(poi);
@@ -220,10 +267,15 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         KinematicProperties kinematicProperties = new KinematicProperties();
         //Abfrage GPS Koordinaten
         //TODO @Vlad Ergebnis zurückgeben, anstatt call by reference
-        gpsTracker.setDumpObject(kinematicProperties);
-        if(kinematicProperties == null) {
+        try{
+            gpsTracker.fillDumpObject(kinematicProperties);
+        }
+        catch (ModuleNotWorkingException e){
+            // handle exception
             return;
         }
+
+        DebugLog.log("Latitude: " + kinematicProperties.getLatitude() + " , Longitude: " + kinematicProperties.getLongitude(), this);
 
         List<PointOfInterest> pois = new ArrayList<PointOfInterest>();
         //Abfrage POIs
@@ -236,11 +288,14 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
 
         //Abfrage Informationen
         //TODO @JulianS Anfrage an das information source Modul, welches für jeden POI in der Liste die Daten abruft
-
+        for (PointOfInterest poi: pois) {
+            poi = abstractProvider.provideAbstract(poi);
+        }
 
         for(PointOfInterest poi: pois) {
             addPOImaps(poi);
         }
+
     }
 
     private void trackUser() {
@@ -254,6 +309,25 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
             return;
         }
 
+    }
+
+    private void bindDebugLog() {
+        this.propertyDebugLog = new SimpleListProperty<String>();
+        this.propertyDebugLog.set(DebugLog.debugLog);
+
+        // systemoutprintline redirect
+        System.setOut(new PrintStream(System.out) {
+
+            public void println(String s) {
+                propertyDebugLog.add(s);
+                //super.println(s);
+            }
+
+            public void print(String s) {
+                propertyDebugLog.add(s);
+                //super.println(s);
+            }
+        });
     }
 
 //Getter und Setter
@@ -305,29 +379,58 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         this.propertyCloseButton.set(propertyCloseButton);
     }
 
+    public ObservableList<String> getPropertyDebugLog() {
+        return propertyDebugLog.get();
+    }
+
+    public SimpleListProperty<String> propertyDebugLogProperty() {
+        return propertyDebugLog;
+    }
+
+    public ObservableList<Image> getPropertyModuleNotWorkingImageList() {
+        return propertyModuleNotWorkingImageList.get();
+    }
+
+    public SimpleListProperty<Image> propertyModuleNotWorkingImageListProperty() {
+        return propertyModuleNotWorkingImageList;
+    }
+
+    public ObservableList<Module> getListModuleNotWorking() {
+        return listModuleNotWorking.get();
+    }
+
+    public SimpleListProperty<Module> listModuleNotWorkingProperty() {
+        return listModuleNotWorking;
+    }
+
 //Testdaten
     private void initTestData() {
         List<PoiViewModel> testData = new ArrayList<PoiViewModel>();
 
-        File domfile = new File(ApplicationViewImplementation.app.getClass().getResource("/test_images/berliner-dom.jpg").getPath());
-        Image domimage = new Image(domfile.toURI().toString());
+        //File domfile = new File(ApplicationViewImplementation.app.getClass().getResource("/test_images/berliner-dom.jpg").getPath());
+        Image domimage = new Image("/test_images/berliner-dom.jpg");
         testData.add(new PoiViewModel("5", "Berliner Dom", domimage, "Das ist der Berliner Dom, lalala. Das hier ist ein ganz langer Text um zu testen, " +
                 "ob bei einem Label der Text automatisch auf die nächste Zeile springt. Offensichtlich tut er das nur, wenn man eine Variable dafür setzt. "));
 
-        File torfile = new File(ApplicationViewImplementation.app.getClass().getResource("/test_images/brandenburger-tor.jpg").getPath());
-        Image torimg = new Image(torfile.toURI().toString());
+        //File torfile = new File(ApplicationViewImplementation.app.getClass().getResource("/test_images/brandenburger-tor.jpg").getPath());
+        Image torimg = new Image("/test_images/brandenburger-tor.jpg");
         testData.add(new PoiViewModel("6", "Brandenburger Tor", torimg, "Das Brandenburger Tor. Offensichtlich. " +
                 "Wer das nicht kennt muss aber echt unter nem Stein leben. Naja. Infos geb ich dir nicht, solltest du doch alles wissen. Kulturbanause!"));
 
-        File turmfile = new File(ApplicationViewImplementation.app.getClass().getResource("/test_images/fernsehturm.jpg").getPath());
-        Image turmimg = new Image(turmfile.toURI().toString());
+        //File turmfile = new File(ApplicationViewImplementation.app.getClass().getResource("/test_images/fernsehturm.jpg").getPath());
+        Image turmimg = new Image("/test_images/fernsehturm.jpg");
         testData.add(new PoiViewModel("7", "Fernsehturm", turmimg, "Vom Fernsehturm kommt das Fernsehen her. Oder so. " +
                 "Heute kommt das Fernsehen aus der Steckdose und stirbt aus. Hah! Video On Demand, hell yeah!"));
 
-        File siegfile = new File(ApplicationViewImplementation.app.getClass().getResource("/test_images/sieges-saeule.jpg").getPath());
-        Image siegimg = new Image(siegfile.toURI().toString());
+        //File siegfile = new File(ApplicationViewImplementation.app.getClass().getResource("/test_images/sieges-saeule.jpg").getPath());
+        Image siegimg = new Image("/test_images/sieges-saeule.jpg");
         testData.add(new PoiViewModel("8", "Siegessäule", siegimg, "Die Siegessäule. Da hat wohl jemand was gewonnen und hat direkt mal Geld investiert, " +
-                "um es jeden wissen zu lassen. Und jetzt weiß auch du, dass hier irgendwer gewonnen hat. Wahnsinn!"));
+                "um es jeden wissen zu lassen. Und jetzt weiß auch du, dass hier irgendwer gewonnen hat. Wahnsinn! " +
+                "Noch viel wahnsinniger ist, dass ich mir jetzt einen unglaublich langen Text ausdenken muss um zu sehen, " +
+                "ob das Layout der Oberfläche gut funktioniert oder nicht. Dazu möchte ich schauen, ob es eine ScrollBar gibt, " +
+                "falls der Text zu lange ist, was ja durchaus vorkommen kann. Vorallem wenn wir das Abstract von Wikipedia anzeigen, " +
+                "welches gerne mal sehr lang sein kann. Da muss das natürlich gut funktionieren. Deswegen teste ist das jetzt aus. " +
+                "Hoffentlich funktioniert es. Solltest du das hier lesen kann es gut sein, dass es erfolgreich war. "));
 
         //listPOIcamera = FXCollections.observableList(testData);
         propertyPOIcamera.set(FXCollections.observableList(testData));

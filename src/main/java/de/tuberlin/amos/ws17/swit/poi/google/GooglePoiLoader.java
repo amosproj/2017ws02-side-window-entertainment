@@ -1,18 +1,15 @@
 package de.tuberlin.amos.ws17.swit.poi.google;
 
+import de.tuberlin.amos.ws17.swit.common.ApiConfig;
 import de.tuberlin.amos.ws17.swit.common.GpsPosition;
+import de.tuberlin.amos.ws17.swit.common.PointOfInterest;
 import de.tuberlin.amos.ws17.swit.poi.PoiType;
-import se.walkercrou.places.GooglePlaces;
-import se.walkercrou.places.Param;
-import se.walkercrou.places.Place;
-import se.walkercrou.places.RequestHandler;
+import se.walkercrou.places.*;
 import se.walkercrou.places.exception.GooglePlacesException;
 import se.walkercrou.places.exception.InvalidRequestException;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.awt.image.BufferedImage;
+import java.util.*;
 
 public class GooglePoiLoader {
 
@@ -21,15 +18,22 @@ public class GooglePoiLoader {
 
 	private GoogleTypeMap typeMap= new GoogleTypeMap();
 
-	public GooglePoiLoader(String yourApiKey, boolean enableLogging) {
-		client = new GooglePlaces(yourApiKey, rh);
+	private GooglePoiFactory poiFactory = new GooglePoiFactory();
+
+	private int xResolution, yResolution;
+
+	public GooglePoiLoader(int xResolution, int yResolution) {
+		this(false, xResolution, yResolution);
+	}
+
+	public GooglePoiLoader(boolean enableLogging, int xResolution, int yResolution) {
+		client = new GooglePlaces(ApiConfig.getProperty("GooglePlaces"), rh);
 		client.setDebugModeEnabled(enableLogging);
+		this.xResolution=xResolution;
+		this.yResolution=yResolution;
 	}
 
 	SearchGeometryFactory geometryFactory=new SearchGeometryFactory();
-
-
-
 
     public Set<GooglePoi> loadPlaceForMultiCircleSearchGeometry(MultiCircleSearchGeometry multiCircle){
 
@@ -67,7 +71,10 @@ public class GooglePoiLoader {
 		return pois;
     }
 
+	public List<? extends PointOfInterest> loadPointOfInterestForCircle(GpsPosition center, int radius) throws InvalidRequestException{
 
+		return loadPlaceForCircle(center, radius, new Param[0]);
+	}
 	public List<GooglePoi> loadPlaceForCircle(GpsPosition center, int radius) throws InvalidRequestException{
 
 		return loadPlaceForCircle(center, radius, new Param[0]);
@@ -106,7 +113,7 @@ public class GooglePoiLoader {
 		try {
 			List<Place> places = client.getNearbyPlaces(center.getLatitude(), center.getLongitude(), radius, GooglePlaces.MAXIMUM_RESULTS, params);
 			places = getPlacesDetails(places);
-			return toPoiImpl(places);
+			return poiFactory.createPOIsfromPlace(places);
 
 		}catch(GooglePlacesException e){
 			e.printStackTrace();
@@ -123,18 +130,20 @@ public class GooglePoiLoader {
 			detailedPlaces.add(Place.parseDetails(p.getClient(), gson));
 		}
 		return detailedPlaces;
-		
 	}
-	
-	private static List<GooglePoi> toPoiImpl(List<Place> places){
 
-		List<GooglePoi> implList=new ArrayList<>();
-		
-		for(Place p: places){
-			implList.add(new GooglePoi(p));
+	public void downloadImages(Collection<GooglePoi> poisToAddPhotosTo){
+		for(GooglePoi poi:poisToAddPhotosTo){
+			downloadImage(poi);
 		}
+	}
 
-		return implList;
+	private void downloadImage(GooglePoi poi) {
+		if(poi.getPhotoreference()!=null) {
+			Photo photo = poi.getPhotoreference();
+			BufferedImage image = photo.download(xResolution, yResolution).getImage();
+			poi.setImage(image);
+		}
 	}
 
 }

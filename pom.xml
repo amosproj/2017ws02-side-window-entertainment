@@ -60,7 +60,7 @@
             </resource>
             <resource>
                 <directory>libs</directory>
-                <targetPath>libs</targetPath>
+                <targetPath>../libs</targetPath>
                 <filtering>true</filtering>
                 <includes>
                     <include>**/*</include>
