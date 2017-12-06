@@ -1,10 +1,14 @@
 package de.tuberlin.amos.ws17.swit.poi.google;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
 
 import de.tuberlin.amos.ws17.swit.common.GpsPosition;
+import de.tuberlin.amos.ws17.swit.common.PoiVisualiser;
+import de.tuberlin.amos.ws17.swit.common.PointOfInterest;
 import de.tuberlin.amos.ws17.swit.poi.PoiType;
 import de.tuberlin.amos.ws17.swit.poi.GeographicCalculator;
 import org.junit.Test;
@@ -21,9 +25,9 @@ public class GooglePoiLoaderTest {
 	private GpsPosition tiergarten1= new GpsPosition(tiergartenLng, tiergartenLat);
 	private GpsPosition tiergarten2= new GpsPosition(tiergartenLng2, tiergartenLat2);
 
-	private final static String GOOGLEPLACESAPIKEY ="yourkey";
+	private final static String GOOGLEPLACESAPIKEY ="AIzaSyAF21uTxKXz139qs8ughPKLuFy91upgHPI";
 
-	private GooglePoiLoader loader=new GooglePoiLoader(GOOGLEPLACESAPIKEY, true);
+	private GooglePoiLoader loader=new GooglePoiLoader(true, 100, 100);
 
 	@Test
 	public void loadOneTest() {

@@ -1,12 +1,12 @@
 package de.tuberlin.amos.ws17.swit.demo;
 
 import de.tuberlin.amos.ws17.swit.common.GpsPosition;
-import de.tuberlin.amos.ws17.swit.poi.google.*;
+import de.tuberlin.amos.ws17.swit.poi.google.GooglePoi;
+import de.tuberlin.amos.ws17.swit.poi.google.GooglePoiLoader;
+import de.tuberlin.amos.ws17.swit.poi.google.MultiCircleSearchGeometry;
+import de.tuberlin.amos.ws17.swit.poi.google.SearchGeometryFactory;
 
-import java.util.List;
 import java.util.Set;
-
-import static org.junit.Assert.assertTrue;
 
 /**
  * A demonstration of the poi package
@@ -24,9 +24,7 @@ public class LoadPlacesInDirectionDemo {
         GpsPosition tiergarten1= new GpsPosition(tiergartenLng, tiergartenLat);
         GpsPosition tiergarten2= new GpsPosition(tiergartenLng2, tiergartenLat2);
 
-        final String GOOGLEPLACESAPIKEY ="yourApiKey";
-
-        GooglePoiLoader loader=new GooglePoiLoader(GOOGLEPLACESAPIKEY, false);
+        GooglePoiLoader loader=new GooglePoiLoader(100, 100);
 
         SearchGeometryFactory searchGeometryFactory=new SearchGeometryFactory(2.1, 200, 3, null, null);
         MultiCircleSearchGeometry searchGeometry=searchGeometryFactory.createSearchCirclesForDirectedCoordinates(tiergarten1, tiergarten2);

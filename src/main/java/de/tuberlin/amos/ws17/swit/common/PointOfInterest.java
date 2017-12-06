@@ -75,4 +75,14 @@ public class PointOfInterest {
         return id.hashCode();
     }
 
+    @Override
+    public String toString() {
+        return "PointOfInterest{" +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                ", gpsPosition=" + gpsPosition +
+                ", image=" + image +
+                ", informationAbstract='" + informationAbstract + '\'' +
+                '}';
+    }
 }

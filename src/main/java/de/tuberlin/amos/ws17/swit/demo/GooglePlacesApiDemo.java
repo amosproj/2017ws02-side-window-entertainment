@@ -19,11 +19,8 @@ public class GooglePlacesApiDemo {
         double tiergartenLng2=13.33490991;
         double tiergartenLat2=52.5085468;
         GpsPosition tiergarten1= new GpsPosition(tiergartenLng, tiergartenLat);
-        GpsPosition tiergarten2= new GpsPosition(tiergartenLng2, tiergartenLat2);
 
-        String GOOGLEPLACESAPIKEY ="yourkey";
-
-        GooglePoiLoader loader=new GooglePoiLoader(GOOGLEPLACESAPIKEY, false);
+        GooglePoiLoader loader=new GooglePoiLoader( false, 100, 100);
 
         List<GooglePoi> pois=loader.loadPlaceForCircleAndType(tiergarten1,
                 500,
