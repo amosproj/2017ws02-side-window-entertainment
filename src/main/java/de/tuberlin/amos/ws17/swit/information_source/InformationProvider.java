@@ -15,4 +15,12 @@ public interface InformationProvider {
      * @return description of the object
      */
     String getInfoByName(String name);
+
+    /**
+     * Get URL link of an object
+     * @param id of Object
+     * @return Url of wikipedia entry (webview relevant)
+     */
+
+     String getUrlById(String id);
 }
