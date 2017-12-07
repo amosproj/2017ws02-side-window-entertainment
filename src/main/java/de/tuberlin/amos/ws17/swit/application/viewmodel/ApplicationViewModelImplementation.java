@@ -223,14 +223,20 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     }
 
     private void addPOImaps(PointOfInterest poi) {
-        PoiViewModel item = convertPOI(poi);
-        pointsOfInterest.add(poi);
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                propertyPOImaps.add(item);
-            }
-        });
+        try
+        {
+            PoiViewModel item = convertPOI(poi);
+            pointsOfInterest.add(poi);
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    propertyPOImaps.add(item);
+                }
+            });
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private boolean removePOImaps(String id) {
@@ -323,28 +329,27 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     private void loadMapsPoi() {
         KinematicProperties kinematicProperties = new KinematicProperties();
 
-        //double tiergartenLng2=13.33490991;
-        //double tiergartenLat2=52.5085468;
-        //GpsPosition currentPostion= new GpsPosition(tiergartenLng2, tiergartenLat2);
-        //kinematicProperties.setLatitude(tiergartenLat2);
-        //kinematicProperties.setLongitude(tiergartenLng2);
+        double tiergartenLng2=13.33490991;
+        double tiergartenLat2=52.5085468;
+        GpsPosition currentPostion= new GpsPosition(tiergartenLng2, tiergartenLat2);
+        kinematicProperties.setLatitude(tiergartenLat2);
+        kinematicProperties.setLongitude(tiergartenLng2);
 
-        try{
-            gpsTracker.fillDumpObject(kinematicProperties);
+        //try{
+            //gpsTracker.fillDumpObject(kinematicProperties);
 
             DebugLog.log("Latitude: " + kinematicProperties.getLatitude() + " , Longitude: " + kinematicProperties.getLongitude(), this);
 
             List<PointOfInterest> pois = new ArrayList<PointOfInterest>();
-            //Abfrage POIs
             //TODO @Leander Anfrage an das POI Modul, welches eine Liste von POIs in der Nähe zurückgibt
             GooglePoiLoader loader = new GooglePoiLoader(500, 800);
-            List<GooglePoi> gPois = loader.loadPlaceForCircleAndType(kinematicProperties,300, GoogleType.food
+            List<GooglePoi> gPois = loader.loadPlaceForCircleAndType(kinematicProperties,300, GoogleType.point_of_interest
                     /*,GoogleType.zoo, GoogleType.airport, GoogleType.aquarium, GoogleType.church, GoogleType.city_hall,
                     GoogleType.hospital, GoogleType.library, GoogleType.mosque, GoogleType.museum, GoogleType.park,
                     GoogleType.school, GoogleType.stadium, GoogleType.synagogue, GoogleType.university,
                     GoogleType.point_of_interest, GoogleType.place_of_worship, GoogleType.gas_station, GoogleType.food,
                     GoogleType.restaurant, GoogleType.store*/);
-            gPois.addAll(loader.loadPlaceForCircleAndType(kinematicProperties,300, GoogleType.gas_station));
+            //gPois.addAll(loader.loadPlaceForCircleAndType(kinematicProperties,300, GoogleType.gas_station));
 
             String names = "";
             if(gPois != null) {
@@ -361,7 +366,6 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 return;
             }
 
-            //Abfrage Informationen
             //TODO @JulianS Anfrage an das information source Modul, welches für jeden POI in der Liste die Daten abruft
             for (PointOfInterest poi: pois) {
                 poi = abstractProvider.provideAbstract(poi);
@@ -371,11 +375,11 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 addPOImaps(poi);
             }
 
-        }
-        catch (ModuleNotWorkingException e){
-            // handle exception
-            return;
-        }
+        //}
+        //catch (ModuleNotWorkingException e){
+        //    // handle exception
+        //    return;
+        //}
 
 
     }
