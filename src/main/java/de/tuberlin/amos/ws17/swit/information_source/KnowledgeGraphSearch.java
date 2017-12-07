@@ -4,21 +4,17 @@ import com.google.api.client.http.*;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.jayway.jsonpath.JsonPath;
 import de.tuberlin.amos.ws17.swit.common.ApiConfig;
-import de.tuberlin.amos.ws17.swit.image_analysis.CloudVision;
-import de.tuberlin.amos.ws17.swit.image_analysis.LandmarkDetector;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-
-import javax.annotation.Nullable;
-import java.io.IOException;
-import java.security.GeneralSecurityException;
 
 public class KnowledgeGraphSearch implements InformationProvider {
 
     private static final String API_KEY = ApiConfig.getProperty("KnowledgeGraphSearch");
     private static final String LANGUAGE = ApiConfig.getProperty("language");
     private static KnowledgeGraphSearch instance;
+    private String detailledInfo;
+    private String ObjectUrl;
 
     private KnowledgeGraphSearch() {}
 
@@ -33,14 +29,24 @@ public class KnowledgeGraphSearch implements InformationProvider {
     public String getInfoById(String id) {
         GenericUrl url = createGenericUrl();
         url.put("ids", id);
-        return getDescription(url);
+        getDescription(url);
+        return detailledInfo;
     }
 
     @Override
     public String getInfoByName(String name) {
         GenericUrl url = createGenericUrl();
         url.put("query", name);
-        return getDescription(url);
+        getDescription(url);
+        return detailledInfo;
+    }
+
+    @Override
+    public String getUrlById(String id) {
+        GenericUrl url = createGenericUrl();
+        url.put("query", id);
+        getDescription(url);
+        return ObjectUrl;
     }
 
     private GenericUrl createGenericUrl() {
@@ -62,9 +68,12 @@ public class KnowledgeGraphSearch implements InformationProvider {
             JSONObject response = (JSONObject) parser.parse(httpResponse.parseAsString());
             JSONArray elements = (JSONArray) response.get("itemListElement");
 
-            for (Object element : elements) {
+            for (Object element: elements) {
                 String detailedDescription = JsonPath.read(element, "$.result.detailedDescription.articleBody").toString();
+                String Objecturl = JsonPath.read(element, "$.result.detailedDescription.url").toString();
                 if (!detailedDescription.isEmpty()) {
+                    this.detailledInfo = detailedDescription;
+                    this.ObjectUrl = Objecturl;
                     return detailedDescription;
                 }
             }
