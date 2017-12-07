@@ -24,8 +24,17 @@ public class JavoNetUserTracker implements UserTracker {
         }
     }
 
+    public boolean isHardwareAvailable() {
+        try {
+            boolean result = JavoNetService.dotNetUserTracker.get("IsHardwareAvailable");
+            return result;
+        } catch (JavonetException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
     @Override
-    public boolean getIsUserTracked() {
+    public boolean isUserTracked() {
         try {
             boolean result = JavoNetService.dotNetUserTracker.get("IsUserTracked");
             return result;
@@ -38,7 +47,7 @@ public class JavoNetUserTracker implements UserTracker {
     @Override
     public UserPosition getUserPosition() {
         UserPosition result = null;
-        if (getIsUserTracked()) {
+        if (isUserTracked()) {
             try {
                 float userHeadPositionX = JavoNetService.dotNetUserTracker.get("UserHeadPositionX");
                 float userHeadPositionY = JavoNetService.dotNetUserTracker.get("UserHeadPositionY");
@@ -62,7 +71,7 @@ public class JavoNetUserTracker implements UserTracker {
     @Override
     public UserExpressions getUserExpressions() {
         UserExpressions result = null;
-        if (getIsUserTracked()) {
+        if (isUserTracked()) {
             try {
                 boolean isKiss = JavoNetService.dotNetUserTracker.get("UserExpressionKiss");
                 boolean isToungueOut = JavoNetService.dotNetUserTracker.get("UserExpressionTongueOut");

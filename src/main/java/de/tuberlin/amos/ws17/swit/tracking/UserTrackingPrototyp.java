@@ -69,7 +69,7 @@ public class UserTrackingPrototyp extends Application {
     }
 
     private void printTrackingDetails() {
-        boolean isUserTracked = userTracker.getIsUserTracked();
+        boolean isUserTracked = userTracker.isUserTracked();
         printText("IsUserTracked: " + isUserTracked);
         if (isUserTracked) {
             UserPosition userPosition = userTracker.getUserPosition();

@@ -159,7 +159,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 UserExpressions userExpressions;
                 while (run) {
                     userExpressions = null;
-                    if(userTracker.getIsUserTracked()) {
+                    if(userTracker.isUserTracked()) {
                         userExpressions = userTracker.getUserExpressions();
                         if(userExpressions.isKiss() /*&& (iterations - lastExpression) >= 10*/) {
                             lastExpression = iterations;

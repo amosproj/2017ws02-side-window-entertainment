@@ -5,7 +5,8 @@ import de.tuberlin.amos.ws17.swit.common.UserPosition;
 
 public interface UserTracker {
 
-    boolean getIsUserTracked();
+    boolean isHardwareAvailable();
+    boolean isUserTracked();
 
     UserPosition getUserPosition();
     UserExpressions getUserExpressions();
