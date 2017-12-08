@@ -29,7 +29,7 @@ public class CloudVision implements LandmarkDetector {
 
     private static final String CLOUD_VISION_API_KEY = ApiConfig.getCloudVisionKey();
 
-    private static final String LANGUAGE = ApiConfig.getProperty("language");
+    private static final String LANGUAGE = "de";
 
     private static final String APPLICATION_NAME = "Swit-Image-Analysis";
 
@@ -128,6 +128,8 @@ public class CloudVision implements LandmarkDetector {
             System.err.print("Cloud Vision service unavailable.");
             return Collections.emptyList();
         }
+        String lang = LANGUAGE;
+        String key = CLOUD_VISION_API_KEY;
         this.bufferedImage = ImageUtils.convertToBufferedImage(image);
         // TODO: reduce image size if necessary
         AnnotateImageRequest request = new AnnotateImageRequest()
