@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
  * Created by leand on 17.11.2017.
  */
 class GoogleTypeMap extends HashMap<GoogleType, PoiType> {
-
+    //TODO: a multimap would be more appropriate, but not too important
     {
         this.put(GoogleType.accounting, PoiType.INFRASTRUCTURE);
         this.put(GoogleType.airport, PoiType.TRANSPORT);
