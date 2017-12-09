@@ -335,21 +335,21 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         kinematicProperties.setLatitude(tiergartenLat2);
         kinematicProperties.setLongitude(tiergartenLng2);
 
-        //try{
-            //gpsTracker.fillDumpObject(kinematicProperties);
+        try{
+            gpsTracker.fillDumpObject(kinematicProperties);
 
             DebugLog.log("Latitude: " + kinematicProperties.getLatitude() + " , Longitude: " + kinematicProperties.getLongitude(), this);
 
             List<PointOfInterest> pois = new ArrayList<PointOfInterest>();
             //TODO @Leander Anfrage an das POI Modul, welches eine Liste von POIs in der Nähe zurückgibt
             GooglePoiLoader loader = new GooglePoiLoader(500, 800);
-            List<GooglePoi> gPois = loader.loadPlaceForCircleAndType(kinematicProperties,300, GoogleType.point_of_interest
-                    /*,GoogleType.zoo, GoogleType.airport, GoogleType.aquarium, GoogleType.church, GoogleType.city_hall,
+            List<GooglePoi> gPois = loader.loadPlaceForCircleAndType(kinematicProperties,300
+                    ,GoogleType.zoo, GoogleType.airport, GoogleType.aquarium, GoogleType.church, GoogleType.city_hall,
                     GoogleType.hospital, GoogleType.library, GoogleType.mosque, GoogleType.museum, GoogleType.park,
-                    GoogleType.school, GoogleType.stadium, GoogleType.synagogue, GoogleType.university,
-                    GoogleType.point_of_interest, GoogleType.place_of_worship, GoogleType.gas_station, GoogleType.food,
-                    GoogleType.restaurant, GoogleType.store*/);
-            //gPois.addAll(loader.loadPlaceForCircleAndType(kinematicProperties,300, GoogleType.gas_station));
+                    GoogleType.stadium, GoogleType.synagogue, GoogleType.university,
+                    GoogleType.point_of_interest, GoogleType.place_of_worship,
+                    GoogleType.restaurant);
+
 
             String names = "";
             if(gPois != null) {
@@ -375,11 +375,11 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 addPOImaps(poi);
             }
 
-        //}
-        //catch (ModuleNotWorkingException e){
-        //    // handle exception
-        //    return;
-        //}
+        }
+        catch (ModuleNotWorkingException e){
+            // handle exception
+            return;
+        }
 
 
     }

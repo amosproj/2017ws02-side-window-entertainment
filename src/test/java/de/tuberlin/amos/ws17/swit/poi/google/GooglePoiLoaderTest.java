@@ -7,10 +7,12 @@ import java.util.Set;
 
 
 import de.tuberlin.amos.ws17.swit.common.GpsPosition;
+import de.tuberlin.amos.ws17.swit.common.ModuleNotWorkingException;
 import de.tuberlin.amos.ws17.swit.common.PoiVisualiser;
 import de.tuberlin.amos.ws17.swit.common.PointOfInterest;
 import de.tuberlin.amos.ws17.swit.poi.PoiType;
 import de.tuberlin.amos.ws17.swit.poi.GeographicCalculator;
+import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -18,7 +20,18 @@ import static org.junit.Assert.*;
 
 public class GooglePoiLoaderTest {
 
-	private GooglePoiLoader loader=new GooglePoiLoader(true, 100, 100);
+
+	private GooglePoiLoader loader;
+
+	@Before
+	public void constrution() throws ModuleNotWorkingException{
+		try{
+			loader=new GooglePoiLoader(true, 100, 100);
+		} catch (ModuleNotWorkingException e){
+			e.printStackTrace();
+			fail();
+		}
+	}
 
 	@Test
 	public void loadOneTest() {
@@ -53,11 +66,6 @@ public class GooglePoiLoaderTest {
 	public void loadNoRadiusTest() {
 		List<GooglePoi> pois=loader.loadPlaceForCircle(TestData.TIERGARTEN_POSITION_1, 0);
 		assertEquals(pois, null);
-	}
-	@Test
-	public void noConnectionTest() {
-//		List<GooglePoi> pois=loader.loadPlaceForCircleAndPoiType(tiergartenLng, tiergartenLat, 500, PoiType.LEISURE);
-//		assertNull(pois);
 	}
 
 	@Test

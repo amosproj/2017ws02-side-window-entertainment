@@ -1,20 +1,32 @@
 package de.tuberlin.amos.ws17.swit.poi.google;
 
+import de.tuberlin.amos.ws17.swit.common.ModuleNotWorkingException;
 import de.tuberlin.amos.ws17.swit.poi.PoiType;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Created by leand on 09.12.2017.
  */
 public class TypeTest {
 
+    private GooglePoiLoader loader;
 
-    private GooglePoiLoader loader=new GooglePoiLoader(true, 100, 100);
+    @Before
+    public void constrution() throws ModuleNotWorkingException{
+        try{
+            loader=new GooglePoiLoader(true, 100, 100);
+        } catch (ModuleNotWorkingException e){
+            e.printStackTrace();
+            fail();
+        }
+    }
 
     @Test
     public void simpleGoogleTypeTest() {

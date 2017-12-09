@@ -1,6 +1,7 @@
 package de.tuberlin.amos.ws17.swit.demo;
 
 import de.tuberlin.amos.ws17.swit.common.GpsPosition;
+import de.tuberlin.amos.ws17.swit.common.ModuleNotWorkingException;
 import de.tuberlin.amos.ws17.swit.common.PointOfInterest;
 import de.tuberlin.amos.ws17.swit.poi.PoisInSightFinder;
 import de.tuberlin.amos.ws17.swit.poi.google.GooglePoi;
@@ -23,22 +24,27 @@ public class MidThermGooglePlacesApiDemo {
         GpsPosition previousPostion= new GpsPosition(tiergartenLng, tiergartenLat);
         GpsPosition currentPostion= new GpsPosition(tiergartenLng2, tiergartenLat2);
 
-        GooglePoiLoader loader=new GooglePoiLoader(500, 800);
-        PoisInSightFinder sightFinder=new PoisInSightFinder(300,200,200);
+        GooglePoiLoader loader= null;
+        try {
+            loader = new GooglePoiLoader(500, 800);
+            PoisInSightFinder sightFinder=new PoisInSightFinder(300,200,200);
 
-        // get pois in a circle range
-        // you also have the possibility to get them for a certain direction, but I guess thats not necessary for the mid-term release (see: LoadPlacesInDirectionDemo)
-        List<GooglePoi> gPois=loader.loadPlaceForCircleAndType(currentPostion,300);
+            // get pois in a circle range
+            // you also have the possibility to get them for a certain direction, but I guess thats not necessary for the mid-term release (see: LoadPlacesInDirectionDemo)
+            List<GooglePoi> gPois=loader.loadPlaceForCircleAndType(currentPostion,300);
 
-        // dowloading images
-        // attenttion this is expensive! 1 request for each photo
-        loader.downloadImages(gPois);
+            // dowloading images
+            // attenttion this is expensive! 1 request for each photo
+            loader.downloadImages(gPois);
 
-        // cast
-        List<PointOfInterest> pois=(List) gPois;
+            // cast
+            List<PointOfInterest> pois=(List) gPois;
 
-        //here the seen pois are calculated by the current position and a previous position
-        Set<PointOfInterest> poisInView = sightFinder.getPoisInViewAngle(previousPostion, currentPostion, pois).keySet();
+            //here the seen pois are calculated by the current position and a previous position
+            Set<PointOfInterest> poisInView = sightFinder.getPoisInViewAngle(previousPostion, currentPostion, pois).keySet();
 
+        } catch (ModuleNotWorkingException e) {
+            e.printStackTrace();
+        }
     }
 }

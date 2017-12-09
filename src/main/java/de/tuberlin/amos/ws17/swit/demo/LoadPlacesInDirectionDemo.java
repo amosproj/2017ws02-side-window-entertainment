@@ -1,6 +1,7 @@
 package de.tuberlin.amos.ws17.swit.demo;
 
 import de.tuberlin.amos.ws17.swit.common.GpsPosition;
+import de.tuberlin.amos.ws17.swit.common.ModuleNotWorkingException;
 import de.tuberlin.amos.ws17.swit.poi.google.GooglePoi;
 import de.tuberlin.amos.ws17.swit.poi.google.GooglePoiLoader;
 import de.tuberlin.amos.ws17.swit.poi.google.MultiCircleSearchGeometry;
@@ -23,17 +24,20 @@ public class LoadPlacesInDirectionDemo {
         double tiergartenLat2=52.5085468;
         GpsPosition tiergarten1= new GpsPosition(tiergartenLng, tiergartenLat);
         GpsPosition tiergarten2= new GpsPosition(tiergartenLng2, tiergartenLat2);
+        try{
+            GooglePoiLoader loader=new GooglePoiLoader(100, 100);
 
-        GooglePoiLoader loader=new GooglePoiLoader(100, 100);
+            SearchGeometryFactory searchGeometryFactory=new SearchGeometryFactory(2.1, 200, 3, null, null);
+            MultiCircleSearchGeometry searchGeometry=searchGeometryFactory.createSearchCirclesForDirectedCoordinates(tiergarten1, tiergarten2);
 
-        SearchGeometryFactory searchGeometryFactory=new SearchGeometryFactory(2.1, 200, 3, null, null);
-        MultiCircleSearchGeometry searchGeometry=searchGeometryFactory.createSearchCirclesForDirectedCoordinates(tiergarten1, tiergarten2);
+            System.out.println(searchGeometry.toString());
 
-        System.out.println(searchGeometry.toString());
+            Set<GooglePoi> pois= loader.loadPlaceForMultiCircleSearchGeometry(searchGeometryFactory.createSearchCirclesForDirectedCoordinates(tiergarten1, tiergarten2));
 
-        Set<GooglePoi> pois= loader.loadPlaceForMultiCircleSearchGeometry(searchGeometryFactory.createSearchCirclesForDirectedCoordinates(tiergarten1, tiergarten2));
+            System.out.println("pios size "+pois.size());
 
-        System.out.println("pios size "+pois.size());
-
+        } catch (ModuleNotWorkingException e) {
+            e.printStackTrace();
+        }
     }
 }

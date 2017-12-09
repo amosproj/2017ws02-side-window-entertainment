@@ -2,6 +2,7 @@ package de.tuberlin.amos.ws17.swit.poi.google;
 
 import de.tuberlin.amos.ws17.swit.common.ApiConfig;
 import de.tuberlin.amos.ws17.swit.common.GpsPosition;
+import de.tuberlin.amos.ws17.swit.common.ModuleNotWorkingException;
 import de.tuberlin.amos.ws17.swit.common.PointOfInterest;
 import de.tuberlin.amos.ws17.swit.poi.PoiType;
 import se.walkercrou.places.*;
@@ -22,15 +23,17 @@ public class GooglePoiLoader {
 
 	private int xResolution, yResolution;
 
-	public GooglePoiLoader(int xResolution, int yResolution) {
-		this(false, xResolution, yResolution);
+	public GooglePoiLoader(int xResolution, int yResolution) throws ModuleNotWorkingException{
+	    this(false, xResolution, yResolution);
+	    testFunctionality();
 	}
 
-	public GooglePoiLoader(boolean enableLogging, int xResolution, int yResolution) {
+	public GooglePoiLoader(boolean enableLogging, int xResolution, int yResolution) throws ModuleNotWorkingException{
 		client = new GooglePlaces(ApiConfig.getProperty("GooglePlaces"), rh);
 		client.setDebugModeEnabled(enableLogging);
 		this.xResolution=xResolution;
 		this.yResolution=yResolution;
+		testFunctionality();
 	}
 
 	SearchGeometryFactory geometryFactory=new SearchGeometryFactory();
@@ -42,6 +45,40 @@ public class GooglePoiLoader {
             pois.addAll(loadPlaceForCircleSearchGeometry(circle));
         }
         return pois;
+    }
+
+    /**
+     * Check if a certain POI can be loaded.
+     * @return true if the Berlin Zoo was found
+     */
+    private void testFunctionality() throws ModuleNotWorkingException{
+
+        GoogleType zoo=GoogleType.zoo;
+        Param[] params = new Param[1];
+        params[0] = new Param("type").value(zoo);
+
+        try {
+            List<Place> places = client.getNearbyPlaces(52.507506, 13.337977, 500, GooglePlaces.MAXIMUM_RESULTS, params);
+
+            //check an return true
+            if(places!=null) {
+                if (places.size() > 0){
+                    if (places.get(0).getName().contains("Zoo")){
+                        //this is what should happen
+                    }else {
+                        throw new ModuleNotWorkingException("Unexpected result when checking places API functionality for a zoo that has been requested.");
+                    }
+                }else {
+                    throw new ModuleNotWorkingException("Unexpected empty result set when checking places API functionality.");
+                }
+            }else {
+                throw new ModuleNotWorkingException("Unexpected null result when checking places API functionality.");
+            }
+
+        }catch(GooglePlacesException e){
+            throw new ModuleNotWorkingException("Exception from used API with err msg: "+e.getErrorMessage(), e);
+        }
+
     }
 
     public Set<GooglePoi> loadPlaceForCircleSearchGeometry(CircleSearchGeometry circle){
