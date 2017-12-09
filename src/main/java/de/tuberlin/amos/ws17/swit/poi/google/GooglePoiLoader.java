@@ -81,13 +81,22 @@ public class GooglePoiLoader {
 	}
 
 	public List<GooglePoi> loadPlaceForCircleAndType(GpsPosition center, int radius, GoogleType... types) throws InvalidRequestException{
-		//TODO koennte fehlerhaft sein
-		Param[] params=new Param[types.length];
-		for(int i=0; i<types.length; i++){
-			params[i]=new Param("type").value(types[i]);
-		}
 
-		return loadPlaceForCircle(center, radius, params);
+    	if(types.length>0) {
+
+    		//concat the types
+			String concatTypes = "";
+			for (GoogleType type:types) {
+				concatTypes+="|"+type.toString();
+			}
+			concatTypes.replaceFirst("|", "");
+
+			Param[] params = new Param[1];
+			params[0] = new Param("type").value(concatTypes);
+
+			return loadPlaceForCircle(center, radius, params);
+		}
+		return loadPlaceForCircle(center, radius);
 	}
 
 	public List<GooglePoi> loadPlaceForCircleAndPoiType(GpsPosition center, int radius, PoiType... types) throws InvalidRequestException{
@@ -97,17 +106,31 @@ public class GooglePoiLoader {
 			gTypes.addAll(typeMap.getKeysByValue(type));
 		}
 
-		Param[] params=new Param[gTypes.size()];
-
-		int i=0;
-		for(GoogleType gType: gTypes){
-			params[i]=new Param("type").value(gType);
-			i++;
-		}
-
-		return loadPlaceForCircle(center, radius, params);
+		return loadPlaceForCircleAndType(center, radius, gTypes.toArray(new GoogleType[gTypes.size()]));
 	}
 
+
+	/**
+	 * A method just in case that using the depricated way of getting multiple places
+	 * as done in loadPlaceForCircleAndType is being depricated one day.
+	 * @param center
+	 * @param radius
+	 * @param params
+	 * @return
+	 * @throws InvalidRequestException
+	 */
+	private List<GooglePoi> loadPlacesForEachParam(GpsPosition center, int radius, Param[] params) throws InvalidRequestException{
+
+    	Set<GooglePoi> pois=new HashSet<>();
+
+    	for(Param param: params){
+    		Param[] single=new Param[1];
+    		single[0]=param;
+    		pois.addAll(loadPlaceForCircle(center, radius, single));
+		}
+
+		return new ArrayList<>(pois);
+	}
 	private List<GooglePoi> loadPlaceForCircle(GpsPosition center, int radius, Param[] params) throws InvalidRequestException{
 
 		try {
@@ -121,6 +144,7 @@ public class GooglePoiLoader {
 			return null;
 		}
 	}
+
 	private static List<Place> getPlacesDetails(List<Place> places){
 
     	if (places == null) {
