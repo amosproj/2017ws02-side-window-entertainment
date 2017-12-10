@@ -23,21 +23,25 @@ public class WikiAbstractProvider implements AbstractProvider, Module {
     @Override
     public PointOfInterest provideAbstract(PointOfInterest poi) {
 
-        String poiName = poi.getName();
-        poiName = poiName.replaceAll(" ", "_");
-        String wikiAbstract = "";
+        if (poi != null) {
+            String poiName = poi.getName();
+            poiName = poiName.replaceAll(" ", "_");
+            String wikiAbstract = "";
 
-        int wikiApiID = searchArticles(poiName);
-        if(wikiApiID == -1) {
-            wikiAbstract = "no pages found";
-            System.out.println("no pages found");
+            int wikiApiID = searchArticles(poiName);
+            if(wikiApiID == -1) {
+                wikiAbstract = "No Wikipedia article for the point of interest " + poiName + " was found.";
+            } else {
+                wikiAbstract = getExtract(wikiApiID);
+            }
+
+            poi.setInformationAbstract(StringEscapeUtils.unescapeJava(wikiAbstract));
+
+            return poi;
         } else {
-            wikiAbstract = getExtract(wikiApiID);
+            return null;
         }
 
-        poi.setInformationAbstract(StringEscapeUtils.unescapeJava(wikiAbstract));
-
-        return poi;
     }
 
     /*
