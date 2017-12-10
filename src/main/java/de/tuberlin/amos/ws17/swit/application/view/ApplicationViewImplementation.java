@@ -1,6 +1,7 @@
 package de.tuberlin.amos.ws17.swit.application.view;
 
 import de.tuberlin.amos.ws17.swit.application.viewmodel.ApplicationViewModelImplementation;
+import de.tuberlin.amos.ws17.swit.application.viewmodel.ModuleStatusViewModel;
 import de.tuberlin.amos.ws17.swit.application.viewmodel.PoiViewModel;
 import de.tuberlin.amos.ws17.swit.common.Module;
 import javafx.application.Application;
@@ -31,7 +32,7 @@ public class ApplicationViewImplementation extends Application implements Applic
     private ListView<PoiViewModel> listPOIcamera;
     private ListView<PoiViewModel> listPOImaps;
     private ListView<String> listDebugLog;
-    private ListView<Module> listModuleNotWorking;
+    private ListView<ModuleStatusViewModel> listModuleStatus;
 
     private BorderPane expansionPane;
     private BorderPane expansionTopPane;
@@ -80,9 +81,9 @@ public class ApplicationViewImplementation extends Application implements Applic
         listPOImaps.setId("listPOImaps");
         pnFoundation.setBottom(listPOImaps);
 
-        listModuleNotWorking = new ListView<>();
-        listModuleNotWorking.setId("listModuleNotWorking");
-        pnFoundation.setLeft(listModuleNotWorking);
+        listModuleStatus = new ListView<ModuleStatusViewModel>();
+        listModuleStatus.setId("listModuleStatus");
+        pnFoundation.setLeft(listModuleStatus);
 
         listDebugLog = new ListView<>();
         listDebugLog.setId("listDebugLog");
@@ -135,7 +136,7 @@ public class ApplicationViewImplementation extends Application implements Applic
             expansionImage.imageProperty().bindBidirectional(controller.getExpandedPOI().imageProperty());
             expansionInformation.textProperty().bindBidirectional(controller.getExpandedPOI().informationAbstractProperty());
             //listDebugLog.itemsProperty().bindBidirectional(controller.propertyDebugLogProperty());
-            listModuleNotWorking.itemsProperty().bindBidirectional(controller.listModuleNotWorkingProperty());
+            listModuleStatus.itemsProperty().bindBidirectional(controller.listModuleStatusProperty());
             listPOIcamera.itemsProperty().bindBidirectional(controller.propertyPOIcameraProperty());
             listPOImaps.itemsProperty().bindBidirectional(controller.propertyPOImapsProperty());
         }
@@ -202,22 +203,38 @@ public class ApplicationViewImplementation extends Application implements Applic
             }
         });
 
-        listModuleNotWorking.setCellFactory(new Callback<ListView<Module>, ListCell<Module>>() {
+        listModuleStatus.setCellFactory(new Callback<ListView<ModuleStatusViewModel>, ListCell<ModuleStatusViewModel>>() {
             @Override
-            public ListCell<Module> call(ListView<Module> param) {
-                return new ListCell<Module>() {
+            public ListCell<ModuleStatusViewModel> call(ListView<ModuleStatusViewModel> param) {
+                return new ListCell<ModuleStatusViewModel>() {
                     @Override
-                    public void updateItem(Module item, boolean empty) {
+                    public void updateItem(ModuleStatusViewModel item, boolean empty) {
                         super.updateItem(item, empty);
                         if(empty || item == null) {
                             setGraphic(null);
                             setText(null);
                         } else {
-                            ImageView imageView = new ImageView(SwingFXUtils.toFXImage(item.getModuleImage(), null));
-                            imageView.setPreserveRatio(true);
-                            imageView.setFitWidth(50);
-                            setGraphic(imageView);
-                            listPOIcamera.refresh();
+                            BorderPane pane = new BorderPane();
+                            ImageView image = new ImageView(item.getErrorType().getImage());
+                            image.setPreserveRatio(true);
+                            image.setFitWidth(50);
+                            image.setFitHeight(50);
+                            Label lbl = new Label();
+                            if(item.isWorking()) {
+                                String text = new String(Character.toChars(10003));
+                                lbl.setText(text);
+                                lbl.setStyle("-fx-text-fill: green; -fx-font-size: 20px; -fx-font-weight: bold");
+                                //lbl.setTextFill(Color.GREEN);
+                            } else {
+                                String text = new String(Character.toChars(10005));
+                                lbl.setText(text);
+                                lbl.setStyle("-fx-text-fill: red; -fx-font-size: 20px; -fx-font-weight: bold");
+                                //lbl.setTextFill(Color.RED);
+                            }
+                            pane.setCenter(image);
+                            pane.setRight(lbl);
+                            BorderPane.setAlignment(lbl, Pos.BOTTOM_RIGHT);
+                            setGraphic(pane);
                         }
                     }
                 };

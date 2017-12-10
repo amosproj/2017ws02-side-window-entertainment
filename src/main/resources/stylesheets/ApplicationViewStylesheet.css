@@ -50,6 +50,11 @@
     -fx-background-color: white;
 }
 
+#listModuleStatus {
+    -fx-pref-width: 100px;
+    -fx-max-width: 100px;
+}
+
 .label {
     -fx-font-size: 20px;
     -fx-font-family: "Helvetica Neue";
