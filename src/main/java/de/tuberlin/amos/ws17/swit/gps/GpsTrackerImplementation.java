@@ -59,6 +59,8 @@ public class GpsTrackerImplementation implements GpsTracker {
 	public KinematicProperties fillDumpObject(KinematicProperties kinProp) throws ModuleNotWorkingException{
 		if (portReader.isUpdated()){
 			portReader.fillKinematicProperties(kinProp);
+			if (kinProp == null)
+				throw new ModuleNotWorkingException(); // later: throw noSignalException or something like that
 			return kinProp;
 		}
 		else {

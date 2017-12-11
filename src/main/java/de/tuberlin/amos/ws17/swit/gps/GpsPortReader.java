@@ -27,6 +27,7 @@ public class GpsPortReader implements SentenceListener{
     private GpsPosition latestPosition; // outdated, kept for compatibility reasons
     private boolean running;
     private boolean update;
+    private DateTime lastMessageReceived;
 
     private double latitude;
     private double longitude;
@@ -36,6 +37,7 @@ public class GpsPortReader implements SentenceListener{
     public GpsPortReader(){
         update = false;
         running = false;
+        lastMessageReceived = null;
     }
 
     public LinkedList<GpsPosition> getGpsList() { return GpsList; }
@@ -60,6 +62,7 @@ public class GpsPortReader implements SentenceListener{
         System.out.println(s.toString());
         // Position and Time (not really necessary, since RMC has all the info and more)
         if("GGA".equals(s.getSentenceId())){
+            lastMessageReceived = new DateTime();
             GGASentence gga = (GGASentence) s;
             System.out.println("----- GGA Sentence -----");
             try{
@@ -96,6 +99,7 @@ public class GpsPortReader implements SentenceListener{
 
         // time and date, position, speed, course
         if("RMC".equals(s.getSentenceId())){
+            lastMessageReceived = new DateTime();
             RMCSentence rmc = (RMCSentence) s;
             System.out.println("----- RMC Sentence -----");
             try{
@@ -125,6 +129,7 @@ public class GpsPortReader implements SentenceListener{
 
         // course and speed (interesting: speed in km/h)
         if("VTG".equals(s.getSentenceId())){
+            lastMessageReceived = new DateTime();
             VTGSentence vtg = (VTGSentence) s;
             System.out.println("----- VTG Sentence -----");
             try{
@@ -218,11 +223,16 @@ public class GpsPortReader implements SentenceListener{
     // returns an object filled with the current available information.
     // Latitude and longitude are new values, the others may be outdated (but still the most actual)
     KinematicProperties fillKinematicProperties(KinematicProperties kinProp){
+        DateTime now = new DateTime();
+        if ((lastMessageReceived == null) || (now.getMillis() - lastMessageReceived.getMillis() > 15000)){ // no new message for 15 seconds
+            return null;
+        }
         kinProp.setLatitude(latitude);
         kinProp.setLongitude(longitude);
         kinProp.setVelocity(velocity);
         kinProp.setCourse(course);
         update = false;
+
 
         return kinProp;
     }
