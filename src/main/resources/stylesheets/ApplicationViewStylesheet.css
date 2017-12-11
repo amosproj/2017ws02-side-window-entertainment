@@ -51,8 +51,8 @@
 }
 
 #listModuleStatus {
-    -fx-pref-width: 100px;
-    -fx-max-width: 100px;
+    -fx-pref-width: 70px;
+    -fx-max-width: 70px;
 }
 
 .label {

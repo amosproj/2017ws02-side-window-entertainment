@@ -20,6 +20,7 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
@@ -214,7 +215,7 @@ public class ApplicationViewImplementation extends Application implements Applic
                             setGraphic(null);
                             setText(null);
                         } else {
-                            BorderPane pane = new BorderPane();
+                            StackPane pane = new StackPane();
                             ImageView image = new ImageView(item.getErrorType().getImage());
                             image.setPreserveRatio(true);
                             image.setFitWidth(50);
@@ -223,17 +224,18 @@ public class ApplicationViewImplementation extends Application implements Applic
                             if(item.isWorking()) {
                                 String text = new String(Character.toChars(10003));
                                 lbl.setText(text);
-                                lbl.setStyle("-fx-text-fill: green; -fx-font-size: 20px; -fx-font-weight: bold");
-                                //lbl.setTextFill(Color.GREEN);
+                                lbl.setStyle("-fx-text-fill: green; -fx-font-size: 20px; -fx-font-weight: bold; " +
+                                        "-fx-background-color: transparent; -fx-effect: dropshadow( gaussian , white , 3, 1.0 , 0 , 0 );");
                             } else {
                                 String text = new String(Character.toChars(10005));
                                 lbl.setText(text);
-                                lbl.setStyle("-fx-text-fill: red; -fx-font-size: 20px; -fx-font-weight: bold");
-                                //lbl.setTextFill(Color.RED);
+                                lbl.setStyle("-fx-text-fill: red; -fx-font-size: 20px; -fx-font-weight: bold; " +
+                                        "-fx-background-color: transparent; -fx-effect: dropshadow( gaussian , white , 3, 1.0 , 0 , 0 );");
                             }
-                            pane.setCenter(image);
-                            pane.setRight(lbl);
-                            BorderPane.setAlignment(lbl, Pos.BOTTOM_RIGHT);
+                            pane.getChildren().add(image);
+                            pane.getChildren().add(lbl);
+                            StackPane.setAlignment(lbl, Pos.BOTTOM_RIGHT);
+                            StackPane.setAlignment(image, Pos.CENTER_LEFT);
                             setGraphic(pane);
                         }
                     }

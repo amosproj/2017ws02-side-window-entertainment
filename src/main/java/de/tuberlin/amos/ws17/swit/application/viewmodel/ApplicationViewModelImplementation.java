@@ -51,8 +51,10 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
 
     //Threads
     public boolean run;
-    public Thread modelviewThread;
-    public Thread updateThread;
+    private Thread modelviewThread;
+    private Thread updateThread;
+    private Thread cameraThread;
+    private Thread mapsThread;
 
     //Listen und Binding
     private List<PointOfInterest> pointsOfInterest;
@@ -83,53 +85,15 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     public ApplicationViewModelImplementation(ApplicationView view) {
         initObjects(view);
         initModules();
-        //initTestData();
 
         run = true;
         modelviewThread = Thread.currentThread();
-        updateThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                int iterations = 10;
-                int lastExpression = 0;
-                UserExpressions userExpressions;
-                while (run) {
-                    userExpressions = null;
-                    if(userTracker.isUserTracked()) {
-                        userExpressions = userTracker.getUserExpressions();
-                        if(userExpressions.isKiss() && (iterations - lastExpression) >= 10) {
-                            lastExpression = iterations;
-                            BufferedImage image = null;
-                            try {
-                                image = landscapeTracker.getImage();
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                            if (image != null) {
-                                cameraImage = image;
-                                Platform.runLater(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        propertyCameraImage.set(SwingFXUtils.toFXImage(cameraImage, null ));
-                                    }
-                                });
-                            }
-                            //loadCameraPoi();
-                        }
-                    }
-                    if(iterations % 10 == 0) {
-                        //loadCameraPoi();
-                        loadMapsPoi();
-                    }
-                    try {
-                        Thread.sleep(500);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    iterations++;
-                }
-            }
-        });
+        initUpdateThread();
+        initMapsThread();
+        initCameraThread();
+
+        //initTestData();
+
         //updateThread.start();
     }
 
@@ -181,19 +145,18 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         }
 
         //GPS
-        gpsTracker = GpsTrackerFactory.GetGpsTracker();
-        try {
+        /*try {
+            gpsTracker = GpsTrackerFactory.GetGpsTracker();
             gpsTracker.startModule();
             setModuleStatus(ModuleErrors.NOGPSHARDWARE, true);
         }
         catch (ModuleNotWorkingException e){
-            e.printStackTrace();
             setModuleStatus(ModuleErrors.NOGPSHARDWARE, false);
         } catch(Exception e) {
             e.printStackTrace();
             setModuleStatus(ModuleErrors.NOGPSHARDWARE, false);
-        }
-        //setModuleStatus(ModuleErrors.NOGPSHARDWARE, true);
+        }*/
+        setModuleStatus(ModuleErrors.NOGPSHARDWARE, true);
 
         //User Tracking
         try {
@@ -211,6 +174,8 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
             moduleList.add(landscapeTracker);
             landscapeTracker.startModule();
             setModuleStatus(ModuleErrors.NOCAMERA, true);
+        } catch (ModuleNotWorkingException e) {
+            setModuleStatus(ModuleErrors.NOCAMERA, false);
         } catch(Exception e) {
             e.printStackTrace();
             setModuleStatus(ModuleErrors.NOCAMERA, false);
@@ -222,6 +187,8 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
             moduleList.add(abstractProvider);
             abstractProvider.startModule();
             setModuleStatus(ModuleErrors.NOINTERNET, true);
+        } catch (ModuleNotWorkingException e) {
+            setModuleStatus(ModuleErrors.NOINTERNET, false);
         } catch(Exception e) {
             e.printStackTrace();
             setModuleStatus(ModuleErrors.NOINTERNET, false);
@@ -232,7 +199,6 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
             googlePoiLoader = new GooglePoiLoader(500, 800);
             setModuleStatus(ModuleErrors.NOINTERNET, true);
         } catch (ModuleNotWorkingException e) {
-            e.printStackTrace();
             setModuleStatus(ModuleErrors.NOINTERNET, false);
         } catch (Exception e) {
             e.printStackTrace();
@@ -244,142 +210,158 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         moduleList.add(userTracker);
         moduleList.add(gpsTracker);
         */
-
-        /*moduleList.forEach(module -> {
-            startModule(module);
-        });*/
     }
 
-    private void loadCameraPoi() {
-        //Aufnahme Bild
-        BufferedImage image = null;
-        try {
-            image = landscapeTracker.getImage();
-            setModuleStatus(ModuleErrors.NOCAMERA, true);
-        } catch (Exception e) {
-            e.printStackTrace();
-            setModuleStatus(ModuleErrors.NOCAMERA, false);
-            return;
-        }
-        if (image == null) {
-            return;
-        }
-
-        /*cameraImage = image;
-        Platform.runLater(new Runnable() {
+    private void initUpdateThread() {
+        updateThread = new Thread(new Runnable() {
             @Override
             public void run() {
-                propertyCameraImage.set(SwingFXUtils.toFXImage(cameraImage, null ));
-            }
-        });*/
+                int iterations = 10;
+                int lastExpression = 0;
+                int lastCameraExecution = 0;
+                int lastMapsExecution = 0;
 
-        //Analyse Bild
-        List<PointOfInterest> pois = null;
-        try {
-            pois = cloudVision.identifyPOIs(image);
-            setModuleStatus(ModuleErrors.NOINTERNET, true);
-        } catch(Exception e) {
-            e.printStackTrace();
-            setModuleStatus(ModuleErrors.NOINTERNET, false);
-            return;
-        }
-        if (pois.isEmpty()) {
-            return;
-        }
-
-        //Abfrage Informationen
-        try {
-            for (PointOfInterest poi: pois) {
-                poi = abstractProvider.provideAbstract(poi);
-            }
-            setModuleStatus(ModuleErrors.NOINTERNET, true);
-        } catch(Exception e) {
-            e.printStackTrace();
-            setModuleStatus(ModuleErrors.NOINTERNET, false);
-            return;
-        }
-
-        for (PointOfInterest poi: pois) {
-            addPOIcamera(poi);
-        }
-    }
-
-    private void loadMapsPoi() {
-        //GPS
-        KinematicProperties kinematicProperties = null;
-        try {
-            gpsTracker.fillDumpObject(kinematicProperties);
-            setModuleStatus(ModuleErrors.NOGPSHARDWARE, true);
-        } catch (ModuleNotWorkingException e) {
-            e.printStackTrace();
-            setModuleStatus(ModuleErrors.NOGPSHARDWARE, false);
-        } catch (Exception e) {
-            e.printStackTrace();
-            setModuleStatus(ModuleErrors.NOGPSHARDWARE, false);
-            return;
-        }
-        if(kinematicProperties == null) {
-            return;
-        }
-
-        /*double tiergartenLng2=13.33490991;
-        double tiergartenLat2=52.5085468;
-        GpsPosition currentPostion= new GpsPosition(tiergartenLng2, tiergartenLat2);
-        kinematicProperties.setLatitude(tiergartenLat2);
-        kinematicProperties.setLongitude(tiergartenLng2);
-        DebugLog.log("Latitude: " + kinematicProperties.getLatitude() + " , Longitude: " + kinematicProperties.getLongitude(), this);*/
-
-        //POI maps
-        List<PointOfInterest> pois = null;
-        try{
-            List<GooglePoi> gPois = googlePoiLoader.loadPlaceForCircleAndType(kinematicProperties,300
-                    ,GoogleType.zoo, GoogleType.airport, GoogleType.aquarium, GoogleType.church, GoogleType.city_hall,
-                    GoogleType.hospital, GoogleType.library, GoogleType.mosque, GoogleType.museum, GoogleType.park,
-                    GoogleType.stadium, GoogleType.synagogue, GoogleType.university,
-                    GoogleType.point_of_interest, GoogleType.place_of_worship,
-                    GoogleType.restaurant);
-            /*String names = "";
-            if(gPois != null) {
-                for (GooglePoi g: gPois) {
-                    names += g.getName() + System.lineSeparator();
-                    names.length();
+                while (run) {
+                    UserExpressions userExpressions = null;
+                    if(userTracker.isUserTracked()) {
+                        userExpressions = userTracker.getUserExpressions();
+                        if(userExpressions.isKiss() && (iterations - lastExpression) >= 10) {
+                            lastExpression = iterations;
+                            //cameraThread.start();
+                        }
+                    }
+                    if((iterations - lastCameraExecution) >= 10) {
+                        if(!cameraThread.isAlive()) {
+                            //cameraThread.start();
+                            lastCameraExecution = iterations;
+                        }
+                    }
+                    if((iterations - lastMapsExecution) >= 10) {
+                        if(!mapsThread.isAlive()) {
+                            //mapsThread.start();
+                            lastMapsExecution = iterations;
+                        }
+                    }
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    iterations++;
                 }
-            }*/
-            googlePoiLoader.downloadImages(gPois);
-            pois = (List) gPois;
-            setModuleStatus(ModuleErrors.NOINTERNET, true);
-        } catch (Exception e){
-            e.printStackTrace();
-            setModuleStatus(ModuleErrors.NOINTERNET, false);
-            return;
-        }
-        if(pois.size() == 0) {
-            return;
-        }
-
-        //Information Source
-        try {
-            for (PointOfInterest poi: pois) {
-                poi = abstractProvider.provideAbstract(poi);
             }
-            setModuleStatus(ModuleErrors.NOINTERNET, true);
-        } catch (Exception e){
-            e.printStackTrace();
-            setModuleStatus(ModuleErrors.NOINTERNET, false);
-            return;
-        }
-
-        for(PointOfInterest poi: pois) {
-            addPOImaps(poi);
-        }
+        });
     }
 
-    private void startModule(Module module) {
-        try {
-            module.startModule();
-        } catch (ModuleNotWorkingException e) {
+    private void initMapsThread() {
+        mapsThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                //GPS
+                KinematicProperties kinematicProperties = null;
+                try {
+                    gpsTracker.fillDumpObject(kinematicProperties);
+                    setModuleStatus(ModuleErrors.NOGPSHARDWARE, true);
+                } catch (ModuleNotWorkingException e) {
+                    setModuleStatus(ModuleErrors.NOGPSHARDWARE, false);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    setModuleStatus(ModuleErrors.NOGPSHARDWARE, false);
+                    return;
+                }
+                if(kinematicProperties == null) {
+                    return;
+                }
 
-        }
+                //POI maps
+                List<PointOfInterest> pois = null;
+                try{
+                    List<GooglePoi> gPois = googlePoiLoader.loadPlaceForCircleAndType(kinematicProperties,300
+                            ,GoogleType.zoo, GoogleType.airport, GoogleType.aquarium, GoogleType.church, GoogleType.city_hall,
+                            GoogleType.hospital, GoogleType.library, GoogleType.mosque, GoogleType.museum, GoogleType.park,
+                            GoogleType.stadium, GoogleType.synagogue, GoogleType.university,
+                            GoogleType.point_of_interest, GoogleType.place_of_worship,
+                            GoogleType.restaurant);
+                    googlePoiLoader.downloadImages(gPois);
+                    pois = (List) gPois;
+                    setModuleStatus(ModuleErrors.NOINTERNET, true);
+                } catch (Exception e){
+                    e.printStackTrace();
+                    setModuleStatus(ModuleErrors.NOINTERNET, false);
+                    return;
+                }
+                if(pois.size() == 0) {
+                    return;
+                }
+
+                //Information Source
+                try {
+                    for (PointOfInterest poi: pois) {
+                        poi = abstractProvider.provideAbstract(poi);
+                    }
+                    setModuleStatus(ModuleErrors.NOINTERNET, true);
+                } catch (Exception e){
+                    e.printStackTrace();
+                    setModuleStatus(ModuleErrors.NOINTERNET, false);
+                    return;
+                }
+
+                for(PointOfInterest poi: pois) {
+                    addPOImaps(poi);
+                }
+            }
+        });
+    }
+
+    private void initCameraThread() {
+        cameraThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                //Aufnahme Bild
+                BufferedImage image = null;
+                try {
+                    image = landscapeTracker.getImage();
+                    setModuleStatus(ModuleErrors.NOCAMERA, true);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    setModuleStatus(ModuleErrors.NOCAMERA, false);
+                    return;
+                }
+                if (image == null) {
+                    return;
+                }
+
+                //Analyse Bild
+                List<PointOfInterest> pois = null;
+                try {
+                    pois = cloudVision.identifyPOIs(image);
+                    setModuleStatus(ModuleErrors.NOINTERNET, true);
+                } catch(Exception e) {
+                    e.printStackTrace();
+                    setModuleStatus(ModuleErrors.NOINTERNET, false);
+                    return;
+                }
+                if (pois.isEmpty()) {
+                    return;
+                }
+
+                //Abfrage Informationen
+                try {
+                    for (PointOfInterest poi: pois) {
+                        poi = abstractProvider.provideAbstract(poi);
+                    }
+                    setModuleStatus(ModuleErrors.NOINTERNET, true);
+                } catch(Exception e) {
+                    e.printStackTrace();
+                    setModuleStatus(ModuleErrors.NOINTERNET, false);
+                    return;
+                }
+
+                for (PointOfInterest poi: pois) {
+                    addPOIcamera(poi);
+                }
+            }
+        });
     }
 
     private void setModuleStatus(ModuleErrors type, boolean working) {
