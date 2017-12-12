@@ -1,7 +1,9 @@
 package de.tuberlin.amos.ws17.swit.demo;
 
-import de.tuberlin.amos.ws17.swit.gps.GpsPosition;
+import de.tuberlin.amos.ws17.swit.common.KinematicProperties;
+import de.tuberlin.amos.ws17.swit.common.ModuleNotWorkingException;
 import de.tuberlin.amos.ws17.swit.gps.GpsTrackerImplementation;
+import de.tuberlin.amos.ws17.swit.gps.GpsTrackerMock;
 
 import java.util.LinkedList;
 
@@ -10,38 +12,39 @@ import java.util.LinkedList;
 public class GpsTrackerImplementationDemo {
 
     public static void main(String[] args){
-        GpsTrackerImplementation tracker = new GpsTrackerImplementation();
+        GpsTrackerImplementation tracker = new GpsTrackerMock();
         try{
-            int i = 0;
-            while(i < 30){
-                i++;
-                Thread.sleep(1000);
-                GpsPosition pos = tracker.getGpsPosition();
-                if(pos != null)
-                    System.out.println("Latest position: " + pos.getLatitude() + ", " + pos.getLongitude()
-                            + " at " + pos.getTimeStamp()+ " with speed: " + pos.getSpeed() + " and course : " + pos.getCourse());
-                else
-                    System.out.println("Latest position: null");
-            }
-
-            LinkedList<GpsPosition> gpsList = tracker.getGpsList();
-            if(gpsList != null){
-                System.out.println("gpsList start:");
-                while(gpsList.size() > 0){
-                    GpsPosition element = gpsList.pop();
-                    System.out.println("Latest position: " + element.getLatitude() + ", " + element.getLongitude() + " at "
-                            + element.getTimeStamp() + " with speed: " + element.getSpeed() + " and course: " + element.getCourse());
+            tracker.startModule();
+            KinematicProperties prop = new KinematicProperties();
+            while (true){
+                prop = tracker.fillDumpObject(prop);
+                String timeString = prop.getTimeStamp().getHourOfDay() + ":" + prop.getTimeStamp().getMinuteOfHour() + ":" + prop.getTimeStamp().getSecondOfMinute();
+                System.out.println("-----------------------------");
+                System.out.println("latitude: " + prop.getLatitude());
+                System.out.println("longitude: " + prop.getLongitude());
+                System.out.println("time: " + timeString);
+                System.out.println("velocity: " + prop.getVelocity());
+                System.out.println("acceleration: " + prop.getAcceleration());
+                System.out.println("course: " + prop.getCourse());
+                try {
+                    Thread.sleep(2000);
                 }
-                System.out.println("gpsList end");
+                catch (InterruptedException e){
+                    System.out.println("Interrupted");
+                    break;
+                }
             }
-            else{
-                System.out.println("gpsList is empty");
-            }
+        }
+        catch (ModuleNotWorkingException e){
+            System.out.println("Module not working exception");
+        }
+        //try{
 
-        }
-        catch(java.lang.InterruptedException e){
-            System.out.println("InterruptedEx exception");
-        }
+
+            //}
+        //catch(java.lang.InterruptedException e){
+            //    System.out.println("InterruptedEx exception");
+        //}
     }
 
 }
