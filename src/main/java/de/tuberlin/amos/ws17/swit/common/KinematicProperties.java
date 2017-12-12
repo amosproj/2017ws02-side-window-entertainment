@@ -9,6 +9,17 @@ public class KinematicProperties extends GpsPosition{
     private double velocity;
     private double acceleration;
 
+    public KinematicProperties() {
+        this(new DateTime(), 0.0, 0.0, 0.0);
+    }
+
+    public KinematicProperties(DateTime timeStamp, double course, double velocity, double acceleration) {
+        this.timeStamp = timeStamp;
+        this.course = course;
+        this.velocity = velocity;
+        this.acceleration = acceleration;
+    }
+
     public DateTime getTimeStamp() {
         return timeStamp;
     }

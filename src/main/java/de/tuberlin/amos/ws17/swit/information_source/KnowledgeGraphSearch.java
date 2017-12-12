@@ -1,5 +1,6 @@
     package de.tuberlin.amos.ws17.swit.information_source;
 
+<<<<<<< HEAD
     import com.google.api.client.http.*;
     import com.google.api.client.http.javanet.NetHttpTransport;
     import com.jayway.jsonpath.JsonPath;
@@ -7,6 +8,17 @@
     import org.json.simple.JSONArray;
     import org.json.simple.JSONObject;
     import org.json.simple.parser.JSONParser;
+=======
+import com.google.api.client.http.*;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.jayway.jsonpath.JsonPath;
+import de.tuberlin.amos.ws17.swit.common.ApiConfig;
+import de.tuberlin.amos.ws17.swit.common.PointOfInterest;
+import de.tuberlin.amos.ws17.swit.common.ServiceNotAvailableException;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+>>>>>>> 94a158d57659610ec542a7d8c82b9506efa96960
 
     public class KnowledgeGraphSearch implements InformationProvider {
 
@@ -18,11 +30,17 @@
 
         private KnowledgeGraphSearch() {}
 
+<<<<<<< HEAD
         public static InformationProvider getInstance() {
             if (instance == null) {
                 instance = new KnowledgeGraphSearch();
             }
             return instance;
+=======
+    public static InformationProvider getInstance() throws ServiceNotAvailableException {
+        if (instance == null) {
+            instance = new KnowledgeGraphSearch();
+>>>>>>> 94a158d57659610ec542a7d8c82b9506efa96960
         }
 
         @Override
@@ -41,6 +59,7 @@
             return detailledInfo;
         }
 
+<<<<<<< HEAD
         @Override
         public String getUrlById(String id) {
             GenericUrl url = createGenericUrl();
@@ -48,6 +67,16 @@
             getDescription(url);
             return ObjectUrl;
         }
+=======
+    @Override
+    public PointOfInterest getUrlById(PointOfInterest poi) throws ServiceNotAvailableException {
+        GenericUrl url = createGenericUrl();
+        url.put("query", poi.getName());
+        getDescription(url);
+        poi.setInformationAbstract(ObjectUrl);
+        return poi;
+    }
+>>>>>>> 94a158d57659610ec542a7d8c82b9506efa96960
 
         private GenericUrl createGenericUrl() {
             GenericUrl url = new GenericUrl("https://kgsearch.googleapis.com/v1/entities:search");

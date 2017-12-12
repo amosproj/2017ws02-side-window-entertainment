@@ -13,11 +13,19 @@ public class PointOfInterest {
     private String informationAbstract;
 
     public PointOfInterest() {
+        this("", "", new GpsPosition(), null, "");
     }
+
     public PointOfInterest(String id, String name, GpsPosition gpsPosition) {
+        this(id, name, gpsPosition, null, "");
+    }
+
+    public PointOfInterest(String id, String name, GpsPosition gpsPosition, BufferedImage image, String informationAbstract) {
         this.id = id;
         this.name = name;
         this.gpsPosition = gpsPosition;
+        this.image = image;
+        this.informationAbstract = informationAbstract;
     }
 
     public String getId() {
