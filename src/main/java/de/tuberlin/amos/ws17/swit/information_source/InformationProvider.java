@@ -23,4 +23,6 @@ public interface InformationProvider {
      */
 
      String getUrlById(String id);
+
+     String getNameFromUrl (String url);
 }
