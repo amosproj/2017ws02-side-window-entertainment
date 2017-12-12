@@ -6,7 +6,8 @@ public class GpsTrackerFactory {
 	
 	public static GpsTracker GetGpsTracker() {
 		if (gpsTracker == null) {
-			gpsTracker = new GpsTrackerImplementation();
+			//gpsTracker = new GpsTrackerImplementation();
+			gpsTracker = new GpsTrackerMock();
 		}
 		
 		return gpsTracker;
