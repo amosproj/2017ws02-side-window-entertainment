@@ -8,6 +8,8 @@ import de.tuberlin.amos.ws17.swit.gps.GpsTrackerFactory;
 import de.tuberlin.amos.ws17.swit.image_analysis.CloudVision;
 import de.tuberlin.amos.ws17.swit.image_analysis.ImageUtils;
 import de.tuberlin.amos.ws17.swit.image_analysis.LandmarkDetector;
+import de.tuberlin.amos.ws17.swit.information_source.InformationProvider;
+import de.tuberlin.amos.ws17.swit.information_source.KnowledgeGraphSearch;
 import de.tuberlin.amos.ws17.swit.information_source.WikiAbstractProvider;
 import de.tuberlin.amos.ws17.swit.landscape_tracking.LandscapeTracker;
 import de.tuberlin.amos.ws17.swit.landscape_tracking.LandscapeTrackerImplementation;
@@ -48,6 +50,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     private DebugLog debugLog = new DebugLog();
     private WikiAbstractProvider abstractProvider;
     private GooglePoiLoader googlePoiLoader;
+    private InformationProvider knowledgeGraphSearch;
 
     //Threads
     public boolean run;
@@ -94,7 +97,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
 
         //initTestData();
 
-        //updateThread.start();
+        updateThread.start();
     }
 
     private void initObjects(ApplicationView view) {
@@ -194,6 +197,17 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
             setModuleStatus(ModuleErrors.NOINTERNET, false);
         }
 
+        //Google KnowledgeGraphSearch
+        try {
+            knowledgeGraphSearch = KnowledgeGraphSearch.getInstance();
+            setModuleStatus(ModuleErrors.NOINTERNET, true);
+        } catch (ModuleNotWorkingException e) {
+            setModuleStatus(ModuleErrors.NOINTERNET, false);
+        } catch(Exception e) {
+            e.printStackTrace();
+            setModuleStatus(ModuleErrors.NOINTERNET, false);
+        }
+
         //Google POI loader
         try {
             googlePoiLoader = new GooglePoiLoader(500, 800);
@@ -216,23 +230,34 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         updateThread = new Thread(new Runnable() {
             @Override
             public void run() {
-                int iterations = 10;
+                int iterations = 0;
                 int lastExpression = 0;
                 int lastCameraExecution = 0;
                 int lastMapsExecution = 0;
 
                 while (run) {
                     UserExpressions userExpressions = null;
-                    if(userTracker.isUserTracked()) {
+                    /*if(userTracker.isUserTracked()) {
                         userExpressions = userTracker.getUserExpressions();
                         if(userExpressions.isKiss() && (iterations - lastExpression) >= 10) {
                             lastExpression = iterations;
                             //cameraThread.start();
                         }
-                    }
+                    }*/
                     if((iterations - lastCameraExecution) >= 10) {
+                        System.out.println(!cameraThread.isAlive());
                         if(!cameraThread.isAlive()) {
+                            System.out.println("Thread is not alive");
                             //cameraThread.start();
+                            try {
+                                PointOfInterest poi = new PointOfInterest();
+                                poi.setId("5");
+                                poi.setName("HTML");
+                                setExpandedPOI(convertPOI(knowledgeGraphSearch.getUrlById(poi)));
+                                setModuleStatus(ModuleErrors.NOINTERNET, true);
+                            } catch(ModuleNotWorkingException e) {
+                                setModuleStatus(ModuleErrors.NOINTERNET, false);
+                            }
                             lastCameraExecution = iterations;
                         }
                     }
@@ -247,6 +272,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
+
                     iterations++;
                 }
             }
@@ -260,7 +286,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 //GPS
                 KinematicProperties kinematicProperties = null;
                 try {
-                    gpsTracker.fillDumpObject(kinematicProperties);
+                    kinematicProperties = gpsTracker.fillDumpObject(kinematicProperties);
                     setModuleStatus(ModuleErrors.NOGPSHARDWARE, true);
                 } catch (ModuleNotWorkingException e) {
                     setModuleStatus(ModuleErrors.NOGPSHARDWARE, false);
@@ -295,7 +321,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 }
 
                 //Information Source
-                try {
+                /*try {
                     for (PointOfInterest poi: pois) {
                         poi = abstractProvider.provideAbstract(poi);
                     }
@@ -304,6 +330,14 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                     e.printStackTrace();
                     setModuleStatus(ModuleErrors.NOINTERNET, false);
                     return;
+                }*/
+                try {
+                    for (PointOfInterest poi: pois) {
+                        poi = knowledgeGraphSearch.getUrlById(poi);
+                    }
+                    setModuleStatus(ModuleErrors.NOINTERNET, true);
+                } catch(ModuleNotWorkingException e) {
+                    setModuleStatus(ModuleErrors.NOINTERNET, false);
                 }
 
                 for(PointOfInterest poi: pois) {
@@ -346,7 +380,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 }
 
                 //Abfrage Informationen
-                try {
+                /*try {
                     for (PointOfInterest poi: pois) {
                         poi = abstractProvider.provideAbstract(poi);
                     }
@@ -355,6 +389,14 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                     e.printStackTrace();
                     setModuleStatus(ModuleErrors.NOINTERNET, false);
                     return;
+                }*/
+                try {
+                    for (PointOfInterest poi: pois) {
+                        poi = knowledgeGraphSearch.getUrlById(poi);
+                    }
+                    setModuleStatus(ModuleErrors.NOINTERNET, true);
+                } catch(ModuleNotWorkingException e) {
+                    setModuleStatus(ModuleErrors.NOINTERNET, false);
                 }
 
                 for (PointOfInterest poi: pois) {
@@ -419,11 +461,18 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
 
     private PoiViewModel convertPOI(PointOfInterest poi) {
         PoiViewModel result = new PoiViewModel();
-        result.setId(poi.getId());
-        result.setName(poi.getName());
-        if(poi.getImage() == null)
+        if(poi.getId() != null) {
+            result.setId(poi.getId());
+        }
+        if(poi.getName() != null) {
+            result.setName(poi.getName());
+        }
+        if(poi.getImage() != null) {
             result.setImage(SwingFXUtils.toFXImage(poi.getImage(), null ));
-        result.setInformationAbstract(poi.getInformationAbstract());
+        }
+        if(poi.getInformationAbstract() != null) {
+            result.setInformationAbstract(poi.getInformationAbstract());
+        }
         return result;
     }
 

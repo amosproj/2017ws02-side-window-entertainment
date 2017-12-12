@@ -1,5 +1,6 @@
 package de.tuberlin.amos.ws17.swit.demo;
 
+import de.tuberlin.amos.ws17.swit.common.ServiceNotAvailableException;
 import de.tuberlin.amos.ws17.swit.image_analysis.CloudVision;
 import de.tuberlin.amos.ws17.swit.image_analysis.LandmarkDetector;
 import de.tuberlin.amos.ws17.swit.image_analysis.LandmarkResult;
@@ -29,10 +30,14 @@ public class WebViewInformationAbstractDemo extends Application {
     @Override
     public void start(final Stage stage) {
 
-        BufferedImage testImage = getTestImageFile("fernsehturm-2.jpg");
+        /*BufferedImage testImage = getTestImageFile("fernsehturm-2.jpg");
         LandmarkDetector landmarkDetector = CloudVision.getInstance();
-        InformationProvider entity = KnowledgeGraphSearch.getInstance();
-
+        final InformationProvider entity;
+        try {
+            entity = KnowledgeGraphSearch.getInstance();
+        } catch (ServiceNotAvailableException e) {
+            e.printStackTrace();
+        }
 
 
         Button buttonURL = new Button("Analyze Image");
@@ -73,7 +78,7 @@ public class WebViewInformationAbstractDemo extends Application {
         stage.setWidth(450);
         stage.setHeight(300);
 
-        stage.show();
+        stage.show();*/
     }
 
     public static void main(String[] args) {

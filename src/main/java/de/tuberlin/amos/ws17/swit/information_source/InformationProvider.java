@@ -1,5 +1,8 @@
 package de.tuberlin.amos.ws17.swit.information_source;
 
+import de.tuberlin.amos.ws17.swit.common.PointOfInterest;
+import de.tuberlin.amos.ws17.swit.common.ServiceNotAvailableException;
+
 public interface InformationProvider {
 
     /**
@@ -18,9 +21,9 @@ public interface InformationProvider {
 
     /**
      * Get URL link of an object
-     * @param id of Object
+     * @param poi Object
      * @return Url of wikipedia entry (webview relevant)
      */
 
-     String getUrlById(String id);
+     PointOfInterest getUrlById(PointOfInterest poi) throws ServiceNotAvailableException;
 }

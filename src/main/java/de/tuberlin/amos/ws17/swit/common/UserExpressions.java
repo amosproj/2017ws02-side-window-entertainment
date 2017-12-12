@@ -6,6 +6,17 @@ public class UserExpressions {
     private boolean isSmile;
     private boolean isMouthOpen;
 
+    public UserExpressions() {
+        this(false, false, false, false);
+    }
+
+    public UserExpressions(boolean isKIss, boolean isTongueOut, boolean isSmile, boolean isMouthOpen) {
+        this.isKiss = isKIss;
+        this.isTongueOut = isTongueOut;
+        this.isSmile = isSmile;
+        this.isMouthOpen = isMouthOpen;
+    }
+
     public boolean isKiss() {
         return isKiss;
     }

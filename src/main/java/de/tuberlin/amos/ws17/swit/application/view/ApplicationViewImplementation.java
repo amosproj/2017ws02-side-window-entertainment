@@ -8,6 +8,8 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
@@ -23,6 +25,8 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import javafx.scene.web.WebEngine;
+import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import org.bridj.cpp.com.IDispatch;
@@ -43,6 +47,9 @@ public class ApplicationViewImplementation extends Application implements Applic
     private ImageView expansionImage;
     private ScrollPane expansionScrollPane;
 
+    private WebEngine webEngine;
+    private WebView browser;
+
     private static final String FONTNAME = "Helvetica Neue";
     public static ApplicationViewImplementation app;
     private static ApplicationViewModelImplementation controller;
@@ -58,12 +65,25 @@ public class ApplicationViewImplementation extends Application implements Applic
 
         initBindings();
         initCellFactories();
+
+
+
     }
 
     @Override
     public void start(Stage stage) {
         this.primaryStage = stage;
         primaryStage.setTitle("Side Window Infotainment");
+
+        /*browser = new WebView();
+        webEngine = browser.getEngine();
+        webEngine.load("http://www.google.com");
+        pnFoundation.setRight(browser);
+        controller.getExpandedPOI().informationAbstractProperty().addListener((observable, oldValue, newValue) -> {
+            System.out.println("change");
+            webEngine.load(newValue);
+        });*/
+
         //primaryStage.initStyle(StageStyle.TRANSPARENT);
         //primaryStage.setMaximized(true);
         Scene scene = new Scene(pnFoundation, 800, 600, Color.WHITE);

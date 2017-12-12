@@ -1,6 +1,7 @@
 package de.tuberlin.amos.ws17.swit.demo;
 
 import com.google.api.services.vision.v1.model.BoundingPoly;
+import de.tuberlin.amos.ws17.swit.common.ServiceNotAvailableException;
 import de.tuberlin.amos.ws17.swit.image_analysis.ImageUtils;
 import de.tuberlin.amos.ws17.swit.image_analysis.LandmarkDetector;
 import de.tuberlin.amos.ws17.swit.image_analysis.CloudVision;
@@ -22,7 +23,12 @@ public class LandmarkExtractionDemo {
     public static void main(String[] args) throws IOException, GeneralSecurityException {
         BufferedImage testImage = getTestImageFile("fernsehturm-2.jpg");
         LandmarkDetector landmarkDetector = CloudVision.getInstance();
-        InformationProvider infoProvider = KnowledgeGraphSearch.getInstance();
+        InformationProvider infoProvider = null;
+        try {
+            infoProvider = KnowledgeGraphSearch.getInstance();
+        } catch (ServiceNotAvailableException e) {
+            e.printStackTrace();
+        }
 
         if (landmarkDetector != null) {
             List<LandmarkResult> results = landmarkDetector.identifyLandmarks(testImage, 3);

@@ -4,6 +4,8 @@ import com.google.api.client.http.*;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.jayway.jsonpath.JsonPath;
 import de.tuberlin.amos.ws17.swit.common.ApiConfig;
+import de.tuberlin.amos.ws17.swit.common.PointOfInterest;
+import de.tuberlin.amos.ws17.swit.common.ServiceNotAvailableException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -18,7 +20,7 @@ public class KnowledgeGraphSearch implements InformationProvider {
 
     private KnowledgeGraphSearch() {}
 
-    public static InformationProvider getInstance() {
+    public static InformationProvider getInstance() throws ServiceNotAvailableException {
         if (instance == null) {
             instance = new KnowledgeGraphSearch();
         }
@@ -42,11 +44,12 @@ public class KnowledgeGraphSearch implements InformationProvider {
     }
 
     @Override
-    public String getUrlById(String id) {
+    public PointOfInterest getUrlById(PointOfInterest poi) throws ServiceNotAvailableException {
         GenericUrl url = createGenericUrl();
-        url.put("query", id);
+        url.put("query", poi.getName());
         getDescription(url);
-        return ObjectUrl;
+        poi.setInformationAbstract(ObjectUrl);
+        return poi;
     }
 
     private GenericUrl createGenericUrl() {
