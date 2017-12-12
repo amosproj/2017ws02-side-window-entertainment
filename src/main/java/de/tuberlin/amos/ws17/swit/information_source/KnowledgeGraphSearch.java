@@ -1,14 +1,14 @@
     package de.tuberlin.amos.ws17.swit.information_source;
 
-<<<<<<< HEAD
     import com.google.api.client.http.*;
     import com.google.api.client.http.javanet.NetHttpTransport;
     import com.jayway.jsonpath.JsonPath;
     import de.tuberlin.amos.ws17.swit.common.ApiConfig;
+    import javafx.beans.property.ObjectProperty;
     import org.json.simple.JSONArray;
     import org.json.simple.JSONObject;
     import org.json.simple.parser.JSONParser;
-=======
+
 import com.google.api.client.http.*;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.jayway.jsonpath.JsonPath;
@@ -18,7 +18,6 @@ import de.tuberlin.amos.ws17.swit.common.ServiceNotAvailableException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
->>>>>>> 94a158d57659610ec542a7d8c82b9506efa96960
 
     public class KnowledgeGraphSearch implements InformationProvider {
 
@@ -30,17 +29,11 @@ import org.json.simple.parser.JSONParser;
 
         private KnowledgeGraphSearch() {}
 
-<<<<<<< HEAD
-        public static InformationProvider getInstance() {
+        public static InformationProvider getInstance() throws ServiceNotAvailableException {
             if (instance == null) {
                 instance = new KnowledgeGraphSearch();
             }
             return instance;
-=======
-    public static InformationProvider getInstance() throws ServiceNotAvailableException {
-        if (instance == null) {
-            instance = new KnowledgeGraphSearch();
->>>>>>> 94a158d57659610ec542a7d8c82b9506efa96960
         }
 
         @Override
@@ -59,24 +52,17 @@ import org.json.simple.parser.JSONParser;
             return detailledInfo;
         }
 
-<<<<<<< HEAD
-        @Override
-        public String getUrlById(String id) {
-            GenericUrl url = createGenericUrl();
-            url.put("query", id);
-            getDescription(url);
-            return ObjectUrl;
-        }
-=======
+
     @Override
     public PointOfInterest getUrlById(PointOfInterest poi) throws ServiceNotAvailableException {
         GenericUrl url = createGenericUrl();
         url.put("query", poi.getName());
         getDescription(url);
-        poi.setInformationAbstract(ObjectUrl);
+        poi.setInformationAbstract(getNameFromUrl(ObjectUrl));
+        System.out.println(ObjectUrl);
+        System.out.println(poi.toString());
         return poi;
     }
->>>>>>> 94a158d57659610ec542a7d8c82b9506efa96960
 
         private GenericUrl createGenericUrl() {
             GenericUrl url = new GenericUrl("https://kgsearch.googleapis.com/v1/entities:search");
@@ -114,8 +100,11 @@ import org.json.simple.parser.JSONParser;
         }
 
         public String getNameFromUrl(String objectUrl){
-           String[] newArray =  objectUrl.split("/");
-           return newArray[newArray.length-1];
+            if(!objectUrl.equals("")) {
+                String[] temp =  objectUrl.split("/");
+                return temp[temp.length - 1];
+            }
+            return "";
         }
 
     }

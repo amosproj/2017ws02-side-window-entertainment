@@ -12,7 +12,7 @@ public class PoiViewModel {
     private SimpleStringProperty informationAbstract;
 
     public PoiViewModel() {
-        this(null, null,null, null);
+        this("", "",null, "");
     }
 
     public PoiViewModel(String id, String name, Image image, String informationAbstract) {

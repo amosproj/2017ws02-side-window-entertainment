@@ -249,15 +249,25 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                         if(!cameraThread.isAlive()) {
                             System.out.println("Thread is not alive");
                             //cameraThread.start();
-                            try {
+                            /*try {
                                 PointOfInterest poi = new PointOfInterest();
                                 poi.setId("5");
-                                poi.setName("HTML");
-                                setExpandedPOI(convertPOI(knowledgeGraphSearch.getUrlById(poi)));
+                                poi.setName("Bill Gates");
+                                Platform.runLater(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        try {
+                                            setExpandedPOI(convertPOI(knowledgeGraphSearch.getUrlById(poi)));
+                                        } catch (ServiceNotAvailableException e) {
+                                            e.printStackTrace();
+                                        }
+
+                                    }
+                                });
                                 setModuleStatus(ModuleErrors.NOINTERNET, true);
-                            } catch(ModuleNotWorkingException e) {
+                            } catch(Exception e) {
                                 setModuleStatus(ModuleErrors.NOINTERNET, false);
-                            }
+                            }*/
                             lastCameraExecution = iterations;
                         }
                     }
