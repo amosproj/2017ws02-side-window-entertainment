@@ -248,11 +248,10 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                         System.out.println(!cameraThread.isAlive());
                         if(!cameraThread.isAlive()) {
                             System.out.println("Thread is not alive");
-                            //cameraThread.start();
-                            /*try {
+                            cameraThread.start();
+                            try {
                                 PointOfInterest poi = new PointOfInterest();
-                                poi.setId("5");
-                                poi.setName("Bill Gates");
+                                poi.setId("/m/02g8n0");
                                 Platform.runLater(new Runnable() {
                                     @Override
                                     public void run() {
@@ -267,7 +266,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                                 setModuleStatus(ModuleErrors.NOINTERNET, true);
                             } catch(Exception e) {
                                 setModuleStatus(ModuleErrors.NOINTERNET, false);
-                            }*/
+                            }
                             lastCameraExecution = iterations;
                         }
                     }
