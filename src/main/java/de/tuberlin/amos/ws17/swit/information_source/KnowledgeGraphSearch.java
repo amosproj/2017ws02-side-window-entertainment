@@ -5,9 +5,12 @@
     import com.jayway.jsonpath.JsonPath;
     import de.tuberlin.amos.ws17.swit.common.ApiConfig;
     import javafx.beans.property.ObjectProperty;
+    import org.apache.commons.lang3.StringEscapeUtils;
+    import org.apache.jena.base.Sys;
     import org.json.simple.JSONArray;
     import org.json.simple.JSONObject;
     import org.json.simple.parser.JSONParser;
+
 
 import com.google.api.client.http.*;
 import com.google.api.client.http.javanet.NetHttpTransport;
@@ -56,9 +59,9 @@ import org.json.simple.parser.JSONParser;
     @Override
     public PointOfInterest getUrlById(PointOfInterest poi) throws ServiceNotAvailableException {
         GenericUrl url = createGenericUrl();
-        url.put("query", poi.getName());
+        url.put("ids", poi.getId());
         getDescription(url);
-        poi.setInformationAbstract(getNameFromUrl(ObjectUrl));
+        poi.setInformationAbstract(StringEscapeUtils.unescapeJava(detailledInfo));
         System.out.println(ObjectUrl);
         System.out.println(poi.toString());
         return poi;
@@ -84,12 +87,18 @@ import org.json.simple.parser.JSONParser;
                 JSONArray elements = (JSONArray) response.get("itemListElement");
 
                 for (Object element: elements) {
-                    String detailedDescription = JsonPath.read(element, "$.result.detailedDescription.articleBody").toString();
+                    String detailedDescription = "";
                     String Objecturl = JsonPath.read(element, "$.result.detailedDescription.url").toString();
-                    if (!detailedDescription.isEmpty()) {
-                        this.detailledInfo = detailedDescription;
+                    if (!Objecturl.isEmpty()) {
                         this.ObjectUrl = Objecturl;
-                        return detailedDescription;
+                        String[] temp = ObjectUrl.split("/");
+                        System.out.println(temp);
+                        String[] language = temp[2].split("\\.");
+                        if(!language[0].equals("")){
+                            this.detailledInfo = WikiAbstractProvider.getExtract(getNameFromUrl(ObjectUrl), language[0]);
+                        }
+
+                        return this.detailledInfo;
                     }
                 }
 
