@@ -80,6 +80,22 @@ public class WikiAbstractProvider implements AbstractProvider, Module {
         return result;
     }
 
+
+    public static String getExtract(String searchTerm, String language) {
+        String result = "";
+        try {
+            String json = readHTTP("https://"+ language + ".wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro=&explaintext=&titles=" + searchTerm);
+            int idStartIndex = json.indexOf("extract\":\"") + 10;
+            result = json.substring(idStartIndex);
+            int idEndIndex = result.indexOf("\"}");
+            result = result.substring(0, idEndIndex);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
     /*
      * Reads the HTTP informations of a given URL and returns it as a string.
      */
