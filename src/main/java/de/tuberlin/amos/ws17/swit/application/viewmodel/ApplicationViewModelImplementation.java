@@ -5,6 +5,8 @@ import de.tuberlin.amos.ws17.swit.application.view.ApplicationViewImplementation
 import de.tuberlin.amos.ws17.swit.common.*;
 import de.tuberlin.amos.ws17.swit.gps.GpsTracker;
 import de.tuberlin.amos.ws17.swit.gps.GpsTrackerFactory;
+import de.tuberlin.amos.ws17.swit.gps.GpsTrackerImplementation;
+import de.tuberlin.amos.ws17.swit.gps.GpsTrackerMock;
 import de.tuberlin.amos.ws17.swit.image_analysis.CloudVision;
 import de.tuberlin.amos.ws17.swit.image_analysis.ImageUtils;
 import de.tuberlin.amos.ws17.swit.image_analysis.LandmarkDetector;
@@ -19,6 +21,7 @@ import de.tuberlin.amos.ws17.swit.poi.google.GooglePoiLoader;
 import de.tuberlin.amos.ws17.swit.poi.google.GoogleType;
 import de.tuberlin.amos.ws17.swit.tracking.JavoNetUserTracker;
 import de.tuberlin.amos.ws17.swit.tracking.UserTracker;
+import de.tuberlin.amos.ws17.swit.tracking.UserTrackerMock;
 import javafx.application.Platform;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
@@ -83,6 +86,9 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     public Property<Background> backgroundProperty;
     public BackgroundImage backgroundImage;
     public Background background;
+
+    //keine Hardware (Kameras und GPS Tracker) = false - Hardware = true
+    private final boolean isHardwareAvailable = false;
 
 
 //Konstruktor
@@ -157,6 +163,71 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     }
 
     private void initModules() {
+        //GPS
+        if(isHardwareAvailable) {
+            try {
+                gpsTracker = new GpsTrackerImplementation();
+                moduleList.add(gpsTracker);
+                gpsTracker.startModule();
+                setModuleStatus(ModuleErrors.NOGPSHARDWARE, true);
+            }
+            catch (ModuleNotWorkingException e){
+                setModuleStatus(ModuleErrors.NOGPSHARDWARE, false);
+            } catch(Exception e) {
+                e.printStackTrace();
+                setModuleStatus(ModuleErrors.NOGPSHARDWARE, false);
+            }
+        } else {
+            try {
+                gpsTracker = new GpsTrackerMock();
+                moduleList.add(gpsTracker);
+                gpsTracker.startModule();
+                setModuleStatus(ModuleErrors.NOGPSHARDWARE, true);
+            } catch (ModuleNotWorkingException e) {
+                e.printStackTrace();
+                setModuleStatus(ModuleErrors.NOGPSHARDWARE, false);
+            }
+        }
+
+        //User Tracking
+        if(isHardwareAvailable) {
+            try {
+                userTracker = new JavoNetUserTracker();
+                userTracker.startTracking();
+                setModuleStatus(ModuleErrors.NOUSERCAMERA, true);
+            } catch(Exception e) {
+                e.printStackTrace();
+                setModuleStatus(ModuleErrors.NOUSERCAMERA, false);
+            }
+        } else {
+            try {
+                userTracker = new UserTrackerMock();
+                userTracker.startTracking();
+                setModuleStatus(ModuleErrors.NOUSERCAMERA, true);
+            } catch(Exception e) {
+                e.printStackTrace();
+                setModuleStatus(ModuleErrors.NOUSERCAMERA, false);
+            }
+        }
+
+
+        //Landscape Tracking
+        if(isHardwareAvailable) {
+            try {
+                landscapeTracker = new LandscapeTrackerImplementation();
+                moduleList.add(landscapeTracker);
+                landscapeTracker.startModule();
+                setModuleStatus(ModuleErrors.NOCAMERA, true);
+            } catch (ModuleNotWorkingException e) {
+                setModuleStatus(ModuleErrors.NOCAMERA, false);
+            } catch(Exception e) {
+                e.printStackTrace();
+                setModuleStatus(ModuleErrors.NOCAMERA, false);
+            }
+        } else {
+            setModuleStatus(ModuleErrors.NOCAMERA, false);
+        }
+
         //CloudVision
         try {
             cloudVision = CloudVision.getInstance();
@@ -164,43 +235,6 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         } catch(Exception e) {
             e.printStackTrace();
             setModuleStatus(ModuleErrors.NOINTERNET, false);
-        }
-
-        //GPS
-        /*try {
-            gpsTracker = GpsTrackerFactory.GetGpsTracker();
-            gpsTracker.startModule();
-            setModuleStatus(ModuleErrors.NOGPSHARDWARE, true);
-        }
-        catch (ModuleNotWorkingException e){
-            setModuleStatus(ModuleErrors.NOGPSHARDWARE, false);
-        } catch(Exception e) {
-            e.printStackTrace();
-            setModuleStatus(ModuleErrors.NOGPSHARDWARE, false);
-        }*/
-        setModuleStatus(ModuleErrors.NOGPSHARDWARE, true);
-
-        //User Tracking
-        try {
-            userTracker = new JavoNetUserTracker();
-            userTracker.startTracking();
-            setModuleStatus(ModuleErrors.NOUSERCAMERA, true);
-        } catch(Exception e) {
-            e.printStackTrace();
-            setModuleStatus(ModuleErrors.NOUSERCAMERA, false);
-        }
-
-        //Landscape Tracking
-        try {
-            landscapeTracker = new LandscapeTrackerImplementation();
-            moduleList.add(landscapeTracker);
-            landscapeTracker.startModule();
-            setModuleStatus(ModuleErrors.NOCAMERA, true);
-        } catch (ModuleNotWorkingException e) {
-            setModuleStatus(ModuleErrors.NOCAMERA, false);
-        } catch(Exception e) {
-            e.printStackTrace();
-            setModuleStatus(ModuleErrors.NOCAMERA, false);
         }
 
         //Information Source
@@ -256,19 +290,19 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
 
                 while (run) {
                     UserExpressions userExpressions = null;
-                    /*if(userTracker.isUserTracked()) {
+                    if(userTracker.isUserTracked()) {
                         userExpressions = userTracker.getUserExpressions();
                         if(userExpressions.isKiss() && (iterations - lastExpression) >= 10) {
                             lastExpression = iterations;
-                            //cameraThread.start();
+                            cameraThread.start();
                         }
-                    }*/
+                    }
                     if((iterations - lastCameraExecution) >= 10) {
                         System.out.println(!cameraThread.isAlive());
                         if(!cameraThread.isAlive()) {
                             System.out.println("Thread is not alive");
                             cameraThread.start();
-                            try {
+                            /*try {
                                 PointOfInterest poi = new PointOfInterest();
                                 poi.setId("/m/02g8n0");
                                 Platform.runLater(new Runnable() {
@@ -285,13 +319,13 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                                 setModuleStatus(ModuleErrors.NOINTERNET, true);
                             } catch(Exception e) {
                                 setModuleStatus(ModuleErrors.NOINTERNET, false);
-                            }
+                            }*/
                             lastCameraExecution = iterations;
                         }
                     }
                     if((iterations - lastMapsExecution) >= 10) {
                         if(!mapsThread.isAlive()) {
-                            //mapsThread.start();
+                            mapsThread.start();
                             lastMapsExecution = iterations;
                         }
                     }
@@ -348,11 +382,11 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 List<PointOfInterest> pois = null;
                 try{
                     List<GooglePoi> gPois = googlePoiLoader.loadPlaceForCircleAndType(kinematicProperties,300
-                            ,GoogleType.zoo, GoogleType.airport, GoogleType.aquarium, GoogleType.church, GoogleType.city_hall,
+                            ,GoogleType.food/*GoogleType.zoo , GoogleType.airport, GoogleType.aquarium, GoogleType.church, GoogleType.city_hall,
                             GoogleType.hospital, GoogleType.library, GoogleType.mosque, GoogleType.museum, GoogleType.park,
                             GoogleType.stadium, GoogleType.synagogue, GoogleType.university,
                             GoogleType.point_of_interest, GoogleType.place_of_worship,
-                            GoogleType.restaurant);
+                            GoogleType.restaurant*/);
                     googlePoiLoader.downloadImages(gPois);
                     pois = (List) gPois;
                     setModuleStatus(ModuleErrors.NOINTERNET, true);
@@ -361,7 +395,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                     setModuleStatus(ModuleErrors.NOINTERNET, false);
                     return;
                 }
-                if(pois.size() == 0) {
+                if(pois == null || pois.size() == 0) {
                     return;
                 }
 
