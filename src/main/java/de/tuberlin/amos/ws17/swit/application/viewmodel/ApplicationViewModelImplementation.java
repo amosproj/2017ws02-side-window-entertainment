@@ -87,8 +87,12 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     public BackgroundImage backgroundImage;
     public Background background;
 
-    //keine Hardware (Kameras und GPS Tracker) = false - Hardware = true
-    private final boolean isHardwareAvailable = false;
+    //GPS Module vorhanden? true : false
+    private final boolean isGpsModuleAvailable = false;
+    //User Tracking Kamera vorhanden ? true : false
+    private final boolean isUserCameraAvailable = true;
+    //Aussenkamera vorhanden? true : false
+    private final boolean isCameraAvailable = true;
 
 
 //Konstruktor
@@ -164,7 +168,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
 
     private void initModules() {
         //GPS
-        if(isHardwareAvailable) {
+        if(isGpsModuleAvailable) {
             try {
                 gpsTracker = new GpsTrackerImplementation();
                 moduleList.add(gpsTracker);
@@ -190,7 +194,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         }
 
         //User Tracking
-        if(isHardwareAvailable) {
+        if(isUserCameraAvailable) {
             try {
                 userTracker = new JavoNetUserTracker();
                 userTracker.startTracking();
@@ -212,7 +216,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
 
 
         //Landscape Tracking
-        if(isHardwareAvailable) {
+        if(isCameraAvailable) {
             try {
                 landscapeTracker = new LandscapeTrackerImplementation();
                 moduleList.add(landscapeTracker);
