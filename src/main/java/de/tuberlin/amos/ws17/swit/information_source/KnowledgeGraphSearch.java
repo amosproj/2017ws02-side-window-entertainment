@@ -27,7 +27,7 @@ import org.json.simple.parser.JSONParser;
         private static final String API_KEY = ApiConfig.getProperty("KnowledgeGraphSearch");
         private static final String LANGUAGE = ApiConfig.getProperty("language");
         private static KnowledgeGraphSearch instance;
-        private String detailledInfo;
+        private String detailledInfo="";
         private String ObjectUrl;
 
         private KnowledgeGraphSearch() {}
@@ -55,13 +55,32 @@ import org.json.simple.parser.JSONParser;
             return detailledInfo;
         }
 
+        @Override
+        public PointOfInterest getInfoByName(PointOfInterest poi) throws ServiceNotAvailableException {
+            GenericUrl url = createGenericUrl();
+            url.put("query", poi.getName());
+            getDescription(url);
+            if (this.detailledInfo.equals("")) {
+                poi.setInformationAbstract(StringEscapeUtils.unescapeJava("Der Wikipedia Artikel ist leider nicht verfügbar"));
+            } else {
+                poi.setInformationAbstract(StringEscapeUtils.unescapeJava(detailledInfo));
+            }
+            System.out.println(ObjectUrl);
+            System.out.println(poi.toString());
+            return poi;
+        }
+
 
     @Override
     public PointOfInterest getUrlById(PointOfInterest poi) throws ServiceNotAvailableException {
         GenericUrl url = createGenericUrl();
         url.put("ids", poi.getId());
         getDescription(url);
-        poi.setInformationAbstract(StringEscapeUtils.unescapeJava(detailledInfo));
+        if (this.detailledInfo.equals("")) {
+            poi.setInformationAbstract(StringEscapeUtils.unescapeJava("Der Wikipedia Artikel ist leider nicht verfügbar"));
+        } else {
+            poi.setInformationAbstract(StringEscapeUtils.unescapeJava(detailledInfo));
+        }
         System.out.println(ObjectUrl);
         System.out.println(poi.toString());
         return poi;
