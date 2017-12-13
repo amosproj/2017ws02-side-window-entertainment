@@ -9,6 +9,7 @@ import net.sf.marineapi.nmea.event.SentenceEvent;
 import net.sf.marineapi.nmea.event.SentenceListener;
 import net.sf.marineapi.nmea.io.ExceptionListener;
 import net.sf.marineapi.nmea.io.SentenceReader;
+import net.sf.marineapi.nmea.parser.DataNotAvailableException;
 import net.sf.marineapi.nmea.sentence.*;
 import org.joda.time.DateTime;
 
@@ -138,24 +139,26 @@ public class GpsPortReader implements SentenceListener{
         if("VTG".equals(s.getSentenceId())){
             lastMessageReceived = new DateTime();
             VTGSentence vtg = (VTGSentence) s;
-            if (vtg.isValid()){
-                System.out.println("----- VTG Sentence -----");
-                try{
-                    System.out.println("Speed: " + vtg.getSpeedKmh() + "km/h");
-                    System.out.println("Course: " + vtg.getMagneticCourse() + "°");
-                }
-                catch (net.sf.marineapi.nmea.parser.DataNotAvailableException e){
-                    // do nothing. Broken messages are ok
-                }
+            try {
+                System.out.println("Speed: " + vtg.getSpeedKmh() + "km/h");
+                System.out.println("Course: " + vtg.getMagneticCourse() + "°");
+                if (vtg.isValid()) {
+                    System.out.println("----- VTG Sentence -----");
 
-                // fill 'latestPosition'. It is only kept for compatibility
-                if (latestPosition == null){
-                    latestPosition = new GpsPosition(555, 666, null);
-                }
-                latestPosition.setSpeed(vtg.getSpeedKmh());
 
-                // set 'velocity' for filling up KinematicProperties object
-                velocity = vtg.getSpeedKmh();
+
+                    // fill 'latestPosition'. It is only kept for compatibility
+                    if (latestPosition == null) {
+                        latestPosition = new GpsPosition(555, 666, null);
+                    }
+                    latestPosition.setSpeed(vtg.getSpeedKmh());
+
+                    // set 'velocity' for filling up KinematicProperties object
+                    velocity = vtg.getSpeedKmh();
+                }
+            }
+            catch(net.sf.marineapi.nmea.parser.DataNotAvailableException e){
+                // do nothing. Broken messages are ok
             }
         }
     }
