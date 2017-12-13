@@ -1,15 +1,11 @@
 package de.tuberlin.amos.ws17.swit.poi.google;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
 
 import de.tuberlin.amos.ws17.swit.common.GpsPosition;
 import de.tuberlin.amos.ws17.swit.common.ModuleNotWorkingException;
-import de.tuberlin.amos.ws17.swit.common.PoiVisualiser;
-import de.tuberlin.amos.ws17.swit.common.PointOfInterest;
 import de.tuberlin.amos.ws17.swit.poi.PoiType;
 import de.tuberlin.amos.ws17.swit.poi.GeographicCalculator;
 import org.junit.Before;
