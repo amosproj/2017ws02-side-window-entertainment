@@ -35,6 +35,7 @@ public class LandmarkExtractionDemo {
             if (!results.isEmpty()) {
                 LandmarkResult firstResult = results.get(0);
                 String description = infoProvider.getInfoById(firstResult.getId());
+                System.out.println(firstResult.getId());
                 showHighlightedLandmark(firstResult, testImage, description);
                 ImageUtils.showImage(firstResult.getCroppedImage(), new JFrame("Cropped POI"));
                 System.out.print(description);
