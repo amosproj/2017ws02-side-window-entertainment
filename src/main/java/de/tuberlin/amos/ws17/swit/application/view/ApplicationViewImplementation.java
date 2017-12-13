@@ -8,6 +8,7 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
@@ -21,15 +22,18 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.StackPane;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.ImagePattern;
+import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import org.bridj.cpp.com.IDispatch;
+
+import java.util.regex.Pattern;
 
 public class ApplicationViewImplementation extends Application implements ApplicationView {
 
@@ -86,6 +90,7 @@ public class ApplicationViewImplementation extends Application implements Applic
 
         //primaryStage.initStyle(StageStyle.TRANSPARENT);
         //primaryStage.setMaximized(true);
+
         Scene scene = new Scene(pnFoundation, 800, 600, Color.WHITE);
         scene.getStylesheets().add("/stylesheets/ApplicationViewStylesheet.css");
         primaryStage.setScene(scene);
@@ -160,6 +165,9 @@ public class ApplicationViewImplementation extends Application implements Applic
             listModuleStatus.itemsProperty().bindBidirectional(controller.listModuleStatusProperty());
             listPOIcamera.itemsProperty().bindBidirectional(controller.propertyPOIcameraProperty());
             listPOImaps.itemsProperty().bindBidirectional(controller.propertyPOImapsProperty());
+
+
+            pnFoundation.backgroundProperty().bindBidirectional(controller.backgroundProperty);
         }
         catch (Exception e) {
             e.printStackTrace();

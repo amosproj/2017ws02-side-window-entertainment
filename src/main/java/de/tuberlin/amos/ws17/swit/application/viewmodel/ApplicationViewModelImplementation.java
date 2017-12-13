@@ -20,10 +20,7 @@ import de.tuberlin.amos.ws17.swit.poi.google.GoogleType;
 import de.tuberlin.amos.ws17.swit.tracking.JavoNetUserTracker;
 import de.tuberlin.amos.ws17.swit.tracking.UserTracker;
 import javafx.application.Platform;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleListProperty;
-import javafx.beans.property.SimpleMapProperty;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
@@ -31,6 +28,7 @@ import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.Image;
 import javafx.event.EventHandler;
 import javafx.event.ActionEvent;
+import javafx.scene.layout.*;
 
 import java.awt.image.BufferedImage;
 import java.io.*;
@@ -81,7 +79,10 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     }
 
     private SimpleObjectProperty<Image> propertyCameraImage;
-    private BufferedImage cameraImage;
+    public Image cameraImage;
+    public Property<Background> backgroundProperty;
+    public BackgroundImage backgroundImage;
+    public Background background;
 
 
 //Konstruktor
@@ -96,6 +97,24 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         initCameraThread();
 
         //initTestData();
+
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    cameraImage = SwingFXUtils.toFXImage(landscapeTracker.getImage(), null );
+                    backgroundProperty = new SimpleObjectProperty<>();
+                    backgroundImage = new BackgroundImage(cameraImage,
+                            BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.DEFAULT,
+                            BackgroundSize.DEFAULT);
+                    background = new Background(backgroundImage);
+                    backgroundProperty.setValue(background);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
 
         updateThread.start();
     }
@@ -281,6 +300,23 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
+
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                cameraImage = SwingFXUtils.toFXImage(landscapeTracker.getImage(), null );
+                                backgroundProperty = new SimpleObjectProperty<>();
+                                backgroundImage = new BackgroundImage(cameraImage,
+                                        BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.DEFAULT,
+                                        BackgroundSize.DEFAULT);
+                                background = new Background(backgroundImage);
+                                backgroundProperty.setValue(background);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
 
                     iterations++;
                 }
