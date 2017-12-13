@@ -7,6 +7,7 @@ import gnu.io.CommPortIdentifier;
 
 import net.sf.marineapi.nmea.event.SentenceEvent;
 import net.sf.marineapi.nmea.event.SentenceListener;
+import net.sf.marineapi.nmea.io.ExceptionListener;
 import net.sf.marineapi.nmea.io.SentenceReader;
 import net.sf.marineapi.nmea.sentence.*;
 import org.joda.time.DateTime;
@@ -28,6 +29,7 @@ public class GpsPortReader implements SentenceListener{
     private boolean running;
     private boolean update;
     private DateTime lastMessageReceived;
+    private OwnExceptionListener exceptionListener;
 
     private double latitude;
     private double longitude;
@@ -38,6 +40,8 @@ public class GpsPortReader implements SentenceListener{
         update = false;
         running = false;
         lastMessageReceived = null;
+        exceptionListener = new OwnExceptionListener();
+
     }
 
     public LinkedList<GpsPosition> getGpsList() { return GpsList; }
@@ -58,42 +62,43 @@ public class GpsPortReader implements SentenceListener{
 
     public void sentenceRead(SentenceEvent event){
         Sentence s = event.getSentence();
-
-        System.out.println(s.toString());
+        //System.out.println(s.toString());
         // Position and Time (not really necessary, since RMC has all the info and more)
         if("GGA".equals(s.getSentenceId())){
             lastMessageReceived = new DateTime();
             GGASentence gga = (GGASentence) s;
-            System.out.println("----- GGA Sentence -----");
-            try{
-                // set values 'latitude' and 'longitude' and set 'update' to true for filling up KinematicProperties object
-                latitude = gga.getPosition().getLatitude();
-                longitude = gga.getPosition().getLongitude();
-                update = true;
+            if (gga.isValid()){
+                System.out.println("----- GGA Sentence -----");
+                try{
+                    // set values 'latitude' and 'longitude' and set 'update' to true for filling up KinematicProperties object
+                    latitude = gga.getPosition().getLatitude();
+                    longitude = gga.getPosition().getLongitude();
+                    update = true;
 
-                // fill 'latestPosition'. It is only kept for compatibility
-                if (latestPosition == null){
-                    latestPosition = new GpsPosition(555, 666, null);
-                }
-                latestPosition.setLatitude(gga.getPosition().getLatitude());
-                latestPosition.setLongitude(gga.getPosition().getLongitude());
+                    // fill 'latestPosition'. It is only kept for compatibility
+                    if (latestPosition == null){
+                        latestPosition = new GpsPosition(555, 666, null);
+                    }
+                    latestPosition.setLatitude(gga.getPosition().getLatitude());
+                    latestPosition.setLongitude(gga.getPosition().getLongitude());
 
-                // fill up GpsList  ( do we use it anymore?? )
-                if (GpsList == null){
-                    GpsList = new LinkedList<GpsPosition>();
-                }
-                Date juDate = new Date();
-                DateTime dt = new DateTime(juDate);
-                GpsList.add(new GpsPosition(gga.getPosition().getLatitude(), gga.getPosition().getLongitude(), dt));
+                    // fill up GpsList  ( do we use it anymore?? )
+                    if (GpsList == null){
+                        GpsList = new LinkedList<GpsPosition>();
+                    }
+                    Date juDate = new Date();
+                    DateTime dt = new DateTime(juDate);
+                    GpsList.add(new GpsPosition(gga.getPosition().getLatitude(), gga.getPosition().getLongitude(), dt));
 
-                // in the future: reset GpsList, if a new day starts (a new element comes in with a timestamp of another day)
-                // ^will be done when I figure out timestamp generation
-                while (GpsList.size() >= 100) {
-                    GpsList.removeLast();
+                    // in the future: reset GpsList, if a new day starts (a new element comes in with a timestamp of another day)
+                    // ^will be done when I figure out timestamp generation
+                    while (GpsList.size() >= 100) {
+                        GpsList.removeLast();
+                    }
                 }
-            }
-            catch (net.sf.marineapi.nmea.parser.DataNotAvailableException e) {
-                // do nothing. Broken messages are ok
+                catch (net.sf.marineapi.nmea.parser.DataNotAvailableException e) {
+                    // do nothing. Broken messages are ok
+                }
             }
         }
 
@@ -101,54 +106,57 @@ public class GpsPortReader implements SentenceListener{
         if("RMC".equals(s.getSentenceId())){
             lastMessageReceived = new DateTime();
             RMCSentence rmc = (RMCSentence) s;
-            System.out.println("----- RMC Sentence -----");
-            try{
-                // fill 'latestPosition'. It is only kept for compatibility
-                if (latestPosition != null){
-                    latestPosition.setCourse(rmc.getCorrectedCourse());
+            if (rmc.isValid()){
+                System.out.println("----- RMC Sentence -----");
+                try{
+                    // fill 'latestPosition'. It is only kept for compatibility
+                    if (latestPosition != null){
+                        latestPosition.setCourse(rmc.getCorrectedCourse());
+                    }
+                    latestPosition.setCourse(rmc.getCourse());
+                    //System.out.println("Position: " + latestPosition.getLatitude() + ", " + latestPosition.getLongitude());
+                    //System.out.println("Date: " + rmc.getDate().getDay() + "." + rmc.getDate().getMonth() + "." + rmc.getDate().getYear());
+                    //System.out.println("Speed: " + rmc.getSpeed() + " knots");
+                    //System.out.println("Course: " + rmc.getCourse());
+
+                    // set course for filling up KinematicProperties object
+                    course = rmc.getCourse();
                 }
-                latestPosition.setCourse(rmc.getCourse());
-                //System.out.println("Position: " + latestPosition.getLatitude() + ", " + latestPosition.getLongitude());
-                //System.out.println("Date: " + rmc.getDate().getDay() + "." + rmc.getDate().getMonth() + "." + rmc.getDate().getYear());
-                //System.out.println("Speed: " + rmc.getSpeed() + " knots");
-                //System.out.println("Course: " + rmc.getCourse());
+                catch (net.sf.marineapi.nmea.parser.DataNotAvailableException e){
+                    // do nothing. Broken messages are ok
+                }
 
-                // set course for filling up KinematicProperties object
-                course = rmc.getCourse();
+                // generate Timestamp from separate data: maybe later, when we actually need it
+                //net.sf.marineapi.nmea.util.Date date = rmc.getDate();
+                //Time time = rmc.getTime();
+                //GregorianCalendar calendar = new GregorianCalendar(date.getYear(), date.getMonth(), date.getDay());
+                //latestPosition.setTimeStamp(time);
             }
-            catch (net.sf.marineapi.nmea.parser.DataNotAvailableException e){
-                // do nothing. Broken messages are ok
-            }
-
-            // generate Timestamp from separate data: maybe later, when we actually need it
-            //net.sf.marineapi.nmea.util.Date date = rmc.getDate();
-            //Time time = rmc.getTime();
-            //GregorianCalendar calendar = new GregorianCalendar(date.getYear(), date.getMonth(), date.getDay());
-            //latestPosition.setTimeStamp(time);
         }
 
         // course and speed (interesting: speed in km/h)
         if("VTG".equals(s.getSentenceId())){
             lastMessageReceived = new DateTime();
             VTGSentence vtg = (VTGSentence) s;
-            System.out.println("----- VTG Sentence -----");
-            try{
-                System.out.println("Speed: " + vtg.getSpeedKmh() + "km/h");
-                System.out.println("Course: " + vtg.getMagneticCourse() + "°");
-            }
-            catch (net.sf.marineapi.nmea.parser.DataNotAvailableException e){
-                // do nothing. Broken messages are ok
-            }
+            if (vtg.isValid()){
+                System.out.println("----- VTG Sentence -----");
+                try{
+                    System.out.println("Speed: " + vtg.getSpeedKmh() + "km/h");
+                    System.out.println("Course: " + vtg.getMagneticCourse() + "°");
+                }
+                catch (net.sf.marineapi.nmea.parser.DataNotAvailableException e){
+                    // do nothing. Broken messages are ok
+                }
 
-            // fill 'latestPosition'. It is only kept for compatibility
-            if (latestPosition == null){
-                latestPosition = new GpsPosition(555, 666, null);
+                // fill 'latestPosition'. It is only kept for compatibility
+                if (latestPosition == null){
+                    latestPosition = new GpsPosition(555, 666, null);
+                }
+                latestPosition.setSpeed(vtg.getSpeedKmh());
+
+                // set 'velocity' for filling up KinematicProperties object
+                velocity = vtg.getSpeedKmh();
             }
-            latestPosition.setSpeed(vtg.getSpeedKmh());
-
-            // set 'velocity' for filling up KinematicProperties object
-            velocity = vtg.getSpeedKmh();
-
         }
     }
 
@@ -207,6 +215,7 @@ public class GpsPortReader implements SentenceListener{
                     InputStream is = sp.getInputStream();
                     SentenceReader sr = new SentenceReader(is);
                     sr.addSentenceListener(this);
+                    sr.setExceptionListener(exceptionListener);
                     sr.start();
                 }
                 else{
