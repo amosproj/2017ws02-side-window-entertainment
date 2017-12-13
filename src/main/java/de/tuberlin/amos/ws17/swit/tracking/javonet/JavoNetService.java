@@ -15,7 +15,7 @@ public class JavoNetService {
 
     public static void initialize() throws JavonetException {
         if (!isInitialized) {
-            Javonet.activate("christian.fengler@campus.tu-berlin.de", "Hs52-Rz97-Bi4j-z5RF-Ee2d", JavonetFramework.v45);
+            Javonet.activate(null, null, JavonetFramework.v45);
             String path = Paths.get("libs/DotNetTracking.dll").toAbsolutePath().toString();
             Javonet.addReference(path);
             dotNetCameraService = Javonet.New("CameraService");
