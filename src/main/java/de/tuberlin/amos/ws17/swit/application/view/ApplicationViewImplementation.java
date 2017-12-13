@@ -92,7 +92,8 @@ public class ApplicationViewImplementation extends Application implements Applic
         //primaryStage.setMaximized(true);
 
         Scene scene = new Scene(pnFoundation, 800, 600, Color.WHITE);
-        scene.getStylesheets().add("/stylesheets/ApplicationViewStylesheet.css");
+        //scene.getStylesheets().add("/stylesheets/ApplicationViewStylesheet.css");
+        scene.getStylesheets().add("/stylesheets/TransparentApplicationViewStylesheet.css");
         primaryStage.setScene(scene);
         primaryStage.show();
     }
