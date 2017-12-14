@@ -348,7 +348,13 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                         }
                     }
                     if((iterations - lastMapsExecution) >= 10) {
-                        if(!mapsThread.isAlive()) {
+                        if(cameraThread.getState() == Thread.State.NEW) {
+                            System.out.println("Thread is NEW");
+                            mapsThread.start();
+                            lastMapsExecution = iterations;
+                        } else if(mapsThread.getState() == Thread.State.TERMINATED) {
+                            System.out.println("Thread is TERMINATED");
+                            initMapsThread();
                             mapsThread.start();
                             lastMapsExecution = iterations;
                         }
