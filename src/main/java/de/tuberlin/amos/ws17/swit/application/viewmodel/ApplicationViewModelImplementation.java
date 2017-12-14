@@ -15,6 +15,7 @@ import de.tuberlin.amos.ws17.swit.information_source.KnowledgeGraphSearch;
 import de.tuberlin.amos.ws17.swit.information_source.WikiAbstractProvider;
 import de.tuberlin.amos.ws17.swit.landscape_tracking.LandscapeTracker;
 import de.tuberlin.amos.ws17.swit.landscape_tracking.LandscapeTrackerImplementation;
+import de.tuberlin.amos.ws17.swit.landscape_tracking.LandscapeTrackerMock;
 import de.tuberlin.amos.ws17.swit.poi.PoiType;
 import de.tuberlin.amos.ws17.swit.poi.google.GooglePoi;
 import de.tuberlin.amos.ws17.swit.poi.google.GooglePoiLoader;
@@ -90,9 +91,9 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     //GPS Module vorhanden? true : false
     private final boolean isGpsModuleAvailable = false;
     //User Tracking Kamera vorhanden ? true : false
-    private final boolean isUserCameraAvailable = true;
+    private final boolean isUserCameraAvailable = false;
     //Aussenkamera vorhanden? true : false
-    private final boolean isCameraAvailable = true;
+    private final boolean isCameraAvailable = false;
 
 
 //Konstruktor
@@ -105,6 +106,8 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         initUpdateThread();
         initMapsThread();
         initCameraThread();
+
+        backgroundProperty = new SimpleObjectProperty<>();
 
         //initTestData();
 
@@ -229,7 +232,17 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 setModuleStatus(ModuleErrors.NOCAMERA, false);
             }
         } else {
-            setModuleStatus(ModuleErrors.NOCAMERA, false);
+            try {
+                landscapeTracker = new LandscapeTrackerMock();
+                moduleList.add(landscapeTracker);
+                landscapeTracker.startModule();
+                setModuleStatus(ModuleErrors.NOCAMERA, true);
+            } catch (ModuleNotWorkingException e) {
+                setModuleStatus(ModuleErrors.NOCAMERA, false);
+            } catch(Exception e) {
+                e.printStackTrace();
+                setModuleStatus(ModuleErrors.NOCAMERA, false);
+            }
         }
 
         //CloudVision
@@ -302,9 +315,9 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                         }
                     }
                     if((iterations - lastCameraExecution) >= 10) {
-                        System.out.println(!cameraThread.isAlive());
-                        if(!cameraThread.isAlive()) {
-                            System.out.println("Thread is not alive");
+                        System.out.println("cameraThread gets checked");
+                        if(cameraThread.getState() == Thread.State.NEW) {
+                            System.out.println("Thread is NEW");
                             cameraThread.start();
                             /*try {
                                 PointOfInterest poi = new PointOfInterest();
@@ -324,6 +337,11 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                             } catch(Exception e) {
                                 setModuleStatus(ModuleErrors.NOINTERNET, false);
                             }*/
+                            lastCameraExecution = iterations;
+                        } else if(cameraThread.getState() == Thread.State.TERMINATED) {
+                            System.out.println("Thread is TERMINATED");
+                            initCameraThread();
+                            cameraThread.start();
                             lastCameraExecution = iterations;
                         }
                     }
@@ -385,8 +403,8 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 //POI maps
                 List<PointOfInterest> pois = null;
                 try{
-                    List<GooglePoi> gPois = googlePoiLoader.loadPlaceForCircleAndType(kinematicProperties,300
-                            ,GoogleType.food/*GoogleType.zoo , GoogleType.airport, GoogleType.aquarium, GoogleType.church, GoogleType.city_hall,
+                    List<GooglePoi> gPois = googlePoiLoader.loadPlaceForCircleAndPoiType(kinematicProperties,300
+                            ,PoiType.FOOD/*GoogleType.zoo , GoogleType.airport, GoogleType.aquarium, GoogleType.church, GoogleType.city_hall,
                             GoogleType.hospital, GoogleType.library, GoogleType.mosque, GoogleType.museum, GoogleType.park,
                             GoogleType.stadium, GoogleType.synagogue, GoogleType.university,
                             GoogleType.point_of_interest, GoogleType.place_of_worship,
@@ -501,8 +519,10 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
 
     private void addPOIcamera(PointOfInterest poi) {
         PoiViewModel item = convertPOI(poi);
-        pointsOfInterest.add(poi);
-        propertyPOIcamera.add(item);
+        if(!propertyPOIcamera.contains(poi)) {
+            pointsOfInterest.add(poi);
+            propertyPOIcamera.add(item);
+        }
     }
 
     private boolean removePOIcamera(String id) {
@@ -520,12 +540,14 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         {
             PoiViewModel item = convertPOI(poi);
             pointsOfInterest.add(poi);
-            Platform.runLater(new Runnable() {
-                @Override
-                public void run() {
-                    propertyPOImaps.add(item);
-                }
-            });
+            if(!propertyPOImaps.contains(poi)) {
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        propertyPOImaps.add(item);
+                    }
+                });
+            }
         }
         catch (Exception e) {
             e.printStackTrace();
