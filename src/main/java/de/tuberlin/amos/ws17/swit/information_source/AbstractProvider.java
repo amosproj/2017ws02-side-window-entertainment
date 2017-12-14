@@ -10,5 +10,4 @@ public interface AbstractProvider {
      */
     PointOfInterest provideAbstract(PointOfInterest poi);
 
-
 }

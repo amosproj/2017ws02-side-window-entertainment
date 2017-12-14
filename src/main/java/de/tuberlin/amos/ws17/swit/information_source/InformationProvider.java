@@ -28,4 +28,7 @@ public interface InformationProvider {
      String getNameFromUrl (String url);
 
      PointOfInterest getUrlById(PointOfInterest poi) throws ServiceNotAvailableException;
+
+     PointOfInterest getInfoByName(PointOfInterest poi) throws ServiceNotAvailableException;
+
 }

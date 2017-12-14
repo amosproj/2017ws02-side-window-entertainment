@@ -321,12 +321,14 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                             cameraThread.start();
                             /*try {
                                 PointOfInterest poi = new PointOfInterest();
-                                poi.setId("/m/02g8n0");
+                                poi.setName("Taylor Swift");
+//                                poi.setId("/m/02g8n");
                                 Platform.runLater(new Runnable() {
                                     @Override
                                     public void run() {
                                         try {
-                                            setExpandedPOI(convertPOI(knowledgeGraphSearch.getUrlById(poi)));
+//                                            setExpandedPOI(convertPOI(knowledgeGraphSearch.getUrlById(poi)));
+                                            setExpandedPOI(convertPOI(knowledgeGraphSearch.getInfoByName(poi)));
                                         } catch (ServiceNotAvailableException e) {
                                             e.printStackTrace();
                                         }
