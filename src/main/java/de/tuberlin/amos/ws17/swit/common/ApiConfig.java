@@ -12,8 +12,8 @@ public class ApiConfig {
         configFile = new java.util.Properties();
         try {
             configFile.load(this.getClass().getClassLoader().getResourceAsStream("api-config.cfg"));
-        } catch (Exception eta) {
-            eta.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -26,8 +26,5 @@ public class ApiConfig {
         return instance.getValue(key);
     }
 
-    public static String getCloudVisionKey() {
-        return getProperty("CloudVision");
-    }
 }
 
