@@ -55,6 +55,11 @@
     -fx-max-width: 70px;
 }
 
+#listExpressionStatus {
+    -fx-pref-width: 70px;
+    -fx-max-width: 70px;
+}
+
 .label {
     -fx-font-size: 20px;
     -fx-font-family: "Helvetica Neue";
