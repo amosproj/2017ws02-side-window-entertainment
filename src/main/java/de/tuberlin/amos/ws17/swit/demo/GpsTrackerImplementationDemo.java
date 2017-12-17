@@ -12,7 +12,9 @@ import java.util.LinkedList;
 public class GpsTrackerImplementationDemo {
 
     public static void main(String[] args){
-        GpsTrackerImplementation tracker = new GpsTrackerMock();
+        // choice: real gps module or fake one
+        //GpsTrackerImplementation tracker = new GpsTrackerMock();
+        GpsTrackerImplementation tracker = new GpsTrackerImplementation();
         try{
             tracker.startModule();
             KinematicProperties prop = new KinematicProperties();

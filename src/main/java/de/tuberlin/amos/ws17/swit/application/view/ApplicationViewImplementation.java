@@ -3,11 +3,13 @@ package de.tuberlin.amos.ws17.swit.application.view;
 import de.tuberlin.amos.ws17.swit.application.viewmodel.ApplicationViewModelImplementation;
 import de.tuberlin.amos.ws17.swit.application.viewmodel.ModuleStatusViewModel;
 import de.tuberlin.amos.ws17.swit.application.viewmodel.PoiViewModel;
+import de.tuberlin.amos.ws17.swit.application.viewmodel.UserExpressionViewModel;
 import de.tuberlin.amos.ws17.swit.common.Module;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
@@ -21,15 +23,19 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.StackPane;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.ImagePattern;
+import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import org.bridj.cpp.com.IDispatch;
+
+import java.nio.charset.Charset;
+import java.util.regex.Pattern;
 
 public class ApplicationViewImplementation extends Application implements ApplicationView {
 
@@ -38,6 +44,7 @@ public class ApplicationViewImplementation extends Application implements Applic
     private ListView<PoiViewModel> listPOImaps;
     private ListView<String> listDebugLog;
     private ListView<ModuleStatusViewModel> listModuleStatus;
+    private ListView<UserExpressionViewModel> listExpressionStatus;
 
     private BorderPane expansionPane;
     private BorderPane expansionTopPane;
@@ -65,9 +72,6 @@ public class ApplicationViewImplementation extends Application implements Applic
 
         initBindings();
         initCellFactories();
-
-
-
     }
 
     @Override
@@ -75,19 +79,12 @@ public class ApplicationViewImplementation extends Application implements Applic
         this.primaryStage = stage;
         primaryStage.setTitle("Side Window Infotainment");
 
-        /*browser = new WebView();
-        webEngine = browser.getEngine();
-        webEngine.load("http://www.google.com");
-        pnFoundation.setRight(browser);
-        controller.getExpandedPOI().informationAbstractProperty().addListener((observable, oldValue, newValue) -> {
-            System.out.println("change");
-            webEngine.load(newValue);
-        });*/
-
         //primaryStage.initStyle(StageStyle.TRANSPARENT);
         //primaryStage.setMaximized(true);
+
         Scene scene = new Scene(pnFoundation, 800, 600, Color.WHITE);
-        scene.getStylesheets().add("/stylesheets/ApplicationViewStylesheet.css");
+        //scene.getStylesheets().add("/stylesheets/ApplicationViewStylesheet.css");
+        scene.getStylesheets().add("/stylesheets/TransparentApplicationViewStylesheet.css");
         primaryStage.setScene(scene);
         primaryStage.show();
     }
@@ -106,9 +103,13 @@ public class ApplicationViewImplementation extends Application implements Applic
         listModuleStatus.setId("listModuleStatus");
         pnFoundation.setLeft(listModuleStatus);
 
+        listExpressionStatus = new ListView<UserExpressionViewModel>();
+        listExpressionStatus.setId("listExpressionStatus");
+        pnFoundation.setRight(listExpressionStatus);
+
         listDebugLog = new ListView<>();
         listDebugLog.setId("listDebugLog");
-        pnFoundation.setRight(listDebugLog);
+        //pnFoundation.setRight(listDebugLog);
 
         expansionPane = new BorderPane();
         expansionPane.setId("expansionPane");
@@ -147,7 +148,7 @@ public class ApplicationViewImplementation extends Application implements Applic
 
     private void initBindings() {
         ImageView cameraImage = new ImageView();
-        pnFoundation.setRight(cameraImage);
+        //pnFoundation.setRight(cameraImage);
         cameraImage.imageProperty().bindBidirectional(controller.propertyCameraImageProperty());
 
         try {
@@ -158,8 +159,11 @@ public class ApplicationViewImplementation extends Application implements Applic
             expansionInformation.textProperty().bindBidirectional(controller.getExpandedPOI().informationAbstractProperty());
             //listDebugLog.itemsProperty().bindBidirectional(controller.propertyDebugLogProperty());
             listModuleStatus.itemsProperty().bindBidirectional(controller.listModuleStatusProperty());
+            listExpressionStatus.itemsProperty().bindBidirectional(controller.listExpressionStatusProperty());
             listPOIcamera.itemsProperty().bindBidirectional(controller.propertyPOIcameraProperty());
             listPOImaps.itemsProperty().bindBidirectional(controller.propertyPOImapsProperty());
+
+            pnFoundation.backgroundProperty().bindBidirectional(controller.backgroundProperty);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -256,6 +260,45 @@ public class ApplicationViewImplementation extends Application implements Applic
                             pane.getChildren().add(lbl);
                             StackPane.setAlignment(lbl, Pos.BOTTOM_RIGHT);
                             StackPane.setAlignment(image, Pos.CENTER_LEFT);
+                            setGraphic(pane);
+                        }
+                    }
+                };
+            }
+        });
+
+        listExpressionStatus.setCellFactory(new Callback<ListView<UserExpressionViewModel>, ListCell<UserExpressionViewModel>>() {
+            @Override
+            public ListCell<UserExpressionViewModel> call(ListView<UserExpressionViewModel> param) {
+                return new ListCell<UserExpressionViewModel>() {
+                    @Override
+                    public void updateItem(UserExpressionViewModel item, boolean empty) {
+                        super.updateItem(item, empty);
+                        if(empty || item == null) {
+                            setGraphic(null);
+                            setText(null);
+                        } else {
+                            StackPane pane = new StackPane();
+                            ImageView image = new ImageView(item.getType().getImage());
+                            image.setPreserveRatio(true);
+                            image.setFitWidth(50);
+                            image.setFitHeight(50);
+                            Label lbl = new Label();
+                            if(item.isActive()) {
+                                String text = new String(Character.toChars(10003));
+                                lbl.setText(text);
+                                lbl.setStyle("-fx-text-fill: green; -fx-font-size: 20px; -fx-font-weight: bold; " +
+                                        "-fx-background-color: transparent; -fx-effect: dropshadow( gaussian , white , 3, 1.0 , 0 , 0 );");
+                            } else {
+                                String text = new String(Character.toChars(10005));
+                                lbl.setText(text);
+                                lbl.setStyle("-fx-text-fill: red; -fx-font-size: 20px; -fx-font-weight: bold; " +
+                                        "-fx-background-color: transparent; -fx-effect: dropshadow( gaussian , white , 3, 1.0 , 0 , 0 );");
+                            }
+                            pane.getChildren().add(image);
+                            pane.getChildren().add(lbl);
+                            StackPane.setAlignment(lbl, Pos.BOTTOM_RIGHT);
+                            StackPane.setAlignment(image, Pos.CENTER_RIGHT);
                             setGraphic(pane);
                         }
                     }

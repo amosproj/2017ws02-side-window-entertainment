@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 
 public class CloudVision implements LandmarkDetector {
 
-    private static final String CLOUD_VISION_API_KEY = ApiConfig.getCloudVisionKey();
+    private static final String CLOUD_VISION_API_KEY = ApiConfig.getProperty("CloudVision");
 
     private static final String LANGUAGE = "de";
 
@@ -35,13 +35,9 @@ public class CloudVision implements LandmarkDetector {
 
     private static final String LANDMARK_DETECTION_FEATURE = "LANDMARK_DETECTION";
 
-    private static final Color[] HIGHLIGHT_COLORS = {Color.red, Color.green, Color.blue, Color.cyan, Color.yellow};
-
     private static LandmarkDetector instance;
 
     private final Vision vision;
-
-    private List<LandmarkResult> landmarkResults = Collections.emptyList();
 
     private BufferedImage bufferedImage;
 
@@ -128,8 +124,6 @@ public class CloudVision implements LandmarkDetector {
             System.err.print("Cloud Vision service unavailable.");
             return Collections.emptyList();
         }
-        String lang = LANGUAGE;
-        String key = CLOUD_VISION_API_KEY;
         this.bufferedImage = ImageUtils.convertToBufferedImage(image);
         // TODO: reduce image size if necessary
         AnnotateImageRequest request = new AnnotateImageRequest()
@@ -157,7 +151,7 @@ public class CloudVision implements LandmarkDetector {
                             ? response.getError().getMessage()
                             : "Unknown error getting image annotations");
         }
-        landmarkResults = convertToLandmarkResults(response.getLandmarkAnnotations());
+        List<LandmarkResult> landmarkResults = convertToLandmarkResults(response.getLandmarkAnnotations());
         return landmarkResults;
     }
 
@@ -188,7 +182,6 @@ public class CloudVision implements LandmarkDetector {
         growRect.grow(growWidth, growHeight);
 
         while (rectOutsideOfImage(growRect, bufferedImage)) {
-//            System.out.println("Rect to big, resizing");
             upScale -= 0.05;
             growWidth = (int) ((width * upScale - width) / 2);
             growHeight = (int) ((height * upScale - height) / 2);
@@ -209,46 +202,5 @@ public class CloudVision implements LandmarkDetector {
         } else {
             return false;
         }
-    }
-
-    public void showHighlightedLandmarks() {
-        if (bufferedImage == null) {
-            return;
-        }
-        // Create a graphics context on the buffered image
-        Graphics2D g2d = bufferedImage.createGraphics();
-        JFrame frame = new JFrame();
-
-        int k = 0;
-        for (LandmarkResult result : landmarkResults) {
-            BoundingPoly bp = result.getBoundingPoly();
-            // Draw on the buffered image
-            g2d.setColor(HIGHLIGHT_COLORS[k]);
-            g2d.setStroke(new BasicStroke(3));
-            int npoints = bp.getVertices().size();
-            int xpoints[] = new int[npoints];
-            int ypoints[] = new int[npoints];
-            int xmin = Integer.MAX_VALUE;
-            int ymax = 0;
-            for (int i = 0; i < npoints; i++) {
-                xpoints[i] = bp.getVertices().get(i).getX();
-                ypoints[i] = bp.getVertices().get(i).getY();
-                if (ypoints[i] > ymax)
-                    ymax = ypoints[i];
-                if (xpoints[i] < xmin) {
-                    xmin = xpoints[i];
-                }
-            }
-
-            g2d.drawPolygon(xpoints, ypoints, npoints);
-            int xtext = xmin + 10;
-            int ytext = ymax - 10;
-            g2d.setFont(new Font("Serif", Font.BOLD, 16));
-            g2d.drawString(result.getName(), xtext, ytext);
-            k++;
-        }
-        g2d.dispose();
-
-        ImageUtils.showImage(bufferedImage, frame);
     }
 }

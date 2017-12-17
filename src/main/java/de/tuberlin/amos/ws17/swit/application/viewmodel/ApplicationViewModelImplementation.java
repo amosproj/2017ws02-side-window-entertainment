@@ -1,43 +1,37 @@
 package de.tuberlin.amos.ws17.swit.application.viewmodel;
 
 import de.tuberlin.amos.ws17.swit.application.view.ApplicationView;
-import de.tuberlin.amos.ws17.swit.application.view.ApplicationViewImplementation;
 import de.tuberlin.amos.ws17.swit.common.*;
 import de.tuberlin.amos.ws17.swit.gps.GpsTracker;
-import de.tuberlin.amos.ws17.swit.gps.GpsTrackerFactory;
+import de.tuberlin.amos.ws17.swit.gps.GpsTrackerImplementation;
+import de.tuberlin.amos.ws17.swit.gps.GpsTrackerMock;
 import de.tuberlin.amos.ws17.swit.image_analysis.CloudVision;
-import de.tuberlin.amos.ws17.swit.image_analysis.ImageUtils;
 import de.tuberlin.amos.ws17.swit.image_analysis.LandmarkDetector;
 import de.tuberlin.amos.ws17.swit.information_source.InformationProvider;
 import de.tuberlin.amos.ws17.swit.information_source.KnowledgeGraphSearch;
 import de.tuberlin.amos.ws17.swit.information_source.WikiAbstractProvider;
 import de.tuberlin.amos.ws17.swit.landscape_tracking.LandscapeTracker;
 import de.tuberlin.amos.ws17.swit.landscape_tracking.LandscapeTrackerImplementation;
+import de.tuberlin.amos.ws17.swit.landscape_tracking.LandscapeTrackerMock;
 import de.tuberlin.amos.ws17.swit.poi.PoiType;
 import de.tuberlin.amos.ws17.swit.poi.google.GooglePoi;
 import de.tuberlin.amos.ws17.swit.poi.google.GooglePoiLoader;
-import de.tuberlin.amos.ws17.swit.poi.google.GoogleType;
 import de.tuberlin.amos.ws17.swit.tracking.JavoNetUserTracker;
 import de.tuberlin.amos.ws17.swit.tracking.UserTracker;
+import de.tuberlin.amos.ws17.swit.tracking.UserTrackerMock;
 import javafx.application.Platform;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleListProperty;
-import javafx.beans.property.SimpleMapProperty;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.collections.ObservableMap;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.Image;
 import javafx.event.EventHandler;
 import javafx.event.ActionEvent;
+import javafx.scene.layout.*;
 
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ApplicationViewModelImplementation implements ApplicationViewModel {
 
@@ -67,9 +61,8 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     private SimpleListProperty<PoiViewModel> propertyPOIcamera;
     private SimpleObjectProperty<EventHandler<ActionEvent>> propertyCloseButton;
     private SimpleListProperty<String> propertyDebugLog;
-    private SimpleListProperty<Image> propertyModuleNotWorkingImageList;
-    private SimpleMapProperty<Module, SimpleBooleanProperty> propertyModuleIsWorkingMap;
     private SimpleListProperty<ModuleStatusViewModel> listModuleStatus;
+    private SimpleListProperty<UserExpressionViewModel> listExpressionStatus;
     private List<Module> moduleList;
 
     public Image getPropertyCameraImage() {
@@ -81,11 +74,16 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     }
 
     private SimpleObjectProperty<Image> propertyCameraImage;
-    private BufferedImage cameraImage;
+    public Image cameraImage;
+    public Property<Background> backgroundProperty;
+    public BackgroundImage backgroundImage;
+    public Background background;
 
+    private Properties properties;
 
 //Konstruktor
     public ApplicationViewModelImplementation(ApplicationView view) {
+        initProperties();
         initObjects(view);
         initModules();
 
@@ -95,9 +93,46 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         initMapsThread();
         initCameraThread();
 
+        backgroundProperty = new SimpleObjectProperty<>();
+
         //initTestData();
 
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    cameraImage = SwingFXUtils.toFXImage(landscapeTracker.getImage(), null );
+                    backgroundImage = new BackgroundImage(cameraImage,
+                            BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.DEFAULT,
+                            BackgroundSize.DEFAULT);
+                    background = new Background(backgroundImage);
+                    backgroundProperty.setValue(background);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
         updateThread.start();
+    }
+
+    private void initProperties() {
+        properties = new Properties();
+        InputStream input = null;
+        try {
+            input = getClass().getClassLoader().getResourceAsStream("hardware.properties");
+            properties.load(input);
+        } catch(Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (input != null) {
+                try {
+                    input.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
     private void initObjects(ApplicationView view) {
@@ -110,6 +145,9 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         listModuleStatus = new SimpleListProperty<>();
         listModuleStatus.set(FXCollections.observableList(new ArrayList<ModuleStatusViewModel>()));
 
+        listExpressionStatus = new SimpleListProperty<>();
+        listExpressionStatus.set(FXCollections.observableList(new ArrayList<UserExpressionViewModel>()));
+
         pointsOfInterest = new ArrayList<PointOfInterest>();
         expandedPOI = new PoiViewModel();
         vmUserPosition = new UserPositionViewModel();
@@ -118,12 +156,6 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         propertyPOImaps.set(FXCollections.observableList(new ArrayList<PoiViewModel>()));
         propertyPOIcamera = new SimpleListProperty();
         propertyPOIcamera.set(FXCollections.observableList(new ArrayList<PoiViewModel>()));
-
-        propertyModuleNotWorkingImageList = new SimpleListProperty<>();
-        propertyModuleNotWorkingImageList.set(FXCollections.observableList(new ArrayList<>()));
-
-        propertyModuleIsWorkingMap = new SimpleMapProperty<>();
-        propertyModuleIsWorkingMap.set(FXCollections.observableMap(new HashMap<>()));
 
         moduleList = new ArrayList<>();
 
@@ -138,92 +170,163 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     }
 
     private void initModules() {
-        //CloudVision
-        try {
-            cloudVision = CloudVision.getInstance();
-            setModuleStatus(ModuleErrors.NOINTERNET, true);
-        } catch(Exception e) {
-            e.printStackTrace();
-            setModuleStatus(ModuleErrors.NOINTERNET, false);
-        }
-
         //GPS
-        /*try {
-            gpsTracker = GpsTrackerFactory.GetGpsTracker();
-            gpsTracker.startModule();
-            setModuleStatus(ModuleErrors.NOGPSHARDWARE, true);
+        if(properties.get("gpsmodule").equals("1")) {
+            try {
+                System.out.println("loading GpsTracker...");
+                gpsTracker = new GpsTrackerImplementation();
+                moduleList.add(gpsTracker);
+                gpsTracker.startModule();
+                setModuleStatus(ModuleErrors.NOGPSHARDWARE, true);
+            }
+            catch (ModuleNotWorkingException e){
+                setModuleStatus(ModuleErrors.NOGPSHARDWARE, false);
+            } catch(Exception e) {
+                e.printStackTrace();
+                setModuleStatus(ModuleErrors.NOGPSHARDWARE, false);
+            }
+        } else if(properties.get("gpsmodule").equals("0")) {
+            try {
+                System.out.println("loading GpsTrackerMock...");
+                gpsTracker = new GpsTrackerMock();
+                moduleList.add(gpsTracker);
+                gpsTracker.startModule();
+                setModuleStatus(ModuleErrors.NOGPSHARDWARE, true);
+            } catch (ModuleNotWorkingException e) {
+                e.printStackTrace();
+                setModuleStatus(ModuleErrors.NOGPSHARDWARE, false);
+            }
+        } else {
+            System.out.println("failed to load GpsTracker");
         }
-        catch (ModuleNotWorkingException e){
-            setModuleStatus(ModuleErrors.NOGPSHARDWARE, false);
-        } catch(Exception e) {
-            e.printStackTrace();
-            setModuleStatus(ModuleErrors.NOGPSHARDWARE, false);
-        }*/
-        setModuleStatus(ModuleErrors.NOGPSHARDWARE, true);
 
         //User Tracking
-        try {
-            userTracker = new JavoNetUserTracker();
-            userTracker.startTracking();
-            setModuleStatus(ModuleErrors.NOUSERCAMERA, true);
-        } catch(Exception e) {
-            e.printStackTrace();
-            setModuleStatus(ModuleErrors.NOUSERCAMERA, false);
+        if(properties.getProperty("usercamera").equals("1")) {
+            try {
+                System.out.println("loading UserTracker...");
+                userTracker = new JavoNetUserTracker();
+                userTracker.startTracking();
+                setModuleStatus(ModuleErrors.NOUSERCAMERA, true);
+            } catch(Exception e) {
+                e.printStackTrace();
+                setModuleStatus(ModuleErrors.NOUSERCAMERA, false);
+            }
+        } else if(properties.getProperty("usercamera").equals("0")) {
+            try {
+                System.out.println("loading UserTrackerMock...");
+                userTracker = new UserTrackerMock();
+                userTracker.startTracking();
+                setModuleStatus(ModuleErrors.NOUSERCAMERA, true);
+            } catch(Exception e) {
+                e.printStackTrace();
+                setModuleStatus(ModuleErrors.NOUSERCAMERA, false);
+            }
+        } else {
+            System.out.println("failed to load UserTracker");
         }
 
         //Landscape Tracking
-        try {
-            landscapeTracker = new LandscapeTrackerImplementation();
-            moduleList.add(landscapeTracker);
-            landscapeTracker.startModule();
-            setModuleStatus(ModuleErrors.NOCAMERA, true);
-        } catch (ModuleNotWorkingException e) {
-            setModuleStatus(ModuleErrors.NOCAMERA, false);
-        } catch(Exception e) {
-            e.printStackTrace();
-            setModuleStatus(ModuleErrors.NOCAMERA, false);
+        if(properties.getProperty("camera").equals("1")) {
+            try {
+                System.out.println("loading LandscapeTracker...");
+                landscapeTracker = new LandscapeTrackerImplementation();
+                moduleList.add(landscapeTracker);
+                landscapeTracker.startModule();
+                setModuleStatus(ModuleErrors.NOCAMERA, true);
+            } catch (ModuleNotWorkingException e) {
+                setModuleStatus(ModuleErrors.NOCAMERA, false);
+            } catch(Exception e) {
+                e.printStackTrace();
+                setModuleStatus(ModuleErrors.NOCAMERA, false);
+            }
+        } else if(properties.getProperty("camera").equals("0")) {
+            try {
+                System.out.println("loading LandscapeTrackerMock...");
+                landscapeTracker = new LandscapeTrackerMock();
+                moduleList.add(landscapeTracker);
+                landscapeTracker.startModule();
+                setModuleStatus(ModuleErrors.NOCAMERA, true);
+            } catch (ModuleNotWorkingException e) {
+                setModuleStatus(ModuleErrors.NOCAMERA, false);
+            } catch(Exception e) {
+                e.printStackTrace();
+                setModuleStatus(ModuleErrors.NOCAMERA, false);
+            }
+        } else {
+            System.out.println("failed to load LandscapeTracker");
+        }
+
+        //CloudVision
+        if(properties.getProperty("image_analysis").equals("1")) {
+            try {
+                System.out.println("loading CloudVision...");
+                cloudVision = CloudVision.getInstance();
+                setModuleStatus(ModuleErrors.NOINTERNET, true);
+            } catch(Exception e) {
+                e.printStackTrace();
+                setModuleStatus(ModuleErrors.NOINTERNET, false);
+            }
+        } else if(properties.getProperty("image_analysis").equals("0")) {
+            setModuleStatus(ModuleErrors.NOINTERNET, false);
+        } else {
+            System.out.println("failed to load CloudVision");
         }
 
         //Information Source
-        try {
-            abstractProvider = new WikiAbstractProvider();
-            moduleList.add(abstractProvider);
-            abstractProvider.startModule();
-            setModuleStatus(ModuleErrors.NOINTERNET, true);
-        } catch (ModuleNotWorkingException e) {
+        if(properties.getProperty("information_source").equals("1")) {
+            try {
+                System.out.println("loading AbstractProvider...");
+                abstractProvider = new WikiAbstractProvider();
+                moduleList.add(abstractProvider);
+                abstractProvider.startModule();
+                setModuleStatus(ModuleErrors.NOINTERNET, true);
+            } catch (ModuleNotWorkingException e) {
+                setModuleStatus(ModuleErrors.NOINTERNET, false);
+            } catch(Exception e) {
+                e.printStackTrace();
+                setModuleStatus(ModuleErrors.NOINTERNET, false);
+            }
+        } else if(properties.getProperty("information_source").equals("0")) {
             setModuleStatus(ModuleErrors.NOINTERNET, false);
-        } catch(Exception e) {
-            e.printStackTrace();
-            setModuleStatus(ModuleErrors.NOINTERNET, false);
+        } else {
+            System.out.println("failed to load AbstractProvider");
         }
 
         //Google KnowledgeGraphSearch
-        try {
-            knowledgeGraphSearch = KnowledgeGraphSearch.getInstance();
-            setModuleStatus(ModuleErrors.NOINTERNET, true);
-        } catch (ModuleNotWorkingException e) {
+        if(properties.getProperty("information_source").equals("1")) {
+            try {
+                System.out.println("loading KnowledgeGraphSearch...");
+                knowledgeGraphSearch = KnowledgeGraphSearch.getInstance();
+                setModuleStatus(ModuleErrors.NOINTERNET, true);
+            } catch (ModuleNotWorkingException e) {
+                setModuleStatus(ModuleErrors.NOINTERNET, false);
+            } catch(Exception e) {
+                e.printStackTrace();
+                setModuleStatus(ModuleErrors.NOINTERNET, false);
+            }
+        } else if(properties.getProperty("information_source").equals("0")) {
             setModuleStatus(ModuleErrors.NOINTERNET, false);
-        } catch(Exception e) {
-            e.printStackTrace();
-            setModuleStatus(ModuleErrors.NOINTERNET, false);
+        } else {
+            System.out.println("failed to load KnowledgeGraphSearch");
         }
 
         //Google POI loader
-        try {
-            googlePoiLoader = new GooglePoiLoader(500, 800);
-            setModuleStatus(ModuleErrors.NOINTERNET, true);
-        } catch (ModuleNotWorkingException e) {
+        if(properties.getProperty("poi_analysis").equals("1")) {
+            try {
+                System.out.println("loading GooglePoiLoader...");
+                googlePoiLoader = new GooglePoiLoader(500, 800);
+                setModuleStatus(ModuleErrors.NOINTERNET, true);
+            } catch (ModuleNotWorkingException e) {
+                setModuleStatus(ModuleErrors.NOINTERNET, false);
+            } catch (Exception e) {
+                e.printStackTrace();
+                setModuleStatus(ModuleErrors.NOINTERNET, false);
+            }
+        } else if(properties.getProperty("poi_analysis").equals("0")) {
             setModuleStatus(ModuleErrors.NOINTERNET, false);
-        } catch (Exception e) {
-            e.printStackTrace();
-            setModuleStatus(ModuleErrors.NOINTERNET, false);
+        } else {
+            System.out.println("failed to load GooglePoiLoader");
         }
-
-        /*
-        moduleList.add(cloudVision);
-        moduleList.add(userTracker);
-        moduleList.add(gpsTracker);
-        */
     }
 
     private void initUpdateThread() {
@@ -237,43 +340,45 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
 
                 while (run) {
                     UserExpressions userExpressions = null;
-                    /*if(userTracker.isUserTracked()) {
+                    if(userTracker.isUserTracked()) {
                         userExpressions = userTracker.getUserExpressions();
-                        if(userExpressions.isKiss() && (iterations - lastExpression) >= 10) {
-                            lastExpression = iterations;
-                            //cameraThread.start();
+                        if(userExpressions != null) {
+                            System.out.println("Expressions get updated");
+                            setExpressionStatus(ExpressionType.KISS, userExpressions.isKiss());
+                            setExpressionStatus(ExpressionType.MOUTHOPEN, userExpressions.isMouthOpen());
+                            setExpressionStatus(ExpressionType.SMILE, userExpressions.isSmile());
+                            setExpressionStatus(ExpressionType.TONGUEOUT, userExpressions.isTongueOut());
                         }
-                    }*/
-                    if((iterations - lastCameraExecution) >= 10) {
-                        System.out.println(!cameraThread.isAlive());
-                        if(!cameraThread.isAlive()) {
-                            System.out.println("Thread is not alive");
-                            cameraThread.start();
-                            try {
-                                PointOfInterest poi = new PointOfInterest();
-                                poi.setId("/m/02g8n0");
-                                Platform.runLater(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        try {
-                                            setExpandedPOI(convertPOI(knowledgeGraphSearch.getUrlById(poi)));
-                                        } catch (ServiceNotAvailableException e) {
-                                            e.printStackTrace();
-                                        }
-
-                                    }
-                                });
-                                setModuleStatus(ModuleErrors.NOINTERNET, true);
-                            } catch(Exception e) {
-                                setModuleStatus(ModuleErrors.NOINTERNET, false);
+                        if(userExpressions != null && userExpressions.isKiss() && (iterations - lastExpression) >= 10) {
+                            lastExpression = iterations;
+                            if(cameraThread.getState() == Thread.State.NEW) {
+                                lastCameraExecution = iterations;
+                                cameraThread.start();
+                            } else if(cameraThread.getState() == Thread.State.TERMINATED) {
+                                lastCameraExecution = iterations;
+                                initCameraThread();
+                                cameraThread.start();
                             }
+                        }
+                    }
+                    if((iterations - lastCameraExecution) >= 10) {
+                        if(cameraThread.getState() == Thread.State.NEW) {
                             lastCameraExecution = iterations;
+                            cameraThread.start();
+                        } else if(cameraThread.getState() == Thread.State.TERMINATED) {
+                            lastCameraExecution = iterations;
+                            initCameraThread();
+                            cameraThread.start();
                         }
                     }
                     if((iterations - lastMapsExecution) >= 10) {
-                        if(!mapsThread.isAlive()) {
-                            //mapsThread.start();
+                        if(mapsThread.getState() == Thread.State.NEW) {
                             lastMapsExecution = iterations;
+                            mapsThread.start();
+                        } else if(mapsThread.getState() == Thread.State.TERMINATED) {
+                            lastMapsExecution = iterations;
+                            initMapsThread();
+                            mapsThread.start();
                         }
                     }
                     try {
@@ -281,6 +386,22 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
+
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                cameraImage = SwingFXUtils.toFXImage(landscapeTracker.getImage(), null );
+                                backgroundImage = new BackgroundImage(cameraImage,
+                                        BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.DEFAULT,
+                                        BackgroundSize.DEFAULT);
+                                background = new Background(backgroundImage);
+                                backgroundProperty.setValue(background);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
 
                     iterations++;
                 }
@@ -311,12 +432,12 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 //POI maps
                 List<PointOfInterest> pois = null;
                 try{
-                    List<GooglePoi> gPois = googlePoiLoader.loadPlaceForCircleAndType(kinematicProperties,300
-                            ,GoogleType.zoo, GoogleType.airport, GoogleType.aquarium, GoogleType.church, GoogleType.city_hall,
+                    List<GooglePoi> gPois = googlePoiLoader.loadPlaceForCircleAndPoiType(kinematicProperties,300
+                            ,PoiType.FOOD/*GoogleType.zoo , GoogleType.airport, GoogleType.aquarium, GoogleType.church, GoogleType.city_hall,
                             GoogleType.hospital, GoogleType.library, GoogleType.mosque, GoogleType.museum, GoogleType.park,
                             GoogleType.stadium, GoogleType.synagogue, GoogleType.university,
                             GoogleType.point_of_interest, GoogleType.place_of_worship,
-                            GoogleType.restaurant);
+                            GoogleType.restaurant*/);
                     googlePoiLoader.downloadImages(gPois);
                     pois = (List) gPois;
                     setModuleStatus(ModuleErrors.NOINTERNET, true);
@@ -325,7 +446,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                     setModuleStatus(ModuleErrors.NOINTERNET, false);
                     return;
                 }
-                if(pois.size() == 0) {
+                if(pois == null || pois.size() == 0) {
                     return;
                 }
 
@@ -425,10 +546,28 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         listModuleStatus.add(new ModuleStatusViewModel(type, working));
     }
 
+    private void setExpressionStatus(ExpressionType type, boolean active) {
+        for(UserExpressionViewModel expression: listExpressionStatus) {
+            if(expression.getType() == type) {
+                expression.setActive(active);
+                return;
+            }
+        }
+        listExpressionStatus.add(new UserExpressionViewModel(type, active));
+    }
+
     private void addPOIcamera(PointOfInterest poi) {
         PoiViewModel item = convertPOI(poi);
-        pointsOfInterest.add(poi);
-        propertyPOIcamera.add(item);
+        if(!propertyPOIcamera.contains(poi)) {
+            pointsOfInterest.add(poi);
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    propertyPOIcamera.add(item);
+                }
+            });
+
+        }
     }
 
     private boolean removePOIcamera(String id) {
@@ -442,9 +581,8 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     }
 
     private void addPOImaps(PointOfInterest poi) {
-        try
-        {
-            PoiViewModel item = convertPOI(poi);
+        PoiViewModel item = convertPOI(poi);
+        if(!propertyPOImaps.contains(poi)) {
             pointsOfInterest.add(poi);
             Platform.runLater(new Runnable() {
                 @Override
@@ -452,9 +590,6 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                     propertyPOImaps.add(item);
                 }
             });
-        }
-        catch (Exception e) {
-            e.printStackTrace();
         }
     }
 
@@ -591,14 +726,6 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         return propertyDebugLog;
     }
 
-    public ObservableList<Image> getPropertyModuleNotWorkingImageList() {
-        return propertyModuleNotWorkingImageList.get();
-    }
-
-    public SimpleListProperty<Image> propertyModuleNotWorkingImageListProperty() {
-        return propertyModuleNotWorkingImageList;
-    }
-
     public ObservableList<ModuleStatusViewModel> getListModuleStatus() {
         return listModuleStatus.get();
     }
@@ -609,6 +736,14 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
 
     public List<Module> getModuleList() {
         return moduleList;
+    }
+
+    public ObservableList<UserExpressionViewModel> getListExpressionStatus() {
+        return listExpressionStatus.get();
+    }
+
+    public SimpleListProperty<UserExpressionViewModel> listExpressionStatusProperty() {
+        return listExpressionStatus;
     }
 
 //Testdaten

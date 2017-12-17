@@ -31,7 +31,7 @@
 }
 
 #expansionScrollPane {
-    -fx-background-color: white;
+    -fx-background-color: transparent;
 }
 
 #listPOImaps {
@@ -47,7 +47,7 @@
 }
 
 #pnFoundation {
-    -fx-background-color: white;
+    -fx-background-color: transparent;
 }
 
 #listModuleStatus {
@@ -84,57 +84,57 @@
 }
 
 .scroll-pane {
-    -fx-background-color: white;
+    -fx-background-color: transparent;
 }
 
 .list-view {
-    -fx-background-color: white;
+    -fx-background-color: transparent;
 }
 
 .list-cell {
-    -fx-background-color: white;
+    -fx-background-color: transparent;
 }
 
 .list-cell:odd {
-    -fx-background-color: white;
+    -fx-background-color: transparent;
 }
 
 .list-view:focused .list-cell:focused {
-    -fx-background-color: white;
+    -fx-background-color: transparent;
 }
 
 .list-view:focused .list-cell:focused:odd {
-    -fx-background-color: white;
+    -fx-background-color: transparent;
 }
 
 .list-view:focused .list-cell:filled:focused:selected {
-    -fx-background-color: white;
+    -fx-background-color: transparent;
 }
 
 .list-view:focused .list-cell:filled:selected, .list-view:focused .list-cell:filled:selected:hover {
-    -fx-background-color: white;
+    -fx-background-color: transparent;
 }
 
 .list-view:focused .list-cell:filled:focused:selected:hover {
-    -fx-background-color: white;
+    -fx-background-color: transparent;
 }
 
 .list-cell:filled:selected:focused, .list-cell:filled:selected, .list-view:horizontal .list-cell:filled:selected {
-    -fx-background-color: white;
+    -fx-background-color: transparent;
 }
 
 .list-cell:filled:selected:focused:disabled, .list-cell:filled:selected:disabled {
-    -fx-background-color: white;
+    -fx-background-color: transparent;
 }
 
 .list-cell:filled:hover {
-    -fx-background-color: white;
+    -fx-background-color: transparent;
 }
 
 .list-view:focused .list-cell:filled:focused:hover {
-    -fx-background-color: white;
+    -fx-background-color: transparent;
 }
 
 .list-view:horizontal .list-cell:filled:selected, .list-view:horizontal .list-cell:filled:selected:hover {
-    -fx-background-color: white;
+    -fx-background-color: transparent;
 }
