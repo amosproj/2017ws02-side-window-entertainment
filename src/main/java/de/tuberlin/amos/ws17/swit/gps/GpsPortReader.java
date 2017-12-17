@@ -12,25 +12,26 @@ import net.sf.marineapi.nmea.io.SentenceReader;
 import net.sf.marineapi.nmea.parser.DataNotAvailableException;
 import net.sf.marineapi.nmea.sentence.*;
 import org.joda.time.DateTime;
+import sun.util.logging.PlatformLogger;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.LinkedList;
+import java.util.logging.*;
 
 
 public class GpsPortReader implements SentenceListener{
 
     private LinkedList<GpsPosition> GpsList;
 
+    private boolean debug = false;
     private GpsPosition latestPosition; // outdated, kept for compatibility reasons
     private boolean running;
     private boolean update;
     private DateTime lastMessageReceived;
     private OwnExceptionListener exceptionListener;
+    private static Logger l = Logger.getLogger(GpsPortReader.class.getName());
 
     private double latitude;
     private double longitude;
@@ -43,22 +44,48 @@ public class GpsPortReader implements SentenceListener{
         lastMessageReceived = null;
         exceptionListener = new OwnExceptionListener();
 
+        // save old PrintStream so that the console remains usable
+        PrintStream oldOut = System.out;
+        System.setOut(new java.io.PrintStream(new java.io.OutputStream() {
+            String message = "";  // message buffer
+            char CR = (char) 13;  // add CR + LF to filter text for new line
+            char LF = (char) 10;  // add CR + LF to filter text for new line
+            String filter = "--- Started ---" + CR + LF; // message to be filtered out
+
+            // the messages comes byte per byte
+            @Override
+            public void write(int b) throws java.io.IOException {
+                char c = (char) b;
+                message += c;
+                if (filter.indexOf(message) == 0){
+                    // if message = filter, then clear message without clearing it
+                    if (message.equals(filter)){
+                        message = "";
+                    }
+                }
+                else{
+                    // print message and clear it
+                    oldOut.print(message);
+                    message = "";
+                }
+            }
+        }));
     }
 
     public LinkedList<GpsPosition> getGpsList() { return GpsList; }
 
     public GpsPosition getLatestPosition() { return latestPosition; }
 
-    public void readingStarted(){
-        System.out.println("--- Started ---");
+    public void readingStarted() {
+        if (debug) System.out.println("--- Started ---");
     }
 
     public void readingPaused(){
-        System.out.println("--- Paused ---");
+        if (debug) System.out.println("--- Paused ---");
     }
 
     public void readingStopped(){
-        System.out.println("--- Stopped ---");
+        if (debug) System.out.println("--- Stopped ---");
     }
 
     public void sentenceRead(SentenceEvent event){
@@ -69,11 +96,13 @@ public class GpsPortReader implements SentenceListener{
             lastMessageReceived = new DateTime();
             GGASentence gga = (GGASentence) s;
             if (gga.isValid()){
-                System.out.println("----- GGA Sentence -----");
+                if (debug) System.out.println("----- GGA Sentence -----");
                 try{
                     // set values 'latitude' and 'longitude' and set 'update' to true for filling up KinematicProperties object
                     latitude = gga.getPosition().getLatitude();
+                    if (debug) System.out.println("latitude updated! (" + latitude + ")");
                     longitude = gga.getPosition().getLongitude();
+                    if (debug) System.out.println("longitude updated! (" + longitude + ")");
                     update = true;
 
                     // fill 'latestPosition'. It is only kept for compatibility
@@ -108,7 +137,7 @@ public class GpsPortReader implements SentenceListener{
             lastMessageReceived = new DateTime();
             RMCSentence rmc = (RMCSentence) s;
             if (rmc.isValid()){
-                System.out.println("----- RMC Sentence -----");
+                if (debug) System.out.println("----- RMC Sentence -----");
                 try{
                     // fill 'latestPosition'. It is only kept for compatibility
                     if (latestPosition != null){
@@ -122,6 +151,7 @@ public class GpsPortReader implements SentenceListener{
 
                     // set course for filling up KinematicProperties object
                     course = rmc.getCourse();
+                    if (debug) System.out.println("course updated! (" + course + ")");
                 }
                 catch (net.sf.marineapi.nmea.parser.DataNotAvailableException e){
                     // do nothing. Broken messages are ok
@@ -140,10 +170,10 @@ public class GpsPortReader implements SentenceListener{
             lastMessageReceived = new DateTime();
             VTGSentence vtg = (VTGSentence) s;
             try {
-                System.out.println("Speed: " + vtg.getSpeedKmh() + "km/h");
-                System.out.println("Course: " + vtg.getMagneticCourse() + "°");
+                if (debug) System.out.println("Speed: " + vtg.getSpeedKmh() + "km/h");
+                if (debug) System.out.println("Course: " + vtg.getMagneticCourse() + "°");
                 if (vtg.isValid()) {
-                    System.out.println("----- VTG Sentence -----");
+                    if (debug)  System.out.println("----- VTG Sentence -----");
 
 
 
@@ -155,6 +185,7 @@ public class GpsPortReader implements SentenceListener{
 
                     // set 'velocity' for filling up KinematicProperties object
                     velocity = vtg.getSpeedKmh();
+                    if (debug) System.out.println("velocity updated! (" + velocity + ")");
                 }
             }
             catch(net.sf.marineapi.nmea.parser.DataNotAvailableException e){
