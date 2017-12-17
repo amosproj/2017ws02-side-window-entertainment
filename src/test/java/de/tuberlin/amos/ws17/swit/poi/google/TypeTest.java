@@ -12,16 +12,16 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 /**
- * Created by leand on 09.12.2017.
+ * Checks the type parameter {@link PoiType} and {@link GoogleType} for the {@link GooglePoiService}
  */
 public class TypeTest {
 
-    private GooglePoiLoader loader;
+    private GooglePoiService loader;
 
     @Before
     public void constrution() throws ModuleNotWorkingException{
         try{
-            loader=new GooglePoiLoader(true, 100, 100);
+            loader=new GooglePoiService(true, 100, 100);
         } catch (ModuleNotWorkingException e){
             e.printStackTrace();
             fail();

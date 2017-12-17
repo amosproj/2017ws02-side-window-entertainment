@@ -15,7 +15,7 @@ import de.tuberlin.amos.ws17.swit.landscape_tracking.LandscapeTrackerImplementat
 import de.tuberlin.amos.ws17.swit.landscape_tracking.LandscapeTrackerMock;
 import de.tuberlin.amos.ws17.swit.poi.PoiType;
 import de.tuberlin.amos.ws17.swit.poi.google.GooglePoi;
-import de.tuberlin.amos.ws17.swit.poi.google.GooglePoiLoader;
+import de.tuberlin.amos.ws17.swit.poi.google.GooglePoiService;
 import de.tuberlin.amos.ws17.swit.tracking.JavoNetUserTracker;
 import de.tuberlin.amos.ws17.swit.tracking.UserTracker;
 import de.tuberlin.amos.ws17.swit.tracking.UserTrackerMock;
@@ -43,7 +43,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     private GpsTracker gpsTracker;
     private DebugLog debugLog = new DebugLog();
     private WikiAbstractProvider abstractProvider;
-    private GooglePoiLoader googlePoiLoader;
+    private GooglePoiService googlePoiService;
     private InformationProvider knowledgeGraphSearch;
 
     //Threads
@@ -313,8 +313,8 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         //Google POI loader
         if(properties.getProperty("poi_analysis").equals("1")) {
             try {
-                System.out.println("loading GooglePoiLoader...");
-                googlePoiLoader = new GooglePoiLoader(500, 800);
+                System.out.println("loading GooglePoiService...");
+                googlePoiService = new GooglePoiService(500, 800);
                 setModuleStatus(ModuleErrors.NOINTERNET, true);
             } catch (ModuleNotWorkingException e) {
                 setModuleStatus(ModuleErrors.NOINTERNET, false);
@@ -325,7 +325,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         } else if(properties.getProperty("poi_analysis").equals("0")) {
             setModuleStatus(ModuleErrors.NOINTERNET, false);
         } else {
-            System.out.println("failed to load GooglePoiLoader");
+            System.out.println("failed to load GooglePoiService");
         }
     }
 
@@ -432,13 +432,13 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 //POI maps
                 List<PointOfInterest> pois = null;
                 try{
-                    List<GooglePoi> gPois = googlePoiLoader.loadPlaceForCircleAndPoiType(kinematicProperties,300
+                    List<GooglePoi> gPois = googlePoiService.loadPlaceForCircleAndPoiType(kinematicProperties,300
                             ,PoiType.FOOD/*GoogleType.zoo , GoogleType.airport, GoogleType.aquarium, GoogleType.church, GoogleType.city_hall,
                             GoogleType.hospital, GoogleType.library, GoogleType.mosque, GoogleType.museum, GoogleType.park,
                             GoogleType.stadium, GoogleType.synagogue, GoogleType.university,
                             GoogleType.point_of_interest, GoogleType.place_of_worship,
                             GoogleType.restaurant*/);
-                    googlePoiLoader.downloadImages(gPois);
+                    googlePoiService.downloadImages(gPois);
                     pois = (List) gPois;
                     setModuleStatus(ModuleErrors.NOINTERNET, true);
                 } catch (Exception e){

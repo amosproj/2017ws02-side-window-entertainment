@@ -4,6 +4,7 @@ import de.tuberlin.amos.ws17.swit.common.ApiConfig;
 import de.tuberlin.amos.ws17.swit.common.GpsPosition;
 import de.tuberlin.amos.ws17.swit.common.ModuleNotWorkingException;
 import de.tuberlin.amos.ws17.swit.common.PointOfInterest;
+import de.tuberlin.amos.ws17.swit.poi.PoiService;
 import de.tuberlin.amos.ws17.swit.poi.PoiType;
 import se.walkercrou.places.*;
 import se.walkercrou.places.exception.GooglePlacesException;
@@ -12,7 +13,10 @@ import se.walkercrou.places.exception.InvalidRequestException;
 import java.awt.image.BufferedImage;
 import java.util.*;
 
-public class GooglePoiLoader {
+/**
+ * The
+ */
+public class GooglePoiService implements PoiService<GooglePoi> {
 
 	private GooglePlaces client;
 	private RequestHandler rh= new FixedRequestHandler();
@@ -23,12 +27,12 @@ public class GooglePoiLoader {
 
 	private int xResolution, yResolution;
 
-	public GooglePoiLoader(int xResolution, int yResolution) throws ModuleNotWorkingException{
+	public GooglePoiService(int xResolution, int yResolution) throws ModuleNotWorkingException{
 	    this(false, xResolution, yResolution);
 	    testFunctionality();
 	}
 
-	public GooglePoiLoader(boolean enableLogging, int xResolution, int yResolution) throws ModuleNotWorkingException{
+	public GooglePoiService(boolean enableLogging, int xResolution, int yResolution) throws ModuleNotWorkingException{
 		client = new GooglePlaces(ApiConfig.getProperty("GooglePlaces"), rh);
 		client.setDebugModeEnabled(enableLogging);
 		this.xResolution=xResolution;
@@ -38,7 +42,7 @@ public class GooglePoiLoader {
 
 	SearchGeometryFactory geometryFactory=new SearchGeometryFactory();
 
-    public Set<GooglePoi> loadPlaceForMultiCircleSearchGeometry(MultiCircleSearchGeometry multiCircle){
+	public Set<GooglePoi> loadPlaceForMultiCircleSearchGeometry(MultiCircleSearchGeometry multiCircle){
 
         Set<GooglePoi> pois=new HashSet<>();
         for(CircleSearchGeometry circle: multiCircle){
@@ -49,7 +53,6 @@ public class GooglePoiLoader {
 
     /**
      * Check if a certain POI can be loaded.
-     * @return true if the Berlin Zoo was found
      */
     private void testFunctionality() throws ModuleNotWorkingException{
 
@@ -81,7 +84,7 @@ public class GooglePoiLoader {
 
     }
 
-    public Set<GooglePoi> loadPlaceForCircleSearchGeometry(CircleSearchGeometry circle){
+	public Set<GooglePoi> loadPlaceForCircleSearchGeometry(CircleSearchGeometry circle){
         Set<GooglePoi> pois=new HashSet<>();
 
         //if nothing definded load all
@@ -108,10 +111,7 @@ public class GooglePoiLoader {
 		return pois;
     }
 
-	public List<? extends PointOfInterest> loadPointOfInterestForCircle(GpsPosition center, int radius) throws InvalidRequestException{
-
-		return loadPlaceForCircle(center, radius, new Param[0]);
-	}
+	@Override
 	public List<GooglePoi> loadPlaceForCircle(GpsPosition center, int radius) throws InvalidRequestException{
 
 		return loadPlaceForCircle(center, radius, new Param[0]);
@@ -126,7 +126,7 @@ public class GooglePoiLoader {
 			for (GoogleType type:types) {
 				concatTypes+="|"+type.toString();
 			}
-			concatTypes.replaceFirst("|", "");
+			concatTypes=concatTypes.replaceFirst("|", "");
 
 			Param[] params = new Param[1];
 			params[0] = new Param("type").value(concatTypes);
@@ -136,6 +136,7 @@ public class GooglePoiLoader {
 		return loadPlaceForCircle(center, radius);
 	}
 
+	@Override
 	public List<GooglePoi> loadPlaceForCircleAndPoiType(GpsPosition center, int radius, PoiType... types) throws InvalidRequestException{
 
 		Set<GoogleType> gTypes=new HashSet<>();
@@ -148,8 +149,8 @@ public class GooglePoiLoader {
 
 
 	/**
-	 * A method just in case that using the depricated way of getting multiple places
-	 * as done in loadPlaceForCircleAndType is being depricated one day.
+	 * A method just in case that using the deprecated way of getting multiple places
+	 * as done in loadPlaceForCircleAndType is being deprecated one day.
 	 * @param center
 	 * @param radius
 	 * @param params

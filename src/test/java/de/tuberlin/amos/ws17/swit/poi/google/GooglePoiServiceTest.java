@@ -14,15 +14,15 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 
-public class GooglePoiLoaderTest {
+public class GooglePoiServiceTest {
 
 
-	private GooglePoiLoader loader;
+	private GooglePoiService loader;
 
 	@Before
 	public void constrution() throws ModuleNotWorkingException{
 		try{
-			loader=new GooglePoiLoader(true, 100, 100);
+			loader=new GooglePoiService(true, 100, 100);
 		} catch (ModuleNotWorkingException e){
 			e.printStackTrace();
 			fail();

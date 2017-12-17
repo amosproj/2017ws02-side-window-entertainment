@@ -3,7 +3,7 @@ package de.tuberlin.amos.ws17.swit.demo;
 import de.tuberlin.amos.ws17.swit.common.GpsPosition;
 import de.tuberlin.amos.ws17.swit.common.ModuleNotWorkingException;
 import de.tuberlin.amos.ws17.swit.poi.google.GooglePoi;
-import de.tuberlin.amos.ws17.swit.poi.google.GooglePoiLoader;
+import de.tuberlin.amos.ws17.swit.poi.google.GooglePoiService;
 import de.tuberlin.amos.ws17.swit.poi.google.MultiCircleSearchGeometry;
 import de.tuberlin.amos.ws17.swit.poi.google.SearchGeometryFactory;
 
@@ -25,7 +25,7 @@ public class LoadPlacesInDirectionDemo {
         GpsPosition tiergarten1= new GpsPosition(tiergartenLng, tiergartenLat);
         GpsPosition tiergarten2= new GpsPosition(tiergartenLng2, tiergartenLat2);
         try{
-            GooglePoiLoader loader=new GooglePoiLoader(100, 100);
+            GooglePoiService loader=new GooglePoiService(100, 100);
 
             SearchGeometryFactory searchGeometryFactory=new SearchGeometryFactory(2.1, 200, 3, null, null);
             MultiCircleSearchGeometry searchGeometry=searchGeometryFactory.createSearchCirclesForDirectedCoordinates(tiergarten1, tiergarten2);

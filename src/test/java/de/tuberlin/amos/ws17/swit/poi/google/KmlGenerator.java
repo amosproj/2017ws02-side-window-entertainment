@@ -26,11 +26,11 @@ public class KmlGenerator {
     private GpsPosition tiergarten2= new GpsPosition(tiergartenLng2, tiergartenLat2);
 
 
-    private GooglePoiLoader loader;
+    private GooglePoiService loader;
 
     @Before
     void construction() throws ModuleNotWorkingException {
-        loader=new GooglePoiLoader(true, 100, 100);
+        loader=new GooglePoiService(true, 100, 100);
     }
 
     @Test
@@ -43,7 +43,7 @@ public class KmlGenerator {
     @Test
     public void inRangeToKml() throws ModuleNotWorkingException{
 
-            GooglePoiLoader loader = new GooglePoiLoader(false, 100, 100);
+            GooglePoiService loader = new GooglePoiService(false, 100, 100);
             PoisInSightFinder sightFinder = new PoisInSightFinder(500, 300, 500);
 
             List<GpsPosition> gpsPositions = new ArrayList<>();

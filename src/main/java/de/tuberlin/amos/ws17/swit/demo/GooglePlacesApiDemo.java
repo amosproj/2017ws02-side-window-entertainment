@@ -3,7 +3,7 @@ package de.tuberlin.amos.ws17.swit.demo;
 import de.tuberlin.amos.ws17.swit.common.GpsPosition;
 import de.tuberlin.amos.ws17.swit.common.ModuleNotWorkingException;
 import de.tuberlin.amos.ws17.swit.poi.google.GooglePoi;
-import de.tuberlin.amos.ws17.swit.poi.google.GooglePoiLoader;
+import de.tuberlin.amos.ws17.swit.poi.google.GooglePoiService;
 import de.tuberlin.amos.ws17.swit.poi.google.GoogleType;
 
 import java.util.List;
@@ -21,9 +21,9 @@ public class GooglePlacesApiDemo {
         double tiergartenLat2=52.5085468;
         GpsPosition tiergarten1= new GpsPosition(tiergartenLng, tiergartenLat);
 
-        GooglePoiLoader loader= null;
+        GooglePoiService loader;
         try {
-            loader = new GooglePoiLoader( false, 100, 100);
+            loader = new GooglePoiService( false, 100, 100);
 
             List<GooglePoi> pois=loader.loadPlaceForCircleAndType(tiergarten1,
                     500,

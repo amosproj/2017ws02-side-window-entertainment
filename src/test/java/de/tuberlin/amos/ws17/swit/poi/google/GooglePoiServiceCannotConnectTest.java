@@ -7,13 +7,13 @@ import static org.junit.Assert.*;
 
 
 /**
- * Created by leand on 09.12.2017.
+ * A Test for the {@link GooglePoiService} in case of no connection. The connection of the device must therefore be turned out.
  */
-public class GooglePoiLoaderCannotConnectTest {
+public class GooglePoiServiceCannotConnectTest {
     @Test
     public void noConnectionTest() {
         try {
-            GooglePoiLoader loader = new GooglePoiLoader(true, 100, 100);
+            GooglePoiService loader = new GooglePoiService(true, 100, 100);
             fail("Exception expected. Please check that your internetconnection is broken.");
         }catch (ModuleNotWorkingException e) {
             System.out.println("Expected exception occured, message: " + e.getMessage());

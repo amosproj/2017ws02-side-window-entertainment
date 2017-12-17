@@ -49,7 +49,7 @@ public class SearchGeometryFactory {
      * Create a cone for two given coordinates, i.e. the current and a previous one for the driving direction of the vehicle.
      * @param c1 the first coordinate (historic of gps-track)
      * @param c2 the middel coordinate (could be current position)
-     * @return the resulting {@link MultiCircleSearchGeometry} that can be handed over to the {@link GooglePoiLoader}
+     * @return the resulting {@link MultiCircleSearchGeometry} that can be handed over to the {@link GooglePoiService}
      */
     public MultiCircleSearchGeometry createSearchCirclesForDirectedCoordinates(GpsPosition c1, GpsPosition c2) {
 

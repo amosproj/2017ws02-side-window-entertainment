@@ -5,7 +5,7 @@ import de.tuberlin.amos.ws17.swit.common.ModuleNotWorkingException;
 import de.tuberlin.amos.ws17.swit.common.PointOfInterest;
 import de.tuberlin.amos.ws17.swit.poi.PoisInSightFinder;
 import de.tuberlin.amos.ws17.swit.poi.google.GooglePoi;
-import de.tuberlin.amos.ws17.swit.poi.google.GooglePoiLoader;
+import de.tuberlin.amos.ws17.swit.poi.google.GooglePoiService;
 
 import java.util.List;
 import java.util.Set;
@@ -24,9 +24,9 @@ public class MidThermGooglePlacesApiDemo {
         GpsPosition previousPostion= new GpsPosition(tiergartenLng, tiergartenLat);
         GpsPosition currentPostion= new GpsPosition(tiergartenLng2, tiergartenLat2);
 
-        GooglePoiLoader loader= null;
+        GooglePoiService loader;
         try {
-            loader = new GooglePoiLoader(500, 800);
+            loader = new GooglePoiService(500, 800);
             PoisInSightFinder sightFinder=new PoisInSightFinder(300,200,200);
 
             // get pois in a circle range
