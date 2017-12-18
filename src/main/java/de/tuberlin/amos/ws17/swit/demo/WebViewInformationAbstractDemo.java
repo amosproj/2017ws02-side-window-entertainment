@@ -1,29 +1,7 @@
 package de.tuberlin.amos.ws17.swit.demo;
 
-import de.tuberlin.amos.ws17.swit.common.ServiceNotAvailableException;
-import de.tuberlin.amos.ws17.swit.image_analysis.CloudVision;
-import de.tuberlin.amos.ws17.swit.image_analysis.LandmarkDetector;
-import de.tuberlin.amos.ws17.swit.image_analysis.LandmarkResult;
-import de.tuberlin.amos.ws17.swit.information_source.InformationProvider;
 import javafx.application.Application;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.geometry.Insets;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.layout.VBox;
-import javafx.scene.web.WebEngine;
-import javafx.scene.web.WebView;
 import javafx.stage.Stage;
-
-import de.tuberlin.amos.ws17.swit.information_source.KnowledgeGraphSearch;
-
-
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.util.List;
-
-import static de.tuberlin.amos.ws17.swit.image_analysis.ImageUtils.getTestImageFile;
 
 public class WebViewInformationAbstractDemo extends Application {
 

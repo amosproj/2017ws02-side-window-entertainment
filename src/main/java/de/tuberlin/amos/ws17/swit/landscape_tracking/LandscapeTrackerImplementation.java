@@ -1,9 +1,7 @@
 package de.tuberlin.amos.ws17.swit.landscape_tracking;
 
 
-import de.tuberlin.amos.ws17.swit.common.DebugLog;
-import de.tuberlin.amos.ws17.swit.common.Module;
-import de.tuberlin.amos.ws17.swit.common.ModuleNotWorkingException;
+import de.tuberlin.amos.ws17.swit.common.exceptions.ModuleNotWorkingException;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -12,7 +10,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.concurrent.TimeoutException;
 
 
 public class LandscapeTrackerImplementation implements LandscapeTracker{

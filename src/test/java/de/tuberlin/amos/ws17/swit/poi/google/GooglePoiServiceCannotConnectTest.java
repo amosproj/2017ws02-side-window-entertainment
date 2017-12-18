@@ -1,6 +1,6 @@
 package de.tuberlin.amos.ws17.swit.poi.google;
 
-import de.tuberlin.amos.ws17.swit.common.ModuleNotWorkingException;
+import de.tuberlin.amos.ws17.swit.common.exceptions.ModuleNotWorkingException;
 import org.junit.Test;
 
 import static org.junit.Assert.*;

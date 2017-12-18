@@ -6,8 +6,7 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.LinkedList;
 
-import de.tuberlin.amos.ws17.swit.common.ModuleNotWorkingException;
-import org.joda.time.DateTime;
+import de.tuberlin.amos.ws17.swit.common.exceptions.ModuleNotWorkingException;
 
 import javax.imageio.ImageIO;
 

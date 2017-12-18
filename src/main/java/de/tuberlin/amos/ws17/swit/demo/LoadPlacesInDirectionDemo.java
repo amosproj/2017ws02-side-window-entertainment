@@ -1,7 +1,7 @@
 package de.tuberlin.amos.ws17.swit.demo;
 
 import de.tuberlin.amos.ws17.swit.common.GpsPosition;
-import de.tuberlin.amos.ws17.swit.common.ModuleNotWorkingException;
+import de.tuberlin.amos.ws17.swit.common.exceptions.ModuleNotWorkingException;
 import de.tuberlin.amos.ws17.swit.poi.google.GooglePoi;
 import de.tuberlin.amos.ws17.swit.poi.google.GooglePoiService;
 import de.tuberlin.amos.ws17.swit.poi.google.MultiCircleSearchGeometry;

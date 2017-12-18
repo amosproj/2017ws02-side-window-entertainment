@@ -1,6 +1,6 @@
 package de.tuberlin.amos.ws17.swit.landscape_tracking;
 
-import de.tuberlin.amos.ws17.swit.common.ModuleNotWorkingException;
+import de.tuberlin.amos.ws17.swit.common.exceptions.ModuleNotWorkingException;
 import de.tuberlin.amos.ws17.swit.image_analysis.ImageUtils;
 
 import java.awt.image.BufferedImage;

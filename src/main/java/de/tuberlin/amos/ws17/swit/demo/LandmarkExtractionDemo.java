@@ -1,7 +1,7 @@
 package de.tuberlin.amos.ws17.swit.demo;
 
 import com.google.api.services.vision.v1.model.BoundingPoly;
-import de.tuberlin.amos.ws17.swit.common.ServiceNotAvailableException;
+import de.tuberlin.amos.ws17.swit.common.exceptions.ServiceNotAvailableException;
 import de.tuberlin.amos.ws17.swit.image_analysis.ImageUtils;
 import de.tuberlin.amos.ws17.swit.image_analysis.LandmarkDetector;
 import de.tuberlin.amos.ws17.swit.image_analysis.CloudVision;

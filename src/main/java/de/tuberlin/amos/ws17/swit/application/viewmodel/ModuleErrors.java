@@ -6,7 +6,7 @@ public enum ModuleErrors {
     NOGPSHARDWARE("GPS Sensor", "/error_images/error_nogpshardware.png"),
     NOCAMERA("Außenkamera", "/error_images/error_nocamera.png"),
     NOUSERCAMERA("Innenkamera", "/error_images/error_nousercamera.png"),
-    NOINTERNET("Internetverbindung", "/error_images/error_nointernet.jpg");
+    NOINTERNET("Internetverbindung", "/error_images/error_nointernet.png");
 
     private final String name;
     private final Image image;

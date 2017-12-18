@@ -1,11 +1,8 @@
 package de.tuberlin.amos.ws17.swit.demo;
 
 import de.tuberlin.amos.ws17.swit.common.KinematicProperties;
-import de.tuberlin.amos.ws17.swit.common.ModuleNotWorkingException;
+import de.tuberlin.amos.ws17.swit.common.exceptions.ModuleNotWorkingException;
 import de.tuberlin.amos.ws17.swit.gps.GpsTrackerImplementation;
-import de.tuberlin.amos.ws17.swit.gps.GpsTrackerMock;
-
-import java.util.LinkedList;
 
 // OUDATED: DOES NOT FOLLOW NEW FORMAT WITH SEPARATE START() AND STORING DATA IN A KINEMATICPROPERTIES OBJECT
 
