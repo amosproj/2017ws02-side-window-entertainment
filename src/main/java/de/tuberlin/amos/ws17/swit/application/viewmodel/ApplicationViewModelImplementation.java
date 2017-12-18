@@ -7,6 +7,7 @@ import de.tuberlin.amos.ws17.swit.gps.GpsTrackerImplementation;
 import de.tuberlin.amos.ws17.swit.gps.GpsTrackerMock;
 import de.tuberlin.amos.ws17.swit.image_analysis.CloudVision;
 import de.tuberlin.amos.ws17.swit.image_analysis.LandmarkDetector;
+import de.tuberlin.amos.ws17.swit.image_analysis.LandmarkDetectorMock;
 import de.tuberlin.amos.ws17.swit.information_source.InformationProvider;
 import de.tuberlin.amos.ws17.swit.information_source.KnowledgeGraphSearch;
 import de.tuberlin.amos.ws17.swit.information_source.WikiAbstractProvider;
@@ -267,7 +268,9 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 setModuleStatus(ModuleErrors.NOINTERNET, false);
             }
         } else if(properties.getProperty("image_analysis").equals("0")) {
-            setModuleStatus(ModuleErrors.NOINTERNET, false);
+            System.out.println("loading LandmarkDetectorMock...");
+            cloudVision = LandmarkDetectorMock.getInstance();
+            setModuleStatus(ModuleErrors.NOINTERNET, true);
         } else {
             System.out.println("failed to load CloudVision");
         }
@@ -343,7 +346,6 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                     if(userTracker.isUserTracked()) {
                         userExpressions = userTracker.getUserExpressions();
                         if(userExpressions != null) {
-                            System.out.println("Expressions get updated");
                             setExpressionStatus(ExpressionType.KISS, userExpressions.isKiss());
                             setExpressionStatus(ExpressionType.MOUTHOPEN, userExpressions.isMouthOpen());
                             setExpressionStatus(ExpressionType.SMILE, userExpressions.isSmile());

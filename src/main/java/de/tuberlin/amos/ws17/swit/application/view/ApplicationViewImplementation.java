@@ -195,6 +195,7 @@ public class ApplicationViewImplementation extends Application implements Applic
                             pane.setOnMouseClicked(event -> controller.expandPOI(item.getId()));
                             setGraphic(pane);
                             listPOIcamera.refresh();
+                            listPOImaps.refresh();
                         }
                     }
                 };
@@ -219,7 +220,7 @@ public class ApplicationViewImplementation extends Application implements Applic
                                 @Override
                                 public void run() {
                                     setGraphic(debugText);
-                                    listPOIcamera.refresh();
+                                    listDebugLog.refresh();
                                 }
                             });
                         }
@@ -245,22 +246,19 @@ public class ApplicationViewImplementation extends Application implements Applic
                             image.setFitWidth(50);
                             image.setFitHeight(50);
                             Label lbl = new Label();
-                            if(item.isWorking()) {
-                                String text = new String(Character.toChars(10003));
-                                lbl.setText(text);
-                                lbl.setStyle("-fx-text-fill: green; -fx-font-size: 20px; -fx-font-weight: bold; " +
-                                        "-fx-background-color: transparent; -fx-effect: dropshadow( gaussian , white , 3, 1.0 , 0 , 0 );");
-                            } else {
-                                String text = new String(Character.toChars(10005));
-                                lbl.setText(text);
-                                lbl.setStyle("-fx-text-fill: red; -fx-font-size: 20px; -fx-font-weight: bold; " +
-                                        "-fx-background-color: transparent; -fx-effect: dropshadow( gaussian , white , 3, 1.0 , 0 , 0 );");
-                            }
+                            item.workingProperty().addListener(new ChangeListener<Boolean>() {
+                                @Override
+                                public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                                    statusIcon(lbl, newValue);
+                                }
+                            });
+                            statusIcon(lbl, item.isWorking());
                             pane.getChildren().add(image);
                             pane.getChildren().add(lbl);
                             StackPane.setAlignment(lbl, Pos.BOTTOM_RIGHT);
                             StackPane.setAlignment(image, Pos.CENTER_LEFT);
                             setGraphic(pane);
+                            listModuleStatus.refresh();
                         }
                     }
                 };
@@ -284,27 +282,43 @@ public class ApplicationViewImplementation extends Application implements Applic
                             image.setFitWidth(50);
                             image.setFitHeight(50);
                             Label lbl = new Label();
-                            if(item.isActive()) {
-                                String text = new String(Character.toChars(10003));
-                                lbl.setText(text);
-                                lbl.setStyle("-fx-text-fill: green; -fx-font-size: 20px; -fx-font-weight: bold; " +
-                                        "-fx-background-color: transparent; -fx-effect: dropshadow( gaussian , white , 3, 1.0 , 0 , 0 );");
-                            } else {
-                                String text = new String(Character.toChars(10005));
-                                lbl.setText(text);
-                                lbl.setStyle("-fx-text-fill: red; -fx-font-size: 20px; -fx-font-weight: bold; " +
-                                        "-fx-background-color: transparent; -fx-effect: dropshadow( gaussian , white , 3, 1.0 , 0 , 0 );");
-                            }
+                            item.activeProperty().addListener(new ChangeListener<Boolean>() {
+                                @Override
+                                public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                                    Platform.runLater(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            statusIcon(lbl, newValue);
+                                        }
+                                    });
+                                }
+                            });
+                            statusIcon(lbl, item.isActive());
                             pane.getChildren().add(image);
                             pane.getChildren().add(lbl);
                             StackPane.setAlignment(lbl, Pos.BOTTOM_RIGHT);
                             StackPane.setAlignment(image, Pos.CENTER_RIGHT);
                             setGraphic(pane);
+                            listExpressionStatus.refresh();
                         }
                     }
                 };
             }
         });
+    }
+
+    private void statusIcon(Label lbl, boolean status) {
+        if(status) {
+            String text = new String(Character.toChars(10003));
+            lbl.setText(text);
+            lbl.setStyle("-fx-text-fill: green; -fx-font-size: 20px; -fx-font-weight: bold; " +
+                    "-fx-background-color: transparent; -fx-effect: dropshadow( gaussian , white , 3, 1.0 , 0 , 0 );");
+        } else {
+            String text = new String(Character.toChars(10005));
+            lbl.setText(text);
+            lbl.setStyle("-fx-text-fill: red; -fx-font-size: 20px; -fx-font-weight: bold; " +
+                    "-fx-background-color: transparent; -fx-effect: dropshadow( gaussian , white , 3, 1.0 , 0 , 0 );");
+        }
     }
 
     @Override

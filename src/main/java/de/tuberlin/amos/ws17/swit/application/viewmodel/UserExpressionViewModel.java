@@ -1,8 +1,11 @@
 package de.tuberlin.amos.ws17.swit.application.viewmodel;
 
+import javafx.beans.property.SimpleBooleanProperty;
+
 public class UserExpressionViewModel {
     private ExpressionType type;
-    private boolean active;
+
+    private SimpleBooleanProperty active;
 
     public UserExpressionViewModel() {
         this(null, false);
@@ -10,7 +13,7 @@ public class UserExpressionViewModel {
 
     public UserExpressionViewModel(ExpressionType type, boolean active) {
         this.type = type;
-        this.active = active;
+        this.active = new SimpleBooleanProperty(active);
     }
 
     public ExpressionType getType() {
@@ -22,11 +25,15 @@ public class UserExpressionViewModel {
     }
 
     public boolean isActive() {
+        return active.get();
+    }
+
+    public SimpleBooleanProperty activeProperty() {
         return active;
     }
 
     public void setActive(boolean active) {
-        this.active = active;
+        this.active.set(active);
     }
 
     @Override
@@ -36,7 +43,7 @@ public class UserExpressionViewModel {
 
         UserExpressionViewModel that = (UserExpressionViewModel) o;
 
-        if (active != that.active) return false;
-        return type == that.type;
+        if (type != that.type) return false;
+        return active != null ? active.equals(that.active) : that.active == null;
     }
 }

@@ -7,17 +7,15 @@ import javax.lang.model.type.ErrorType;
 public class ModuleStatusViewModel {
 
     private ModuleErrors errorType;
-    private boolean working;
+    private SimpleBooleanProperty working;
 
     public ModuleStatusViewModel() {
-        errorType = null;
-        working = false;
+        this(null, false);
     }
 
     public ModuleStatusViewModel(ModuleErrors type, boolean working) {
-        super();
         this.errorType = type;
-        this.working = working;
+        this.working = new SimpleBooleanProperty(working);
     }
 
     public ModuleErrors getErrorType() {
@@ -29,11 +27,15 @@ public class ModuleStatusViewModel {
     }
 
     public boolean isWorking() {
+        return working.get();
+    }
+
+    public SimpleBooleanProperty workingProperty() {
         return working;
     }
 
     public void setWorking(boolean working) {
-        this.working = working;
+        this.working.set(working);
     }
 
     @Override
@@ -43,7 +45,7 @@ public class ModuleStatusViewModel {
 
         ModuleStatusViewModel that = (ModuleStatusViewModel) o;
 
-        if (working != that.working) return false;
-        return errorType == that.errorType;
+        if (errorType != that.errorType) return false;
+        return working != null ? working.equals(that.working) : that.working == null;
     }
 }
