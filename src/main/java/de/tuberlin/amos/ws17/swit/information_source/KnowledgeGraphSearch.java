@@ -11,13 +11,15 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
+import java.util.Arrays;
+
 public class KnowledgeGraphSearch implements InformationProvider {
 
     private static final String API_KEY = ApiConfig.getProperty("KnowledgeGraphSearch");
     private static final String LANGUAGE = "de";
     private static KnowledgeGraphSearch instance;
-    private String detailledInfo = "";
-    private String ObjectUrl;
+    private String detailedInfo = "";
+    private String objectUrl;
 
     private KnowledgeGraphSearch() { }
 
@@ -32,16 +34,14 @@ public class KnowledgeGraphSearch implements InformationProvider {
     public String getInfoById(String id) {
         GenericUrl url = createGenericUrl();
         url.put("ids", id);
-        getDescription(url);
-        return detailledInfo;
+        return getDescription(url);
     }
 
     @Override
     public String getInfoByName(String name) {
         GenericUrl url = createGenericUrl();
         url.put("query", name);
-        getDescription(url);
-        return detailledInfo;
+        return getDescription(url);
     }
 
     @Override
@@ -49,12 +49,12 @@ public class KnowledgeGraphSearch implements InformationProvider {
         GenericUrl url = createGenericUrl();
         url.put("query", poi.getName());
         getDescription(url);
-        if (this.detailledInfo.equals("")) {
+        if (this.detailedInfo.equals("")) {
             poi.setInformationAbstract(StringEscapeUtils.unescapeJava("Der Wikipedia Artikel ist leider nicht verfügbar"));
         } else {
-            poi.setInformationAbstract(StringEscapeUtils.unescapeJava(detailledInfo));
+            poi.setInformationAbstract(StringEscapeUtils.unescapeJava(detailedInfo));
         }
-        System.out.println(ObjectUrl);
+        System.out.println(objectUrl);
         System.out.println(poi.toString());
         return poi;
     }
@@ -65,12 +65,12 @@ public class KnowledgeGraphSearch implements InformationProvider {
         GenericUrl url = createGenericUrl();
         url.put("ids", poi.getId());
         getDescription(url);
-        if (this.detailledInfo.equals("")) {
+        if (this.detailedInfo.equals("")) {
             poi.setInformationAbstract(StringEscapeUtils.unescapeJava("Der Wikipedia Artikel ist leider nicht verfügbar"));
         } else {
-            poi.setInformationAbstract(StringEscapeUtils.unescapeJava(detailledInfo));
+            poi.setInformationAbstract(StringEscapeUtils.unescapeJava(detailedInfo));
         }
-        System.out.println(ObjectUrl);
+        System.out.println(objectUrl);
         System.out.println(poi.toString());
         return poi;
     }
@@ -95,18 +95,17 @@ public class KnowledgeGraphSearch implements InformationProvider {
             JSONArray elements = (JSONArray) response.get("itemListElement");
 
             for (Object element : elements) {
-                String detailedDescription = "";
-                String Objecturl = JsonPath.read(element, "$.result.detailedDescription.url").toString();
-                if (!Objecturl.isEmpty()) {
-                    this.ObjectUrl = Objecturl;
-                    String[] temp = ObjectUrl.split("/");
-                    System.out.println(temp);
+                String objectUrl = JsonPath.read(element, "$.result.detailedDescription.url").toString();
+                if (!objectUrl.isEmpty()) {
+                    this.objectUrl = objectUrl;
+                    String[] temp = this.objectUrl.split("/");
+                    System.out.println(Arrays.toString(temp));
                     String[] language = temp[2].split("\\.");
                     if (!language[0].equals("")) {
-                        this.detailledInfo = WikiAbstractProvider.getExtract(getNameFromUrl(ObjectUrl), language[0]);
+                        this.detailedInfo = WikiAbstractProvider.getExtract(getNameFromUrl(this.objectUrl), language[0]);
                     }
 
-                    return this.detailledInfo;
+                    return this.detailedInfo;
                 }
             }
 
