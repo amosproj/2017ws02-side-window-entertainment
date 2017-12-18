@@ -60,6 +60,7 @@ public class KnowledgeGraphSearch implements InformationProvider {
     }
 
 
+    //TODO: integrate google Places API to expand possibilites for information search, waiting for Leander collaboration
     @Override
     public PointOfInterest getUrlById(PointOfInterest poi) throws ServiceNotAvailableException {
         GenericUrl url = createGenericUrl();
