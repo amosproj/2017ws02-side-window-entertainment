@@ -2,6 +2,7 @@ package de.tuberlin.amos.ws17.swit.application.viewmodel;
 
 import de.tuberlin.amos.ws17.swit.application.view.ApplicationView;
 import de.tuberlin.amos.ws17.swit.common.*;
+import de.tuberlin.amos.ws17.swit.common.exceptions.ModuleNotWorkingException;
 import de.tuberlin.amos.ws17.swit.gps.GpsTracker;
 import de.tuberlin.amos.ws17.swit.gps.GpsTrackerImplementation;
 import de.tuberlin.amos.ws17.swit.gps.GpsTrackerMock;

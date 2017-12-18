@@ -1,18 +1,15 @@
 package de.tuberlin.amos.ws17.swit.gps;
 
 import de.tuberlin.amos.ws17.swit.common.KinematicProperties;
-import de.tuberlin.amos.ws17.swit.common.ModuleNotWorkingException;
+import de.tuberlin.amos.ws17.swit.common.exceptions.ModuleNotWorkingException;
 import gnu.io.SerialPort;
 import gnu.io.CommPortIdentifier;
 
 import net.sf.marineapi.nmea.event.SentenceEvent;
 import net.sf.marineapi.nmea.event.SentenceListener;
-import net.sf.marineapi.nmea.io.ExceptionListener;
 import net.sf.marineapi.nmea.io.SentenceReader;
-import net.sf.marineapi.nmea.parser.DataNotAvailableException;
 import net.sf.marineapi.nmea.sentence.*;
 import org.joda.time.DateTime;
-import sun.util.logging.PlatformLogger;
 
 import java.io.*;
 import java.util.Date;

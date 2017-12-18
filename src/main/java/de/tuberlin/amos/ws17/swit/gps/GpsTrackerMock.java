@@ -1,13 +1,12 @@
 package de.tuberlin.amos.ws17.swit.gps;
 
 import de.tuberlin.amos.ws17.swit.common.KinematicProperties;
-import de.tuberlin.amos.ws17.swit.common.KinematicProperties;
 
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.LinkedList;
 
-import de.tuberlin.amos.ws17.swit.common.ModuleNotWorkingException;
+import de.tuberlin.amos.ws17.swit.common.exceptions.ModuleNotWorkingException;
 import org.joda.time.DateTime;
 
 import javax.imageio.ImageIO;

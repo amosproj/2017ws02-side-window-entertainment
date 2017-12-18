@@ -5,7 +5,7 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.jayway.jsonpath.JsonPath;
 import de.tuberlin.amos.ws17.swit.common.ApiConfig;
 import de.tuberlin.amos.ws17.swit.common.PointOfInterest;
-import de.tuberlin.amos.ws17.swit.common.ServiceNotAvailableException;
+import de.tuberlin.amos.ws17.swit.common.exceptions.ServiceNotAvailableException;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;

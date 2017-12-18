@@ -1,4 +1,4 @@
-package de.tuberlin.amos.ws17.swit.common;
+package de.tuberlin.amos.ws17.swit.common.exceptions;
 
 public class HardwareNotAvailableException extends ModuleNotWorkingException{
 

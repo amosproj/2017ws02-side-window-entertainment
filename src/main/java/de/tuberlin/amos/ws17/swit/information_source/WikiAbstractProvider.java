@@ -1,7 +1,7 @@
 package de.tuberlin.amos.ws17.swit.information_source;
 
 import de.tuberlin.amos.ws17.swit.common.Module;
-import de.tuberlin.amos.ws17.swit.common.ModuleNotWorkingException;
+import de.tuberlin.amos.ws17.swit.common.exceptions.ModuleNotWorkingException;
 import de.tuberlin.amos.ws17.swit.common.PointOfInterest;
 import org.apache.commons.lang3.StringEscapeUtils;
 

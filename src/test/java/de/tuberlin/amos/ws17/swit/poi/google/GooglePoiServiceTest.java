@@ -5,7 +5,7 @@ import java.util.Set;
 
 
 import de.tuberlin.amos.ws17.swit.common.GpsPosition;
-import de.tuberlin.amos.ws17.swit.common.ModuleNotWorkingException;
+import de.tuberlin.amos.ws17.swit.common.exceptions.ModuleNotWorkingException;
 import de.tuberlin.amos.ws17.swit.poi.PoiType;
 import de.tuberlin.amos.ws17.swit.poi.GeographicCalculator;
 import org.junit.Before;

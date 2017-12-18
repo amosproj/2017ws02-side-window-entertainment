@@ -1,5 +1,7 @@
 package de.tuberlin.amos.ws17.swit.common;
 
+import de.tuberlin.amos.ws17.swit.common.exceptions.ModuleNotWorkingException;
+
 import java.awt.image.BufferedImage;
 
 public interface Module {
