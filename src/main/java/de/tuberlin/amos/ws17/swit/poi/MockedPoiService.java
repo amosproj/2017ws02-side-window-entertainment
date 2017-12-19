@@ -40,7 +40,7 @@ public class MockedPoiService implements PoiService<PointOfInterest> {
 
         poi=new PointOfInterest("63054a42e42879c3b17e1819bc86b79b58fd27b9", "Zoo Berlin", new GpsPosition(13.33414771,52.5067766));
         poi.setInformationAbstract("Geöffnet\nHardenbergplatz Y, Berlin\nBewertung: 4.Y");
-        InputStream is=MockedPoiService.class.getResourceAsStream("/images/ZoologischerGartenBerlin.jpg");
+        InputStream is=MockedPoiService.class.getResourceAsStream("/mockimages/ZoologischerGartenBerlin.jpg");
         try {
             BufferedImage image = ImageIO.read(is);
             poi.setImage(image);
@@ -53,7 +53,7 @@ public class MockedPoiService implements PoiService<PointOfInterest> {
 
         poi=new PointOfInterest("6d010effb6cf7c8e092ca0fdb294f8a6256f0828", "Delphi Filmpalast", new GpsPosition(13.340322,52.504344));
         poi.setInformationAbstract("Geöffnet\nKantstraße Z, Berlin\nBewertung: 4.X");
-        is=MockedPoiService.class.getResourceAsStream("/images/Filmpalast.jpg");
+        is=MockedPoiService.class.getResourceAsStream("/mockimages/Filmpalast.jpg");
         try {
             BufferedImage image = ImageIO.read(is);
             poi.setImage(image);
