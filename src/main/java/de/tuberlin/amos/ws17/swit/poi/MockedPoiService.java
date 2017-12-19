@@ -1,9 +1,7 @@
-package de.tuberlin.amos.ws17.swit.poi.google;
+package de.tuberlin.amos.ws17.swit.poi;
 
 import de.tuberlin.amos.ws17.swit.common.GpsPosition;
 import de.tuberlin.amos.ws17.swit.common.PointOfInterest;
-import de.tuberlin.amos.ws17.swit.poi.PoiService;
-import de.tuberlin.amos.ws17.swit.poi.PoiType;
 import se.walkercrou.places.exception.InvalidRequestException;
 
 import java.awt.image.BufferedImage;

@@ -18,6 +18,6 @@ public class InformationProviderMock implements InformationProvider {
     public PointOfInterest setInfoAndUrl(PointOfInterest poi) {
         poi.setInformationAbstract(info);
         poi.setWikiUrl(wikiUrl);
-        return null;
+        return poi;
     }
 }

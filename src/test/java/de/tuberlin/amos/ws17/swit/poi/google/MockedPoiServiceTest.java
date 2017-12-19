@@ -2,17 +2,11 @@ package de.tuberlin.amos.ws17.swit.poi.google;
 
 import de.tuberlin.amos.ws17.swit.common.GpsPosition;
 import de.tuberlin.amos.ws17.swit.common.PointOfInterest;
-import de.tuberlin.amos.ws17.swit.common.exceptions.ModuleNotWorkingException;
-import de.tuberlin.amos.ws17.swit.poi.GeographicCalculator;
+import de.tuberlin.amos.ws17.swit.poi.MockedPoiService;
 import de.tuberlin.amos.ws17.swit.poi.PoiService;
-import de.tuberlin.amos.ws17.swit.poi.PoiType;
-import org.junit.Before;
 import org.junit.Test;
 
-import javax.swing.*;
-import java.awt.*;
 import java.util.List;
-import java.util.Set;
 
 import static org.junit.Assert.*;
 

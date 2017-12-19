@@ -17,6 +17,8 @@ import de.tuberlin.amos.ws17.swit.information_source.WikiAbstractProvider;
 import de.tuberlin.amos.ws17.swit.landscape_tracking.LandscapeTracker;
 import de.tuberlin.amos.ws17.swit.landscape_tracking.LandscapeTrackerImplementation;
 import de.tuberlin.amos.ws17.swit.landscape_tracking.LandscapeTrackerMock;
+import de.tuberlin.amos.ws17.swit.poi.MockedPoiService;
+import de.tuberlin.amos.ws17.swit.poi.PoiService;
 import de.tuberlin.amos.ws17.swit.poi.PoiType;
 import de.tuberlin.amos.ws17.swit.poi.google.GooglePoi;
 import de.tuberlin.amos.ws17.swit.poi.google.GooglePoiService;
@@ -48,7 +50,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     private GpsTracker gpsTracker;
     private DebugLog debugLog = new DebugLog();
     private WikiAbstractProvider abstractProvider;
-    private GooglePoiService googlePoiService;
+    private PoiService poiService;
     private InformationProvider knowledgeGraphSearch;
 
     //Threads
@@ -294,6 +296,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 setModuleStatus(ModuleErrors.NOINTERNET, false);
             }
         } else if(properties.getProperty("information_source").equals("0")) {
+            System.out.println("loading AbstractProviderMock...");
             setModuleStatus(ModuleErrors.NOINTERNET, false);
         } else {
             System.out.println("failed to load AbstractProvider");
@@ -312,6 +315,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 setModuleStatus(ModuleErrors.NOINTERNET, false);
             }
         } else if(properties.getProperty("information_source").equals("0")) {
+            System.out.println("loading InformationProviderMock...");
             knowledgeGraphSearch = new InformationProviderMock();
             setModuleStatus(ModuleErrors.NOINTERNET, false);
         } else {
@@ -322,7 +326,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         if(properties.getProperty("poi_analysis").equals("1")) {
             try {
                 System.out.println("loading GooglePoiService...");
-                googlePoiService = new GooglePoiService(500, 800);
+                poiService = new GooglePoiService(500, 800);
                 setModuleStatus(ModuleErrors.NOINTERNET, true);
             } catch (ModuleNotWorkingException e) {
                 setModuleStatus(ModuleErrors.NOINTERNET, false);
@@ -331,6 +335,8 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 setModuleStatus(ModuleErrors.NOINTERNET, false);
             }
         } else if(properties.getProperty("poi_analysis").equals("0")) {
+            System.out.println("loading PoiServiceMock...");
+            poiService = new MockedPoiService();
             setModuleStatus(ModuleErrors.NOINTERNET, false);
         } else {
             System.out.println("failed to load GooglePoiService");
@@ -439,13 +445,13 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 //POI maps
                 List<PointOfInterest> pois = null;
                 try{
-                    List<GooglePoi> gPois = googlePoiService.loadPlaceForCircleAndPoiType(kinematicProperties,300
+                    List<GooglePoi> gPois = poiService.loadPlaceForCircleAndPoiType(kinematicProperties,300
                             ,PoiType.FOOD/*GoogleType.zoo , GoogleType.airport, GoogleType.aquarium, GoogleType.church, GoogleType.city_hall,
                             GoogleType.hospital, GoogleType.library, GoogleType.mosque, GoogleType.museum, GoogleType.park,
                             GoogleType.stadium, GoogleType.synagogue, GoogleType.university,
                             GoogleType.point_of_interest, GoogleType.place_of_worship,
                             GoogleType.restaurant*/);
-                    googlePoiService.downloadImages(gPois);
+//                    poiService.downloadImages(gPois);
                     pois = (List) gPois;
                     setModuleStatus(ModuleErrors.NOINTERNET, true);
                 } catch (Exception e){
