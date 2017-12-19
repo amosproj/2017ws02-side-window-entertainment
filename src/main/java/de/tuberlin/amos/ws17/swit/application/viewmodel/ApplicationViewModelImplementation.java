@@ -11,6 +11,7 @@ import de.tuberlin.amos.ws17.swit.image_analysis.CloudVision;
 import de.tuberlin.amos.ws17.swit.image_analysis.LandmarkDetector;
 import de.tuberlin.amos.ws17.swit.image_analysis.LandmarkDetectorMock;
 import de.tuberlin.amos.ws17.swit.information_source.InformationProvider;
+import de.tuberlin.amos.ws17.swit.information_source.InformationProviderMock;
 import de.tuberlin.amos.ws17.swit.information_source.KnowledgeGraphSearch;
 import de.tuberlin.amos.ws17.swit.information_source.WikiAbstractProvider;
 import de.tuberlin.amos.ws17.swit.landscape_tracking.LandscapeTracker;
@@ -310,6 +311,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 setModuleStatus(ModuleErrors.NOINTERNET, false);
             }
         } else if(properties.getProperty("information_source").equals("0")) {
+            knowledgeGraphSearch = new InformationProviderMock();
             setModuleStatus(ModuleErrors.NOINTERNET, false);
         } else {
             System.out.println("failed to load KnowledgeGraphSearch");
