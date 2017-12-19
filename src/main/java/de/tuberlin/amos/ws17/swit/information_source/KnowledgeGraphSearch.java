@@ -106,24 +106,6 @@ public class KnowledgeGraphSearch implements InformationProvider {
         return null;
     }
 
-    public String getNameFromUrl(String wikiUrl) {
-        if (!wikiUrl.equals("")) {
-            String[] temp = wikiUrl.split("/");
-            return temp[temp.length - 1];
-        }
-        return "";
-    }
-
-    @Nullable
-    public String getLanguageFromUrl(String wikiUrl) {
-        String[] temp = wikiUrl.split("/");
-        System.out.println(Arrays.toString(temp));
-        String[] language = temp[2].split("\\.");
-        if (!language[0].equals("")) {
-            return language[0];
-        }
-        return null;
-    }
 
     class Tuple<X, Y> {
         public final X x;

@@ -32,6 +32,7 @@ import javafx.scene.image.Image;
 import javafx.event.EventHandler;
 import javafx.event.ActionEvent;
 import javafx.scene.layout.*;
+import org.apache.commons.lang.StringUtils;
 
 import java.awt.image.BufferedImage;
 import java.io.*;
@@ -470,6 +471,14 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 try {
                     for (PointOfInterest poi: pois) {
                         poi = knowledgeGraphSearch.setInfoAndUrl(poi);
+                        String wikiUrl = poi.getWikiUrl();
+                        if (!StringUtils.isEmpty(wikiUrl)) {
+                            // if wiki url available -> query info from wikipedia
+                            String abstractInfo = WikiAbstractProvider.getAbstract(wikiUrl);
+                            if (!StringUtils.isEmpty(abstractInfo)) {
+                                poi.setInformationAbstract(abstractInfo);
+                            }
+                        }
                     }
                     setModuleStatus(ModuleErrors.NOINTERNET, true);
                 } catch(ModuleNotWorkingException e) {
@@ -529,6 +538,14 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 try {
                     for (PointOfInterest poi: pois) {
                         poi = knowledgeGraphSearch.setInfoAndUrl(poi);
+                        String wikiUrl = poi.getWikiUrl();
+                        if (!StringUtils.isEmpty(wikiUrl)) {
+                            // if wiki url available -> query info from wikipedia
+                            String abstractInfo = WikiAbstractProvider.getAbstract(wikiUrl);
+                            if (!StringUtils.isEmpty(abstractInfo)) {
+                                poi.setInformationAbstract(abstractInfo);
+                            }
+                        }
                     }
                     setModuleStatus(ModuleErrors.NOINTERNET, true);
                 } catch(ModuleNotWorkingException e) {
