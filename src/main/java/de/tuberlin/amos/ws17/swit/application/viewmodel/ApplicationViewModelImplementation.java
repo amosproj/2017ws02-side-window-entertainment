@@ -110,8 +110,10 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 try {
                     cameraImage = SwingFXUtils.toFXImage(landscapeTracker.getImage(), null );
                     backgroundImage = new BackgroundImage(cameraImage,
-                            BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.DEFAULT,
-                            BackgroundSize.DEFAULT);
+                            BackgroundRepeat.NO_REPEAT,
+                            BackgroundRepeat.NO_REPEAT,
+                            BackgroundPosition.CENTER,
+                            new BackgroundSize(100, 100, true, true, false, true));
                     background = new Background(backgroundImage);
                     backgroundProperty.setValue(background);
                 } catch (IOException e) {
@@ -406,8 +408,10 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                             try {
                                 cameraImage = SwingFXUtils.toFXImage(landscapeTracker.getImage(), null );
                                 backgroundImage = new BackgroundImage(cameraImage,
-                                        BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.DEFAULT,
-                                        BackgroundSize.DEFAULT);
+                                        BackgroundRepeat.NO_REPEAT,
+                                        BackgroundRepeat.NO_REPEAT,
+                                        BackgroundPosition.CENTER,
+                                        new BackgroundSize(100,100,true,true,false,true));
                                 background = new Background(backgroundImage);
                                 backgroundProperty.setValue(background);
                             } catch (IOException e) {
