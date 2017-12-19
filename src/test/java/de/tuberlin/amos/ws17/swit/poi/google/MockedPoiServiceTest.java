@@ -21,8 +21,13 @@ public class MockedPoiServiceTest {
 		List<PointOfInterest> pois=loader.loadPlaceForCircle(new GpsPosition(0,0), 0);
 
 		assertTrue(pois.size()>1);
+		assertTrue(pois.get(1).getImage()==null);
+
+		loader.addImages(pois);
+
 		assertTrue(pois.get(1).getImage()!=null);
 		assertTrue(pois.get(0).getImage()==null);
+
 
 		System.out.println(pois.get(1).getImage().toString());
 	}

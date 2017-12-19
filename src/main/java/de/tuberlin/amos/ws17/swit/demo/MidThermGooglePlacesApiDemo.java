@@ -3,6 +3,7 @@ package de.tuberlin.amos.ws17.swit.demo;
 import de.tuberlin.amos.ws17.swit.common.GpsPosition;
 import de.tuberlin.amos.ws17.swit.common.exceptions.ModuleNotWorkingException;
 import de.tuberlin.amos.ws17.swit.common.PointOfInterest;
+import de.tuberlin.amos.ws17.swit.poi.PoiService;
 import de.tuberlin.amos.ws17.swit.poi.PoisInSightFinder;
 import de.tuberlin.amos.ws17.swit.poi.google.GooglePoi;
 import de.tuberlin.amos.ws17.swit.poi.google.GooglePoiService;
@@ -24,18 +25,19 @@ public class MidThermGooglePlacesApiDemo {
         GpsPosition previousPostion= new GpsPosition(tiergartenLng, tiergartenLat);
         GpsPosition currentPostion= new GpsPosition(tiergartenLng2, tiergartenLat2);
 
-        GooglePoiService loader;
+        PoiService loader;
+
         try {
             loader = new GooglePoiService(500, 800);
             PoisInSightFinder sightFinder=new PoisInSightFinder(300,200,200);
 
             // get pois in a circle range
             // you also have the possibility to get them for a certain direction, but I guess thats not necessary for the mid-term release (see: LoadPlacesInDirectionDemo)
-            List<GooglePoi> gPois=loader.loadPlaceForCircleAndType(currentPostion,300);
+            List<PointOfInterest> gPois=loader.loadPlaceForCircleAndPoiType(currentPostion,300);
 
             // dowloading images
             // attenttion this is expensive! 1 request for each photo
-            loader.downloadImages(gPois);
+            loader.addImages(gPois);
 
             // cast
             List<PointOfInterest> pois=(List) gPois;

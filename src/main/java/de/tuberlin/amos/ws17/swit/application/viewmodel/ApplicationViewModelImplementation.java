@@ -445,14 +445,20 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 //POI maps
                 List<PointOfInterest> pois = null;
                 try{
-                    List<GooglePoi> gPois = poiService.loadPlaceForCircleAndPoiType(kinematicProperties,300
-                            ,PoiType.FOOD/*GoogleType.zoo , GoogleType.airport, GoogleType.aquarium, GoogleType.church, GoogleType.city_hall,
+                    pois = poiService.loadPlaceForCircleAndPoiType(kinematicProperties,200
+                            ,PoiType.FOOD,PoiType.LEISURE/*GoogleType.zoo , GoogleType.airport, GoogleType.aquarium, GoogleType.church, GoogleType.city_hall,
                             GoogleType.hospital, GoogleType.library, GoogleType.mosque, GoogleType.museum, GoogleType.park,
                             GoogleType.stadium, GoogleType.synagogue, GoogleType.university,
                             GoogleType.point_of_interest, GoogleType.place_of_worship,
                             GoogleType.restaurant*/);
-//                    poiService.downloadImages(gPois);
-                    pois = (List) gPois;
+
+                    System.out.println(pois.size()+ " number of POIs found.");
+
+                    poiService.addImages(pois);
+
+                    System.out.println(pois.size()+ " images added.");
+
+
                     setModuleStatus(ModuleErrors.NOINTERNET, true);
                 } catch (Exception e){
                     e.printStackTrace();

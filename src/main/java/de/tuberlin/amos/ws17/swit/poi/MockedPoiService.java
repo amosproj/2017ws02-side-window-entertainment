@@ -9,6 +9,7 @@ import javax.imageio.ImageIO;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -28,6 +29,33 @@ public class MockedPoiService implements PoiService<PointOfInterest> {
         return generateSamples();
     }
 
+    @Override
+    public void addImages(Collection<PointOfInterest> poisToAddPhotosTo) {
+        for(PointOfInterest poi: poisToAddPhotosTo){
+            if(poi.getId().equals("63054a42e42879c3b17e1819bc86b79b58fd27b9")){
+                InputStream is=MockedPoiService.class.getResourceAsStream("/mockimages/ZoologischerGartenBerlin.jpg");
+                try {
+                    BufferedImage image = ImageIO.read(is);
+                    poi.setImage(image);
+                }catch (IOException e){
+                    System.err.println("No BufferedImage for: "+is.toString());
+                    e.printStackTrace();
+                }
+            }
+            if(poi.getId().equals("6d010effb6cf7c8e092ca0fdb294f8a6256f0828")){
+                InputStream is=MockedPoiService.class.getResourceAsStream("/mockimages/Filmpalast.jpg");
+                try {
+                    BufferedImage image = ImageIO.read(is);
+                    poi.setImage(image);
+                }catch (IOException e){
+                    System.err.println("No BufferedImage for: "+is.toString());
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+
     private List<PointOfInterest> generateSamples(){
         List<PointOfInterest> pois=new ArrayList<>();
 
@@ -40,27 +68,11 @@ public class MockedPoiService implements PoiService<PointOfInterest> {
 
         poi=new PointOfInterest("63054a42e42879c3b17e1819bc86b79b58fd27b9", "Zoo Berlin", new GpsPosition(13.33414771,52.5067766));
         poi.setInformationAbstract("Geöffnet\nHardenbergplatz Y, Berlin\nBewertung: 4.Y");
-        InputStream is=MockedPoiService.class.getResourceAsStream("/mockimages/ZoologischerGartenBerlin.jpg");
-        try {
-            BufferedImage image = ImageIO.read(is);
-            poi.setImage(image);
-        }catch (IOException e){
-            System.err.println("No BufferedImage for: "+is.toString());
-            e.printStackTrace();
-        }
         pois.add(poi);
 
 
         poi=new PointOfInterest("6d010effb6cf7c8e092ca0fdb294f8a6256f0828", "Delphi Filmpalast", new GpsPosition(13.340322,52.504344));
         poi.setInformationAbstract("Geöffnet\nKantstraße Z, Berlin\nBewertung: 4.X");
-        is=MockedPoiService.class.getResourceAsStream("/mockimages/Filmpalast.jpg");
-        try {
-            BufferedImage image = ImageIO.read(is);
-            poi.setImage(image);
-        }catch (IOException e){
-            System.err.println("No BufferedImage for: "+is.toString());
-            e.printStackTrace();
-        }
         pois.add(poi);
 
         return pois;
