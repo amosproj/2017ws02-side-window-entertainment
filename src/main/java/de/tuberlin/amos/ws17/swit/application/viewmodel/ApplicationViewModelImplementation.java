@@ -469,7 +469,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 }*/
                 try {
                     for (PointOfInterest poi: pois) {
-                        poi = knowledgeGraphSearch.getUrlById(poi);
+                        poi = knowledgeGraphSearch.setInfoAndUrl(poi);
                     }
                     setModuleStatus(ModuleErrors.NOINTERNET, true);
                 } catch(ModuleNotWorkingException e) {
@@ -528,7 +528,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 }*/
                 try {
                     for (PointOfInterest poi: pois) {
-                        poi = knowledgeGraphSearch.getUrlById(poi);
+                        poi = knowledgeGraphSearch.setInfoAndUrl(poi);
                     }
                     setModuleStatus(ModuleErrors.NOINTERNET, true);
                 } catch(ModuleNotWorkingException e) {

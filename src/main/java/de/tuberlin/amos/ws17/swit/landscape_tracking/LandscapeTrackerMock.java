@@ -13,7 +13,7 @@ public class LandscapeTrackerMock implements LandscapeTracker {
     @Override
     public BufferedImage getImage() throws IOException {
         if (isTracking)
-            return ImageUtils.getTestImageFile("brandenburger-tor.jpg");
+            return ImageUtils.getRandomTestImage();
         return null;
     }
 

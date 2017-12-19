@@ -8,6 +8,7 @@ public class PointOfInterest {
 
     private String id;
     private String name;
+    private String wikiUrl;
     private GpsPosition gpsPosition;
     private BufferedImage image;
     private String informationAbstract;
@@ -34,6 +35,14 @@ public class PointOfInterest {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getWikiUrl() {
+        return wikiUrl;
+    }
+
+    public void setWikiUrl(String wikiUrl) {
+        this.wikiUrl = wikiUrl;
     }
 
     public String getName() {

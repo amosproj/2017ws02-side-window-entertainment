@@ -3,14 +3,16 @@ package de.tuberlin.amos.ws17.swit.information_source;
 import com.google.api.client.http.*;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.PathNotFoundException;
 import de.tuberlin.amos.ws17.swit.common.ApiConfig;
 import de.tuberlin.amos.ws17.swit.common.PointOfInterest;
 import de.tuberlin.amos.ws17.swit.common.exceptions.ServiceNotAvailableException;
-import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang.StringUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
+import javax.annotation.Nullable;
 import java.util.Arrays;
 
 public class KnowledgeGraphSearch implements InformationProvider {
@@ -18,62 +20,15 @@ public class KnowledgeGraphSearch implements InformationProvider {
     private static final String API_KEY = ApiConfig.getProperty("KnowledgeGraphSearch");
     private static final String LANGUAGE = "de";
     private static KnowledgeGraphSearch instance;
-    private String detailedInfo = "";
-    private String objectUrl;
 
-    private KnowledgeGraphSearch() { }
+    private KnowledgeGraphSearch() {
+    }
 
     public static InformationProvider getInstance() throws ServiceNotAvailableException {
         if (instance == null) {
             instance = new KnowledgeGraphSearch();
         }
         return instance;
-    }
-
-    @Override
-    public String getInfoById(String id) {
-        GenericUrl url = createGenericUrl();
-        url.put("ids", id);
-        return getDescription(url);
-    }
-
-    @Override
-    public String getInfoByName(String name) {
-        GenericUrl url = createGenericUrl();
-        url.put("query", name);
-        return getDescription(url);
-    }
-
-    @Override
-    public PointOfInterest getInfoByName(PointOfInterest poi) throws ServiceNotAvailableException {
-        GenericUrl url = createGenericUrl();
-        url.put("query", poi.getName());
-        getDescription(url);
-        if (this.detailedInfo.equals("")) {
-            poi.setInformationAbstract(StringEscapeUtils.unescapeJava("Der Wikipedia Artikel ist leider nicht verfügbar"));
-        } else {
-            poi.setInformationAbstract(StringEscapeUtils.unescapeJava(detailedInfo));
-        }
-        System.out.println(objectUrl);
-        System.out.println(poi.toString());
-        return poi;
-    }
-
-
-    //TODO: integrate google Places API to expand possibilites for information search, waiting for Leander collaboration
-    @Override
-    public PointOfInterest getUrlById(PointOfInterest poi) throws ServiceNotAvailableException {
-        GenericUrl url = createGenericUrl();
-        url.put("ids", poi.getId());
-        getDescription(url);
-        if (this.detailedInfo.equals("")) {
-            poi.setInformationAbstract(StringEscapeUtils.unescapeJava("Der Wikipedia Artikel ist leider nicht verfügbar"));
-        } else {
-            poi.setInformationAbstract(StringEscapeUtils.unescapeJava(detailedInfo));
-        }
-        System.out.println(objectUrl);
-        System.out.println(poi.toString());
-        return poi;
     }
 
     private GenericUrl createGenericUrl() {
@@ -85,7 +40,45 @@ public class KnowledgeGraphSearch implements InformationProvider {
         return url;
     }
 
-    private String getDescription(GenericUrl url) {
+    @Nullable
+    private Tuple<String, String> getInfoById(String id) {
+        GenericUrl url = createGenericUrl();
+        url.put("ids", id);
+        return getInfoAndWikiUrl(url);
+    }
+
+    @Nullable
+    private Tuple<String, String> getInfoByName(String name) {
+        GenericUrl url = createGenericUrl();
+        url.put("query", name);
+        return getInfoAndWikiUrl(url);
+    }
+
+    @Override
+    public PointOfInterest setInfoAndUrl(PointOfInterest poi) throws ServiceNotAvailableException {
+        // try with id
+        Tuple<String, String> result = null;
+
+        if (StringUtils.isEmpty(poi.getId())) {
+            // check if id is a kgs id
+            if (poi.getId().contains("/m/")) {
+                result = getInfoById(poi.getId());
+            }
+        }
+        // if it fails, try with name
+        if (result == null) {
+            result = getInfoByName(poi.getName());
+        }
+
+        if (result != null) {
+            poi.setInformationAbstract(result.x);
+            poi.setWikiUrl(result.y);
+        }
+        return poi;
+    }
+
+    @Nullable
+    private Tuple<String, String> getInfoAndWikiUrl(GenericUrl url) {
         try {
             HttpTransport httpTransport = new NetHttpTransport();
             HttpRequestFactory requestFactory = httpTransport.createRequestFactory();
@@ -96,32 +89,49 @@ public class KnowledgeGraphSearch implements InformationProvider {
             JSONArray elements = (JSONArray) response.get("itemListElement");
 
             for (Object element : elements) {
-                String objectUrl = JsonPath.read(element, "$.result.detailedDescription.url").toString();
-                if (!objectUrl.isEmpty()) {
-                    this.objectUrl = objectUrl;
-                    String[] temp = this.objectUrl.split("/");
-                    System.out.println(Arrays.toString(temp));
-                    String[] language = temp[2].split("\\.");
-                    if (!language[0].equals("")) {
-                        this.detailedInfo = WikiAbstractProvider.getExtract(getNameFromUrl(this.objectUrl), language[0]);
-                    }
+                // only use first element
+                System.out.println(url.get("query"));
 
-                    return this.detailedInfo;
-                }
+                String info = JsonPath.read(element, "$.result.detailedDescription.articleBody").toString();
+                String wikiUrl = JsonPath.read(element, "$.result.detailedDescription.url").toString();
+                return new Tuple<>(info, wikiUrl);
             }
-
+        } catch(HttpResponseException hre) {
+            System.out.println("Bad Request");
+        } catch (PathNotFoundException pnfe) {
+            System.out.println("No info found for POI");
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-        return "";
+        return null;
     }
 
-    public String getNameFromUrl(String objectUrl) {
-        if (!objectUrl.equals("")) {
-            String[] temp = objectUrl.split("/");
+    public String getNameFromUrl(String wikiUrl) {
+        if (!wikiUrl.equals("")) {
+            String[] temp = wikiUrl.split("/");
             return temp[temp.length - 1];
         }
         return "";
     }
 
+    @Nullable
+    public String getLanguageFromUrl(String wikiUrl) {
+        String[] temp = wikiUrl.split("/");
+        System.out.println(Arrays.toString(temp));
+        String[] language = temp[2].split("\\.");
+        if (!language[0].equals("")) {
+            return language[0];
+        }
+        return null;
+    }
+
+    class Tuple<X, Y> {
+        public final X x;
+        public final Y y;
+
+        public Tuple(X x, Y y) {
+            this.x = x;
+            this.y = y;
+        }
+    }
 }
