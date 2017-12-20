@@ -50,7 +50,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     private GpsTracker gpsTracker;
     private DebugLog debugLog = new DebugLog();
     private WikiAbstractProvider abstractProvider;
-    private PoiService poiService;
+    private PoiService poiService = new MockedPoiService();
     private InformationProvider knowledgeGraphSearch;
 
     //Threads
@@ -449,12 +449,15 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 //POI maps
                 List<PointOfInterest> pois = null;
                 try{
-                    pois = poiService.loadPlaceForCircleAndPoiType(kinematicProperties,200
-                            ,PoiType.FOOD,PoiType.LEISURE/*GoogleType.zoo , GoogleType.airport, GoogleType.aquarium, GoogleType.church, GoogleType.city_hall,
+                   /* pois = poiService.loadPlaceForCircleAndPoiType(kinematicProperties,200
+                            ,PoiType.FOOD,PoiType.LEISURE*//*GoogleType.zoo , GoogleType.airport, GoogleType.aquarium, GoogleType.church, GoogleType.city_hall,
                             GoogleType.hospital, GoogleType.library, GoogleType.mosque, GoogleType.museum, GoogleType.park,
                             GoogleType.stadium, GoogleType.synagogue, GoogleType.university,
                             GoogleType.point_of_interest, GoogleType.place_of_worship,
-                            GoogleType.restaurant*/);
+                            GoogleType.restaurant*//*);*/
+
+                    pois = poiService.loadPlaceForCircle(new GpsPosition(0,0), 0);
+
 
                     System.out.println(pois.size()+ " number of POIs found.");
 
@@ -555,6 +558,10 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                     for (PointOfInterest poi: pois) {
                         poi = knowledgeGraphSearch.setInfoAndUrl(poi);
                         String wikiUrl = poi.getWikiUrl();
+                        if (wikiUrl==null){
+                            String abstractInfo= WikiAbstractProvider.getAbstract(poi.getName(), "en");
+                            poi.setInformationAbstract(abstractInfo);
+                        }
                         if (!StringUtils.isEmpty(wikiUrl)) {
                             // if wiki url available -> query info from wikipedia
                             String abstractInfo = WikiAbstractProvider.getAbstract(wikiUrl);
