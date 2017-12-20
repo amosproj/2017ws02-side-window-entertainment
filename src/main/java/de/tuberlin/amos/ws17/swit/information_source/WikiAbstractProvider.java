@@ -90,6 +90,7 @@ public class WikiAbstractProvider implements AbstractProvider, Module {
 
     public static String getAbstract(String searchTerm, String language) {
         String result = "";
+        searchTerm=searchTerm.replaceAll(" ", "_");
         try {
             String json = readHTTP("https://"+ language + ".wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro=&explaintext=&titles=" + searchTerm);
             int idStartIndex = json.indexOf("extract\":\"") + 10;
