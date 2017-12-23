@@ -44,7 +44,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     private LandscapeTracker landscapeTracker;
     private UserTracker userTracker;
     private GpsTracker gpsTracker;
-    private DebugLog debugLog = new DebugLog();
+    private DebugLog debugLog;
     private WikiAbstractProvider abstractProvider;
     private GooglePoiService googlePoiService;
     private InformationProvider knowledgeGraphSearch;
@@ -98,6 +98,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
 
         backgroundProperty = new SimpleObjectProperty<>();
 
+        //bindDebugLog();
         //initTestData();
 
         Platform.runLater(new Runnable() {
@@ -142,8 +143,6 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         this.view = view;
 
         propertyCameraImage = new SimpleObjectProperty<Image>();
-
-        //bindDebugLog();
 
         listModuleStatus = new SimpleListProperty<>();
         listModuleStatus.set(FXCollections.observableList(new ArrayList<ModuleStatusViewModel>()));
@@ -655,6 +654,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     }
 
     private void bindDebugLog() {
+        debugLog = new DebugLog();
         this.propertyDebugLog = new SimpleListProperty<String>();
         this.propertyDebugLog.set(DebugLog.debugLog);
 
