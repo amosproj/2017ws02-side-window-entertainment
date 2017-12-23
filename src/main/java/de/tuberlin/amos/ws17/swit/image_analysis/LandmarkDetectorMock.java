@@ -21,13 +21,13 @@ public class LandmarkDetectorMock implements LandmarkDetector {
                 new GpsPosition(13.378144, 52.516325), ImageUtils.getTestImageFile("brandenburger-tor.jpg"), "");
         PointOfInterest fernsehturm = new PointOfInterest("/m/02g8n0", "Fernsehturm Berlin",
                 new GpsPosition(13.424005, 52.521613), ImageUtils.getTestImageFile("fernsehturm-2.jpg"), "");
-        PointOfInterest worldClock = new PointOfInterest("/m/02g8n0", "World Clock",
-                new GpsPosition(13.413309, 52.521163), ImageUtils.getTestImageFile("fernsehturm.jpg"), "");
-        PointOfInterest berlinCathedral = new PointOfInterest("/m/02h7s_", "World Clock",
+        PointOfInterest victoryColumn = new PointOfInterest("/m/03hx6x", "Siegessäule",
+                new GpsPosition(13.370704, 52.5159983), ImageUtils.getTestImageFile("sieges-saeule.jpg"), "");
+        PointOfInterest berlinCathedral = new PointOfInterest("/m/02h7s_", "Berliner Dom",
                 new GpsPosition(13.400617, 52.518754), ImageUtils.getTestImageFile("berliner-dom.jpg"), "");
         pois.add(brandenburgerGate);
         pois.add(fernsehturm);
-        pois.add(worldClock);
+        pois.add(victoryColumn);
         pois.add(berlinCathedral);
     }
 

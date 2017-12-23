@@ -1,58 +1,74 @@
 package de.tuberlin.amos.ws17.swit.landscape_tracking;
 
-
+import com.github.sarxos.webcam.Webcam;
 import de.tuberlin.amos.ws17.swit.common.exceptions.ModuleNotWorkingException;
 
 import javax.imageio.ImageIO;
-import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-
+import java.util.List;
+import java.util.concurrent.TimeoutException;
 
 public class LandscapeTrackerImplementation implements LandscapeTracker{
 
-    public boolean noCameraMode = false;
-
-
-    public WebcamImplementation webcamImp;
-    JFrame frame=new JFrame();
-    private ArrayList<String> examplePicturesNames;
-    //private String path = ".\\src\\main\\resources\\test_images\\";
-    ArrayList<BufferedImage> examplePictures = new ArrayList<>();
-    private BufferedImage lastImage;
-
+    private Webcam logitechC920webcam = null;
+    private boolean isTracking = false;
 
     public LandscapeTrackerImplementation() {
 
     }
 
-    public void setWebcamImp(WebcamImplementation webcamImp) {
-        this.webcamImp = webcamImp;
-    }
-
-
-
     @Override
     public BufferedImage getImage() throws IOException {
-        if(!webcamImp.getWebcam().isOpen()) webcamImp.getWebcam().open();
-        return webcamImp.getWebcam().getImage();
+        return logitechC920webcam.getImage();
     }
 
     @Override
     public void startModule() throws ModuleNotWorkingException {
-        WebcamImplementation webcamImplementation = null;
+        if (isTracking)
+            stopModule();
+
+        findLogitechC920();
+        startLogitechC920();
+        isTracking = true;
+    }
+
+    private void findLogitechC920() throws ModuleNotWorkingException {
         try {
-            webcamImplementation = new WebcamBuilder()
-                    .setWebcamName("Webcam Logitech HD Pro Webcam C920 1")
-                    .setViewSize(new Dimension(640, 480))
-                    .setWebcamDiscoveryTimeout(10000).build();
-        } catch (Exception e) {
-            throw new ModuleNotWorkingException();
+            List<Webcam> webcams = Webcam.getWebcams(2000);
+            for (Webcam webcam: webcams) {
+                if (webcam.toString().startsWith("Webcam Logitech HD Pro Webcam C920")) {
+                    logitechC920webcam = webcam;
+                    break;
+                }
+            }
+        } catch (TimeoutException e) {
+            throw new ModuleNotWorkingException(e.getMessage());
         }
-        this.webcamImp = webcamImplementation;
+
+        if (logitechC920webcam == null) {
+            throw new ModuleNotWorkingException("Logitech Kamera nicht vorhanden.");
+        }
+    }
+
+    private void startLogitechC920() throws ModuleNotWorkingException {
+        if (logitechC920webcam == null) {
+            throw new ModuleNotWorkingException("Logitech Kamera nicht vorhanden.");
+        }
+
+        if (!logitechC920webcam.isOpen()) {
+            Dimension fullHD = new Dimension(1920, 1080);
+            Dimension[] customViewSizes = new Dimension[] {
+                    fullHD
+            };
+            logitechC920webcam.setCustomViewSizes(customViewSizes);
+            logitechC920webcam.setViewSize(fullHD);
+            if (!logitechC920webcam.open()) {
+                throw new ModuleNotWorkingException("Logitech Kamera konnte nicht gestartet werden.");
+            }
+        }
     }
 
     @Override

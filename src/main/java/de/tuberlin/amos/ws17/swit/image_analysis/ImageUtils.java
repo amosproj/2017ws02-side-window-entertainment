@@ -1,16 +1,14 @@
 package de.tuberlin.amos.ws17.swit.image_analysis;
 
 import com.google.api.services.vision.v1.model.Image;
+import org.apache.jena.base.Sys;
 
 import javax.annotation.Nullable;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.net.URL;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -40,7 +38,9 @@ public class ImageUtils {
     }
 
     public static void showImage(BufferedImage img, JFrame frame) {
-        if (img == null) { return; }
+        if (img == null) {
+            return;
+        }
         ImageIcon icon = new ImageIcon(img);
         frame.setLayout(new FlowLayout());
         frame.setSize(img.getWidth() + 10, img.getHeight() + 20);
@@ -54,30 +54,26 @@ public class ImageUtils {
     @Nullable
     public static BufferedImage getTestImageFile(String imageName) {
         ClassLoader classLoader = ImageUtils.class.getClassLoader();
-        URL resourceUrl = classLoader.getResource("test_images/" + imageName);
-        if (resourceUrl != null) {
-            File file = new File(resourceUrl.getFile());
-            try {
-                return ImageIO.read(file);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        InputStream is = classLoader.getResourceAsStream("test_images/" + imageName);
+        try {
+            return ImageIO.read(is);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         return null;
     }
 
+    @Nullable
     public static BufferedImage getRandomTestImage() {
+        String[] imageNames = new String[]{"berliner-dom.jpg", "brandenburger-tor.jpg", "brandenburger-tor-2.jpg",
+                "fernsehturm.jpg", "fernsehturm-2.jpg", "sieges-saeule.jpg"};
+        int rnd = ThreadLocalRandom.current().nextInt(0, imageNames.length);
         ClassLoader classLoader = ImageUtils.class.getClassLoader();
-        URL resourceUrl = classLoader.getResource("test_images/");
-        File[] files = new File(resourceUrl.getPath()).listFiles();
-        if (files != null) {
-            int rnd = ThreadLocalRandom.current().nextInt(0, files.length);
-            File file = files[rnd];
-            try {
-                return ImageIO.read(file);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        InputStream is = classLoader.getResourceAsStream("test_images/" + imageNames[rnd]);
+        try {
+            return ImageIO.read(is);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         return null;
     }

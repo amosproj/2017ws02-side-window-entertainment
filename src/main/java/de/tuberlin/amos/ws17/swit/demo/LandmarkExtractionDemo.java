@@ -30,17 +30,17 @@ public class LandmarkExtractionDemo {
             e.printStackTrace();
         }
 
-        if (landmarkDetector != null) {
-            List<LandmarkResult> results = landmarkDetector.identifyLandmarks(testImage, 3);
-            if (!results.isEmpty()) {
-                LandmarkResult firstResult = results.get(0);
-                String description = infoProvider.getInfoById(firstResult.getId());
-                System.out.println(firstResult.getId());
-                showHighlightedLandmark(firstResult, testImage, description);
-                ImageUtils.showImage(firstResult.getCroppedImage(), new JFrame("Cropped POI"));
-                System.out.print(description);
-            }
-        }
+//        if (landmarkDetector != null) {
+//            List<LandmarkResult> results = landmarkDetector.identifyLandmarks(testImage, 3);
+//            if (!results.isEmpty()) {
+//                LandmarkResult firstResult = results.get(0);
+//                String description = infoProvider.getInfoById(firstResult.getId());
+//                System.out.println(firstResult.getId());
+//                showHighlightedLandmark(firstResult, testImage, description);
+//                ImageUtils.showImage(firstResult.getCroppedImage(), new JFrame("Cropped POI"));
+//                System.out.print(description);
+//            }
+//        }
     }
 
     private static void showHighlightedLandmark(LandmarkResult result, BufferedImage img, String description) {

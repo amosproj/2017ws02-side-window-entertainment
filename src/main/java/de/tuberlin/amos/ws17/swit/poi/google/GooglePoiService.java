@@ -122,10 +122,11 @@ public class GooglePoiService implements PoiService<GooglePoi> {
 
     		//concat the types
 			String concatTypes = "";
+
 			for (GoogleType type:types) {
 				concatTypes+="|"+type.toString();
 			}
-			concatTypes=concatTypes.replaceFirst("|", "");
+			concatTypes=concatTypes.replaceFirst("\\S", "");
 
 			Param[] params = new Param[1];
 			params[0] = new Param("type").value(concatTypes);
@@ -197,13 +198,14 @@ public class GooglePoiService implements PoiService<GooglePoi> {
 		return detailedPlaces;
 	}
 
-	public void downloadImages(Collection<GooglePoi> poisToAddPhotosTo){
+	public void addImages(Collection<GooglePoi> poisToAddPhotosTo){
     	if (poisToAddPhotosTo == null) {
     		return;
 		}
 
 		for(GooglePoi poi:poisToAddPhotosTo){
 			downloadImage(poi);
+
 		}
 	}
 
@@ -213,9 +215,14 @@ public class GooglePoiService implements PoiService<GooglePoi> {
 		}
 
 		if(poi.getPhotoreference()!=null) {
+
+			System.out.print("Getting image for poi " +poi.getId()+" with ref " +poi.getPhotoreference().getReference()+
+					" ..."  );
 			Photo photo = poi.getPhotoreference();
 			BufferedImage image = photo.download(xResolution, yResolution).getImage();
 			poi.setImage(image);
+
+			System.out.println("...image added to poi." );
 		}
 	}
 

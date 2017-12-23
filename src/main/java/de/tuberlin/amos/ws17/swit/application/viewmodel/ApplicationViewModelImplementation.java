@@ -11,11 +11,14 @@ import de.tuberlin.amos.ws17.swit.image_analysis.CloudVision;
 import de.tuberlin.amos.ws17.swit.image_analysis.LandmarkDetector;
 import de.tuberlin.amos.ws17.swit.image_analysis.LandmarkDetectorMock;
 import de.tuberlin.amos.ws17.swit.information_source.InformationProvider;
+import de.tuberlin.amos.ws17.swit.information_source.InformationProviderMock;
 import de.tuberlin.amos.ws17.swit.information_source.KnowledgeGraphSearch;
 import de.tuberlin.amos.ws17.swit.information_source.WikiAbstractProvider;
 import de.tuberlin.amos.ws17.swit.landscape_tracking.LandscapeTracker;
 import de.tuberlin.amos.ws17.swit.landscape_tracking.LandscapeTrackerImplementation;
 import de.tuberlin.amos.ws17.swit.landscape_tracking.LandscapeTrackerMock;
+import de.tuberlin.amos.ws17.swit.poi.MockedPoiService;
+import de.tuberlin.amos.ws17.swit.poi.PoiService;
 import de.tuberlin.amos.ws17.swit.poi.PoiType;
 import de.tuberlin.amos.ws17.swit.poi.google.GooglePoi;
 import de.tuberlin.amos.ws17.swit.poi.google.GooglePoiService;
@@ -31,6 +34,7 @@ import javafx.scene.image.Image;
 import javafx.event.EventHandler;
 import javafx.event.ActionEvent;
 import javafx.scene.layout.*;
+import org.apache.commons.lang.StringUtils;
 
 import java.awt.image.BufferedImage;
 import java.io.*;
@@ -46,7 +50,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     private GpsTracker gpsTracker;
     private DebugLog debugLog;
     private WikiAbstractProvider abstractProvider;
-    private GooglePoiService googlePoiService;
+    private PoiService poiService = new MockedPoiService();
     private InformationProvider knowledgeGraphSearch;
 
     //Threads
@@ -107,8 +111,10 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 try {
                     cameraImage = SwingFXUtils.toFXImage(landscapeTracker.getImage(), null );
                     backgroundImage = new BackgroundImage(cameraImage,
-                            BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.DEFAULT,
-                            BackgroundSize.DEFAULT);
+                            BackgroundRepeat.NO_REPEAT,
+                            BackgroundRepeat.NO_REPEAT,
+                            BackgroundPosition.CENTER,
+                            new BackgroundSize(100, 100, true, true, false, true));
                     background = new Background(backgroundImage);
                     backgroundProperty.setValue(background);
                 } catch (IOException e) {
@@ -291,6 +297,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 setModuleStatus(ModuleErrors.NOINTERNET, false);
             }
         } else if(properties.getProperty("information_source").equals("0")) {
+            System.out.println("loading AbstractProviderMock...");
             setModuleStatus(ModuleErrors.NOINTERNET, false);
         } else {
             System.out.println("failed to load AbstractProvider");
@@ -309,6 +316,8 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 setModuleStatus(ModuleErrors.NOINTERNET, false);
             }
         } else if(properties.getProperty("information_source").equals("0")) {
+            System.out.println("loading InformationProviderMock...");
+            knowledgeGraphSearch = new InformationProviderMock();
             setModuleStatus(ModuleErrors.NOINTERNET, false);
         } else {
             System.out.println("failed to load KnowledgeGraphSearch");
@@ -318,7 +327,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         if(properties.getProperty("poi_analysis").equals("1")) {
             try {
                 System.out.println("loading GooglePoiService...");
-                googlePoiService = new GooglePoiService(500, 800);
+                poiService = new GooglePoiService(500, 800);
                 setModuleStatus(ModuleErrors.NOINTERNET, true);
             } catch (ModuleNotWorkingException e) {
                 setModuleStatus(ModuleErrors.NOINTERNET, false);
@@ -327,6 +336,8 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 setModuleStatus(ModuleErrors.NOINTERNET, false);
             }
         } else if(properties.getProperty("poi_analysis").equals("0")) {
+            System.out.println("loading PoiServiceMock...");
+            poiService = new MockedPoiService();
             setModuleStatus(ModuleErrors.NOINTERNET, false);
         } else {
             System.out.println("failed to load GooglePoiService");
@@ -396,8 +407,10 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                             try {
                                 cameraImage = SwingFXUtils.toFXImage(landscapeTracker.getImage(), null );
                                 backgroundImage = new BackgroundImage(cameraImage,
-                                        BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.DEFAULT,
-                                        BackgroundSize.DEFAULT);
+                                        BackgroundRepeat.NO_REPEAT,
+                                        BackgroundRepeat.NO_REPEAT,
+                                        BackgroundPosition.CENTER,
+                                        new BackgroundSize(100,100,true,true,false,true));
                                 background = new Background(backgroundImage);
                                 backgroundProperty.setValue(background);
                             } catch (IOException e) {
@@ -435,14 +448,23 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 //POI maps
                 List<PointOfInterest> pois = null;
                 try{
-                    List<GooglePoi> gPois = googlePoiService.loadPlaceForCircleAndPoiType(kinematicProperties,300
-                            ,PoiType.FOOD/*GoogleType.zoo , GoogleType.airport, GoogleType.aquarium, GoogleType.church, GoogleType.city_hall,
+                   /* pois = poiService.loadPlaceForCircleAndPoiType(kinematicProperties,200
+                            ,PoiType.FOOD,PoiType.LEISURE*//*GoogleType.zoo , GoogleType.airport, GoogleType.aquarium, GoogleType.church, GoogleType.city_hall,
                             GoogleType.hospital, GoogleType.library, GoogleType.mosque, GoogleType.museum, GoogleType.park,
                             GoogleType.stadium, GoogleType.synagogue, GoogleType.university,
                             GoogleType.point_of_interest, GoogleType.place_of_worship,
-                            GoogleType.restaurant*/);
-                    googlePoiService.downloadImages(gPois);
-                    pois = (List) gPois;
+                            GoogleType.restaurant*//*);*/
+
+                    pois = poiService.loadPlaceForCircle(new GpsPosition(0,0), 0);
+
+
+                    System.out.println(pois.size()+ " number of POIs found.");
+
+                    poiService.addImages(pois);
+
+                    System.out.println(pois.size()+ " images added.");
+
+
                     setModuleStatus(ModuleErrors.NOINTERNET, true);
                 } catch (Exception e){
                     e.printStackTrace();
@@ -466,7 +488,15 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 }*/
                 try {
                     for (PointOfInterest poi: pois) {
-                        poi = knowledgeGraphSearch.getUrlById(poi);
+                        poi = knowledgeGraphSearch.setInfoAndUrl(poi);
+                        String wikiUrl = poi.getWikiUrl();
+                        if (!StringUtils.isEmpty(wikiUrl)) {
+                            // if wiki url available -> query info from wikipedia
+                            String abstractInfo = WikiAbstractProvider.getAbstract(wikiUrl);
+                            if (!StringUtils.isEmpty(abstractInfo)) {
+                                poi.setInformationAbstract(abstractInfo);
+                            }
+                        }
                     }
                     setModuleStatus(ModuleErrors.NOINTERNET, true);
                 } catch(ModuleNotWorkingException e) {
@@ -525,7 +555,19 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 }*/
                 try {
                     for (PointOfInterest poi: pois) {
-                        poi = knowledgeGraphSearch.getUrlById(poi);
+                        poi = knowledgeGraphSearch.setInfoAndUrl(poi);
+                        String wikiUrl = poi.getWikiUrl();
+                        if (wikiUrl==null){
+                            String abstractInfo= WikiAbstractProvider.getAbstract(poi.getName(), "en");
+                            poi.setInformationAbstract(abstractInfo);
+                        }
+                        if (!StringUtils.isEmpty(wikiUrl)) {
+                            // if wiki url available -> query info from wikipedia
+                            String abstractInfo = WikiAbstractProvider.getAbstract(wikiUrl);
+                            if (!StringUtils.isEmpty(abstractInfo)) {
+                                poi.setInformationAbstract(abstractInfo);
+                            }
+                        }
                     }
                     setModuleStatus(ModuleErrors.NOINTERNET, true);
                 } catch(ModuleNotWorkingException e) {

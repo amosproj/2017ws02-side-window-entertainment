@@ -5,6 +5,7 @@ import de.tuberlin.amos.ws17.swit.common.exceptions.ModuleNotWorkingException;
 import de.tuberlin.amos.ws17.swit.common.PointOfInterest;
 import org.apache.commons.lang3.StringEscapeUtils;
 
+import javax.annotation.Nullable;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
@@ -13,6 +14,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Arrays;
 
 public class WikiAbstractProvider implements AbstractProvider, Module {
     /**
@@ -32,7 +34,7 @@ public class WikiAbstractProvider implements AbstractProvider, Module {
             if(wikiApiID == -1) {
                 wikiAbstract = "No Wikipedia article for the point of interest " + poiName + " was found.";
             } else {
-                wikiAbstract = getExtract(wikiApiID);
+                wikiAbstract = getAbstract(wikiApiID);
             }
 
             poi.setInformationAbstract(StringEscapeUtils.unescapeJava(wikiAbstract));
@@ -66,7 +68,7 @@ public class WikiAbstractProvider implements AbstractProvider, Module {
     /*
      * Retrieves the short information text for a Wikipedia article with the given ID and returns an empty string if the ID is invalid.
      */
-    private static String getExtract(int articleID) {
+    private static String getAbstract(int articleID) {
         String result = "";
         try {
             String json = readHTTP("https://en.wikipedia.org/w/api.php?action=query&prop=extracts&exintro&explaintext&format=json&pageids=" + articleID);
@@ -80,9 +82,15 @@ public class WikiAbstractProvider implements AbstractProvider, Module {
         return result;
     }
 
+    public static String getAbstract(String wikiUrl) {
+        String wikiName = getNameFromUrl(wikiUrl);
+        String wikiLanguage = getLanguageFromUrl(wikiUrl);
+        return getAbstract(wikiName, wikiLanguage);
+    }
 
-    public static String getExtract(String searchTerm, String language) {
+    public static String getAbstract(String searchTerm, String language) {
         String result = "";
+        searchTerm=searchTerm.replaceAll(" ", "_");
         try {
             String json = readHTTP("https://"+ language + ".wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro=&explaintext=&titles=" + searchTerm);
             int idStartIndex = json.indexOf("extract\":\"") + 10;
@@ -93,9 +101,28 @@ public class WikiAbstractProvider implements AbstractProvider, Module {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return result;
+        return StringEscapeUtils.unescapeJava(result);
     }
 
+
+    public static  String getNameFromUrl(String wikiUrl) {
+        if (!wikiUrl.equals("")) {
+            String[] temp = wikiUrl.split("/");
+            return temp[temp.length - 1];
+        }
+        return "";
+    }
+
+    @Nullable
+    public static String getLanguageFromUrl(String wikiUrl) {
+        String[] temp = wikiUrl.split("/");
+        System.out.println(Arrays.toString(temp));
+        String[] language = temp[2].split("\\.");
+        if (!language[0].equals("")) {
+            return language[0];
+        }
+        return null;
+    }
     /*
      * Reads the HTTP informations of a given URL and returns it as a string.
      */
