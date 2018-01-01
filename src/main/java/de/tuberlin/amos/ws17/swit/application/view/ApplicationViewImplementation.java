@@ -53,6 +53,7 @@ public class ApplicationViewImplementation extends Application implements Applic
     private Label expansionInformation;
     private ImageView expansionImage;
     private ScrollPane expansionScrollPane;
+    private HBox statusPane;
 
     private WebEngine webEngine;
     private WebView browser;
@@ -92,24 +93,29 @@ public class ApplicationViewImplementation extends Application implements Applic
     private void initElements() {
         pnFoundation = new BorderPane();
         pnFoundation.setId("pnFoundation");
-        listPOIcamera = new ListView<PoiViewModel>();
+
+        listPOIcamera = new ListView<>();
         listPOIcamera.setId("listPOIcamera");
         pnFoundation.setTop(listPOIcamera);
-        listPOImaps = new ListView<PoiViewModel>();
+        listPOImaps = new ListView<>();
         listPOImaps.setId("listPOImaps");
         pnFoundation.setBottom(listPOImaps);
 
-        listModuleStatus = new ListView<ModuleStatusViewModel>();
-        listModuleStatus.setId("listModuleStatus");
-        pnFoundation.setLeft(listModuleStatus);
+        statusPane = new HBox();
+        statusPane.setId("statusPane");
+        pnFoundation.setLeft(statusPane);
 
-        listExpressionStatus = new ListView<UserExpressionViewModel>();
+        listModuleStatus = new ListView<>();
+        listModuleStatus.setId("listModuleStatus");
+        statusPane.getChildren().add(listModuleStatus);
+
+        listExpressionStatus = new ListView<>();
         listExpressionStatus.setId("listExpressionStatus");
-        pnFoundation.setRight(listExpressionStatus);
+        statusPane.getChildren().add(listExpressionStatus);
 
         listDebugLog = new ListView<>();
         listDebugLog.setId("listDebugLog");
-        //pnFoundation.setRight(listDebugLog);
+        pnFoundation.setRight(listDebugLog);
 
         expansionPane = new BorderPane();
         expansionPane.setId("expansionPane");
@@ -157,7 +163,7 @@ public class ApplicationViewImplementation extends Application implements Applic
             expansionName.textProperty().bindBidirectional(controller.getExpandedPOI().nameProperty());
             expansionImage.imageProperty().bindBidirectional(controller.getExpandedPOI().imageProperty());
             expansionInformation.textProperty().bindBidirectional(controller.getExpandedPOI().informationAbstractProperty());
-            //listDebugLog.itemsProperty().bindBidirectional(controller.propertyDebugLogProperty());
+            listDebugLog.itemsProperty().bindBidirectional(controller.propertyDebugLogProperty());
             listModuleStatus.itemsProperty().bindBidirectional(controller.listModuleStatusProperty());
             listExpressionStatus.itemsProperty().bindBidirectional(controller.listExpressionStatusProperty());
             listPOIcamera.itemsProperty().bindBidirectional(controller.propertyPOIcameraProperty());

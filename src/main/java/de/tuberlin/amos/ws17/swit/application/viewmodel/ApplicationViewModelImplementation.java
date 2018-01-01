@@ -26,6 +26,7 @@ import de.tuberlin.amos.ws17.swit.tracking.UserTrackerMock;
 import javafx.application.Platform;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.Image;
@@ -46,7 +47,6 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     private LandscapeTracker landscapeTracker;
     private UserTracker userTracker;
     private GpsTracker gpsTracker;
-    private DebugLog debugLog;
     private WikiAbstractProvider abstractProvider;
     private PoiService poiService = new MockedPoiService();
     private InformationProvider knowledgeGraphSearch;
@@ -65,7 +65,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     private SimpleListProperty<PoiViewModel> propertyPOImaps;
     private SimpleListProperty<PoiViewModel> propertyPOIcamera;
     private SimpleObjectProperty<EventHandler<ActionEvent>> propertyCloseButton;
-    private SimpleListProperty<String> propertyDebugLog;
+    private SimpleListProperty<String> listDebugLog;
     private SimpleListProperty<ModuleStatusViewModel> listModuleStatus;
     private SimpleListProperty<UserExpressionViewModel> listExpressionStatus;
     private List<Module> moduleList;
@@ -101,10 +101,8 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         backgroundProperty = new SimpleObjectProperty<>();
 
         if(properties.get("debuglog").equals("1")) {
-            bindDebugLog();
+            initDebugLog();
         }
-
-        //initTestData();
 
         updateBackgroundImage();
 
@@ -133,22 +131,25 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     private void initObjects(ApplicationView view) {
         this.view = view;
 
-        propertyCameraImage = new SimpleObjectProperty<Image>();
+        propertyCameraImage = new SimpleObjectProperty<>();
 
         listModuleStatus = new SimpleListProperty<>();
-        listModuleStatus.set(FXCollections.observableList(new ArrayList<ModuleStatusViewModel>()));
+        listModuleStatus.set(FXCollections.observableList(new ArrayList<>()));
 
         listExpressionStatus = new SimpleListProperty<>();
-        listExpressionStatus.set(FXCollections.observableList(new ArrayList<UserExpressionViewModel>()));
+        listExpressionStatus.set(FXCollections.observableList(new ArrayList<>()));
 
-        pointsOfInterest = new ArrayList<PointOfInterest>();
+        pointsOfInterest = new ArrayList<>();
         expandedPOI = new PoiViewModel();
         vmUserPosition = new UserPositionViewModel();
 
         propertyPOImaps = new SimpleListProperty();
-        propertyPOImaps.set(FXCollections.observableList(new ArrayList<PoiViewModel>()));
+        propertyPOImaps.set(FXCollections.observableList(new ArrayList<>()));
         propertyPOIcamera = new SimpleListProperty();
-        propertyPOIcamera.set(FXCollections.observableList(new ArrayList<PoiViewModel>()));
+        propertyPOIcamera.set(FXCollections.observableList(new ArrayList<>()));
+
+        listDebugLog = new SimpleListProperty<>();
+        listDebugLog.set(FXCollections.observableList(new ArrayList<>()));
 
         moduleList = new ArrayList<>();
 
@@ -156,10 +157,33 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         propertyCloseButton.set(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                DebugLog.log("minimized", this);
+                DebugLog.log("POI minimized");
                 minimizePOI();
             }
         });
+    }
+
+    private void initDebugLog() {
+        DebugLog.initDebugLog();
+        DebugLog.getDebugLog().addListener((ListChangeListener<DebugLog.DebugEntry>) c -> {
+            for(DebugLog.DebugEntry de: c.getAddedSubList()) {
+                listDebugLog.add(de.toString());
+            }
+        });
+
+        // systemoutprintline redirect
+        /*System.setOut(new PrintStream(System.out) {
+
+            public void println(String s) {
+                propertyDebugLog.add(s);
+                super.println(s);
+            }
+
+            public void print(String s) {
+                propertyDebugLog.add(s);
+                super.println(s);
+            }
+        });*/
     }
 
     private void initModules() {
@@ -725,26 +749,6 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         expandedPOI.setInformationAbstract(item.getInformationAbstract());
     }
 
-    private void bindDebugLog() {
-        debugLog = new DebugLog();
-        this.propertyDebugLog = new SimpleListProperty<String>();
-        this.propertyDebugLog.set(DebugLog.debugLog);
-
-        // systemoutprintline redirect
-        System.setOut(new PrintStream(System.out) {
-
-            public void println(String s) {
-                propertyDebugLog.add(s);
-                super.println(s);
-            }
-
-            public void print(String s) {
-                propertyDebugLog.add(s);
-                super.println(s);
-            }
-        });
-    }
-
 //Getter und Setter
     public List<PointOfInterest> getPointsOfInterest() {
         return pointsOfInterest;
@@ -794,12 +798,12 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         this.propertyCloseButton.set(propertyCloseButton);
     }
 
-    public ObservableList<String> getPropertyDebugLog() {
-        return propertyDebugLog.get();
+    public ObservableList<String> getListDebugLog() {
+        return listDebugLog.get();
     }
 
     public SimpleListProperty<String> propertyDebugLogProperty() {
-        return propertyDebugLog;
+        return listDebugLog;
     }
 
     public ObservableList<ModuleStatusViewModel> getListModuleStatus() {
