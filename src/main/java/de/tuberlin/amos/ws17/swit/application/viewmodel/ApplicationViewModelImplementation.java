@@ -143,9 +143,9 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         expandedPOI = new PoiViewModel();
         vmUserPosition = new UserPositionViewModel();
 
-        propertyPOImaps = new SimpleListProperty();
+        propertyPOImaps = new SimpleListProperty<>();
         propertyPOImaps.set(FXCollections.observableList(new ArrayList<>()));
-        propertyPOIcamera = new SimpleListProperty();
+        propertyPOIcamera = new SimpleListProperty<>();
         propertyPOIcamera.set(FXCollections.observableList(new ArrayList<>()));
 
         listDebugLog = new SimpleListProperty<>();
@@ -164,8 +164,10 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     }
 
     private void initDebugLog() {
+        System.out.println("loading DebugLog...");
         DebugLog.initDebugLog();
         DebugLog.getDebugLog().addListener((ListChangeListener<DebugLog.DebugEntry>) c -> {
+            c.next();
             for(DebugLog.DebugEntry de: c.getAddedSubList()) {
                 listDebugLog.add(de.toString());
             }
@@ -802,7 +804,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         return listDebugLog.get();
     }
 
-    public SimpleListProperty<String> propertyDebugLogProperty() {
+    public SimpleListProperty<String> listDebugLogProperty() {
         return listDebugLog;
     }
 

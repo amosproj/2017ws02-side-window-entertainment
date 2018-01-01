@@ -163,11 +163,12 @@ public class ApplicationViewImplementation extends Application implements Applic
             expansionName.textProperty().bindBidirectional(controller.getExpandedPOI().nameProperty());
             expansionImage.imageProperty().bindBidirectional(controller.getExpandedPOI().imageProperty());
             expansionInformation.textProperty().bindBidirectional(controller.getExpandedPOI().informationAbstractProperty());
-            listDebugLog.itemsProperty().bindBidirectional(controller.propertyDebugLogProperty());
             listModuleStatus.itemsProperty().bindBidirectional(controller.listModuleStatusProperty());
             listExpressionStatus.itemsProperty().bindBidirectional(controller.listExpressionStatusProperty());
             listPOIcamera.itemsProperty().bindBidirectional(controller.propertyPOIcameraProperty());
             listPOImaps.itemsProperty().bindBidirectional(controller.propertyPOImapsProperty());
+
+            listDebugLog.itemsProperty().bindBidirectional(controller.listDebugLogProperty());
 
             pnFoundation.backgroundProperty().bindBidirectional(controller.backgroundProperty);
         }
@@ -222,13 +223,8 @@ public class ApplicationViewImplementation extends Application implements Applic
                             setText(null);
                         } else {
                             Label debugText = new Label(item);
-                            Platform.runLater(new Runnable() {
-                                @Override
-                                public void run() {
-                                    setGraphic(debugText);
-                                    listDebugLog.refresh();
-                                }
-                            });
+                            setGraphic(debugText);
+                            listDebugLog.refresh();
                         }
                     }
                 };

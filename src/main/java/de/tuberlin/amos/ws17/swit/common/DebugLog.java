@@ -3,6 +3,8 @@ package de.tuberlin.amos.ws17.swit.common;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import org.joda.time.LocalDateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 import java.util.ArrayList;
 
@@ -61,13 +63,14 @@ public class DebugLog {
 
         public DebugEntry(String message) {
             timeStamp = new LocalDateTime();
-            source = sun.reflect.Reflection.getCallerClass(1).getName();
+            String temp = sun.reflect.Reflection.getCallerClass(3).getName();
+            source = temp.substring(temp.lastIndexOf(".") + 1);
             this.message = message;
         }
 
         @Override
         public String toString() {
-            return "[" + source + "," + timeStamp.toString() + "]: " + message;
+            return "[" + source + "," + timeStamp.toString("HH:mm:ss.SSS") + "]: " + message;
         }
     }
 }
