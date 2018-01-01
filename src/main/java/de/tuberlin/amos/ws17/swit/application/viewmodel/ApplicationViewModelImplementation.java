@@ -443,7 +443,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         mapsThread = new Thread(new Runnable() {
             @Override
             public void run() {
-                if(gpsTracker == null || poiService == null || abstractProvider == null || knowledgeGraphSearch == null) {
+                if(gpsTracker == null || poiService == null || knowledgeGraphSearch == null) {
                     System.out.println("unable to run maps thread because of uninitialized modules");
                     return;
                 }
@@ -533,7 +533,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         cameraThread = new Thread(new Runnable() {
             @Override
             public void run() {
-                if(landscapeTracker == null || cloudVision == null || abstractProvider == null || knowledgeGraphSearch == null) {
+                if(landscapeTracker == null || cloudVision == null || knowledgeGraphSearch == null) {
                     System.out.println("unable to run camera thread because of uninitialized modules");
                     return;
                 }
