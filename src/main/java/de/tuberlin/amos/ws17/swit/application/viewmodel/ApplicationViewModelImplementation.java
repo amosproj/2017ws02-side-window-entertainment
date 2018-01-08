@@ -389,6 +389,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 while (run) {
                     UserExpressions userExpressions = null;
                     if(userTracker.isUserTracked()) {
+                        setExpressionStatus(ExpressionType.ISRACKED, true);
                         userExpressions = userTracker.getUserExpressions();
                         if(userExpressions != null) {
                             setExpressionStatus(ExpressionType.KISS, userExpressions.isKiss());
@@ -406,6 +407,8 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                                 cameraThread.start();
                             }
                         }
+                    } else {
+                        setExpressionStatus(ExpressionType.ISRACKED, false);
                     }
                     /*if((iterations - lastCameraExecution) >= 10) {
                         if(cameraThread.getState() == Thread.State.NEW) {

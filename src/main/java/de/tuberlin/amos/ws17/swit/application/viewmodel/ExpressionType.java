@@ -4,6 +4,7 @@ import javafx.scene.image.Image;
 
 public enum ExpressionType {
 
+    ISRACKED("wird getrackt", "/expression_images/expression_istracked.png"),
     KISS("Kuss", "/expression_images/expression_kiss.png"),
     SMILE("Lachen", "/expression_images/expression_smile.png"),
     TONGUEOUT("Zunge draußen", "/expression_images/expression_tongueout.png"),
