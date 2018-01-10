@@ -111,20 +111,13 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
 
     private void initProperties() {
         properties = new Properties();
-        InputStream input = null;
+
         try {
-            input = getClass().getClassLoader().getResourceAsStream("viewmodel.properties");
-            properties.load(input);
+            try (InputStream input = getClass().getClassLoader().getResourceAsStream("viewmodel.properties")) {
+                properties.load(input);
+            }
         } catch(Exception e) {
             e.printStackTrace();
-        } finally {
-            if (input != null) {
-                try {
-                    input.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
         }
     }
 
