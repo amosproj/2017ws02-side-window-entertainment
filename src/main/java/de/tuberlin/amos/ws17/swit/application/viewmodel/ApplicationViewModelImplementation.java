@@ -110,14 +110,15 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     }
 
     private void initProperties() {
+        System.out.println("loading properties...");
         properties = new Properties();
-
         try {
-            try (InputStream input = getClass().getClassLoader().getResourceAsStream("viewmodel.properties")) {
-                properties.load(input);
-            }
-        } catch(Exception e) {
-            e.printStackTrace();
+            InputStream input = getClass().getClassLoader().getResourceAsStream("viewmodel.properties");
+            properties.load(input);
+        }  catch (IOException e) {
+            System.out.println("unable to load properties: viewmodel.properties not found");
+        } catch (Exception e) {
+            System.out.println("unable to load properties: unexpected error");
         }
     }
 
@@ -147,13 +148,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         moduleList = new ArrayList<>();
 
         propertyCloseButton = new SimpleObjectProperty<EventHandler<ActionEvent>>();
-        propertyCloseButton.set(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                DebugLog.log("POI minimized");
-                minimizePOI();
-            }
-        });
+        propertyCloseButton.set(event -> minimizePOI());
     }
 
     private void initDebugLog() {
@@ -371,234 +366,225 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     }
 
     private void initUpdateThread() {
-        updateThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                int iterations = 0;
-                int lastExpression = 0;
-                int lastCameraExecution = 0;
-                int lastMapsExecution = 0;
+        updateThread = new Thread(() -> {
+            int iterations = 0;
+            int lastExpression = 0;
+            int lastCameraExecution = 0;
+            int lastMapsExecution = 0;
 
-                while (run) {
-                    UserExpressions userExpressions = null;
-                    if(userTracker.isUserTracked()) {
-                        setExpressionStatus(ExpressionType.ISRACKED, true);
-                        userExpressions = userTracker.getUserExpressions();
-                        if(userExpressions != null) {
-                            setExpressionStatus(ExpressionType.KISS, userExpressions.isKiss());
-                            setExpressionStatus(ExpressionType.MOUTHOPEN, userExpressions.isMouthOpen());
-                            setExpressionStatus(ExpressionType.SMILE, userExpressions.isSmile());
-                            setExpressionStatus(ExpressionType.TONGUEOUT, userExpressions.isTongueOut());
-                        }
-                        if(userExpressions != null && userExpressions.isKiss() && (iterations - lastExpression) >= 10) {
-                            if(cameraThread.getState() == Thread.State.NEW) {
-                                lastExpression = iterations;
-                                cameraThread.start();
-                            } else if(cameraThread.getState() == Thread.State.TERMINATED) {
-                                lastExpression = iterations;
-                                initCameraThread();
-                                cameraThread.start();
-                            }
-                        }
-                    } else {
-                        setExpressionStatus(ExpressionType.ISRACKED, false);
+            while (run) {
+                UserExpressions userExpressions = null;
+                if(userTracker.isUserTracked()) {
+                    setExpressionStatus(ExpressionType.ISRACKED, true);
+                    userExpressions = userTracker.getUserExpressions();
+                    if(userExpressions != null) {
+                        setExpressionStatus(ExpressionType.KISS, userExpressions.isKiss());
+                        setExpressionStatus(ExpressionType.MOUTHOPEN, userExpressions.isMouthOpen());
+                        setExpressionStatus(ExpressionType.SMILE, userExpressions.isSmile());
+                        setExpressionStatus(ExpressionType.TONGUEOUT, userExpressions.isTongueOut());
                     }
-                    /*if((iterations - lastCameraExecution) >= 10) {
+                    if(userExpressions != null && userExpressions.isKiss() && (iterations - lastExpression) >= 10) {
                         if(cameraThread.getState() == Thread.State.NEW) {
-                            lastCameraExecution = iterations;
+                            lastExpression = iterations;
                             cameraThread.start();
                         } else if(cameraThread.getState() == Thread.State.TERMINATED) {
-                            lastCameraExecution = iterations;
+                            lastExpression = iterations;
                             initCameraThread();
                             cameraThread.start();
                         }
-                    }*/
-                    if((iterations - lastMapsExecution) >= 10) {
-                        if(mapsThread.getState() == Thread.State.NEW) {
-                            lastMapsExecution = iterations;
-                            mapsThread.start();
-                        } else if(mapsThread.getState() == Thread.State.TERMINATED) {
-                            lastMapsExecution = iterations;
-                            initMapsThread();
-                            mapsThread.start();
-                        }
                     }
-                    try {
-                        Thread.sleep(500);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-
-                    updateBackgroundImage();
-
-                    iterations++;
+                } else {
+                    setExpressionStatus(ExpressionType.ISRACKED, false);
                 }
+                /*if((iterations - lastCameraExecution) >= 10) {
+                    if(cameraThread.getState() == Thread.State.NEW) {
+                        lastCameraExecution = iterations;
+                        cameraThread.start();
+                    } else if(cameraThread.getState() == Thread.State.TERMINATED) {
+                        lastCameraExecution = iterations;
+                        initCameraThread();
+                        cameraThread.start();
+                    }
+                }*/
+                if((iterations - lastMapsExecution) >= 10) {
+                    if(mapsThread.getState() == Thread.State.NEW) {
+                        lastMapsExecution = iterations;
+                        mapsThread.start();
+                    } else if(mapsThread.getState() == Thread.State.TERMINATED) {
+                        lastMapsExecution = iterations;
+                        initMapsThread();
+                        mapsThread.start();
+                    }
+                }
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                updateBackgroundImage();
+
+                iterations++;
             }
         });
     }
 
     private void initMapsThread() {
-        mapsThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                if(gpsTracker == null || poiService == null || knowledgeGraphSearch == null) {
-                    System.out.println("unable to run maps thread because of uninitialized modules");
-                    return;
+        mapsThread = new Thread(() -> {
+            if(gpsTracker == null || poiService == null || knowledgeGraphSearch == null) {
+                System.out.println("unable to run maps thread because of uninitialized modules");
+                return;
+            }
+
+            //GPS
+            KinematicProperties kinematicProperties = null;
+            try {
+                kinematicProperties = gpsTracker.fillDumpObject(kinematicProperties);
+                setModuleStatus(ModuleErrors.NOGPSHARDWARE, true);
+            } catch (ModuleNotWorkingException e) {
+                setModuleStatus(ModuleErrors.NOGPSHARDWARE, false);
+            } catch (Exception e) {
+                e.printStackTrace();
+                setModuleStatus(ModuleErrors.NOGPSHARDWARE, false);
+                return;
+            }
+            if(kinematicProperties == null) {
+                return;
+            }
+
+            //POI maps
+            List<PointOfInterest> pois = null;
+            try{
+               /* pois = poiService.loadPlaceForCircleAndPoiType(kinematicProperties,200
+                        ,PoiType.FOOD,PoiType.LEISURE*//*GoogleType.zoo , GoogleType.airport, GoogleType.aquarium, GoogleType.church, GoogleType.city_hall,
+                        GoogleType.hospital, GoogleType.library, GoogleType.mosque, GoogleType.museum, GoogleType.park,
+                        GoogleType.stadium, GoogleType.synagogue, GoogleType.university,
+                        GoogleType.point_of_interest, GoogleType.place_of_worship,
+                        GoogleType.restaurant*//*);*/
+
+                pois = poiService.loadPlaceForCircle(new GpsPosition(0,0), 0);
+
+
+                System.out.println(pois.size()+ " number of POIs found.");
+
+                poiService.addImages(pois);
+
+                System.out.println(pois.size()+ " images added.");
+
+
+                setModuleStatus(ModuleErrors.NOINTERNET, true);
+            } catch (Exception e){
+                e.printStackTrace();
+                setModuleStatus(ModuleErrors.NOINTERNET, false);
+                return;
+            }
+            if(pois == null || pois.size() == 0) {
+                return;
+            }
+
+            //Information Source
+            /*try {
+                for (PointOfInterest poi: pois) {
+                    poi = abstractProvider.provideAbstract(poi);
                 }
-
-                //GPS
-                KinematicProperties kinematicProperties = null;
-                try {
-                    kinematicProperties = gpsTracker.fillDumpObject(kinematicProperties);
-                    setModuleStatus(ModuleErrors.NOGPSHARDWARE, true);
-                } catch (ModuleNotWorkingException e) {
-                    setModuleStatus(ModuleErrors.NOGPSHARDWARE, false);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    setModuleStatus(ModuleErrors.NOGPSHARDWARE, false);
-                    return;
-                }
-                if(kinematicProperties == null) {
-                    return;
-                }
-
-                //POI maps
-                List<PointOfInterest> pois = null;
-                try{
-                   /* pois = poiService.loadPlaceForCircleAndPoiType(kinematicProperties,200
-                            ,PoiType.FOOD,PoiType.LEISURE*//*GoogleType.zoo , GoogleType.airport, GoogleType.aquarium, GoogleType.church, GoogleType.city_hall,
-                            GoogleType.hospital, GoogleType.library, GoogleType.mosque, GoogleType.museum, GoogleType.park,
-                            GoogleType.stadium, GoogleType.synagogue, GoogleType.university,
-                            GoogleType.point_of_interest, GoogleType.place_of_worship,
-                            GoogleType.restaurant*//*);*/
-
-                    pois = poiService.loadPlaceForCircle(new GpsPosition(0,0), 0);
-
-
-                    System.out.println(pois.size()+ " number of POIs found.");
-
-                    poiService.addImages(pois);
-
-                    System.out.println(pois.size()+ " images added.");
-
-
-                    setModuleStatus(ModuleErrors.NOINTERNET, true);
-                } catch (Exception e){
-                    e.printStackTrace();
-                    setModuleStatus(ModuleErrors.NOINTERNET, false);
-                    return;
-                }
-                if(pois == null || pois.size() == 0) {
-                    return;
-                }
-
-                //Information Source
-                /*try {
-                    for (PointOfInterest poi: pois) {
-                        poi = abstractProvider.provideAbstract(poi);
-                    }
-                    setModuleStatus(ModuleErrors.NOINTERNET, true);
-                } catch (Exception e){
-                    e.printStackTrace();
-                    setModuleStatus(ModuleErrors.NOINTERNET, false);
-                    return;
-                }*/
-                try {
-                    for (PointOfInterest poi: pois) {
-                        poi = knowledgeGraphSearch.setInfoAndUrl(poi);
-                        String wikiUrl = poi.getWikiUrl();
-                        if (!StringUtils.isEmpty(wikiUrl)) {
-                            // if wiki url available -> query info from wikipedia
-                            String abstractInfo = WikiAbstractProvider.getAbstract(wikiUrl);
-                            if (!StringUtils.isEmpty(abstractInfo)) {
-                                poi.setInformationAbstract(abstractInfo);
-                            }
+                setModuleStatus(ModuleErrors.NOINTERNET, true);
+            } catch (Exception e){
+                e.printStackTrace();
+                setModuleStatus(ModuleErrors.NOINTERNET, false);
+                return;
+            }*/
+            try {
+                for (PointOfInterest poi: pois) {
+                    poi = knowledgeGraphSearch.setInfoAndUrl(poi);
+                    String wikiUrl = poi.getWikiUrl();
+                    if (!StringUtils.isEmpty(wikiUrl)) {
+                        // if wiki url available -> query info from wikipedia
+                        String abstractInfo = WikiAbstractProvider.getAbstract(wikiUrl);
+                        if (!StringUtils.isEmpty(abstractInfo)) {
+                            poi.setInformationAbstract(abstractInfo);
                         }
                     }
-                    setModuleStatus(ModuleErrors.NOINTERNET, true);
-                } catch(ModuleNotWorkingException e) {
-                    setModuleStatus(ModuleErrors.NOINTERNET, false);
                 }
+                setModuleStatus(ModuleErrors.NOINTERNET, true);
+            } catch(ModuleNotWorkingException e) {
+                setModuleStatus(ModuleErrors.NOINTERNET, false);
+            }
 
-                for(PointOfInterest poi: pois) {
-                    addPOImaps(poi);
-                }
+            for(PointOfInterest poi: pois) {
+                addPOImaps(poi);
             }
         });
     }
 
     private void initCameraThread() {
-        cameraThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                if(landscapeTracker == null || cloudVision == null || knowledgeGraphSearch == null) {
-                    System.out.println("unable to run camera thread because of uninitialized modules");
-                    return;
-                }
+        cameraThread = new Thread(() -> {
+            if(landscapeTracker == null || cloudVision == null || knowledgeGraphSearch == null) {
+                System.out.println("unable to run camera thread because of uninitialized modules");
+                return;
+            }
 
-                //Aufnahme Bild
-                BufferedImage image = null;
-                try {
-                    image = landscapeTracker.getImage();
-                    setModuleStatus(ModuleErrors.NOCAMERA, true);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    setModuleStatus(ModuleErrors.NOCAMERA, false);
-                    return;
-                }
-                if (image == null) {
-                    return;
-                }
+            //Aufnahme Bild
+            BufferedImage image = null;
+            try {
+                image = landscapeTracker.getImage();
+                setModuleStatus(ModuleErrors.NOCAMERA, true);
+            } catch (Exception e) {
+                e.printStackTrace();
+                setModuleStatus(ModuleErrors.NOCAMERA, false);
+                return;
+            }
+            if (image == null) {
+                return;
+            }
 
-                //Analyse Bild
-                List<PointOfInterest> pois = null;
-                try {
-                    pois = cloudVision.identifyPOIs(image);
-                    setModuleStatus(ModuleErrors.NOINTERNET, true);
-                } catch(Exception e) {
-                    e.printStackTrace();
-                    setModuleStatus(ModuleErrors.NOINTERNET, false);
-                    return;
-                }
-                if (pois.isEmpty()) {
-                    return;
-                }
+            //Analyse Bild
+            List<PointOfInterest> pois = null;
+            try {
+                pois = cloudVision.identifyPOIs(image);
+                setModuleStatus(ModuleErrors.NOINTERNET, true);
+            } catch(Exception e) {
+                e.printStackTrace();
+                setModuleStatus(ModuleErrors.NOINTERNET, false);
+                return;
+            }
+            if (pois.isEmpty()) {
+                return;
+            }
 
-                //Abfrage Informationen
-                /*try {
-                    for (PointOfInterest poi: pois) {
-                        poi = abstractProvider.provideAbstract(poi);
+            //Abfrage Informationen
+            /*try {
+                for (PointOfInterest poi: pois) {
+                    poi = abstractProvider.provideAbstract(poi);
+                }
+                setModuleStatus(ModuleErrors.NOINTERNET, true);
+            } catch(Exception e) {
+                e.printStackTrace();
+                setModuleStatus(ModuleErrors.NOINTERNET, false);
+                return;
+            }*/
+            try {
+                for (PointOfInterest poi: pois) {
+                    poi = knowledgeGraphSearch.setInfoAndUrl(poi);
+                    String wikiUrl = poi.getWikiUrl();
+                    if (wikiUrl==null){
+                        String abstractInfo= WikiAbstractProvider.getAbstract(poi.getName(), "en");
+                        poi.setInformationAbstract(abstractInfo);
                     }
-                    setModuleStatus(ModuleErrors.NOINTERNET, true);
-                } catch(Exception e) {
-                    e.printStackTrace();
-                    setModuleStatus(ModuleErrors.NOINTERNET, false);
-                    return;
-                }*/
-                try {
-                    for (PointOfInterest poi: pois) {
-                        poi = knowledgeGraphSearch.setInfoAndUrl(poi);
-                        String wikiUrl = poi.getWikiUrl();
-                        if (wikiUrl==null){
-                            String abstractInfo= WikiAbstractProvider.getAbstract(poi.getName(), "en");
+                    if (!StringUtils.isEmpty(wikiUrl)) {
+                        // if wiki url available -> query info from wikipedia
+                        String abstractInfo = WikiAbstractProvider.getAbstract(wikiUrl);
+                        if (!StringUtils.isEmpty(abstractInfo)) {
                             poi.setInformationAbstract(abstractInfo);
                         }
-                        if (!StringUtils.isEmpty(wikiUrl)) {
-                            // if wiki url available -> query info from wikipedia
-                            String abstractInfo = WikiAbstractProvider.getAbstract(wikiUrl);
-                            if (!StringUtils.isEmpty(abstractInfo)) {
-                                poi.setInformationAbstract(abstractInfo);
-                            }
-                        }
                     }
-                    setModuleStatus(ModuleErrors.NOINTERNET, true);
-                } catch(ModuleNotWorkingException e) {
-                    setModuleStatus(ModuleErrors.NOINTERNET, false);
                 }
+                setModuleStatus(ModuleErrors.NOINTERNET, true);
+            } catch(ModuleNotWorkingException e) {
+                setModuleStatus(ModuleErrors.NOINTERNET, false);
+            }
 
-                for (PointOfInterest poi: pois) {
-                    addPOIcamera(poi);
-                }
+            for (PointOfInterest poi: pois) {
+                addPOIcamera(poi);
             }
         });
     }
@@ -606,12 +592,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     private void setModuleStatus(ModuleErrors type, boolean working) {
         for(ModuleStatusViewModel status: listModuleStatus) {
             if(status.getErrorType() == type) {
-                Platform.runLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        status.setWorking(working);
-                    }
-                });
+                Platform.runLater(() -> status.setWorking(working));
                 return;
             }
         }
@@ -621,12 +602,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     private void setExpressionStatus(ExpressionType type, boolean active) {
         for(UserExpressionViewModel expression: listExpressionStatus) {
             if(expression.getType() == type) {
-                Platform.runLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        expression.setActive(active);
-                    }
-                });
+                Platform.runLater(() -> expression.setActive(active));
                 return;
             }
         }
@@ -634,21 +610,18 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     }
 
     private void updateBackgroundImage() {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    cameraImage = SwingFXUtils.toFXImage(landscapeTracker.getImage(), null );
-                    backgroundImage = new BackgroundImage(cameraImage,
-                            BackgroundRepeat.NO_REPEAT,
-                            BackgroundRepeat.NO_REPEAT,
-                            BackgroundPosition.CENTER,
-                            new BackgroundSize(100,100,true,true,false,true));
-                    background = new Background(backgroundImage);
-                    backgroundProperty.setValue(background);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+        Platform.runLater(() -> {
+            try {
+                cameraImage = SwingFXUtils.toFXImage(landscapeTracker.getImage(), null );
+                backgroundImage = new BackgroundImage(cameraImage,
+                        BackgroundRepeat.NO_REPEAT,
+                        BackgroundRepeat.NO_REPEAT,
+                        BackgroundPosition.CENTER,
+                        new BackgroundSize(100,100,true,true,false,true));
+                background = new Background(backgroundImage);
+                backgroundProperty.setValue(background);
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         });
     }
@@ -657,12 +630,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         PoiViewModel item = convertPOI(poi);
         if(!propertyPOIcamera.contains(poi)) {
             pointsOfInterest.add(poi);
-            Platform.runLater(new Runnable() {
-                @Override
-                public void run() {
-                    propertyPOIcamera.add(item);
-                }
-            });
+            Platform.runLater(() -> propertyPOIcamera.add(item));
 
         }
     }
@@ -681,12 +649,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         PoiViewModel item = convertPOI(poi);
         if(!propertyPOImaps.contains(poi)) {
             pointsOfInterest.add(poi);
-            Platform.runLater(new Runnable() {
-                @Override
-                public void run() {
-                    propertyPOImaps.add(item);
-                }
-            });
+            Platform.runLater(() -> propertyPOImaps.add(item));
         }
     }
 
