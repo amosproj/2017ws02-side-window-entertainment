@@ -1,15 +1,16 @@
 package de.tuberlin.amos.ws17.swit.image_analysis;
 
 import com.google.api.services.vision.v1.model.Image;
-import org.apache.jena.base.Sys;
 
 import javax.annotation.Nullable;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.*;
-import java.net.URL;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class ImageUtils {
@@ -26,6 +27,7 @@ public class ImageUtils {
     }
 
     public static Image convertToImage(BufferedImage bufferedImage) throws IOException {
+        if (bufferedImage == null) { throw new IOException(); }
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ImageIO.write(bufferedImage, "jpg", baos);
         byte[] data = baos.toByteArray();
