@@ -13,10 +13,12 @@ import de.tuberlin.amos.ws17.swit.common.ApiConfig;
 import de.tuberlin.amos.ws17.swit.common.PointOfInterest;
 
 import javax.annotation.Nullable;
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -34,6 +36,8 @@ public class CloudVision implements LandmarkDetector {
     private static final String APPLICATION_NAME = "Swit-Image-Analysis";
 
     private static final String LANDMARK_DETECTION_FEATURE = "LANDMARK_DETECTION";
+
+    private static final int MAX_RESULTS = 5;
 
     private static LandmarkDetector instance;
 
@@ -68,8 +72,7 @@ public class CloudVision implements LandmarkDetector {
                 .build();
     }
 
-    @Override
-    public List<LandmarkResult> identifyLandmarks(BufferedImage bufferedImage, int maxResults) throws IOException {
+    private List<LandmarkResult> identifyLandmarks(BufferedImage bufferedImage, int maxResults) throws IOException {
         try {
             Image image = ImageUtils.convertToImage(bufferedImage);
             return identifyLandmarks(image, maxResults);
@@ -80,26 +83,16 @@ public class CloudVision implements LandmarkDetector {
     }
 
     @Override
-    public List<LandmarkResult> identifyLandmarks(Path path, int maxResults) throws IOException {
+    public List<PointOfInterest> identifyPOIs(Path path) throws IOException {
         byte[] data = Files.readAllBytes(path);
-        Image image = new Image().encodeContent(data);
-        return identifyLandmarks(image, maxResults);
-    }
-
-    @Override
-    public List<LandmarkResult> identifyLandmarkUrl(String gcsUrl, int maxResults) throws IOException {
-        ImageSource imageSource = new ImageSource()
-                .setImageUri(gcsUrl);
-
-        Image image = new Image()
-                .setSource(imageSource);
-        return identifyLandmarks(image, maxResults);
+        ByteArrayInputStream bais = new ByteArrayInputStream(data);
+        return identifyPOIs(ImageIO.read(bais));
     }
 
     @Override
     public List<PointOfInterest> identifyPOIs(BufferedImage image) {
         try {
-            List<LandmarkResult> results = identifyLandmarks(image, 5);
+            List<LandmarkResult> results = identifyLandmarks(image, MAX_RESULTS);
             return results.stream()
                     .map(CloudVision::convertToPOI)
                     .collect(Collectors.toList());
@@ -195,7 +188,7 @@ public class CloudVision implements LandmarkDetector {
     }
 
     private boolean rectOutsideOfImage(Rectangle rect, BufferedImage image) {
-        if (rect.x < 0 || rect.y < 0)  {
+        if (rect.x < 0 || rect.y < 0) {
             return true;
         } else if (rect.x + rect.width > image.getWidth() || rect.y + rect.getHeight() > image.getHeight()) {
             return true;
