@@ -56,25 +56,30 @@ public class KnowledgeGraphSearch implements InformationProvider {
 
     @Override
     public PointOfInterest setInfoAndUrl(PointOfInterest poi) throws ServiceNotAvailableException {
-        // try with id
-        Tuple<String, String> result = null;
 
-        if (StringUtils.isEmpty(poi.getId())) {
-            // check if id is a kgs id
-            if (poi.getId().contains("/m/")) {
-                result = getInfoById(poi.getId());
+        if (poi != null) {
+            Tuple<String, String> result = null;
+
+            // try with id
+            if (StringUtils.isEmpty(poi.getId())) {
+                // check if id is a kgs id
+                if (poi.getId().contains("/m/")) {
+                    result = getInfoById(poi.getId());
+                }
             }
-        }
-        // if it fails, try with name
-        if (result == null) {
-            result = getInfoByName(poi.getName());
-        }
+            // if it fails, try with name
+            if (result == null) {
+                result = getInfoByName(poi.getName());
+            }
 
-        if (result != null) {
-            poi.setInformationAbstract(result.x);
-            poi.setWikiUrl(result.y);
+            if (result != null) {
+                poi.setInformationAbstract(result.x);
+                poi.setWikiUrl(result.y);
+            }
+            return poi;
+        } else {
+            return null;
         }
-        return poi;
     }
 
     @Nullable
