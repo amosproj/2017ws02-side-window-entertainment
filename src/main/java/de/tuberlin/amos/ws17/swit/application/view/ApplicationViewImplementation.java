@@ -48,6 +48,7 @@ public class ApplicationViewImplementation extends Application implements Applic
 
     private BorderPane expansionPane;
     private BorderPane expansionTopPane;
+    private BorderPane expansionContentPane;
     private Button expansionButton;
     private Label expansionName;
     private Label expansionInformation;
@@ -68,7 +69,6 @@ public class ApplicationViewImplementation extends Application implements Applic
 
         initElements();
         initExpansion();
-
         controller = new ApplicationViewModelImplementation(this);
 
         initBindings();
@@ -95,6 +95,7 @@ public class ApplicationViewImplementation extends Application implements Applic
         pnFoundation.setId("pnFoundation");
 
         listPOIcamera = new ListView<>();
+
         listPOIcamera.setId("listPOIcamera");
         pnFoundation.setTop(listPOIcamera);
         listPOImaps = new ListView<>();
@@ -119,12 +120,16 @@ public class ApplicationViewImplementation extends Application implements Applic
 
         expansionPane = new BorderPane();
         expansionPane.setId("expansionPane");
+        expansionPane.setVisible(false);
         expansionTopPane = new BorderPane();
         expansionTopPane.setId("expansionTopPane");
         expansionButton = new Button("X");
         expansionButton.setId("expansionButton");
         expansionName = new Label();
         expansionName.setId("expansionName");
+
+        expansionContentPane = new BorderPane();
+        expansionContentPane.setId("expansionContentPane");
         expansionInformation = new Label();
         expansionInformation.setId("expansionInformation");
         expansionImage = new ImageView();
@@ -134,21 +139,22 @@ public class ApplicationViewImplementation extends Application implements Applic
     }
 
     private void initExpansion() {
-        expansionName.setAlignment(Pos.TOP_LEFT);
+        expansionName.setAlignment(Pos.TOP_CENTER);
         expansionInformation.setAlignment(Pos.TOP_CENTER);
-        expansionScrollPane.setContent(expansionInformation);
+        expansionContentPane.setTop(expansionImage);
+        expansionContentPane.setBottom(expansionInformation);
+        expansionScrollPane.setContent(expansionContentPane);
         expansionImage.setPreserveRatio(true);
-        expansionImage.setFitHeight(300);
-        expansionImage.setFitWidth(150);
+        expansionImage.setFitHeight(400);
+        expansionImage.setFitWidth(250);
         expansionTopPane.setLeft(expansionName);
         expansionTopPane.setRight(expansionButton);
         expansionPane.setTop(expansionTopPane);
-        expansionPane.setLeft(expansionImage);
-        expansionPane.setCenter(expansionScrollPane);
+        expansionPane.setCenter(expansionImage);
+        expansionPane.setBottom(expansionScrollPane);
         pnFoundation.setCenter(expansionPane);
         BorderPane.setAlignment(expansionPane, Pos.CENTER_RIGHT);
-        BorderPane.setAlignment(expansionName, Pos.CENTER_LEFT);
-        BorderPane.setAlignment(expansionImage, Pos.CENTER_LEFT);
+        BorderPane.setAlignment(expansionImage, Pos.CENTER);
         expansionScrollPane.setFitToWidth(true);
     }
 
@@ -248,12 +254,7 @@ public class ApplicationViewImplementation extends Application implements Applic
                             image.setFitWidth(50);
                             image.setFitHeight(50);
                             Label lbl = new Label();
-                            item.workingProperty().addListener(new ChangeListener<Boolean>() {
-                                @Override
-                                public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-                                    statusIcon(lbl, newValue);
-                                }
-                            });
+                            item.workingProperty().addListener((observable, oldValue, newValue) -> statusIcon(lbl, newValue));
                             statusIcon(lbl, item.isWorking());
                             pane.getChildren().add(image);
                             pane.getChildren().add(lbl);
@@ -284,17 +285,7 @@ public class ApplicationViewImplementation extends Application implements Applic
                             image.setFitWidth(50);
                             image.setFitHeight(50);
                             Label lbl = new Label();
-                            item.activeProperty().addListener(new ChangeListener<Boolean>() {
-                                @Override
-                                public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-                                    Platform.runLater(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            statusIcon(lbl, newValue);
-                                        }
-                                    });
-                                }
-                            });
+                            item.activeProperty().addListener((observable, oldValue, newValue) -> Platform.runLater(() -> statusIcon(lbl, newValue)));
                             statusIcon(lbl, item.isActive());
                             pane.getChildren().add(image);
                             pane.getChildren().add(lbl);
@@ -321,6 +312,10 @@ public class ApplicationViewImplementation extends Application implements Applic
             lbl.setStyle("-fx-text-fill: red; -fx-font-size: 20px; -fx-font-weight: bold; " +
                     "-fx-background-color: transparent; -fx-effect: dropshadow( gaussian , white , 3, 1.0 , 0 , 0 );");
         }
+    }
+
+    public void showExpandedPoi(boolean show) {
+        expansionPane.setVisible(show);
     }
 
     @Override

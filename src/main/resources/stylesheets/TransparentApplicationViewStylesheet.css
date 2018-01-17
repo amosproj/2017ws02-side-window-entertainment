@@ -13,37 +13,44 @@
 }
 
 #expansionPane {
+    -fx-padding: 16px;
     -fx-max-width: 500px;
-    -fx-max-height: 400px;
+    -fx-max-height: 600px;
     -fx-alignment: center-right;
+    -fx-background-color: rgba(0, 0, 0, 0.7);
 }
 
+#expansionName {
+    -fx-font-size: 30px;
+    -fx-font-weight: bold;
+}
 #expansionImage {
     -fx-fit-to-width: 150px;
-    -fx-fit-to-height: 300px;
-    -fx-alignment: center-left;
+    -fx-fit-to-height: 200px;
+    -fx-alignment: center;
 }
 
 #expansionInformation {
-    -fx-padding: 5px;
-    -fx-background-color: white;
     -fx-wrap-text: true;
 }
 
 #expansionScrollPane {
     -fx-background-color: transparent;
+    -fx-max-height: 350px;
 }
 
 #listPOImaps {
     -fx-orientation: horizontal;
     -fx-pref-height: 150px;
     -fx-max-height: 150px;
+    -fx-background-color: rgba(0, 0, 0, 0.5);
 }
 
 #listPOIcamera {
     -fx-orientation: horizontal;
     -fx-pref-height: 150px;
     -fx-max-height: 150px;
+    -fx-background-color: rgba(0, 0, 0, 0.5);
 }
 
 #pnFoundation {
@@ -63,8 +70,8 @@
 .label {
     -fx-font-size: 20px;
     -fx-font-family: "Helvetica Neue";
-    -fx-text-fill: black;
-    -fx-background-color: white;
+    -fx-text-fill: white;
+    -fx-background-color: transparent;
 }
 
 .button {
