@@ -208,7 +208,7 @@
         <dependency>
             <groupId>com.javonet</groupId>
             <artifactId>javonet</artifactId>
-            <version>1.4hf34</version>
+            <version>LATEST</version>
         </dependency>
 
     </dependencies>

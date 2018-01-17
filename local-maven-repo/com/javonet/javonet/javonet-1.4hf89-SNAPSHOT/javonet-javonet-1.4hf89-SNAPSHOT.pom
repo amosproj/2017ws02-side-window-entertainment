@@ -4,5 +4,6 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.javonet</groupId>
   <artifactId>javonet</artifactId>
-  <version>1.4hf34</version>
+  <version>javonet-1.4hf89-SNAPSHOT</version>
+  <description>POM was created from install:install-file</description>
 </project>

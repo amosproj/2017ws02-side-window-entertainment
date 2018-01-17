@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata modelVersion="1.1.0">
+  <groupId>com.javonet</groupId>
+  <artifactId>javonet</artifactId>
+  <version>javonet-1.4hf89-SNAPSHOT</version>
+  <versioning>
+    <snapshot>
+      <localCopy>true</localCopy>
+    </snapshot>
+    <lastUpdated>20180117183749</lastUpdated>
+    <snapshotVersions>
+      <snapshotVersion>
+        <extension>jar</extension>
+        <value>javonet-1.4hf89-SNAPSHOT</value>
+        <updated>20180117183749</updated>
+      </snapshotVersion>
+      <snapshotVersion>
+        <extension>pom</extension>
+        <value>javonet-1.4hf89-SNAPSHOT</value>
+        <updated>20180117183551</updated>
+      </snapshotVersion>
+    </snapshotVersions>
+  </versioning>
+</metadata>

@@ -3,21 +3,13 @@ package de.tuberlin.amos.ws17.swit.information_source;
 import de.tuberlin.amos.ws17.swit.common.GpsPosition;
 import de.tuberlin.amos.ws17.swit.common.PointOfInterest;
 import de.tuberlin.amos.ws17.swit.common.exceptions.ServiceNotAvailableException;
-import org.apache.commons.lang.StringUtils;
-import org.junit.Before;
+import de.tuberlin.amos.ws17.swit.poi.MockedPoiService;
+import de.tuberlin.amos.ws17.swit.poi.PoiService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import de.tuberlin.amos.ws17.swit.poi.PoiService;
-import de.tuberlin.amos.ws17.swit.poi.MockedPoiService;
-import de.tuberlin.amos.ws17.swit.information_source.WikiAbstractProvider;
 
-
-import java.awt.image.BufferedImage;
 import java.util.List;
-import java.util.stream.Collectors;
-
-import static de.tuberlin.amos.ws17.swit.image_analysis.ImageUtils.getTestImageFile;
 
 @RunWith(JUnit4.class)
 public class InformationSourceTest {
