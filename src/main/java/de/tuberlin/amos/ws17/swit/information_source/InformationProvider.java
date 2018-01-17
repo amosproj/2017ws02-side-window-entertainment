@@ -11,4 +11,5 @@ public interface InformationProvider {
      * @return poi with info and wikipedia url
      */
     PointOfInterest setInfoAndUrl(PointOfInterest poi) throws ServiceNotAvailableException;
+
 }
