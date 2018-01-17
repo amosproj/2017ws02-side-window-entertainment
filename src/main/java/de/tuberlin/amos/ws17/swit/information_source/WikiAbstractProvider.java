@@ -1,12 +1,17 @@
 package de.tuberlin.amos.ws17.swit.information_source;
 
+
+import com.sun.istack.internal.NotNull;
+import com.sun.security.ntlm.Server;
 import de.tuberlin.amos.ws17.swit.common.Module;
 import de.tuberlin.amos.ws17.swit.common.exceptions.ModuleNotWorkingException;
 import de.tuberlin.amos.ws17.swit.common.PointOfInterest;
+import de.tuberlin.amos.ws17.swit.common.exceptions.ServiceNotAvailableException;
 import org.apache.commons.lang3.StringEscapeUtils;
 
 import javax.annotation.Nullable;
 import javax.imageio.ImageIO;
+import javax.naming.ServiceUnavailableException;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
@@ -14,15 +19,19 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.rmi.server.ServerNotActiveException;
 import java.util.Arrays;
+import org.apache.commons.lang.StringUtils;
 
-public class WikiAbstractProvider implements AbstractProvider, Module {
+public class WikiAbstractProvider implements InformationProvider, Module {
     /**
      * Provides an abstract for a POI
      *
      * @param poi PointOfInterest object, already contains either a name of a poi or its poi
      */
-    @Override
+    InformationProvider knowledgeGraphSearch;
+
+    /*@Override
     public PointOfInterest provideAbstract(PointOfInterest poi) {
 
         if (poi != null) {
@@ -44,7 +53,43 @@ public class WikiAbstractProvider implements AbstractProvider, Module {
             return null;
         }
 
+    }*/
+
+    @Override
+    public PointOfInterest setInfoAndUrl(PointOfInterest poi) throws ServiceNotAvailableException{
+        if (poi!= null) {
+            try {
+                knowledgeGraphSearch = KnowledgeGraphSearch.getInstance();
+                poi = knowledgeGraphSearch.setInfoAndUrl(poi);
+                String wikiUrl = poi.getWikiUrl();
+                if (wikiUrl==null){
+                    String abstractInfo= getAbstract(poi.getName(), "en");
+                    if (abstractInfo == null) {
+                        throw new ServiceNotAvailableException("Information is not available");
+                    } else {
+                        poi.setInformationAbstract(abstractInfo);
+                    }
+                }
+                if (!StringUtils.isEmpty(wikiUrl)) {
+                    // if wiki url available -> query info from wikipedia
+                    String abstractInfo = getAbstract(wikiUrl);
+                    if (!StringUtils.isEmpty(abstractInfo)) {
+                        poi.setInformationAbstract(abstractInfo);
+                    } else {
+                        throw new ServiceNotAvailableException("Information is not available");
+                    }
+                }
+
+            } catch (ServiceNotAvailableException ex) {
+                ex.printStackTrace();
+            }
+
+            return poi;
+        } else {
+            throw new ServiceNotAvailableException("No POI could be find");
+        }
     }
+
 
     /*
      * Searches for the Wikipedia article ID and returns -1 if no page was found.
@@ -82,13 +127,16 @@ public class WikiAbstractProvider implements AbstractProvider, Module {
         return result;
     }
 
-    public static String getAbstract(String wikiUrl) {
+    private static String getAbstract(String wikiUrl) {
         String wikiName = getNameFromUrl(wikiUrl);
         String wikiLanguage = getLanguageFromUrl(wikiUrl);
         return getAbstract(wikiName, wikiLanguage);
     }
 
-    public static String getAbstract(String searchTerm, String language) {
+   private static String getAbstract(String searchTerm, String language) {
+        if (searchTerm == null) {
+            return null;
+        }
         String result = "";
         searchTerm=searchTerm.replaceAll(" ", "_");
         try {
@@ -103,6 +151,7 @@ public class WikiAbstractProvider implements AbstractProvider, Module {
         }
         return StringEscapeUtils.unescapeJava(result);
     }
+
 
 
     public static  String getNameFromUrl(String wikiUrl) {
