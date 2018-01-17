@@ -495,18 +495,10 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
             }*/
             try {
                 for (PointOfInterest poi: pois) {
-                    poi = knowledgeGraphSearch.setInfoAndUrl(poi);
-                    String wikiUrl = poi.getWikiUrl();
-                    if (!StringUtils.isEmpty(wikiUrl)) {
-                        // if wiki url available -> query info from wikipedia
-                        String abstractInfo = WikiAbstractProvider.getAbstract(wikiUrl);
-                        if (!StringUtils.isEmpty(abstractInfo)) {
-                            poi.setInformationAbstract(abstractInfo);
-                        }
-                    }
+                    abstractProvider.setInfoAndUrl(poi);
                 }
                 setModuleStatus(ModuleErrors.NOINTERNET, true);
-            } catch(ModuleNotWorkingException e) {
+            } catch(Exception e) {
                 setModuleStatus(ModuleErrors.NOINTERNET, false);
             }
 
@@ -563,9 +555,15 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 return;
             }*/
             try {
-                for (PointOfInterest poi: pois) {
+                for(PointOfInterest poi: pois) {
+                     abstractProvider.setInfoAndUrl(poi);
+
+                }
+
+               /* for (PointOfInterest poi: pois) {
                     poi = knowledgeGraphSearch.setInfoAndUrl(poi);
-                    String wikiUrl = poi.getWikiUrl();
+
+                  * String wikiUrl = poi.getWikiUrl();
                     if (wikiUrl==null){
                         String abstractInfo= WikiAbstractProvider.getAbstract(poi.getName(), "en");
                         poi.setInformationAbstract(abstractInfo);
@@ -576,10 +574,10 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                         if (!StringUtils.isEmpty(abstractInfo)) {
                             poi.setInformationAbstract(abstractInfo);
                         }
-                    }
-                }
+                    /
+                */
                 setModuleStatus(ModuleErrors.NOINTERNET, true);
-            } catch(ModuleNotWorkingException e) {
+            } catch(Exception e) {
                 setModuleStatus(ModuleErrors.NOINTERNET, false);
             }
 
