@@ -1,17 +1,15 @@
 package de.tuberlin.amos.ws17.swit.information_source;
 
 
-import com.sun.istack.internal.NotNull;
-import com.sun.security.ntlm.Server;
 import de.tuberlin.amos.ws17.swit.common.Module;
-import de.tuberlin.amos.ws17.swit.common.exceptions.ModuleNotWorkingException;
 import de.tuberlin.amos.ws17.swit.common.PointOfInterest;
+import de.tuberlin.amos.ws17.swit.common.exceptions.ModuleNotWorkingException;
 import de.tuberlin.amos.ws17.swit.common.exceptions.ServiceNotAvailableException;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 
 import javax.annotation.Nullable;
 import javax.imageio.ImageIO;
-import javax.naming.ServiceUnavailableException;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
@@ -19,9 +17,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.rmi.server.ServerNotActiveException;
 import java.util.Arrays;
-import org.apache.commons.lang.StringUtils;
 
 public class WikiAbstractProvider implements InformationProvider, Module {
     /**

@@ -33,7 +33,7 @@ import javafx.scene.image.Image;
 import javafx.event.EventHandler;
 import javafx.event.ActionEvent;
 import javafx.scene.layout.*;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 
 import java.awt.image.BufferedImage;
