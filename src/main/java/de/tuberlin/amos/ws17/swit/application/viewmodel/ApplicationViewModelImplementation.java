@@ -34,6 +34,7 @@ import javafx.event.EventHandler;
 import javafx.event.ActionEvent;
 import javafx.scene.layout.*;
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.DateTime;
 
 import java.awt.image.BufferedImage;
 import java.io.*;
@@ -440,8 +441,14 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
             try {
                 kinematicProperties = gpsTracker.fillDumpObject(kinematicProperties);
                 setModuleStatus(ModuleErrors.NOGPSHARDWARE, true);
+                DateTime timeStamp = kinematicProperties.getTimeStamp();
+                Double latitude = kinematicProperties.getLatitude();
+                Double longitude = kinematicProperties.getLongitude();
+                System.out.println("Um " + timeStamp.toString() + " befanden wir uns an dem Breitengrad: " +
+                        latitude + " und Laengengrad: " + longitude + ".");
             } catch (ModuleNotWorkingException e) {
                 setModuleStatus(ModuleErrors.NOGPSHARDWARE, false);
+                System.out.println("Keine Position erfasst.");
             } catch (Exception e) {
                 e.printStackTrace();
                 setModuleStatus(ModuleErrors.NOGPSHARDWARE, false);
