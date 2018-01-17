@@ -559,23 +559,6 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                      abstractProvider.setInfoAndUrl(poi);
 
                 }
-
-               /* for (PointOfInterest poi: pois) {
-                    poi = knowledgeGraphSearch.setInfoAndUrl(poi);
-
-                  * String wikiUrl = poi.getWikiUrl();
-                    if (wikiUrl==null){
-                        String abstractInfo= WikiAbstractProvider.getAbstract(poi.getName(), "en");
-                        poi.setInformationAbstract(abstractInfo);
-                    }
-                    if (!StringUtils.isEmpty(wikiUrl)) {
-                        // if wiki url available -> query info from wikipedia
-                        String abstractInfo = WikiAbstractProvider.getAbstract(wikiUrl);
-                        if (!StringUtils.isEmpty(abstractInfo)) {
-                            poi.setInformationAbstract(abstractInfo);
-                        }
-                    /
-                */
                 setModuleStatus(ModuleErrors.NOINTERNET, true);
             } catch(Exception e) {
                 setModuleStatus(ModuleErrors.NOINTERNET, false);
