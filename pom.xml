@@ -208,7 +208,9 @@
         <dependency>
             <groupId>com.javonet</groupId>
             <artifactId>javonet</artifactId>
-            <version>LATEST</version>
+            <version>1.4hf89-SNAPSHOT</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/local-maven-repo/com/javonet/javonet/1.4hf89-SNAPSHOT/javonet-1.4hf89-SNAPSHOT.jar</systemPath>
         </dependency>
 
     </dependencies>
