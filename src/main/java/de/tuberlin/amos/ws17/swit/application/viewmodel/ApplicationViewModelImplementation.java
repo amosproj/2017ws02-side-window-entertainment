@@ -448,13 +448,13 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                         latitude + " und Laengengrad: " + longitude + ".");
             } catch (ModuleNotWorkingException e) {
                 setModuleStatus(ModuleErrors.NOGPSHARDWARE, false);
-                System.out.println("Keine Position erfasst.");
             } catch (Exception e) {
                 e.printStackTrace();
                 setModuleStatus(ModuleErrors.NOGPSHARDWARE, false);
                 return;
             }
             if(kinematicProperties == null) {
+                System.out.println("Keine Position erfasst.");
                 return;
             }
 
