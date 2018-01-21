@@ -10,11 +10,7 @@ import java.util.ArrayList;
 
 public class DebugLog {
 
-    private static ObservableList<DebugEntry> debugLog;
-
-    public static void initDebugLog() {
-        debugLog = FXCollections.observableList(new ArrayList<>());
-    }
+    private static ObservableList<DebugEntry> debugLog = FXCollections.observableList(new ArrayList<>());
 
     public static void log(Object o) {
         debugLog.add(new DebugEntry(o.toString()));

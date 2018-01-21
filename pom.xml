@@ -6,7 +6,7 @@
 
     <groupId>de.tuberlin.amos.ws17.swit</groupId>
     <artifactId>side-window-infotainment</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>0.1.1-SNAPSHOT</version>
     <name>Side Window Infotainment</name>
 
     <properties>
@@ -208,7 +208,9 @@
         <dependency>
             <groupId>com.javonet</groupId>
             <artifactId>javonet</artifactId>
-            <version>1.4hf34</version>
+            <version>1.4hf89-SNAPSHOT</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/local-maven-repo/com/javonet/javonet/1.4hf89-SNAPSHOT/javonet-1.4hf89-SNAPSHOT.jar</systemPath>
         </dependency>
 
     </dependencies>

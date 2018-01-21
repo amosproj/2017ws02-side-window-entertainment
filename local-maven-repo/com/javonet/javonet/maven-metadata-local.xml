@@ -3,10 +3,9 @@
   <groupId>com.javonet</groupId>
   <artifactId>javonet</artifactId>
   <versioning>
-    <release>1.4hf34</release>
     <versions>
-      <version>1.4hf34</version>
+      <version>1.4hf89-SNAPSHOT</version>
     </versions>
-    <lastUpdated>20171203115147</lastUpdated>
+    <lastUpdated>20180117185533</lastUpdated>
   </versioning>
 </metadata>

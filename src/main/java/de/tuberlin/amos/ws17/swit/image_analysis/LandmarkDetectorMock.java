@@ -3,8 +3,11 @@ package de.tuberlin.amos.ws17.swit.image_analysis;
 import de.tuberlin.amos.ws17.swit.common.GpsPosition;
 import de.tuberlin.amos.ws17.swit.common.PointOfInterest;
 
+import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -39,18 +42,10 @@ public class LandmarkDetectorMock implements LandmarkDetector {
     }
 
     @Override
-    public List<LandmarkResult> identifyLandmarks(BufferedImage bufferedImage, int maxResults) throws IOException {
-        return null;
-    }
-
-    @Override
-    public List<LandmarkResult> identifyLandmarks(Path imagePath, int maxResults) throws IOException {
-        return null;
-    }
-
-    @Override
-    public List<LandmarkResult> identifyLandmarkUrl(String gcsUrl, int maxResults) throws IOException {
-        return null;
+    public List<PointOfInterest> identifyPOIs(Path path) throws IOException {
+        byte[] data = Files.readAllBytes(path);
+        ByteArrayInputStream bais = new ByteArrayInputStream(data);
+        return identifyPOIs(ImageIO.read(bais));
     }
 
     @Override

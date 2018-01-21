@@ -10,6 +10,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,7 +25,6 @@ public class CloudVisionTest {
     @Before
     public void setUp() {
         appUnderTest = CloudVision.getInstance();
-//        appUnderTest = LandmarkDetectorMock.getInstance();
     }
 
     @Test
@@ -43,7 +43,8 @@ public class CloudVisionTest {
 
     @Test
     public void nullTest() {
-        List<PointOfInterest> pois = appUnderTest.identifyPOIs(null);
+        BufferedImage image = null;
+        List<PointOfInterest> pois = appUnderTest.identifyPOIs(image);
         assert pois.isEmpty();
     }
 
