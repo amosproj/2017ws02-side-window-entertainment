@@ -1,15 +1,9 @@
 package de.tuberlin.amos.ws17.swit.tracking.camera;
 
-import com.javonet.Javonet;
 import com.javonet.JavonetException;
-import com.javonet.api.NObject;
 import de.tuberlin.amos.ws17.swit.tracking.javonet.JavoNetService;
 
-import java.nio.file.Paths;
-
 public class JavoNetCameraService implements CameraService {
-
-
 
     public JavoNetCameraService() throws JavonetException {
         JavoNetService.initialize();
