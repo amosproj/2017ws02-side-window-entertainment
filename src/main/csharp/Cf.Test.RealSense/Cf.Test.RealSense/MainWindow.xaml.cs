@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -78,7 +79,52 @@ namespace Cf.Test.RealSense
 
         private void ButtonGetImage_Click(object sender, RoutedEventArgs e)
         {
-            //Image.Source = HeadTracking.writeableBitmap;
+            //AddTextBlock(UserTracker.ImageString);
+            //Image.Source = UserTracker.WriteableBitmap;// ByteImageConverter.ByteToImage(UserTracker.ImageAsByteArray);// LoadImage(UserTracker.ImageAsByteArray);
+        }
+
+        public class ByteImageConverter
+        {
+            public static ImageSource ByteToImage(byte[] imageData)
+            {
+                BitmapImage biImg = new BitmapImage();
+                MemoryStream ms = new MemoryStream(imageData);
+                biImg.BeginInit();
+                biImg.StreamSource = ms;
+                biImg.EndInit();
+
+                ImageSource imgSrc = biImg as ImageSource;
+
+                return imgSrc;
+            }
+        }
+
+        private static BitmapSource LoadImage(byte[] imageData)
+        {
+            //WriteableBitmap writeableBitmap = new WriteableBitmap(1270, 720, 96, 96, Pixelfo)
+            return BitmapSource.Create(
+                1280, 
+                720, 
+                96, 
+                96, 
+                PixelFormats.Bgr32, 
+                new BitmapPalette(new List<Color>() { Colors.Red, Colors.Green, Colors.Blue, Colors.Transparent }), 
+                imageData, 1280/32);
+
+            if (imageData == null || imageData.Length == 0) return null;
+            var image = new BitmapImage();
+            using (var mem = new MemoryStream(imageData))
+            {
+                mem.Position = 0;
+                image.BeginInit();
+                image.CreateOptions = BitmapCreateOptions.PreservePixelFormat;
+                image.CacheOption = BitmapCacheOption.OnLoad;
+                image.UriSource = null;
+                image.StreamSource = mem;
+                image.EndInit();
+            }
+            image.Freeze();
+            return image;
         }
     }
 }
