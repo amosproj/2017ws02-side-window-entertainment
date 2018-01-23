@@ -92,7 +92,8 @@ namespace DotNetTracking
             PXCMFaceData.HeadPosition headPosition;
             PXCMFaceData.PoseEulerAngles poseAngles;
 
-            if (poseData.QueryHeadPosition(out headPosition) && poseData.QueryPoseAngles(out poseAngles))
+            if (poseData != null && 
+                poseData.QueryHeadPosition(out headPosition) && poseData.QueryPoseAngles(out poseAngles))
             {
                 IsUserTracked = true;
 
@@ -118,7 +119,8 @@ namespace DotNetTracking
             PXCMFaceData.ExpressionsData.FaceExpressionResult faceExpressionSmile;
             PXCMFaceData.ExpressionsData.FaceExpressionResult faceExpressionMouthOpen;
 
-            if (expressionsData.QueryExpression(PXCMFaceData.ExpressionsData.FaceExpression.EXPRESSION_KISS, out faceExpressionKiss)
+            if (expressionsData != null &&
+                expressionsData.QueryExpression(PXCMFaceData.ExpressionsData.FaceExpression.EXPRESSION_KISS, out faceExpressionKiss)
                 && expressionsData.QueryExpression(PXCMFaceData.ExpressionsData.FaceExpression.EXPRESSION_TONGUE_OUT, out faceExpressionTongueOut)
                 && expressionsData.QueryExpression(PXCMFaceData.ExpressionsData.FaceExpression.EXPRESSION_SMILE, out faceExpressionSmile)
                 && expressionsData.QueryExpression(PXCMFaceData.ExpressionsData.FaceExpression.EXPRESSION_MOUTH_OPEN, out faceExpressionMouthOpen))

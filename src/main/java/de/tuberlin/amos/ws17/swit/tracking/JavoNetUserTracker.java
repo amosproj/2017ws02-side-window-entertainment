@@ -1,9 +1,6 @@
 package de.tuberlin.amos.ws17.swit.tracking;
 
-import com.javonet.Javonet;
 import com.javonet.JavonetException;
-import com.javonet.JavonetFramework;
-import com.javonet.api.NObject;
 import de.tuberlin.amos.ws17.swit.common.UserExpressions;
 import de.tuberlin.amos.ws17.swit.common.UserPosition;
 import de.tuberlin.amos.ws17.swit.common.Vector3D;
