@@ -96,5 +96,14 @@ public enum GoogleType {
 	university,
 	veterinary_care,
 	zoo,
-	
+
+	health,
+	point_of_interest,
+	establishment,
+	food,
+	finance,
+	political,
+	premise,
+	locality,
+	route,
 }

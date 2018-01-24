@@ -21,7 +21,7 @@ public class TypeTest {
     @Before
     public void constrution() throws ModuleNotWorkingException{
         try{
-            loader=new GooglePoiService(true, 100, 100);
+            loader=new GooglePoiService(false, 100, 100);
         } catch (ModuleNotWorkingException e){
             e.printStackTrace();
             fail();

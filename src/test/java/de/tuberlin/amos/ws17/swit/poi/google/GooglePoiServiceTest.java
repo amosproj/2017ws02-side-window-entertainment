@@ -22,7 +22,7 @@ public class GooglePoiServiceTest {
 	@Before
 	public void constrution() throws ModuleNotWorkingException{
 		try{
-			loader=new GooglePoiService(true, 100, 100);
+			loader=new GooglePoiService(false, 100, 100);
 		} catch (ModuleNotWorkingException e){
 			e.printStackTrace();
 			fail();
@@ -33,8 +33,6 @@ public class GooglePoiServiceTest {
 	public void loadOneTest() {
 		List<GooglePoi> pois=loader.loadPlaceForCircle(TestData.TIERGARTEN_POSITION_1, 50);
 		assertTrue(pois.size()>1);
-		assertTrue(pois.get(0).getPoiTypes().size()>0);
-		assertTrue(pois.get(0).getTypes().size()>0);
 
 		System.out.println(pois.get(0).toString());
 		System.out.println(pois.get(0).getTypes());
@@ -54,14 +52,14 @@ public class GooglePoiServiceTest {
 
 	}
 	@Test
-	public void loadVeryLargeRadiusTest() {
+	public void loadVeryLargeRadiusTest() throws ModuleNotWorkingException{
 		List<GooglePoi> pois=loader.loadPlaceForCircle(TestData.TIERGARTEN_POSITION_1, 57000);
 		assertEquals(pois.size(), 60);
 	}
 	@Test
 	public void loadNoRadiusTest() {
 		List<GooglePoi> pois=loader.loadPlaceForCircle(TestData.TIERGARTEN_POSITION_1, 0);
-		assertEquals(pois, null);
+		assertTrue(pois.isEmpty());
 	}
 
 	@Test

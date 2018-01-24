@@ -204,7 +204,7 @@ public class GooglePoiService implements PoiService<GooglePoi> {
 
 		}catch(GooglePlacesException e){
 			e.printStackTrace();
-			System.err.println(e.getErrorMessage());
+			System.err.println(e.getErrorMessage()+ center.getLatitude() + center.getLongitude()+radius+ GooglePlaces.MAXIMUM_RESULTS+params.toString());
 			return new ArrayList<>();
 		}
 	}
