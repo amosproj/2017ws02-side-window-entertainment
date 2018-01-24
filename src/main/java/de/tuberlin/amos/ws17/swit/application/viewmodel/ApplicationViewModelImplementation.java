@@ -509,7 +509,9 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 setModuleStatus(ModuleErrors.NOINTERNET, false);
                 return;
             }
-            if(pois.size() == 0) {
+
+            clearDuplicates(pois, "map");
+            if(pois.isEmpty()) {
                 return;
             }
 
@@ -574,9 +576,13 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 setModuleStatus(ModuleErrors.NOINTERNET, false);
                 return;
             }
-            if (pois.isEmpty()) {
+
+
+            clearDuplicates(pois, "camera");
+            if(pois.isEmpty()) {
                 return;
             }
+
 
             //Abfrage Informationen
             /*try {
@@ -595,6 +601,25 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 addPOIcamera(poi);
             }
         });
+    }
+
+    private void clearDuplicates(List<PointOfInterest> pois, String propertyList) {
+        ArrayList<PointOfInterest> list = new ArrayList<PointOfInterest>();
+        for (PointOfInterest poi : pois) {
+            PoiViewModel item = convertPOI(poi);
+            if (propertyList == "map") {
+                if (propertyPOImaps.contains(item)) {
+                    list.add(poi);
+                }
+            } else if (propertyList == "camera") {
+                if (propertyPOIcamera.contains(item)) {
+                    list.add(poi);
+                }
+            }
+        }
+        for (PointOfInterest poi: list) {
+            pois.remove(poi);
+        }
     }
 
     private void setModuleStatus(ModuleErrors type, boolean working) {
@@ -655,6 +680,12 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
 
     private void addPOImaps(PointOfInterest poi) {
         PoiViewModel item = convertPOI(poi);
+        System.out.println("item: " + item.getId() + " " + item.getName());
+        System.out.println(propertyPOImaps.contains(item));
+        System.out.println("size: " + propertyPOImaps.size());
+        for (PoiViewModel p: propertyPOImaps) {
+            System.out.println("comp: " + p.equals(item));
+        }
         if(!propertyPOImaps.contains(poi)) {
             pointsOfInterest.add(poi);
             Platform.runLater(() -> propertyPOImaps.add(item));
