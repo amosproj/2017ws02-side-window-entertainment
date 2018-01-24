@@ -8,6 +8,7 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.awt.image.RasterFormatException;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -84,18 +85,22 @@ public class ImageUtils {
         return null;
     }
 
-    public static Media getTestVideo() {
+    public static Media getTestVideo(String name) {
         ClassLoader classLoader = ImageUtils.class.getClassLoader();
-        URL url = classLoader.getResource("test_video.mp4");
+        URL url = classLoader.getResource(name);
         return new Media(url.toExternalForm());
     }
 
     public static BufferedImage cropImage(BufferedImage image, Rectangle rect) {
-        BufferedImage img = image.getSubimage(rect.x, rect.y, rect.width, rect.height);
-        BufferedImage copyOfImage = new BufferedImage(img.getWidth(), img.getHeight(), BufferedImage.TYPE_INT_RGB);
-        Graphics g = copyOfImage.createGraphics();
-        g.drawImage(img, 0, 0, null);
-        return copyOfImage;
+        try {
+            BufferedImage img = image.getSubimage(rect.x, rect.y, rect.width, rect.height);
+//            BufferedImage copyOfImage = new BufferedImage(img.getWidth(), img.getHeight(), BufferedImage.TYPE_INT_RGB);
+//            Graphics g = copyOfImage.createGraphics();
+//            g.drawImage(img, 0, 0, null);
+            return img;
+        } catch (RasterFormatException e) {
+            return image;
+        }
     }
 
 }

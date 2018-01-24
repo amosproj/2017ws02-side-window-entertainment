@@ -1,6 +1,5 @@
 package de.tuberlin.amos.ws17.swit.application.viewmodel;
 
-import de.tuberlin.amos.ws17.swit.application.view.ApplicationView;
 import de.tuberlin.amos.ws17.swit.application.view.ApplicationViewImplementation;
 import de.tuberlin.amos.ws17.swit.common.*;
 import de.tuberlin.amos.ws17.swit.common.Module;
@@ -35,7 +34,6 @@ import javafx.scene.image.Image;
 import javafx.event.EventHandler;
 import javafx.event.ActionEvent;
 import javafx.scene.layout.*;
-import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 
 import java.awt.image.BufferedImage;
@@ -465,6 +463,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 iterations++;
             }
         });
+        updateThread.setDaemon(true);
     }
 
     private void initMapsThread() {
@@ -543,7 +542,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     }
 
 
-    private void test() {
+    public void analyzeImage() {
         BufferedImage image = null;
         try {
             image = landscapeTracker.getImage();
@@ -589,9 +588,9 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
             }
 
             if (useDemoVideo) {
-                Platform.runLater(this::test);
+                Platform.runLater(this::analyzeImage);
             } else {
-                test();
+                analyzeImage();
             }
         });
 
@@ -862,4 +861,5 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     public boolean useDemoVideo() {
         return useDemoVideo;
     }
+
 }

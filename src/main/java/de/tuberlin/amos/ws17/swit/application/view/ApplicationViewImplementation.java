@@ -25,6 +25,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
@@ -94,6 +95,14 @@ public class ApplicationViewImplementation extends Application implements Applic
         //primaryStage.setMaximized(true);
 
         Scene scene = new Scene(root, 800, 600, Color.WHITE);
+        scene.setOnKeyPressed(event -> {
+            switch (event.getCode()) {
+                case F: controller.analyzeImage();
+                    break;
+                default:
+                    break;
+            }
+        });
         //scene.getStylesheets().add("/stylesheets/ApplicationViewStylesheet.css");
         scene.getStylesheets().add("/stylesheets/TransparentApplicationViewStylesheet.css");
         primaryStage.setScene(scene);
@@ -148,7 +157,7 @@ public class ApplicationViewImplementation extends Application implements Applic
         expansionScrollPane.setId("expansionScrollPane");
 
         root = new StackPane();
-        mp = new MediaPlayer(ImageUtils.getTestVideo());
+        mp = new MediaPlayer(ImageUtils.getTestVideo("Berlin.mp4"));
         mv = new MediaView(mp);
         mv.setVisible(false);
         final DoubleProperty width = mv.fitWidthProperty();
