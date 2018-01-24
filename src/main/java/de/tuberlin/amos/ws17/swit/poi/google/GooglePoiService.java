@@ -39,16 +39,6 @@ public class GooglePoiService implements PoiService<GooglePoi> {
 		testFunctionality();
 	}
 
-	SearchGeometryFactory geometryFactory=new SearchGeometryFactory();
-
-	public Set<GooglePoi> loadPlaceForMultiCircleSearchGeometry(MultiCircleSearchGeometry multiCircle){
-
-        Set<GooglePoi> pois=new HashSet<>();
-        for(CircleSearchGeometry circle: multiCircle){
-            pois.addAll(loadPlaceForCircleSearchGeometry(circle));
-        }
-        return pois;
-    }
 
     /**
      * Check if a certain POI can be loaded.

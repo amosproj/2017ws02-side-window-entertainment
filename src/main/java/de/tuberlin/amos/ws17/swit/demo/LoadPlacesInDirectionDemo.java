@@ -4,9 +4,6 @@ import de.tuberlin.amos.ws17.swit.common.GpsPosition;
 import de.tuberlin.amos.ws17.swit.common.exceptions.ModuleNotWorkingException;
 import de.tuberlin.amos.ws17.swit.poi.google.GooglePoi;
 import de.tuberlin.amos.ws17.swit.poi.google.GooglePoiService;
-import de.tuberlin.amos.ws17.swit.poi.google.MultiCircleSearchGeometry;
-import de.tuberlin.amos.ws17.swit.poi.google.SearchGeometryFactory;
-
 import java.util.Set;
 
 /**
@@ -26,15 +23,6 @@ public class LoadPlacesInDirectionDemo {
         GpsPosition tiergarten2= new GpsPosition(tiergartenLng2, tiergartenLat2);
         try{
             GooglePoiService loader=new GooglePoiService(100, 100);
-
-            SearchGeometryFactory searchGeometryFactory=new SearchGeometryFactory(2.1, 200, 3, null, null);
-            MultiCircleSearchGeometry searchGeometry=searchGeometryFactory.createSearchCirclesForDirectedCoordinates(tiergarten1, tiergarten2);
-
-            System.out.println(searchGeometry.toString());
-
-            Set<GooglePoi> pois= loader.loadPlaceForMultiCircleSearchGeometry(searchGeometryFactory.createSearchCirclesForDirectedCoordinates(tiergarten1, tiergarten2));
-
-            System.out.println("pios size "+pois.size());
 
         } catch (ModuleNotWorkingException e) {
             e.printStackTrace();
