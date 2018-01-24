@@ -93,43 +93,5 @@ public enum GoogleType {
 	university,
 	veterinary_care,
 	zoo,
-
-	administrative_area_level_1, //additional types, see: https://developers.google.com/maps/documentation/geocoding/intro#Types
-	administrative_area_level_2, //additional types, see: https://developers.google.com/maps/documentation/geocoding/intro#Types
-	administrative_area_level_3, //additional types, see: https://developers.google.com/maps/documentation/geocoding/intro#Types
-	administrative_area_level_4, //additional types, see: https://developers.google.com/maps/documentation/geocoding/intro#Types
-	administrative_area_level_5, //additional types, see: https://developers.google.com/maps/documentation/geocoding/intro#Types
-	colloquial_area, //additional types, see: https://developers.google.com/maps/documentation/geocoding/intro#Types
-	country, //additional types, see: https://developers.google.com/maps/documentation/geocoding/intro#Types
-	establishment, //additional types, see: https://developers.google.com/maps/documentation/geocoding/intro#Types
-	finance, //additional types, see: https://developers.google.com/maps/documentation/geocoding/intro#Types
-	floor, //additional types, see: https://developers.google.com/maps/documentation/geocoding/intro#Types
-	food, //additional types, see: https://developers.google.com/maps/documentation/geocoding/intro#Types
-	general_contractor, //additional types, see: https://developers.google.com/maps/documentation/geocoding/intro#Types
-	geocode, //additional types, see: https://developers.google.com/maps/documentation/geocoding/intro#Types
-	health, //additional types, see: https://developers.google.com/maps/documentation/geocoding/intro#Types
-	intersection, //additional types, see: https://developers.google.com/maps/documentation/geocoding/intro#Types
-	locality, //additional types, see: https://developers.google.com/maps/documentation/geocoding/intro#Types
-	natural_feature, //additional types, see: https://developers.google.com/maps/documentation/geocoding/intro#Types
-	neighborhood, //additional types, see: https://developers.google.com/maps/documentation/geocoding/intro#Types
-	place_of_worship, //additional types, see: https://developers.google.com/maps/documentation/geocoding/intro#Types
-	political, //additional types, see: https://developers.google.com/maps/documentation/geocoding/intro#Types
-	point_of_interest, //additional types, see: https://developers.google.com/maps/documentation/geocoding/intro#Types
-	post_box, //additional types, see: https://developers.google.com/maps/documentation/geocoding/intro#Types
-	postal_code, //additional types, see: https://developers.google.com/maps/documentation/geocoding/intro#Types
-	postal_code_prefix, //additional types, see: https://developers.google.com/maps/documentation/geocoding/intro#Types
-	postal_code_suffix, //additional types, see: https://developers.google.com/maps/documentation/geocoding/intro#Types
-	postal_town, //additional types, see: https://developers.google.com/maps/documentation/geocoding/intro#Types
-	premise, //additional types, see: https://developers.google.com/maps/documentation/geocoding/intro#Types
-	room, //additional types, see: https://developers.google.com/maps/documentation/geocoding/intro#Types
-	route, //additional types, see: https://developers.google.com/maps/documentation/geocoding/intro#Types
-	street_address, //additional types, see: https://developers.google.com/maps/documentation/geocoding/intro#Types
-	street_number, //additional types, see: https://developers.google.com/maps/documentation/geocoding/intro#Types
-	sublocality, //additional types, see: https://developers.google.com/maps/documentation/geocoding/intro#Types
-	sublocality_level_4, //additional types, see: https://developers.google.com/maps/documentation/geocoding/intro#Types
-	sublocality_level_5, //additional types, see: https://developers.google.com/maps/documentation/geocoding/intro#Types
-	sublocality_level_3, //additional types, see: https://developers.google.com/maps/documentation/geocoding/intro#Types
-	sublocality_level_2, //additional types, see: https://developers.google.com/maps/documentation/geocoding/intro#Types
-	sublocality_level_1, //additional types, see: https://developers.google.com/maps/documentation/geocoding/intro#Types
-	subpremise //additional types, see: https://developers.google.com/maps/documentation/geocoding/intro#Types
+	
 }
