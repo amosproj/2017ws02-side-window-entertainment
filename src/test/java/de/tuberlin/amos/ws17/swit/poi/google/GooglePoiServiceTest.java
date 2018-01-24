@@ -65,22 +65,6 @@ public class GooglePoiServiceTest {
 	}
 
 	@Test
-	public void customDirectedSearchTestWithLargeRadius(){
-		SearchGeometryFactory searchGeometryFactory=new SearchGeometryFactory(2.8, 600, 3, null, null);
-		MultiCircleSearchGeometry searchGeometry=searchGeometryFactory.createSearchCirclesForDirectedCoordinates(TestData.TIERGARTEN_POSITION_1, TestData.TIERGARTEN_POSITION_2);
-
-		System.out.println(searchGeometry.toString());
-
-		Set<GooglePoi> pois= loader.loadPlaceForMultiCircleSearchGeometry(searchGeometryFactory.createSearchCirclesForDirectedCoordinates(TestData.TIERGARTEN_POSITION_1, TestData.TIERGARTEN_POSITION_2));
-
-		System.out.println("pios size "+pois.size());
-
-		//each time 60 pois should be gotten. As its a Set the number can be reduced by overlaps
-		assertTrue(pois.size()>100);
-
-	}
-
-	@Test
 	public void expandByMetersTest(){
 		int distanceInMeters=400;
 		GpsPosition pos3= GeographicCalculator.expandByMeters(TestData.TIERGARTEN_POSITION_1, TestData.TIERGARTEN_POSITION_2, distanceInMeters);
