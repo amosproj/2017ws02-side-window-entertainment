@@ -60,18 +60,41 @@
                     </archive>
                 </configuration>
             </plugin>
+
+            <plugin>
+                <groupId>com.coderplus.maven.plugins</groupId>
+                <artifactId>copy-rename-maven-plugin</artifactId>
+                <version>1.0</version>
+                <executions>
+                    <execution>
+                        <id>copy-file</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <fileSets>
+                                <fileSet>
+                                    <sourceFile>libs/DotNetTracking.dll</sourceFile>
+                                    <destinationFile>target/libs/DotNetTracking.dll</destinationFile>
+                                </fileSet>
+                                <fileSet>
+                                    <sourceFile>libs/libpxcclr.cs.dll</sourceFile>
+                                    <destinationFile>target/libs/libpxcclr.cs.dll</destinationFile>
+                                </fileSet>
+                                <fileSet>
+                                    <sourceFile>libs/libpxccpp2c.dll</sourceFile>
+                                    <destinationFile>target/libs/libpxccpp2c.dll</destinationFile>
+                                </fileSet>
+                            </fileSets>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
-            </resource>
-            <resource>
-                <directory>libs</directory>
-                <targetPath>../libs</targetPath>
-                <filtering>true</filtering>
-                <includes>
-                    <include>**/*</include>
-                </includes>
             </resource>
         </resources>
     </build>
@@ -209,8 +232,6 @@
             <groupId>com.javonet</groupId>
             <artifactId>javonet</artifactId>
             <version>1.4hf89-SNAPSHOT</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/local-maven-repo/com/javonet/javonet/1.4hf89-SNAPSHOT/javonet-1.4hf89-SNAPSHOT.jar</systemPath>
         </dependency>
 
     </dependencies>
