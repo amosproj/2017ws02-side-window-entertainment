@@ -1,5 +1,8 @@
 package de.tuberlin.amos.ws17.swit.poi.google;
 
+/**
+ * The types as enums according to https://developers.google.com/places/supported_types
+ */
 public enum GoogleType {
 	accounting,
 	airport,

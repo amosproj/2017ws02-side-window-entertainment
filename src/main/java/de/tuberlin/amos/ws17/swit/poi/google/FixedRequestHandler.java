@@ -18,8 +18,11 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
- 
 
+
+/**
+ * An implementation of the {@link RequestHandler}  that works (fix)
+ */
 public class FixedRequestHandler implements RequestHandler {
 
 	public static void enableLogging() {

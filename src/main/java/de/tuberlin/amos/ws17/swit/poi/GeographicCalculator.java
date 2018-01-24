@@ -8,7 +8,11 @@ import de.tuberlin.amos.ws17.swit.common.Vector2D;
 public class GeographicCalculator {
 
 
-
+    /**
+     * @param targetPosition
+     * @param vectorFromSource
+     * @return
+     */
     private static GpsPosition getRedirectedPosition(GpsPosition targetPosition, Vector2D vectorFromSource){
         double virtualLon=targetPosition.getLongitude()+vectorFromSource.getX();
         double virtualLat=targetPosition.getLatitude()+vectorFromSource.getY();

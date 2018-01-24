@@ -13,7 +13,8 @@ import java.awt.image.BufferedImage;
 import java.util.*;
 
 /**
- * The
+ * The GooglePoiService provides the basic functionality of the {@link PoiService} and some additional features.
+ * Such as a function to explicitly download the image, what is of importance for saving API requests.
  */
 public class GooglePoiService implements PoiService<GooglePoi> {
 
@@ -31,6 +32,12 @@ public class GooglePoiService implements PoiService<GooglePoi> {
 	    testFunctionality();
 	}
 
+	/**
+	 * @param enableLogging is to be set true if the logging of the {@link GooglePlaces} client should output its logging informaiton.
+	 * @param xResolution as the x resolution for the downloaded images in pixels
+	 * @param yResolution as the y resolution for the downloaded images in pixels
+	 * @throws ModuleNotWorkingException in case of failure
+	 */
 	public GooglePoiService(boolean enableLogging, int xResolution, int yResolution) throws ModuleNotWorkingException{
 		client = new GooglePlaces(ApiConfig.getProperty("GooglePlaces"), rh);
 		client.setDebugModeEnabled(enableLogging);
@@ -41,8 +48,9 @@ public class GooglePoiService implements PoiService<GooglePoi> {
 
 
     /**
-     * Check if a certain POI can be loaded.
-     */
+     * Check if a certain POI can be loaded. No return.
+	 * @throws ModuleNotWorkingException is thrown in case of failure
+	 */
     private void testFunctionality() throws ModuleNotWorkingException{
 
         GoogleType zoo=GoogleType.zoo;
@@ -56,7 +64,7 @@ public class GooglePoiService implements PoiService<GooglePoi> {
             if(places!=null) {
                 if (places.size() > 0){
                     if (places.get(0).getName().contains("Zoo")){
-                        //this is what should happen
+						return;
                     }else {
                         throw new ModuleNotWorkingException("Unexpected result when checking places API functionality for a zoo that has been requested.");
                     }
@@ -73,6 +81,11 @@ public class GooglePoiService implements PoiService<GooglePoi> {
 
     }
 
+	/**
+	 * Retrieve the POIs for a given {@link CircleSearchGeometry}
+	 * @param circle the area in which the POIs shell be within
+	 * @return a Set of the retrieved POis, can be empty but not null
+	 */
 	public Set<GooglePoi> loadPlaceForCircleSearchGeometry(CircleSearchGeometry circle){
         Set<GooglePoi> pois=new HashSet<>();
 
@@ -100,12 +113,27 @@ public class GooglePoiService implements PoiService<GooglePoi> {
 		return pois;
     }
 
+	/**
+	 * Retrieve the POIs with a circle. Simple method, not differentiating in what kind of POIs to get. Not recommended to use.
+	 * @param center as the centerpoint
+	 * @param radius as the radius in meters
+	 * @return a Set of the retrieved POis, can be empty but not null
+	 * @throws InvalidRequestException
+	 */
 	@Override
 	public List<GooglePoi> loadPlaceForCircle(GpsPosition center, int radius) throws InvalidRequestException{
 
 		return loadPlaceForCircle(center, radius, new Param[0]);
 	}
 
+	/**
+	 * Retrieve the POIs with a circle and the given {@link GoogleType}s
+	 * @param center as the centerpoint
+	 * @param radius as the radius in meters
+	 * @param types as the types to be sent
+	 * @return a Set of the retrieved POis, can be empty but not null
+	 * @throws InvalidRequestException is thrown in case the request was not correct
+	 */
 	public List<GooglePoi> loadPlaceForCircleAndType(GpsPosition center, int radius, GoogleType... types) throws InvalidRequestException{
 
     	if(types.length>0) {
@@ -126,6 +154,14 @@ public class GooglePoiService implements PoiService<GooglePoi> {
 		return loadPlaceForCircle(center, radius);
 	}
 
+	/**
+	 * * Retrieve the POIs with a circle and the given {@link PoiType}s
+	 * @param center as the centerpoint
+	 * @param radius as the radius in meters
+	 * @param types  as the types to retrieve
+	 * @return a Set of the retrieved POis, can be empty but not null
+	 * @throws InvalidRequestException is thrown in case the request was not correct
+	 */
 	@Override
 	public List<GooglePoi> loadPlaceForCircleAndPoiType(GpsPosition center, int radius, PoiType... types) throws InvalidRequestException{
 
@@ -141,11 +177,11 @@ public class GooglePoiService implements PoiService<GooglePoi> {
 	/**
 	 * A method just in case that using the deprecated way of getting multiple places
 	 * as done in loadPlaceForCircleAndType is being deprecated one day.
-	 * @param center
-	 * @param radius
-	 * @param params
-	 * @return
-	 * @throws InvalidRequestException
+	 * @param center as the centerpoint
+	 * @param radius as the radius in meters
+	 * @param params  as the types to retrieve
+	 * @return a List of the retrieved POis, can be empty but not null
+	 * @throws InvalidRequestException is thrown in case the request was not correct
 	 */
 	private List<GooglePoi> loadPlacesForEachParam(GpsPosition center, int radius, Param[] params) throws InvalidRequestException{
 
@@ -169,14 +205,14 @@ public class GooglePoiService implements PoiService<GooglePoi> {
 		}catch(GooglePlacesException e){
 			e.printStackTrace();
 			System.err.println(e.getErrorMessage());
-			return null;
+			return new ArrayList<>();
 		}
 	}
 
 	private static List<Place> getPlacesDetails(List<Place> places){
 
     	if (places == null) {
-    		return new ArrayList<Place>();
+    		return new ArrayList<>();
 		}
 
 		List<Place> detailedPlaces=new ArrayList<>();
@@ -188,6 +224,11 @@ public class GooglePoiService implements PoiService<GooglePoi> {
 		return detailedPlaces;
 	}
 
+	/**
+	 * Download the photos from the Places API for each element of the given Collection. Each download costs one request,
+	 * so this is to be done carefully.
+	 * @param poisToAddPhotosTo as the POIs where a try of adding a photo is made
+	 */
 	public void addImages(Collection<GooglePoi> poisToAddPhotosTo){
     	if (poisToAddPhotosTo == null) {
     		return;

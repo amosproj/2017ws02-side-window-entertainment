@@ -7,7 +7,7 @@ import se.walkercrou.places.Status;
 import java.util.*;
 
 /**
- *
+ * A Factory to create {@link GooglePoi}s from other datatypes
  */
 class GooglePoiFactory {
 
@@ -22,6 +22,12 @@ class GooglePoiFactory {
         return pois;
     }
 
+    /**
+     * Create a {@link GooglePoi} by passing a {@link Place}
+     * @param place as the output of the currently used Google Places API
+     *
+     * @return the created GooglePoi
+     */
     GooglePoi createPOIfromPlace(Place place){
 
         GooglePoi poi=new GooglePoi(
@@ -38,6 +44,12 @@ class GooglePoiFactory {
         return poi;
     }
 
+    /**
+     * A method that defines what information provided by Google Places informationAbstract
+     * of a {@link de.tuberlin.amos.ws17.swit.common.PointOfInterest} could contain
+     * @param place as the Locations abstract to create
+     * @return the String for the information abstract
+     */
     private String constructInformationAbstract(Place place){
         String info="";
 
@@ -55,6 +67,11 @@ class GooglePoiFactory {
     }
 
 
+    /**
+     * Translate the types of the used API into a Set of {@link GoogleType}s
+     * @param p as the POI of which the translation is to be done
+     * @return a Set of the successfully translated types
+     */
     private Set<GoogleType> getTypes(Place p){
         Set<GoogleType> types= new HashSet<>();
 

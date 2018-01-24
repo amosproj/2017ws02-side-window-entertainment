@@ -8,6 +8,9 @@ import se.walkercrou.places.Photo;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * A {@link PointOfInterest} with additional fields to have comparability with the Places API
+ */
 public class GooglePoi extends PointOfInterest{
 
 	GooglePoi(String id, String name, GpsPosition gpsPosition, Set<GoogleType> types) {
