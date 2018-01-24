@@ -73,8 +73,6 @@ public class PoiViewModel {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        Class<? extends PoiViewModel> a = getClass();
-        Class<?> b = o.getClass();
         if (o == null || getClass() != o.getClass()) return false;
 
         PoiViewModel that = (PoiViewModel) o;
