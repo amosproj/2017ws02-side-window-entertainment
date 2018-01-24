@@ -486,15 +486,8 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
             //POI maps
             List<PointOfInterest> pois;
             try{
-               /* pois = poiService.loadPlaceForCircleAndPoiType(kinematicProperties,200
-                        ,PoiType.FOOD,PoiType.LEISURE*//*GoogleType.zoo , GoogleType.airport, GoogleType.aquarium, GoogleType.church, GoogleType.city_hall,
-                        GoogleType.hospital, GoogleType.library, GoogleType.mosque, GoogleType.museum, GoogleType.park,
-                        GoogleType.stadium, GoogleType.synagogue, GoogleType.university,
-                        GoogleType.point_of_interest, GoogleType.place_of_worship,
-                        GoogleType.restaurant*//*);*/
 
                 pois = poiService.loadPlaceForCircle(new GpsPosition(0,0), 0);
-
 
                 System.out.println(pois.size()+ " number of POIs found.");
 
@@ -515,17 +508,6 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 return;
             }
 
-            //Information Source
-            /*try {
-                for (PointOfInterest poi: pois) {
-                    poi = abstractProvider.provideAbstract(poi);
-                }
-                setModuleStatus(ModuleErrors.NOINTERNET, true);
-            } catch (Exception e){
-                e.printStackTrace();
-                setModuleStatus(ModuleErrors.NOINTERNET, false);
-                return;
-            }*/
             getAbstract(pois);
 
             for(PointOfInterest poi: pois) {
@@ -583,18 +565,6 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 return;
             }
 
-
-            //Abfrage Informationen
-            /*try {
-                for (PointOfInterest poi: pois) {
-                    poi = abstractProvider.provideAbstract(poi);
-                }
-                setModuleStatus(ModuleErrors.NOINTERNET, true);
-            } catch(Exception e) {
-                e.printStackTrace();
-                setModuleStatus(ModuleErrors.NOINTERNET, false);
-                return;
-            }*/
             getAbstract(pois);
 
             for (PointOfInterest poi: pois) {
