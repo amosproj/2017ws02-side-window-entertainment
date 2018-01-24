@@ -11,6 +11,7 @@ import com.google.api.services.vision.v1.model.Image;
 import com.google.common.collect.ImmutableList;
 import de.tuberlin.amos.ws17.swit.common.ApiConfig;
 import de.tuberlin.amos.ws17.swit.common.PointOfInterest;
+import org.apache.jena.base.Sys;
 
 import javax.annotation.Nullable;
 import javax.imageio.ImageIO;
@@ -73,13 +74,8 @@ public class CloudVision implements LandmarkDetector {
     }
 
     private List<LandmarkResult> identifyLandmarks(BufferedImage bufferedImage, int maxResults) throws IOException {
-        try {
-            Image image = ImageUtils.convertToImage(bufferedImage);
-            return identifyLandmarks(image, maxResults);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return Collections.emptyList();
+        Image image = ImageUtils.convertToImage(bufferedImage);
+        return identifyLandmarks(image, maxResults);
     }
 
     @Override
@@ -92,12 +88,13 @@ public class CloudVision implements LandmarkDetector {
     @Override
     public List<PointOfInterest> identifyPOIs(BufferedImage image) {
         try {
+            this.bufferedImage = image;
             List<LandmarkResult> results = identifyLandmarks(image, MAX_RESULTS);
             return results.stream()
                     .map(CloudVision::convertToPOI)
                     .collect(Collectors.toList());
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("Could not identify POI on image");
         }
 
         return Collections.emptyList();
@@ -117,7 +114,6 @@ public class CloudVision implements LandmarkDetector {
             System.err.print("Cloud Vision service unavailable.");
             return Collections.emptyList();
         }
-        this.bufferedImage = ImageUtils.convertToBufferedImage(image);
         // TODO: reduce image size if necessary
         AnnotateImageRequest request = new AnnotateImageRequest()
                 .setImage(image)
@@ -144,6 +140,7 @@ public class CloudVision implements LandmarkDetector {
                             ? response.getError().getMessage()
                             : "Unknown error getting image annotations");
         }
+        List<EntityAnnotation> res = response.getLandmarkAnnotations();
         List<LandmarkResult> landmarkResults = convertToLandmarkResults(response.getLandmarkAnnotations());
         return landmarkResults;
     }
@@ -167,19 +164,23 @@ public class CloudVision implements LandmarkDetector {
         int y = vertices.get(0).getY();
         int width = vertices.get(1).getX() - x;
         int height = vertices.get(3).getY() - y;
-        Rectangle originalRect = new Rectangle(x, y, width, height);
+//        System.out.println("Full image size: " + bufferedImage.getWidth() + "x" + bufferedImage.getHeight());
 
+        Rectangle originalRect = new Rectangle(x, y, width, height);
+//        System.out.println("Original Rect: "+ originalRect.toString());
         int growWidth = (int) ((width * upScale - width) / 2);
         int growHeight = (int) ((height * upScale - height) / 2);
         Rectangle growRect = new Rectangle(originalRect);
         growRect.grow(growWidth, growHeight);
-
-        while (rectOutsideOfImage(growRect, bufferedImage)) {
+        final int maxIterations = 10;
+        int i = 0;
+        while (rectOutsideOfImage(growRect, bufferedImage) && i < maxIterations) {
             upScale -= 0.05;
             growWidth = (int) ((width * upScale - width) / 2);
             growHeight = (int) ((height * upScale - height) / 2);
             growRect = new Rectangle(originalRect);
             growRect.grow(growWidth, growHeight);
+            i++;
         }
 
         BufferedImage croppedImg = ImageUtils.cropImage(bufferedImage, growRect);

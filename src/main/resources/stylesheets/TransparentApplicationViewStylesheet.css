@@ -14,8 +14,8 @@
 
 #expansionPane {
     -fx-padding: 16px;
-    -fx-max-width: 500px;
-    -fx-max-height: 600px;
+    -fx-max-width: 400px;
+    -fx-max-height: 500px;
     -fx-alignment: center-right;
     -fx-background-color: rgba(0, 0, 0, 0.7);
 }
@@ -36,7 +36,7 @@
 
 #expansionScrollPane {
     -fx-background-color: transparent;
-    -fx-max-height: 350px;
+    -fx-max-height: 250px;
 }
 
 #listPOImaps {

@@ -1,16 +1,19 @@
 package de.tuberlin.amos.ws17.swit.image_analysis;
 
 import com.google.api.services.vision.v1.model.Image;
+import javafx.scene.media.Media;
 
 import javax.annotation.Nullable;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.awt.image.RasterFormatException;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class ImageUtils {
@@ -27,7 +30,9 @@ public class ImageUtils {
     }
 
     public static Image convertToImage(BufferedImage bufferedImage) throws IOException {
-        if (bufferedImage == null) { throw new IOException(); }
+        if (bufferedImage == null) {
+            throw new IOException();
+        }
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ImageIO.write(bufferedImage, "jpg", baos);
         byte[] data = baos.toByteArray();
@@ -80,12 +85,22 @@ public class ImageUtils {
         return null;
     }
 
+    public static Media getTestVideo(String name) {
+        ClassLoader classLoader = ImageUtils.class.getClassLoader();
+        URL url = classLoader.getResource(name);
+        return new Media(url.toExternalForm());
+    }
+
     public static BufferedImage cropImage(BufferedImage image, Rectangle rect) {
-        BufferedImage img = image.getSubimage(rect.x, rect.y, rect.width, rect.height);
-        BufferedImage copyOfImage = new BufferedImage(img.getWidth(), img.getHeight(), BufferedImage.TYPE_INT_RGB);
-        Graphics g = copyOfImage.createGraphics();
-        g.drawImage(img, 0, 0, null);
-        return copyOfImage;
+        try {
+            BufferedImage img = image.getSubimage(rect.x, rect.y, rect.width, rect.height);
+//            BufferedImage copyOfImage = new BufferedImage(img.getWidth(), img.getHeight(), BufferedImage.TYPE_INT_RGB);
+//            Graphics g = copyOfImage.createGraphics();
+//            g.drawImage(img, 0, 0, null);
+            return img;
+        } catch (RasterFormatException e) {
+            return image;
+        }
     }
 
 }

@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 
-public class LandscapeTrackerImplementation implements LandscapeTracker{
+public class LandscapeTrackerImplementation implements LandscapeTracker {
 
     private Webcam logitechC920webcam = null;
     private boolean isTracking = false;
@@ -80,7 +80,6 @@ public class LandscapeTrackerImplementation implements LandscapeTracker{
     public BufferedImage getModuleImage() {
         String path = "";
         try {
-            this.getClass();
             this.getClass().getResource("");
             path = this.getClass().getClassLoader().getResource("module_images/landscape_tracking.jpg").getPath();
             return ImageIO.read(new File(path));

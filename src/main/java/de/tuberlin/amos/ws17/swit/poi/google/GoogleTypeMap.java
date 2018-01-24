@@ -50,6 +50,7 @@ class GoogleTypeMap extends HashMap<GoogleType, PoiType> {
         this.put(GoogleType.funeral_home, PoiType.OF_NO_INTEREST);
         this.put(GoogleType.furniture_store, PoiType.SHOPPING);
         this.put(GoogleType.gas_station, PoiType.INFRASTRUCTURE);
+        this.put(GoogleType.grocery_or_supermarket, PoiType.SHOPPING);
         this.put(GoogleType.gym, PoiType.LEISURE);
         this.put(GoogleType.hair_care, PoiType.LEISURE);
         this.put(GoogleType.hardware_store, PoiType.SHOPPING);
@@ -94,6 +95,7 @@ class GoogleTypeMap extends HashMap<GoogleType, PoiType> {
         this.put(GoogleType.storage, PoiType.OF_NO_INTEREST);
         this.put(GoogleType.store, PoiType.SHOPPING);
         this.put(GoogleType.subway_station, PoiType.INFRASTRUCTURE);
+        this.put(GoogleType.supermarket, PoiType.SHOPPING);
         this.put(GoogleType.synagogue, PoiType.HISTORIC);
         this.put(GoogleType.taxi_stand, PoiType.OF_NO_INTEREST);
         this.put(GoogleType.train_station, PoiType.TOURISM);

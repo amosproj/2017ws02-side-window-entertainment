@@ -5,9 +5,11 @@ import de.tuberlin.amos.ws17.swit.application.viewmodel.ModuleStatusViewModel;
 import de.tuberlin.amos.ws17.swit.application.viewmodel.PoiViewModel;
 import de.tuberlin.amos.ws17.swit.application.viewmodel.UserExpressionViewModel;
 import de.tuberlin.amos.ws17.swit.common.Module;
+import de.tuberlin.amos.ws17.swit.image_analysis.ImageUtils;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -23,7 +25,11 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
+import javafx.scene.media.MediaView;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.paint.Paint;
@@ -34,6 +40,7 @@ import javafx.stage.Stage;
 import javafx.util.Callback;
 import org.bridj.cpp.com.IDispatch;
 
+import java.awt.image.BufferedImage;
 import java.nio.charset.Charset;
 import java.util.regex.Pattern;
 
@@ -55,7 +62,9 @@ public class ApplicationViewImplementation extends Application implements Applic
     private ImageView expansionImage;
     private ScrollPane expansionScrollPane;
     private HBox statusPane;
-
+    StackPane root;
+    MediaPlayer mp;
+    MediaView mv;
     private WebEngine webEngine;
     private WebView browser;
 
@@ -77,13 +86,23 @@ public class ApplicationViewImplementation extends Application implements Applic
 
     @Override
     public void start(Stage stage) {
-        this.primaryStage = stage;
+
+        primaryStage = stage;
         primaryStage.setTitle("Side Window Infotainment");
+
 
         //primaryStage.initStyle(StageStyle.TRANSPARENT);
         //primaryStage.setMaximized(true);
 
-        Scene scene = new Scene(pnFoundation, 800, 600, Color.WHITE);
+        Scene scene = new Scene(root, 800, 600, Color.WHITE);
+        scene.setOnKeyPressed(event -> {
+            switch (event.getCode()) {
+                case F: controller.analyzeImage();
+                    break;
+                default:
+                    break;
+            }
+        });
         //scene.getStylesheets().add("/stylesheets/ApplicationViewStylesheet.css");
         scene.getStylesheets().add("/stylesheets/TransparentApplicationViewStylesheet.css");
         primaryStage.setScene(scene);
@@ -136,6 +155,20 @@ public class ApplicationViewImplementation extends Application implements Applic
         expansionImage.setId("expansionImage");
         expansionScrollPane = new ScrollPane();
         expansionScrollPane.setId("expansionScrollPane");
+
+        root = new StackPane();
+        mp = new MediaPlayer(ImageUtils.getTestVideo("Berlin.mp4"));
+        mv = new MediaView(mp);
+        mv.setVisible(false);
+        final DoubleProperty width = mv.fitWidthProperty();
+        final DoubleProperty height = mv.fitHeightProperty();
+
+        width.bind(Bindings.selectDouble(mv.sceneProperty(), "width"));
+        height.bind(Bindings.selectDouble(mv.sceneProperty(), "height"));
+        mv.setPreserveRatio(true);
+
+        root.getChildren().add(mv);
+        root.getChildren().add(pnFoundation);
     }
 
     private void initExpansion() {
@@ -145,8 +178,10 @@ public class ApplicationViewImplementation extends Application implements Applic
         expansionContentPane.setBottom(expansionInformation);
         expansionScrollPane.setContent(expansionContentPane);
         expansionImage.setPreserveRatio(true);
-        expansionImage.setFitHeight(400);
-        expansionImage.setFitWidth(250);
+        expansionImage.setFitHeight(150);
+        expansionImage.minHeight(0);
+        expansionImage.minWidth(0);
+
         expansionTopPane.setLeft(expansionName);
         expansionTopPane.setRight(expansionButton);
         expansionPane.setTop(expansionTopPane);
@@ -175,8 +210,10 @@ public class ApplicationViewImplementation extends Application implements Applic
             listPOImaps.itemsProperty().bindBidirectional(controller.propertyPOImapsProperty());
 
             listDebugLog.itemsProperty().bindBidirectional(controller.listDebugLogProperty());
+            if (!controller.useDemoVideo()) {
+                pnFoundation.backgroundProperty().bindBidirectional(controller.backgroundProperty);
+            }
 
-            pnFoundation.backgroundProperty().bindBidirectional(controller.backgroundProperty);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -324,5 +361,10 @@ public class ApplicationViewImplementation extends Application implements Applic
         for(Module m: controller.getModuleList()) {
             m.stopModule();
         }
+    }
+
+
+    public MediaView getMediaView() {
+        return mv;
     }
 }
