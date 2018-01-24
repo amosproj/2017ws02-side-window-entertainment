@@ -486,15 +486,8 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
             //POI maps
             List<PointOfInterest> pois;
             try{
-               /* pois = poiService.loadPlaceForCircleAndPoiType(kinematicProperties,200
-                        ,PoiType.FOOD,PoiType.LEISURE*//*GoogleType.zoo , GoogleType.airport, GoogleType.aquarium, GoogleType.church, GoogleType.city_hall,
-                        GoogleType.hospital, GoogleType.library, GoogleType.mosque, GoogleType.museum, GoogleType.park,
-                        GoogleType.stadium, GoogleType.synagogue, GoogleType.university,
-                        GoogleType.point_of_interest, GoogleType.place_of_worship,
-                        GoogleType.restaurant*//*);*/
 
                 pois = poiService.loadPlaceForCircle(new GpsPosition(0,0), 0);
-
 
                 System.out.println(pois.size()+ " number of POIs found.");
 
@@ -509,21 +502,12 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 setModuleStatus(ModuleErrors.NOINTERNET, false);
                 return;
             }
-            if(pois.size() == 0) {
+
+            clearDuplicates(pois, "map");
+            if(pois.isEmpty()) {
                 return;
             }
 
-            //Information Source
-            /*try {
-                for (PointOfInterest poi: pois) {
-                    poi = abstractProvider.provideAbstract(poi);
-                }
-                setModuleStatus(ModuleErrors.NOINTERNET, true);
-            } catch (Exception e){
-                e.printStackTrace();
-                setModuleStatus(ModuleErrors.NOINTERNET, false);
-                return;
-            }*/
             getAbstract(pois);
 
             for(PointOfInterest poi: pois) {
@@ -574,27 +558,38 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 setModuleStatus(ModuleErrors.NOINTERNET, false);
                 return;
             }
-            if (pois.isEmpty()) {
+
+
+            clearDuplicates(pois, "camera");
+            if(pois.isEmpty()) {
                 return;
             }
 
-            //Abfrage Informationen
-            /*try {
-                for (PointOfInterest poi: pois) {
-                    poi = abstractProvider.provideAbstract(poi);
-                }
-                setModuleStatus(ModuleErrors.NOINTERNET, true);
-            } catch(Exception e) {
-                e.printStackTrace();
-                setModuleStatus(ModuleErrors.NOINTERNET, false);
-                return;
-            }*/
             getAbstract(pois);
 
             for (PointOfInterest poi: pois) {
                 addPOIcamera(poi);
             }
         });
+    }
+
+    private void clearDuplicates(List<PointOfInterest> pois, String propertyList) {
+        ArrayList<PointOfInterest> list = new ArrayList<PointOfInterest>();
+        for (PointOfInterest poi : pois) {
+            PoiViewModel item = convertPOI(poi);
+            if (propertyList == "map") {
+                if (propertyPOImaps.contains(item)) {
+                    list.add(poi);
+                }
+            } else if (propertyList == "camera") {
+                if (propertyPOIcamera.contains(item)) {
+                    list.add(poi);
+                }
+            }
+        }
+        for (PointOfInterest poi: list) {
+            pois.remove(poi);
+        }
     }
 
     private void setModuleStatus(ModuleErrors type, boolean working) {
@@ -655,6 +650,12 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
 
     private void addPOImaps(PointOfInterest poi) {
         PoiViewModel item = convertPOI(poi);
+        System.out.println("item: " + item.getId() + " " + item.getName());
+        System.out.println(propertyPOImaps.contains(item));
+        System.out.println("size: " + propertyPOImaps.size());
+        for (PoiViewModel p: propertyPOImaps) {
+            System.out.println("comp: " + p.equals(item));
+        }
         if(!propertyPOImaps.contains(poi)) {
             pointsOfInterest.add(poi);
             Platform.runLater(() -> propertyPOImaps.add(item));
