@@ -534,6 +534,32 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         });
     }
 
+    private boolean movedRelevantDistance(KinematicProperties newPos, KinematicProperties oldPos) {
+
+        double newLong = newPos.getLongitude();
+        double newLat = newPos.getLatitude();
+        double oldLong = oldPos.getLongitude();
+        double oldLat = oldPos.getLatitude();
+
+        final int R = 6371; // Radius of the earth
+
+        double latDistance = Math.toRadians(newLong - oldLong);
+        double lonDistance = Math.toRadians(newLat - oldLat);
+        double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
+                + Math.cos(Math.toRadians(newLong)) * Math.cos(Math.toRadians(newLat))
+                * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        double distance = R * c * 1000; // convert to meters
+
+        //double height = 0.0 - 0.0;
+
+        //distance = Math.pow(distance, 2) + Math.pow(height, 2);
+
+        //double distance = Math.sqrt(Math.pow(newLat - oldLat, 2) + Math.pow(newLong - oldLong, 2));
+
+        return distance > 100;
+    }
+
     private void getAbstract(List<PointOfInterest> pois) {
         try {
             for (PointOfInterest poi: pois) {
