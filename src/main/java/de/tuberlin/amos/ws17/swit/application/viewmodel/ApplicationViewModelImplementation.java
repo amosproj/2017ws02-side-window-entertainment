@@ -15,6 +15,7 @@ import de.tuberlin.amos.ws17.swit.information_source.InformationProvider;
 import de.tuberlin.amos.ws17.swit.information_source.InformationProviderMock;
 import de.tuberlin.amos.ws17.swit.information_source.KnowledgeGraphSearch;
 import de.tuberlin.amos.ws17.swit.information_source.WikiAbstractProvider;
+import de.tuberlin.amos.ws17.swit.landscape_tracking.DemoVideoLandscapeTracker;
 import de.tuberlin.amos.ws17.swit.landscape_tracking.LandscapeTracker;
 import de.tuberlin.amos.ws17.swit.landscape_tracking.LandscapeTrackerImplementation;
 import de.tuberlin.amos.ws17.swit.landscape_tracking.LandscapeTrackerMock;
@@ -71,6 +72,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     private SimpleListProperty<ModuleStatusViewModel> listModuleStatus;
     private SimpleListProperty<UserExpressionViewModel> listExpressionStatus;
     private List<Module> moduleList;
+    private boolean useDemoVideo;
 
     public Image getPropertyCameraImage() {
         return propertyCameraImage.get();
@@ -88,7 +90,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
 
     private Properties properties;
 
-//Konstruktor
+    //Konstruktor
     public ApplicationViewModelImplementation(ApplicationViewImplementation view) {
         this.view = view;
         initProperties();
@@ -102,7 +104,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         initCameraThread();
         backgroundProperty = new SimpleObjectProperty<>();
 
-        if(properties.get("debuglog").equals("1")) {
+        if (properties.get("debuglog").equals("1")) {
             initDebugLog();
         }
 
@@ -117,7 +119,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         try {
             InputStream input = getClass().getClassLoader().getResourceAsStream("viewmodel.properties");
             properties.load(input);
-        }  catch (IOException e) {
+        } catch (IOException e) {
             System.out.println("unable to load properties: viewmodel.properties not found");
         } catch (Exception e) {
             System.out.println("unable to load properties: unexpected error");
@@ -156,7 +158,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         System.out.println("loading DebugLog...");
         DebugLog.getDebugLog().addListener((ListChangeListener<DebugLog.DebugEntry>) c -> {
             c.next();
-            for(DebugLog.DebugEntry de: c.getAddedSubList()) {
+            for (DebugLog.DebugEntry de : c.getAddedSubList()) {
                 listDebugLog.add(de.toString());
             }
         });
@@ -180,7 +182,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         String currentModule = "";
         //GPS
         currentModule = "GpsTracker";
-        if(properties.get("gpsmodule").equals("1")) {
+        if (properties.get("gpsmodule").equals("1")) {
             try {
                 System.out.println("loading " + currentModule + "...");
                 gpsTracker = new GpsTrackerImplementation();
@@ -189,12 +191,12 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 setModuleStatus(ModuleErrors.NOGPSHARDWARE, true);
             } catch (ModuleNotWorkingException e) {
                 setModuleStatus(ModuleErrors.NOGPSHARDWARE, false);
-            } catch(Exception e) {
+            } catch (Exception e) {
                 System.out.println("unexpected error loading " + currentModule);
                 e.printStackTrace();
                 setModuleStatus(ModuleErrors.NOGPSHARDWARE, false);
             }
-        } else if(properties.get("gpsmodule").equals("0")) {
+        } else if (properties.get("gpsmodule").equals("0")) {
             try {
                 System.out.println("loading " + currentModule + "Mock...");
                 gpsTracker = new GpsTrackerMock();
@@ -274,6 +276,18 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                     e.printStackTrace();
                     setModuleStatus(ModuleErrors.NOCAMERA, false);
                 }
+                break;
+            case "2":
+                System.out.println("loading " + currentModule + "Demo...");
+                landscapeTracker = new DemoVideoLandscapeTracker(view.getMediaView());
+                moduleList.add(landscapeTracker);
+                try {
+                    landscapeTracker.startModule();
+                } catch (ModuleNotWorkingException e) {
+                    e.printStackTrace();
+                }
+                setModuleStatus(ModuleErrors.NOCAMERA, true);
+                useDemoVideo = true;
                 break;
             default:
                 System.out.println("failed to load LandscapeTracker");
@@ -396,23 +410,22 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
             int lastExpression = 0;
             int lastCameraExecution = 0;
             int lastMapsExecution = 0;
-
             while (run) {
                 UserExpressions userExpressions = null;
-                if(userTracker.isUserTracked()) {
+                if (userTracker.isUserTracked()) {
                     setExpressionStatus(ExpressionType.ISRACKED, true);
                     userExpressions = userTracker.getUserExpressions();
-                    if(userExpressions != null) {
+                    if (userExpressions != null) {
                         setExpressionStatus(ExpressionType.KISS, userExpressions.isKiss());
                         setExpressionStatus(ExpressionType.MOUTHOPEN, userExpressions.isMouthOpen());
                         setExpressionStatus(ExpressionType.SMILE, userExpressions.isSmile());
                         setExpressionStatus(ExpressionType.TONGUEOUT, userExpressions.isTongueOut());
                     }
-                    if(userExpressions != null && userExpressions.isKiss() && (iterations - lastExpression) >= 10) {
-                        if(cameraThread.getState() == Thread.State.NEW) {
+                    if (userExpressions != null && userExpressions.isKiss() && (iterations - lastExpression) >= 10) {
+                        if (cameraThread.getState() == Thread.State.NEW) {
                             lastExpression = iterations;
                             cameraThread.start();
-                        } else if(cameraThread.getState() == Thread.State.TERMINATED) {
+                        } else if (cameraThread.getState() == Thread.State.TERMINATED) {
                             lastExpression = iterations;
                             initCameraThread();
                             cameraThread.start();
@@ -431,11 +444,11 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                         cameraThread.start();
                     }
                 }*/
-                if((iterations - lastMapsExecution) >= 10) {
-                    if(mapsThread.getState() == Thread.State.NEW) {
+                if ((iterations - lastMapsExecution) >= 10) {
+                    if (mapsThread.getState() == Thread.State.NEW) {
                         lastMapsExecution = iterations;
                         mapsThread.start();
-                    } else if(mapsThread.getState() == Thread.State.TERMINATED) {
+                    } else if (mapsThread.getState() == Thread.State.TERMINATED) {
                         lastMapsExecution = iterations;
                         initMapsThread();
                         mapsThread.start();
@@ -456,7 +469,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
 
     private void initMapsThread() {
         mapsThread = new Thread(() -> {
-            if(gpsTracker == null || poiService == null || knowledgeGraphSearch == null) {
+            if (gpsTracker == null || poiService == null || knowledgeGraphSearch == null) {
                 System.out.println("unable to run maps thread because of uninitialized modules");
                 return;
             }
@@ -478,7 +491,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 setModuleStatus(ModuleErrors.NOGPSHARDWARE, false);
                 return;
             }
-            if(kinematicProperties == null) {
+            if (kinematicProperties == null) {
                 System.out.println("Keine Position erfasst.");
                 return;
             }
@@ -487,17 +500,17 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
             List<PointOfInterest> pois;
             try{
 
-                pois = poiService.loadPlaceForCircle(new GpsPosition(0,0), 0);
+                pois = poiService.loadPlaceForCircle(new GpsPosition(0, 0), 0);
 
-                System.out.println(pois.size()+ " number of POIs found.");
+                System.out.println(pois.size() + " number of POIs found.");
 
                 poiService.addImages(pois);
 
-                System.out.println(pois.size()+ " images added.");
+                System.out.println(pois.size() + " images added.");
 
 
                 setModuleStatus(ModuleErrors.NOINTERNET, true);
-            } catch (Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
                 setModuleStatus(ModuleErrors.NOINTERNET, false);
                 return;
@@ -510,67 +523,80 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
 
             getAbstract(pois);
 
-            for(PointOfInterest poi: pois) {
+            for (PointOfInterest poi : pois) {
                 addPOImaps(poi);
             }
         });
+        // thread will not prevent application shutdown
+        mapsThread.setDaemon(true);
     }
 
     private void getAbstract(List<PointOfInterest> pois) {
         try {
-            for (PointOfInterest poi: pois) {
+            for (PointOfInterest poi : pois) {
                 abstractProvider.setInfoAndUrl(poi);
             }
             setModuleStatus(ModuleErrors.NOINTERNET, true);
-        } catch(Exception e) {
+        } catch (Exception e) {
             setModuleStatus(ModuleErrors.NOINTERNET, false);
+        }
+    }
+
+
+    private void test() {
+        BufferedImage image = null;
+        try {
+            image = landscapeTracker.getImage();
+            setModuleStatus(ModuleErrors.NOCAMERA, true);
+        } catch (Exception e) {
+            e.printStackTrace();
+            setModuleStatus(ModuleErrors.NOCAMERA, false);
+            return;
+        }
+        if (image == null) {
+            return;
+        }
+
+        //Analyse Bild
+        List<PointOfInterest> pois;
+        try {
+            pois = cloudVision.identifyPOIs(image);
+            setModuleStatus(ModuleErrors.NOINTERNET, true);
+        } catch (Exception e) {
+            e.printStackTrace();
+            setModuleStatus(ModuleErrors.NOINTERNET, false);
+            return;
+        }
+
+        if (pois.isEmpty()) {
+            return;
+        }
+        clearDuplicates(pois, "camera");
+
+        getAbstract(pois);
+
+        for (PointOfInterest poi : pois) {
+            addPOIcamera(poi);
         }
     }
 
     private void initCameraThread() {
         cameraThread = new Thread(() -> {
-            if(landscapeTracker == null || cloudVision == null || knowledgeGraphSearch == null) {
+
+            if (landscapeTracker == null || cloudVision == null || knowledgeGraphSearch == null) {
                 System.out.println("unable to run camera thread because of uninitialized modules");
                 return;
             }
 
-            //Aufnahme Bild
-            BufferedImage image;
-            try {
-                image = landscapeTracker.getImage();
-                setModuleStatus(ModuleErrors.NOCAMERA, true);
-            } catch (Exception e) {
-                e.printStackTrace();
-                setModuleStatus(ModuleErrors.NOCAMERA, false);
-                return;
-            }
-            if (image == null) {
-                return;
-            }
-
-            //Analyse Bild
-            List<PointOfInterest> pois;
-            try {
-                pois = cloudVision.identifyPOIs(image);
-                setModuleStatus(ModuleErrors.NOINTERNET, true);
-            } catch(Exception e) {
-                e.printStackTrace();
-                setModuleStatus(ModuleErrors.NOINTERNET, false);
-                return;
-            }
-
-
-            clearDuplicates(pois, "camera");
-            if(pois.isEmpty()) {
-                return;
-            }
-
-            getAbstract(pois);
-
-            for (PointOfInterest poi: pois) {
-                addPOIcamera(poi);
+            if (useDemoVideo) {
+                Platform.runLater(this::test);
+            } else {
+                test();
             }
         });
+
+        // thread will not prevent application shutdown
+        cameraThread.setDaemon(true);
     }
 
     private void clearDuplicates(List<PointOfInterest> pois, String propertyList) {
@@ -593,8 +619,8 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     }
 
     private void setModuleStatus(ModuleErrors type, boolean working) {
-        for(ModuleStatusViewModel status: listModuleStatus) {
-            if(status.getErrorType() == type) {
+        for (ModuleStatusViewModel status : listModuleStatus) {
+            if (status.getErrorType() == type) {
                 Platform.runLater(() -> status.setWorking(working));
                 return;
             }
@@ -603,8 +629,8 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     }
 
     private void setExpressionStatus(ExpressionType type, boolean active) {
-        for(UserExpressionViewModel expression: listExpressionStatus) {
-            if(expression.getType() == type) {
+        for (UserExpressionViewModel expression : listExpressionStatus) {
+            if (expression.getType() == type) {
                 Platform.runLater(() -> expression.setActive(active));
                 return;
             }
@@ -615,14 +641,16 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     private void updateBackgroundImage() {
         Platform.runLater(() -> {
             try {
-                cameraImage = SwingFXUtils.toFXImage(landscapeTracker.getImage(), null );
-                backgroundImage = new BackgroundImage(cameraImage,
-                        BackgroundRepeat.NO_REPEAT,
-                        BackgroundRepeat.NO_REPEAT,
-                        BackgroundPosition.CENTER,
-                        new BackgroundSize(100,100,true,true,false,true));
-                background = new Background(backgroundImage);
-                backgroundProperty.setValue(background);
+                if (landscapeTracker != null) {
+                    cameraImage = SwingFXUtils.toFXImage(landscapeTracker.getImage(), null);
+                    backgroundImage = new BackgroundImage(cameraImage,
+                            BackgroundRepeat.NO_REPEAT,
+                            BackgroundRepeat.NO_REPEAT,
+                            BackgroundPosition.CENTER,
+                            new BackgroundSize(100, 100, true, true, false, true));
+                    background = new Background(backgroundImage);
+                    backgroundProperty.setValue(background);
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -631,7 +659,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
 
     private void addPOIcamera(PointOfInterest poi) {
         PoiViewModel item = convertPOI(poi);
-        if(!propertyPOIcamera.contains(poi)) {
+        if (!propertyPOIcamera.contains(poi)) {
             pointsOfInterest.add(poi);
             Platform.runLater(() -> propertyPOIcamera.add(item));
 
@@ -639,8 +667,8 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     }
 
     private boolean removePOIcamera(String id) {
-        for(PoiViewModel item: propertyPOIcamera) {
-            if(item.getId().equals(id)) {
+        for (PoiViewModel item : propertyPOIcamera) {
+            if (item.getId().equals(id)) {
                 propertyPOIcamera.remove(item);
                 return true;
             }
@@ -656,15 +684,15 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         for (PoiViewModel p: propertyPOImaps) {
             System.out.println("comp: " + p.equals(item));
         }
-        if(!propertyPOImaps.contains(poi)) {
+        if (!propertyPOImaps.contains(poi)) {
             pointsOfInterest.add(poi);
             Platform.runLater(() -> propertyPOImaps.add(item));
         }
     }
 
     private boolean removePOImaps(String id) {
-        for(PoiViewModel item: propertyPOImaps) {
-            if(item.getId().equals(id)) {
+        for (PoiViewModel item : propertyPOImaps) {
+            if (item.getId().equals(id)) {
                 propertyPOImaps.remove(item);
                 return true;
             }
@@ -674,30 +702,30 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
 
     private PoiViewModel convertPOI(PointOfInterest poi) {
         PoiViewModel result = new PoiViewModel();
-        if(poi.getId() != null) {
+        if (poi.getId() != null) {
             result.setId(poi.getId());
         }
-        if(poi.getName() != null) {
+        if (poi.getName() != null) {
             result.setName(poi.getName());
         }
-        if(poi.getImage() != null) {
-            result.setImage(SwingFXUtils.toFXImage(poi.getImage(), null ));
+        if (poi.getImage() != null) {
+            result.setImage(SwingFXUtils.toFXImage(poi.getImage(), null));
         }
-        if(poi.getInformationAbstract() != null) {
+        if (poi.getInformationAbstract() != null) {
             result.setInformationAbstract(poi.getInformationAbstract());
         }
         return result;
     }
 
     public boolean expandPOI(String id) {
-        for(PoiViewModel item: propertyPOIcamera) {
-            if(item.getId().equals(id)) {
+        for (PoiViewModel item : propertyPOIcamera) {
+            if (item.getId().equals(id)) {
                 setExpandedPOI(item);
                 return true;
             }
         }
-        for(PoiViewModel item: propertyPOImaps) {
-            if(item.getId().equals(id)) {
+        for (PoiViewModel item : propertyPOImaps) {
+            if (item.getId().equals(id)) {
                 setExpandedPOI(item);
                 return true;
             }
@@ -721,7 +749,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         view.showExpandedPoi(true);
     }
 
-//Getter und Setter
+    //Getter und Setter
     public List<PointOfInterest> getPointsOfInterest() {
         return pointsOfInterest;
     }
@@ -798,7 +826,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         return listExpressionStatus;
     }
 
-//Testdaten
+    //Testdaten
     private void initTestData() {
         List<PoiViewModel> testData = new ArrayList<PoiViewModel>();
 
@@ -829,5 +857,9 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
 
         //listPOIcamera = FXCollections.observableList(testData);
         propertyPOIcamera.set(FXCollections.observableList(testData));
+    }
+
+    public boolean useDemoVideo() {
+        return useDemoVideo;
     }
 }

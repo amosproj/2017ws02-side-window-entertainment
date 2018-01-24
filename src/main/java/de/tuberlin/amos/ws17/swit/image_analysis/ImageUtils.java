@@ -1,6 +1,7 @@
 package de.tuberlin.amos.ws17.swit.image_analysis;
 
 import com.google.api.services.vision.v1.model.Image;
+import javafx.scene.media.Media;
 
 import javax.annotation.Nullable;
 import javax.imageio.ImageIO;
@@ -11,6 +12,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class ImageUtils {
@@ -27,7 +29,9 @@ public class ImageUtils {
     }
 
     public static Image convertToImage(BufferedImage bufferedImage) throws IOException {
-        if (bufferedImage == null) { throw new IOException(); }
+        if (bufferedImage == null) {
+            throw new IOException();
+        }
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ImageIO.write(bufferedImage, "jpg", baos);
         byte[] data = baos.toByteArray();
@@ -78,6 +82,12 @@ public class ImageUtils {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public static Media getTestVideo() {
+        ClassLoader classLoader = ImageUtils.class.getClassLoader();
+        URL url = classLoader.getResource("test_video.mp4");
+        return new Media(url.toExternalForm());
     }
 
     public static BufferedImage cropImage(BufferedImage image, Rectangle rect) {
