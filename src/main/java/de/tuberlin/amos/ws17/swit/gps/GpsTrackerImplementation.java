@@ -4,6 +4,7 @@ import de.tuberlin.amos.ws17.swit.common.KinematicProperties;
 
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.util.LinkedList;
 
 import de.tuberlin.amos.ws17.swit.common.exceptions.ModuleNotWorkingException;
 
@@ -60,5 +61,10 @@ public class GpsTrackerImplementation implements GpsTracker {
 	public boolean stopModule(){
 		portReader = null;
 		return true;
+	}
+
+	@Override
+	public LinkedList<KinematicProperties> getGpsTrack(int count) {
+		return portReader.getGpsTrack(count);
 	}
 }

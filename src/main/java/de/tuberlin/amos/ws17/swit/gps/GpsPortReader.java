@@ -2,6 +2,7 @@ package de.tuberlin.amos.ws17.swit.gps;
 
 import de.tuberlin.amos.ws17.swit.common.KinematicProperties;
 import de.tuberlin.amos.ws17.swit.common.exceptions.ModuleNotWorkingException;
+import de.tuberlin.amos.ws17.swit.common.DebugLog;
 import gnu.io.SerialPort;
 import gnu.io.CommPortIdentifier;
 
@@ -13,6 +14,7 @@ import org.joda.time.DateTime;
 
 import java.io.*;
 import java.util.Enumeration;
+import java.util.LinkedList;
 
 
 public class GpsPortReader implements SentenceListener{
@@ -28,12 +30,21 @@ public class GpsPortReader implements SentenceListener{
     private double longitude;
     private double course;
     private double velocity;
+    private LinkedList<KinematicProperties> gpsTrack;
 
     public GpsPortReader(){
         update = false;
         running = false;
         lastMessageReceived = null;
         exceptionListener = new OwnExceptionListener();
+        gpsTrack = new LinkedList<KinematicProperties>();
+
+        // filler
+        latitude = -1;
+        longitude = -1;
+        course = -1;
+        velocity = -1;
+
     }
 
     public void readingStarted() {
@@ -64,6 +75,15 @@ public class GpsPortReader implements SentenceListener{
                     longitude = gga.getPosition().getLongitude();
                     if (debug) System.out.println("longitude updated! (" + longitude + ")");
                     update = true;
+
+                    // create KinematicProperties object for GpsTrack
+                    KinematicProperties obj = new KinematicProperties();
+                    obj.setTimeStamp(lastMessageReceived);
+                    obj.setLongitude(longitude);
+                    obj.setLatitude(latitude);
+                    obj.setVelocity(velocity);
+                    obj.setCourse(course);
+                    gpsTrack.push(obj);
 
                 }
                 catch (net.sf.marineapi.nmea.parser.DataNotAvailableException e) {
@@ -191,6 +211,15 @@ public class GpsPortReader implements SentenceListener{
 
 
         return kinProp;
+    }
+
+    public LinkedList<KinematicProperties> getGpsTrack(int count){
+        LinkedList<KinematicProperties> list = new LinkedList<KinematicProperties>();
+        for (int i = 0; (i < count) || (i <= gpsTrack.size()); i++){
+            list.push(gpsTrack.get(gpsTrack.size() - i));
+        }
+
+        return list;
     }
 
     public static void main(String[] args) {
