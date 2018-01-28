@@ -10,7 +10,7 @@ public class OwnExceptionListener implements ExceptionListener {
     }
 
     public void onException(Exception e){
-        // do nothing
+        // do nothing, ignore exceptions
         //System.out.println("Exception: " + e.getMessage());
     }
 }

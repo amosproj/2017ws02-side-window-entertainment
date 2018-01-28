@@ -15,6 +15,9 @@ public class GpsTrackerMock extends GpsTrackerImplementation {
 
     LinkedList<KinematicProperties> returnList;
 
+    private int index = -1;
+    private int skipCount = 1;
+
     // constructor
     public GpsTrackerMock() {
         // DateTime timeStamp, double course, double velocity, double acceleration
@@ -59,9 +62,16 @@ public class GpsTrackerMock extends GpsTrackerImplementation {
         return null;
     }
     // returns an object filled with the fake values (fot testing without hardware)
+    // for every second new request, a new coordinate is sent
     public KinematicProperties fillDumpObject(KinematicProperties kinProp) throws ModuleNotWorkingException{
         DateTime now = new DateTime();
-        int index = now.getMinuteOfHour() / 12;
+        skipCount--;
+        if (skipCount == 0){
+            skipCount = 1;
+            index++;
+            while (index >= returnList.size())
+                index -= returnList.size();
+        }
         returnList.get(index).setTimeStamp(now);
         return returnList.get(index);
     }
