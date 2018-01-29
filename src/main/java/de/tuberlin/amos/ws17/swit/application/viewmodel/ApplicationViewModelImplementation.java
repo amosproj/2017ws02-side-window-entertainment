@@ -20,6 +20,8 @@ import de.tuberlin.amos.ws17.swit.landscape_tracking.LandscapeTrackerImplementat
 import de.tuberlin.amos.ws17.swit.landscape_tracking.LandscapeTrackerMock;
 import de.tuberlin.amos.ws17.swit.poi.MockedPoiService;
 import de.tuberlin.amos.ws17.swit.poi.PoiService;
+import de.tuberlin.amos.ws17.swit.poi.PoiType;
+import de.tuberlin.amos.ws17.swit.poi.PoisInSightFinder;
 import de.tuberlin.amos.ws17.swit.poi.google.GooglePoiService;
 import de.tuberlin.amos.ws17.swit.tracking.JavoNetUserTracker;
 import de.tuberlin.amos.ws17.swit.tracking.UserTracker;
@@ -50,6 +52,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     private GpsTracker gpsTracker;
     private WikiAbstractProvider abstractProvider;
     private PoiService poiService = new MockedPoiService();
+    PoisInSightFinder sightFinder=new PoisInSightFinder(300,200,200);
     private InformationProvider knowledgeGraphSearch;
 
     //Threads
@@ -71,6 +74,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     private SimpleListProperty<UserExpressionViewModel> listExpressionStatus;
     private List<Module> moduleList;
     private boolean useDemoVideo;
+    private int searchRadius=1000;
 
     public Image getPropertyCameraImage() {
         return propertyCameraImage.get();
@@ -177,7 +181,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     }
 
     private void initModules() {
-        String currentModule = "";
+        String currentModule;
         //GPS
         currentModule = "GpsTracker";
         if (properties.get("gpsmodule").equals("1")) {
@@ -380,7 +384,9 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
             case "1":
                 try {
                     System.out.println("loading " + currentModule + "...");
-                    poiService = new GooglePoiService(500, 800);
+                    //instantiate with the forbidden words from the properties file
+                    poiService = new GooglePoiService(500, 800,
+                            Arrays.asList(properties.getProperty("places_to_ignore").split(",")));
                     setModuleStatus(ModuleErrors.NOINTERNET, true);
                 } catch (ModuleNotWorkingException e) {
                     setModuleStatus(ModuleErrors.NOINTERNET, false);
@@ -409,7 +415,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
             int lastCameraExecution = 0;
             int lastMapsExecution = 0;
             while (run) {
-                UserExpressions userExpressions = null;
+                UserExpressions userExpressions;
                 if (userTracker.isUserTracked()) {
                     setExpressionStatus(ExpressionType.ISRACKED, true);
                     userExpressions = userTracker.getUserExpressions();
@@ -475,8 +481,10 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
 
             //GPS
             KinematicProperties kinematicProperties = null;
+            List<KinematicProperties> history = null;
             try {
                 kinematicProperties = gpsTracker.fillDumpObject(kinematicProperties);
+                history = gpsTracker.getGpsTrack(1);
                 setModuleStatus(ModuleErrors.NOGPSHARDWARE, true);
                 DateTime timeStamp = kinematicProperties.getTimeStamp();
                 Double latitude = kinematicProperties.getLatitude();
@@ -496,17 +504,35 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
             }
 
             //POI maps
-            List<PointOfInterest> pois;
-            try{
+            Map<PointOfInterest, Float> pois;
+            try {
+                List<PointOfInterest> poisFound=poiService.loadPlaceForCircleAndPoiType(kinematicProperties, searchRadius,
+                        PoiType.LEISURE, PoiType.TOURISM);
 
-                pois = poiService.loadPlaceForCircle(new GpsPosition(0, 0), 0);
+                pois=sightFinder.calculateDistances(kinematicProperties, poisFound);
+
+                //if there is a history: remove POIs out of viewrange
+                //or: no or irrelevant history
+                if (properties.getProperty("calculatePoisInSight").equals("1")
+                        && history!=null ) {
+                    //or: no or irrelevant history
+                    if (history.isEmpty() == false) {
+                            GpsPosition historyPoint=history.get(0);
+                            if(historyPoint.distanceTo(kinematicProperties)>0.5){
+                            System.out.println("Point in histroy found. Size of POIs now: " + pois.size());
+                            pois = sightFinder.getPoisInViewAngle(historyPoint, kinematicProperties, pois.keySet());
+                            System.out.println("Used viewrange calculation now pois are of size: " + pois.size());
+                        }
+                    }
+                }
 
                 System.out.println(pois.size() + " number of POIs found.");
 
-                poiService.addImages(pois);
-
-                System.out.println(pois.size() + " images added.");
-
+                if(properties.getProperty("load_images").equals("1")) {
+                    poiService.addImages(pois.keySet());
+                    System.out.println(pois.size() + " images added.");
+                }else
+                    System.out.println("Image download is turned of.");
 
                 setModuleStatus(ModuleErrors.NOINTERNET, true);
             } catch (Exception e) {
@@ -515,14 +541,14 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 return;
             }
 
-            clearDuplicates(pois, "map");
             if(pois.isEmpty()) {
                 return;
             }
 
-            getAbstract(pois);
+            //retrieve information
+            getAbstract(new ArrayList<>(pois.keySet()));
 
-            for (PointOfInterest poi : pois) {
+            for (PointOfInterest poi : pois.keySet()) {
                 addPOImaps(poi);
             }
         });
@@ -569,7 +595,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
 
 
     public void analyzeImage() {
-        BufferedImage image = null;
+        BufferedImage image;
         try {
             image = landscapeTracker.getImage();
             setModuleStatus(ModuleErrors.NOCAMERA, true);
@@ -625,7 +651,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     }
 
     private void clearDuplicates(List<PointOfInterest> pois, String propertyList) {
-        ArrayList<PointOfInterest> list = new ArrayList<PointOfInterest>();
+        ArrayList<PointOfInterest> list = new ArrayList<>();
         for (PointOfInterest poi : pois) {
             PoiViewModel item = convertPOI(poi);
             if (propertyList == "map") {
@@ -638,6 +664,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 }
             }
         }
+
         for (PointOfInterest poi: list) {
             pois.remove(poi);
         }
@@ -758,7 +785,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         return false;
     }
 
-    public void minimizePOI() {
+    private void minimizePOI() {
         expandedPOI.setId("");
         expandedPOI.setName("");
         expandedPOI.setImage(null);
@@ -853,7 +880,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
 
     //Testdaten
     private void initTestData() {
-        List<PoiViewModel> testData = new ArrayList<PoiViewModel>();
+        List<PoiViewModel> testData = new ArrayList<>();
 
         //File domfile = new File(ApplicationViewImplementation.app.getClass().getResource("/test_images/berliner-dom.jpg").getPath());
         Image domimage = new Image("/test_images/berliner-dom.jpg");

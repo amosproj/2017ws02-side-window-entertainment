@@ -1,6 +1,7 @@
 package de.tuberlin.amos.ws17.swit.poi.google;
 
 import de.tuberlin.amos.ws17.swit.common.GpsPosition;
+import de.tuberlin.amos.ws17.swit.common.PointOfInterest;
 import se.walkercrou.places.Place;
 import se.walkercrou.places.Status;
 
@@ -11,6 +12,25 @@ import java.util.*;
  */
 class GooglePoiFactory {
 
+    private List<String> forbiddenInPlacenames;
+
+    public GooglePoiFactory(List<String> forbiddenInPlacenames) {
+        this.forbiddenInPlacenames = forbiddenInPlacenames;
+    }
+
+    private <T extends Collection<? extends PointOfInterest>> void removeForbiddenInPlacename(T places){
+        if(places!=null) {
+            Set<PointOfInterest> poisToRemove = new HashSet<>();
+            for (PointOfInterest poi : places) {
+                for (String forbiddenInName : forbiddenInPlacenames) {
+                    if (poi.getName().toLowerCase().contains(forbiddenInName.toLowerCase()))
+                        poisToRemove.add(poi);
+                }
+            }
+            places.removeAll(poisToRemove);
+        }
+    }
+
 
     List<GooglePoi> createPOIsfromPlace(Collection<Place> places){
         List<GooglePoi> pois=new ArrayList<>();
@@ -19,6 +39,7 @@ class GooglePoiFactory {
             pois.add(createPOIfromPlace(place));
         }
 
+        removeForbiddenInPlacename(pois);
         return pois;
     }
 

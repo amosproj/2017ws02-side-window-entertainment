@@ -13,7 +13,7 @@ import javax.imageio.ImageIO;
 
 public class GpsTrackerMock extends GpsTrackerImplementation {
 
-    LinkedList<KinematicProperties> returnList;
+    private LinkedList<KinematicProperties> returnList;
 
     private int index = -1;
     private int skipCount = 1;
@@ -21,7 +21,7 @@ public class GpsTrackerMock extends GpsTrackerImplementation {
     // constructor
     public GpsTrackerMock() {
         // DateTime timeStamp, double course, double velocity, double acceleration
-        returnList = new LinkedList<KinematicProperties>();
+        returnList = new LinkedList<>();
         KinematicProperties one = new KinematicProperties(null, 180, 10, 0);
         one.setLatitude(52.5219184);
         one.setLongitude(13.411026);
@@ -56,7 +56,8 @@ public class GpsTrackerMock extends GpsTrackerImplementation {
         try {
             path = this.getClass().getClassLoader().getResource("module_images/gps_tracker.png").getPath();
             return ImageIO.read(new File(path));
-        } catch (IOException e) {
+        } catch (IOException|NullPointerException e) {
+            e.printStackTrace();
             System.out.println(path);
         }
         return null;
@@ -83,5 +84,17 @@ public class GpsTrackerMock extends GpsTrackerImplementation {
     public boolean stopModule(){
         // not a real module, does not need stopping
         return true;
+    }
+
+
+    @Override
+    public LinkedList<KinematicProperties> getGpsTrack(int count) {
+
+        int end=count-1;
+
+        if(count>returnList.size())
+            end=returnList.size()-1;
+
+        return new LinkedList<>(returnList.subList(0, end));
     }
 }

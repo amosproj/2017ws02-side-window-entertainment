@@ -37,7 +37,7 @@ public class GpsPortReader implements SentenceListener{
         running = false;
         lastMessageReceived = null;
         exceptionListener = new OwnExceptionListener();
-        gpsTrack = new LinkedList<KinematicProperties>();
+        gpsTrack = new LinkedList<>();
 
         // filler
         latitude = -1;
@@ -214,8 +214,8 @@ public class GpsPortReader implements SentenceListener{
     }
 
     public LinkedList<KinematicProperties> getGpsTrack(int count){
-        LinkedList<KinematicProperties> list = new LinkedList<KinematicProperties>();
-        for (int i = 0; (i < count) || (i <= gpsTrack.size()); i++){
+        LinkedList<KinematicProperties> list = new LinkedList<>();
+        for (int i = 1; (i <= count) || (i <= gpsTrack.size()); i++){
             list.push(gpsTrack.get(gpsTrack.size() - i));
         }
 

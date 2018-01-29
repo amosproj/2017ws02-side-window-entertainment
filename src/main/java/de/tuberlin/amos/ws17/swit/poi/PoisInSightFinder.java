@@ -4,9 +4,9 @@ import de.tuberlin.amos.ws17.swit.common.GpsPosition;
 import de.tuberlin.amos.ws17.swit.common.PointOfInterest;
 
 import java.awt.*;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.List;
+import java.util.Map.Entry;
 
 public class PoisInSightFinder {
     private int metersInDrivinDirection;
@@ -19,7 +19,18 @@ public class PoisInSightFinder {
         this.metersBraod = metersBraod;
     }
 
+    /**
+     * Calculates which POIs lie in a four-sided figure right to the car. The length of the sides are defined in the constructor of the {@link PoisInSightFinder}.
+     * @param oldPosition as the previous position
+     * @param currentPosition as the current position
+     * @param pois as the pois to process
+     * @return the pois within the defined area
+     */
     public  Map<PointOfInterest, Float> getPoisInViewAngle(GpsPosition oldPosition, GpsPosition currentPosition, Collection<PointOfInterest> pois){
+
+        if(oldPosition.equals(currentPosition)){
+            return calculateDistances(currentPosition, pois);
+        }
 
         Polygon sight=calculateSight(currentPosition, oldPosition);
         Map<PointOfInterest, Float> inViewRange=new HashMap<>();
@@ -33,8 +44,20 @@ public class PoisInSightFinder {
                 inViewRange.put(p, distance);
             }
         }
+        //sort asc
+        inViewRange=sortByComparator(inViewRange, true);
 
         return inViewRange;
+    }
+
+    public Map<PointOfInterest, Float> calculateDistances(GpsPosition currentPosition, Collection<PointOfInterest> pois){
+        Map<PointOfInterest, Float> poisWithDistance=new HashMap<>();
+        for(PointOfInterest poi:pois){
+            poisWithDistance.put(poi, currentPosition.distanceTo(poi.getGpsPosition()));
+        }
+        //sort asc
+        poisWithDistance=sortByComparator(poisWithDistance, true);
+        return poisWithDistance;
     }
 
     public Polygon calculateSight(GpsPosition currentPosition, GpsPosition oldPosition){
@@ -52,5 +75,38 @@ public class PoisInSightFinder {
         sight.addPoint(inDrivingDirectionBroad.getX(), inDrivingDirectionBroad.getY());
 
         return sight;
+    }
+
+    private static <T extends Comparable> Map<PointOfInterest, T> sortByComparator(Map<PointOfInterest, T> unsortMap, final boolean order)
+    {
+
+        List<Entry<PointOfInterest, T>> list = new LinkedList<>(unsortMap.entrySet());
+
+        // Sorting the list based on values
+        Collections.sort(list, new Comparator<Entry<PointOfInterest, T>>()
+        {
+            public int compare(Entry<PointOfInterest, T> o1,
+                               Entry<PointOfInterest, T> o2)
+            {
+                if (order)
+                {
+                    return o1.getValue().compareTo(o2.getValue());
+                }
+                else
+                {
+                    return o2.getValue().compareTo(o1.getValue());
+
+                }
+            }
+        });
+
+        // Maintaining insertion order with the help of LinkedList
+        Map<PointOfInterest, T> sortedMap = new LinkedHashMap<>();
+        for (Entry<PointOfInterest, T> entry : list)
+        {
+            sortedMap.put(entry.getKey(), entry.getValue());
+        }
+
+        return sortedMap;
     }
 }

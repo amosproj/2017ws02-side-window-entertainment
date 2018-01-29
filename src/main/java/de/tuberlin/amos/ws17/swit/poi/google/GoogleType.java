@@ -97,13 +97,48 @@ public enum GoogleType {
 	veterinary_care,
 	zoo,
 
+	/**
+	 * Do NOT use for requests! Only required for received POIs
+	 */
 	health,
+	/**
+	 * Do NOT use for requests! Only required for received POIs
+	 */
 	point_of_interest,
+	/**
+	 * Do NOT use for requests! Only required for received POIs
+	 */
 	establishment,
+	/**
+	 * Do NOT use for requests! Only required for received POIs
+	 */
 	food,
+	/**
+	 * Do NOT use for requests! Only required for received POIs
+	 */
 	finance,
+	/**
+	 * Do NOT use for requests! Only required for received POIs
+	 */
 	political,
+	/**
+	 * Do NOT use for requests! Only required for received POIs
+	 */
 	premise,
+	/**
+	 * Do NOT use for requests! Only required for received POIs
+	 */
 	locality,
+	/**
+	 * Do NOT use for requests! Only required for received POIs
+	 */
 	route,
+	/**
+	 * Do NOT use for requests! Only required for received POIs
+	 */
+	light_rail_station,
+	/**
+	 * Do NOT use for requests! Only required for received POIs
+	 */
+	place_of_worship,
 }
