@@ -46,65 +46,55 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
 
     //Module
     private ApplicationViewImplementation view;
-    private LandmarkDetector cloudVision;
-    private LandscapeTracker landscapeTracker;
-    private UserTracker userTracker;
-    private GpsTracker gpsTracker;
-    private WikiAbstractProvider abstractProvider;
-    private PoiService poiService = new MockedPoiService();
-    PoisInSightFinder sightFinder=new PoisInSightFinder(300,200,200);
+    private LandmarkDetector              cloudVision;
+    private LandscapeTracker              landscapeTracker;
+    private UserTracker                   userTracker;
+    private GpsTracker                    gpsTracker;
+    private WikiAbstractProvider          abstractProvider;
+    private PoiService                    poiService;
+    private PoisInSightFinder sightFinder = new PoisInSightFinder(300, 200, 200);
     private InformationProvider knowledgeGraphSearch;
 
     //Threads
-    public boolean run;
-    private Thread modelviewThread;
-    private Thread updateThread;
-    private Thread cameraThread;
-    private Thread mapsThread;
+    public  boolean isRunning;
+    private Thread  updateThread;
+    private Thread  cameraThread;
+    private Thread  mapsThread;
 
     //Listen und Binding
-    private List<PointOfInterest> pointsOfInterest;
-    private PoiViewModel expandedPOI;
-    private UserPositionViewModel vmUserPosition;
-    private SimpleListProperty<PoiViewModel> propertyPOImaps;
-    private SimpleListProperty<PoiViewModel> propertyPOIcamera;
-    private SimpleObjectProperty<EventHandler<ActionEvent>> propertyCloseButton;
-    private SimpleListProperty<String> listDebugLog;
-    private SimpleListProperty<ModuleStatusViewModel> listModuleStatus;
-    private SimpleListProperty<UserExpressionViewModel> listExpressionStatus;
-    private List<Module> moduleList;
-    private boolean useDemoVideo;
-    private int searchRadius=1000;
+    private List<PointOfInterest>                           pointsOfInterest     = new ArrayList<>();
+    private PoiViewModel                                    expandedPOI          = new PoiViewModel();
+    private UserPositionViewModel                           vmUserPosition       = new UserPositionViewModel();
+    private SimpleListProperty<PoiViewModel>                propertyPoiMaps      = new SimpleListProperty<>();
+    private SimpleListProperty<PoiViewModel>                propertyPoiCamera    = new SimpleListProperty<>();
+    private SimpleObjectProperty<EventHandler<ActionEvent>> propertyCloseButton  = new SimpleObjectProperty<>();
+    private SimpleListProperty<String>                      listDebugLog         = new SimpleListProperty<>();
+    private SimpleListProperty<ModuleStatusViewModel>       listModuleStatus     = new SimpleListProperty<>();
+    private SimpleListProperty<UserExpressionViewModel>     listExpressionStatus = new SimpleListProperty<>();
+    private List<Module>                                    moduleList           = new ArrayList<>();
 
-    public Image getPropertyCameraImage() {
-        return propertyCameraImage.get();
-    }
+    private boolean useDemoVideo = false;
+    private int     searchRadius = 1000;
 
-    public SimpleObjectProperty<Image> propertyCameraImageProperty() {
-        return propertyCameraImage;
-    }
+    private Property<Image> propertyCameraImage = new SimpleObjectProperty<>();
+    private Image cameraImage;
+    public Property<Background> backgroundProperty = new SimpleObjectProperty<>();
 
-    private SimpleObjectProperty<Image> propertyCameraImage;
-    public Image cameraImage;
-    public Property<Background> backgroundProperty;
-    public BackgroundImage backgroundImage;
-    public Background background;
+    private BackgroundImage backgroundImage;
+    private Background      background;
 
     private Properties properties;
 
-    //Konstruktor
     public ApplicationViewModelImplementation(ApplicationViewImplementation view) {
         this.view = view;
         initProperties();
         initObjects();
         initModules();
 
-        run = true;
-        modelviewThread = Thread.currentThread();
+        isRunning = true;
         initUpdateThread();
         initMapsThread();
         initCameraThread();
-        backgroundProperty = new SimpleObjectProperty<>();
 
         if (properties.get("debuglog").equals("1")) {
             initDebugLog();
@@ -129,31 +119,12 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     }
 
     private void initObjects() {
-
-        propertyCameraImage = new SimpleObjectProperty<>();
-
-        listModuleStatus = new SimpleListProperty<>();
         listModuleStatus.set(FXCollections.observableList(new ArrayList<>()));
-
-        listExpressionStatus = new SimpleListProperty<>();
         listExpressionStatus.set(FXCollections.observableList(new ArrayList<>()));
-
-        pointsOfInterest = new ArrayList<>();
-        expandedPOI = new PoiViewModel();
-        vmUserPosition = new UserPositionViewModel();
-
-        propertyPOImaps = new SimpleListProperty<>();
-        propertyPOImaps.set(FXCollections.observableList(new ArrayList<>()));
-        propertyPOIcamera = new SimpleListProperty<>();
-        propertyPOIcamera.set(FXCollections.observableList(new ArrayList<>()));
-
-        listDebugLog = new SimpleListProperty<>();
+        propertyPoiMaps.set(FXCollections.observableList(new ArrayList<>()));
+        propertyPoiCamera.set(FXCollections.observableList(new ArrayList<>()));
         listDebugLog.set(FXCollections.observableList(new ArrayList<>()));
-
-        moduleList = new ArrayList<>();
-
-        propertyCloseButton = new SimpleObjectProperty<>();
-        propertyCloseButton.set(event -> minimizePOI());
+        propertyCloseButton.set(event -> minimizePoi());
     }
 
     private void initDebugLog() {
@@ -164,20 +135,6 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 listDebugLog.add(de.toString());
             }
         });
-
-        // systemoutprintline redirect
-        /*System.setOut(new PrintStream(System.out) {
-
-            public void println(String s) {
-                propertyDebugLog.add(s);
-                super.println(s);
-            }
-
-            public void print(String s) {
-                propertyDebugLog.add(s);
-                super.println(s);
-            }
-        });*/
     }
 
     private void initModules() {
@@ -414,7 +371,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
             int lastExpression = 0;
             int lastCameraExecution = 0;
             int lastMapsExecution = 0;
-            while (run) {
+            while (isRunning) {
                 UserExpressions userExpressions;
                 if (userTracker.isUserTracked()) {
                     setExpressionStatus(ExpressionType.ISRACKED, true);
@@ -475,7 +432,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     private void initMapsThread() {
         mapsThread = new Thread(() -> {
             if (gpsTracker == null || poiService == null || knowledgeGraphSearch == null) {
-                System.out.println("unable to run maps thread because of uninitialized modules");
+                System.out.println("unable to isRunning maps thread because of uninitialized modules");
                 return;
             }
 
@@ -506,19 +463,19 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
             //POI maps
             Map<PointOfInterest, Float> pois;
             try {
-                List<PointOfInterest> poisFound=poiService.loadPlaceForCircleAndPoiType(kinematicProperties, searchRadius,
+                List<PointOfInterest> poisFound = poiService.loadPlaceForCircleAndPoiType(kinematicProperties, searchRadius,
                         PoiType.LEISURE, PoiType.TOURISM);
 
-                pois=sightFinder.calculateDistances(kinematicProperties, poisFound);
+                pois = sightFinder.calculateDistances(kinematicProperties, poisFound);
 
                 //if there is a history: remove POIs out of viewrange
                 //or: no or irrelevant history
                 if (properties.getProperty("calculatePoisInSight").equals("1")
-                        && history!=null ) {
+                        && history != null) {
                     //or: no or irrelevant history
-                    if (history.isEmpty() == false) {
-                            GpsPosition historyPoint=history.get(0);
-                            if(historyPoint.distanceTo(kinematicProperties)>0.5){
+                    if (!history.isEmpty()) {
+                        GpsPosition historyPoint = history.get(0);
+                        if (historyPoint.distanceTo(kinematicProperties) > 0.5) {
                             System.out.println("Point in histroy found. Size of POIs now: " + pois.size());
                             pois = sightFinder.getPoisInViewAngle(historyPoint, kinematicProperties, pois.keySet());
                             System.out.println("Used viewrange calculation now pois are of size: " + pois.size());
@@ -528,10 +485,10 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
 
                 System.out.println(pois.size() + " number of POIs found.");
 
-                if(properties.getProperty("load_images").equals("1")) {
+                if (properties.getProperty("load_images").equals("1")) {
                     poiService.addImages(pois.keySet());
                     System.out.println(pois.size() + " images added.");
-                }else
+                } else
                     System.out.println("Image download is turned of.");
 
                 setModuleStatus(ModuleErrors.NOINTERNET, true);
@@ -541,7 +498,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 return;
             }
 
-            if(pois.isEmpty()) {
+            if (pois.isEmpty()) {
                 return;
             }
 
@@ -549,7 +506,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
             getAbstract(new ArrayList<>(pois.keySet()));
 
             for (PointOfInterest poi : pois.keySet()) {
-                addPOImaps(poi);
+                addMapsPoi(poi);
             }
         });
         // thread will not prevent application shutdown
@@ -627,7 +584,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         getAbstract(pois);
 
         for (PointOfInterest poi : pois) {
-            addPOIcamera(poi);
+            addCameraPoi(poi);
         }
     }
 
@@ -635,7 +592,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         cameraThread = new Thread(() -> {
 
             if (landscapeTracker == null || cloudVision == null || knowledgeGraphSearch == null) {
-                System.out.println("unable to run camera thread because of uninitialized modules");
+                System.out.println("unable to isRunning camera thread because of uninitialized modules");
                 return;
             }
 
@@ -653,19 +610,19 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     private void clearDuplicates(List<PointOfInterest> pois, String propertyList) {
         ArrayList<PointOfInterest> list = new ArrayList<>();
         for (PointOfInterest poi : pois) {
-            PoiViewModel item = convertPOI(poi);
-            if (propertyList == "map") {
-                if (propertyPOImaps.contains(item)) {
+            PoiViewModel item = convertPoi(poi);
+            if (propertyList.equals("map")) {
+                if (propertyPoiMaps.contains(item)) {
                     list.add(poi);
                 }
-            } else if (propertyList == "camera") {
-                if (propertyPOIcamera.contains(item)) {
+            } else if (propertyList.equals("camera")) {
+                if (propertyPoiCamera.contains(item)) {
                     list.add(poi);
                 }
             }
         }
 
-        for (PointOfInterest poi: list) {
+        for (PointOfInterest poi : list) {
             pois.remove(poi);
         }
     }
@@ -709,50 +666,50 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         });
     }
 
-    private void addPOIcamera(PointOfInterest poi) {
-        PoiViewModel item = convertPOI(poi);
-        if (!propertyPOIcamera.contains(poi)) {
+    private void addCameraPoi(PointOfInterest poi) {
+        PoiViewModel item = convertPoi(poi);
+        if (!propertyPoiCamera.contains(poi)) {
             pointsOfInterest.add(poi);
-            Platform.runLater(() -> propertyPOIcamera.add(item));
+            Platform.runLater(() -> propertyPoiCamera.add(item));
 
         }
     }
 
-    private boolean removePOIcamera(String id) {
-        for (PoiViewModel item : propertyPOIcamera) {
+    private boolean removeCameraPoi(String id) {
+        for (PoiViewModel item : propertyPoiCamera) {
             if (item.getId().equals(id)) {
-                propertyPOIcamera.remove(item);
+                propertyPoiCamera.remove(item);
                 return true;
             }
         }
         return false;
     }
 
-    private void addPOImaps(PointOfInterest poi) {
-        PoiViewModel item = convertPOI(poi);
+    private void addMapsPoi(PointOfInterest poi) {
+        PoiViewModel item = convertPoi(poi);
         System.out.println("item: " + item.getId() + " " + item.getName());
-        System.out.println(propertyPOImaps.contains(item));
-        System.out.println("size: " + propertyPOImaps.size());
-        for (PoiViewModel p: propertyPOImaps) {
+        System.out.println(propertyPoiMaps.contains(item));
+        System.out.println("size: " + propertyPoiMaps.size());
+        for (PoiViewModel p : propertyPoiMaps) {
             System.out.println("comp: " + p.equals(item));
         }
-        if (!propertyPOImaps.contains(poi)) {
+        if (!propertyPoiMaps.contains(poi)) {
             pointsOfInterest.add(poi);
-            Platform.runLater(() -> propertyPOImaps.add(item));
+            Platform.runLater(() -> propertyPoiMaps.add(item));
         }
     }
 
-    private boolean removePOImaps(String id) {
-        for (PoiViewModel item : propertyPOImaps) {
+    private boolean removeMapsPoi(String id) {
+        for (PoiViewModel item : propertyPoiMaps) {
             if (item.getId().equals(id)) {
-                propertyPOImaps.remove(item);
+                propertyPoiMaps.remove(item);
                 return true;
             }
         }
         return false;
     }
 
-    private PoiViewModel convertPOI(PointOfInterest poi) {
+    private PoiViewModel convertPoi(PointOfInterest poi) {
         PoiViewModel result = new PoiViewModel();
         if (poi.getId() != null) {
             result.setId(poi.getId());
@@ -769,23 +726,23 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         return result;
     }
 
-    public boolean expandPOI(String id) {
-        for (PoiViewModel item : propertyPOIcamera) {
+    public boolean expandPoi(String id) {
+        for (PoiViewModel item : propertyPoiCamera) {
             if (item.getId().equals(id)) {
-                setExpandedPOI(item);
+                setExpandedPoi(item);
                 return true;
             }
         }
-        for (PoiViewModel item : propertyPOImaps) {
+        for (PoiViewModel item : propertyPoiMaps) {
             if (item.getId().equals(id)) {
-                setExpandedPOI(item);
+                setExpandedPoi(item);
                 return true;
             }
         }
         return false;
     }
 
-    private void minimizePOI() {
+    private void minimizePoi() {
         expandedPOI.setId("");
         expandedPOI.setName("");
         expandedPOI.setImage(null);
@@ -793,7 +750,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         view.showExpandedPoi(false);
     }
 
-    private void setExpandedPOI(PoiViewModel item) {
+    private void setExpandedPoi(PoiViewModel item) {
         expandedPOI.setId(item.getId());
         expandedPOI.setName(item.getName());
         expandedPOI.setImage(item.getImage());
@@ -814,28 +771,28 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         return expandedPOI;
     }
 
-    public ObservableList<PoiViewModel> getPropertyPOImaps() {
-        return propertyPOImaps.get();
+    public ObservableList<PoiViewModel> getPropertyPoiMaps() {
+        return propertyPoiMaps.get();
     }
 
-    public SimpleListProperty<PoiViewModel> propertyPOImapsProperty() {
-        return propertyPOImaps;
+    public SimpleListProperty<PoiViewModel> propertyPoiMapsProperty() {
+        return propertyPoiMaps;
     }
 
-    public void setPropertyPOImaps(ObservableList<PoiViewModel> propertyPOImaps) {
-        this.propertyPOImaps.set(propertyPOImaps);
+    public void setPropertyPoiMaps(ObservableList<PoiViewModel> propertyPoiMaps) {
+        this.propertyPoiMaps.set(propertyPoiMaps);
     }
 
-    public ObservableList<PoiViewModel> getPropertyPOIcamera() {
-        return propertyPOIcamera.get();
+    public ObservableList<PoiViewModel> getPropertyPoiCamera() {
+        return propertyPoiCamera.get();
     }
 
-    public SimpleListProperty<PoiViewModel> propertyPOIcameraProperty() {
-        return propertyPOIcamera;
+    public SimpleListProperty<PoiViewModel> propertyPoiCameraProperty() {
+        return propertyPoiCamera;
     }
 
-    public void setPropertyPOIcamera(ObservableList<PoiViewModel> propertyPOIcamera) {
-        this.propertyPOIcamera.set(propertyPOIcamera);
+    public void setPropertyPoiCamera(ObservableList<PoiViewModel> propertyPoiCamera) {
+        this.propertyPoiCamera.set(propertyPoiCamera);
     }
 
     public EventHandler getPropertyCloseButton() {
@@ -878,37 +835,8 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         return listExpressionStatus;
     }
 
-    //Testdaten
-    private void initTestData() {
-        List<PoiViewModel> testData = new ArrayList<>();
-
-        //File domfile = new File(ApplicationViewImplementation.app.getClass().getResource("/test_images/berliner-dom.jpg").getPath());
-        Image domimage = new Image("/test_images/berliner-dom.jpg");
-        testData.add(new PoiViewModel("5", "Berliner Dom", domimage, "Das ist der Berliner Dom, lalala. Das hier ist ein ganz langer Text um zu testen, " +
-                "ob bei einem Label der Text automatisch auf die nächste Zeile springt. Offensichtlich tut er das nur, wenn man eine Variable dafür setzt. "));
-
-        //File torfile = new File(ApplicationViewImplementation.app.getClass().getResource("/test_images/brandenburger-tor.jpg").getPath());
-        Image torimg = new Image("/test_images/brandenburger-tor.jpg");
-        testData.add(new PoiViewModel("6", "Brandenburger Tor", torimg, "Das Brandenburger Tor. Offensichtlich. " +
-                "Wer das nicht kennt muss aber echt unter nem Stein leben. Naja. Infos geb ich dir nicht, solltest du doch alles wissen. Kulturbanause!"));
-
-        //File turmfile = new File(ApplicationViewImplementation.app.getClass().getResource("/test_images/fernsehturm.jpg").getPath());
-        Image turmimg = new Image("/test_images/fernsehturm.jpg");
-        testData.add(new PoiViewModel("7", "Fernsehturm", turmimg, "Vom Fernsehturm kommt das Fernsehen her. Oder so. " +
-                "Heute kommt das Fernsehen aus der Steckdose und stirbt aus. Hah! Video On Demand, hell yeah!"));
-
-        //File siegfile = new File(ApplicationViewImplementation.app.getClass().getResource("/test_images/sieges-saeule.jpg").getPath());
-        Image siegimg = new Image("/test_images/sieges-saeule.jpg");
-        testData.add(new PoiViewModel("8", "Siegessäule", siegimg, "Die Siegessäule. Da hat wohl jemand was gewonnen und hat direkt mal Geld investiert, " +
-                "um es jeden wissen zu lassen. Und jetzt weiß auch du, dass hier irgendwer gewonnen hat. Wahnsinn! " +
-                "Noch viel wahnsinniger ist, dass ich mir jetzt einen unglaublich langen Text ausdenken muss um zu sehen, " +
-                "ob das Layout der Oberfläche gut funktioniert oder nicht. Dazu möchte ich schauen, ob es eine ScrollBar gibt, " +
-                "falls der Text zu lange ist, was ja durchaus vorkommen kann. Vorallem wenn wir das Abstract von Wikipedia anzeigen, " +
-                "welches gerne mal sehr lang sein kann. Da muss das natürlich gut funktionieren. Deswegen teste ist das jetzt aus. " +
-                "Hoffentlich funktioniert es. Solltest du das hier lesen kann es gut sein, dass es erfolgreich war. "));
-
-        //listPOIcamera = FXCollections.observableList(testData);
-        propertyPOIcamera.set(FXCollections.observableList(testData));
+    public Property<Image> propertyCameraImageProperty() {
+        return propertyCameraImage;
     }
 
     public boolean useDemoVideo() {

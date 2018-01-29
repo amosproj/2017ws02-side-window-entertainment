@@ -36,7 +36,7 @@ public interface ApplicationView {
      * Displays the POI in the middle of the screen with more information
      * @param id ID of the POI
      */
-    //void expandPOI(int id);
+    //void expandPoi(int id);
 
     /**
      * Closes the currently expanded POI
