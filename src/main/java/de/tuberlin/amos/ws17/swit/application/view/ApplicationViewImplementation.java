@@ -22,6 +22,8 @@ import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 
+import java.util.Stack;
+
 public class ApplicationViewImplementation extends Application implements ApplicationView {
 
     private BorderPane                        pnFoundation         = new BorderPane();
@@ -69,6 +71,9 @@ public class ApplicationViewImplementation extends Application implements Applic
                 case F:
                     controller.analyzeImage();
                     break;
+                case D:
+                    toggleDebugLog();
+                    break;
                 default:
                     break;
             }
@@ -82,7 +87,6 @@ public class ApplicationViewImplementation extends Application implements Applic
         pnFoundation.setId("pnFoundation");
         pnFoundation.setTop(listPoiCamera);
         pnFoundation.setBottom(listPoiMaps);
-        pnFoundation.setRight(listDebugLog);
         pnFoundation.setLeft(statusPane);
 
         listPoiCamera.setId("listPoiCamera");
@@ -97,7 +101,6 @@ public class ApplicationViewImplementation extends Application implements Applic
         listExpressionStatus.setId("listExpressionStatus");
 
         listDebugLog.setId("listDebugLog");
-
         expansionPane.setId("expansionPane");
         expansionPane.setVisible(false);
         expansionTopPane.setId("expansionTopPane");
@@ -119,6 +122,8 @@ public class ApplicationViewImplementation extends Application implements Applic
 
         root.getChildren().add(mediaView);
         root.getChildren().add(pnFoundation);
+        root.getChildren().add(listDebugLog);
+        StackPane.setAlignment(listDebugLog, Pos.TOP_RIGHT);
     }
 
     private void initExpansion() {
@@ -143,6 +148,15 @@ public class ApplicationViewImplementation extends Application implements Applic
         expansionScrollPane.setFitToWidth(true);
     }
 
+    @Override
+    public void showDebugLog(boolean show) {
+        listDebugLog.setVisible(show);
+    }
+
+    private void toggleDebugLog() {
+        listDebugLog.setVisible(!listDebugLog.isVisible());
+    }
+
     private void initBindings() {
         ImageView cameraImage = new ImageView();
         cameraImage.imageProperty().bindBidirectional(controller.propertyCameraImageProperty());
@@ -158,7 +172,7 @@ public class ApplicationViewImplementation extends Application implements Applic
             listPoiCamera.itemsProperty().bindBidirectional(controller.propertyPoiCameraProperty());
             listPoiMaps.itemsProperty().bindBidirectional(controller.propertyPoiMapsProperty());
 
-            listDebugLog.itemsProperty().bindBidirectional(controller.listDebugLogProperty());
+            listDebugLog.itemsProperty().bindBidirectional(controller.propertyDebugLogProperty());
             if (!controller.useDemoVideo()) {
                 pnFoundation.backgroundProperty().bindBidirectional(controller.backgroundProperty);
             }
@@ -209,14 +223,17 @@ public class ApplicationViewImplementation extends Application implements Applic
                     @Override
                     public void updateItem(String item, boolean empty) {
                         super.updateItem(item, empty);
-                        if (empty || item == null) {
-                            setGraphic(null);
-                            setText(null);
-                        } else {
-                            Label debugText = new Label(item);
-                            setGraphic(debugText);
-                            listDebugLog.refresh();
-                        }
+                        Platform.runLater(() -> {
+                            if (empty || item == null) {
+                                setGraphic(null);
+                                setText(null);
+                            } else {
+                                Label debugText = new Label(item);
+                                setGraphic(debugText);
+                                listDebugLog.refresh();
+                            }
+                        });
+
                     }
                 };
             }

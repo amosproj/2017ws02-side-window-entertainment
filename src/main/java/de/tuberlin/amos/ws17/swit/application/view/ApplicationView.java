@@ -49,4 +49,6 @@ public interface ApplicationView {
      * @param poi
      */
     //void showPoiInfo(PoiViewModel poi);
+
+    void showDebugLog(boolean show);
 }

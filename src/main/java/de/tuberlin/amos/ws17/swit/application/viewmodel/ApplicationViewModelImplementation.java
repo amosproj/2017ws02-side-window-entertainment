@@ -68,7 +68,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     private SimpleListProperty<PoiViewModel>                propertyPoiMaps      = new SimpleListProperty<>();
     private SimpleListProperty<PoiViewModel>                propertyPoiCamera    = new SimpleListProperty<>();
     private SimpleObjectProperty<EventHandler<ActionEvent>> propertyCloseButton  = new SimpleObjectProperty<>();
-    private SimpleListProperty<String>                      listDebugLog         = new SimpleListProperty<>();
+    private SimpleListProperty<String>                      propertyDebugLog     = new SimpleListProperty<>();
     private SimpleListProperty<ModuleStatusViewModel>       listModuleStatus     = new SimpleListProperty<>();
     private SimpleListProperty<UserExpressionViewModel>     listExpressionStatus = new SimpleListProperty<>();
     private List<Module>                                    moduleList           = new ArrayList<>();
@@ -123,16 +123,17 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         listExpressionStatus.set(FXCollections.observableList(new ArrayList<>()));
         propertyPoiMaps.set(FXCollections.observableList(new ArrayList<>()));
         propertyPoiCamera.set(FXCollections.observableList(new ArrayList<>()));
-        listDebugLog.set(FXCollections.observableList(new ArrayList<>()));
+        propertyDebugLog.set(FXCollections.observableList(new ArrayList<>()));
         propertyCloseButton.set(event -> minimizePoi());
     }
 
     private void initDebugLog() {
+        view.showDebugLog(true);
         System.out.println("loading DebugLog...");
         DebugLog.getDebugLog().addListener((ListChangeListener<DebugLog.DebugEntry>) c -> {
             c.next();
             for (DebugLog.DebugEntry de : c.getAddedSubList()) {
-                listDebugLog.add(de.toString());
+                propertyDebugLog.add(de.toString());
             }
         });
     }
@@ -446,8 +447,8 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 DateTime timeStamp = kinematicProperties.getTimeStamp();
                 Double latitude = kinematicProperties.getLatitude();
                 Double longitude = kinematicProperties.getLongitude();
-                System.out.println("Um " + timeStamp.toString() + " befanden wir uns an dem Breitengrad: " +
-                        latitude + " und Laengengrad: " + longitude + ".");
+                DebugLog.log(timeStamp.toString("HH:mm:ss") + " Lat: " +
+                        latitude + ", Lng: " + longitude);
             } catch (ModuleNotWorkingException e) {
                 setModuleStatus(ModuleErrors.NOGPSHARDWARE, false);
             } catch (Exception e) {
@@ -648,6 +649,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     }
 
     private void updateBackgroundImage() {
+
         Platform.runLater(() -> {
             try {
                 if (landscapeTracker != null) {
@@ -807,12 +809,12 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         this.propertyCloseButton.set(propertyCloseButton);
     }
 
-    public ObservableList<String> getListDebugLog() {
-        return listDebugLog.get();
+    public ObservableList<String> getPropertyDebugLog() {
+        return propertyDebugLog.get();
     }
 
-    public SimpleListProperty<String> listDebugLogProperty() {
-        return listDebugLog;
+    public SimpleListProperty<String> propertyDebugLogProperty() {
+        return propertyDebugLog;
     }
 
     public ObservableList<ModuleStatusViewModel> getListModuleStatus() {
