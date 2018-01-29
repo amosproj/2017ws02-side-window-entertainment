@@ -2,6 +2,7 @@ package de.tuberlin.amos.ws17.swit.poi.google;
 
 import de.tuberlin.amos.ws17.swit.common.ApiConfig;
 import de.tuberlin.amos.ws17.swit.common.GpsPosition;
+import de.tuberlin.amos.ws17.swit.common.PointOfInterest;
 import de.tuberlin.amos.ws17.swit.common.exceptions.ModuleNotWorkingException;
 import de.tuberlin.amos.ws17.swit.poi.PoiService;
 import de.tuberlin.amos.ws17.swit.poi.PoiType;
@@ -23,12 +24,19 @@ public class GooglePoiService implements PoiService<GooglePoi> {
 
 	private GoogleTypeMap typeMap= new GoogleTypeMap();
 
-	private GooglePoiFactory poiFactory = new GooglePoiFactory();
+	private GooglePoiFactory poiFactory;
 
 	private int xResolution, yResolution;
 
-	public GooglePoiService(int xResolution, int yResolution) throws ModuleNotWorkingException{
-	    this(false, xResolution, yResolution);
+	/**
+	 * Instatiation with logging turned of (by default)
+	 * @param xResolution as the x resolution for the downloaded images in pixels
+	 * @param yResolution as the y resolution for the downloaded images in pixels
+	 * @param forbiddenPlacenames as a string (ignore case) that is not allowed within the POI name and so not further processed
+	 * @throws ModuleNotWorkingException in case of failure
+	 */
+	public GooglePoiService(int xResolution, int yResolution, List<String> forbiddenPlacenames) throws ModuleNotWorkingException{
+	    this(false, xResolution, yResolution, forbiddenPlacenames);
 	    testFunctionality();
 	}
 
@@ -36,16 +44,17 @@ public class GooglePoiService implements PoiService<GooglePoi> {
 	 * @param enableLogging is to be set true if the logging of the {@link GooglePlaces} client should output its logging informaiton.
 	 * @param xResolution as the x resolution for the downloaded images in pixels
 	 * @param yResolution as the y resolution for the downloaded images in pixels
+	 * @param forbiddenPlacenames as a string (ignore case) that is not allowed within the POI name and so not further processed
 	 * @throws ModuleNotWorkingException in case of failure
 	 */
-	public GooglePoiService(boolean enableLogging, int xResolution, int yResolution) throws ModuleNotWorkingException{
+	public GooglePoiService(boolean enableLogging, int xResolution, int yResolution, List<String> forbiddenPlacenames) throws ModuleNotWorkingException{
 		client = new GooglePlaces(ApiConfig.getProperty("GooglePlaces"), rh);
 		client.setDebugModeEnabled(enableLogging);
 		this.xResolution=xResolution;
 		this.yResolution=yResolution;
 		testFunctionality();
+		poiFactory = new GooglePoiFactory(forbiddenPlacenames);
 	}
-
 
     /**
      * Check if a certain POI can be loaded. No return.
@@ -118,7 +127,7 @@ public class GooglePoiService implements PoiService<GooglePoi> {
 	 * @param center as the centerpoint
 	 * @param radius as the radius in meters
 	 * @return a Set of the retrieved POis, can be empty but not null
-	 * @throws InvalidRequestException
+	 * @throws InvalidRequestException in case an exception occurs
 	 */
 	@Override
 	public List<GooglePoi> loadPlaceForCircle(GpsPosition center, int radius) throws InvalidRequestException{
@@ -151,6 +160,7 @@ public class GooglePoiService implements PoiService<GooglePoi> {
 
 			return loadPlaceForCircle(center, radius, params);
 		}
+
 		return loadPlaceForCircle(center, radius);
 	}
 
@@ -200,11 +210,12 @@ public class GooglePoiService implements PoiService<GooglePoi> {
 		try {
 			List<Place> places = client.getNearbyPlaces(center.getLatitude(), center.getLongitude(), radius, GooglePlaces.MAXIMUM_RESULTS, params);
 			places = getPlacesDetails(places);
+
 			return poiFactory.createPOIsfromPlace(places);
 
 		}catch(GooglePlacesException e){
 			e.printStackTrace();
-			System.err.println(e.getErrorMessage()+ center.getLatitude() + center.getLongitude()+radius+ GooglePlaces.MAXIMUM_RESULTS+params.toString());
+			System.err.println(e.getErrorMessage()+ center.getLatitude() + center.getLongitude()+radius+ GooglePlaces.MAXIMUM_RESULTS+Arrays.toString(params));
 			return new ArrayList<>();
 		}
 	}

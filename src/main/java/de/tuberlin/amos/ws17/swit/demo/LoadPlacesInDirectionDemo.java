@@ -22,7 +22,7 @@ public class LoadPlacesInDirectionDemo {
         GpsPosition tiergarten1= new GpsPosition(tiergartenLng, tiergartenLat);
         GpsPosition tiergarten2= new GpsPosition(tiergartenLng2, tiergartenLat2);
         try{
-            GooglePoiService loader=new GooglePoiService(100, 100);
+            GooglePoiService loader=new GooglePoiService(100, 100, null);
 
         } catch (ModuleNotWorkingException e) {
             e.printStackTrace();

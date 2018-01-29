@@ -28,7 +28,7 @@ public class MidThermGooglePlacesApiDemo {
         PoiService loader;
 
         try {
-            loader = new GooglePoiService(500, 800);
+            loader = new GooglePoiService(500, 800, null);
             PoisInSightFinder sightFinder=new PoisInSightFinder(300,200,200);
 
             // get pois in a circle range

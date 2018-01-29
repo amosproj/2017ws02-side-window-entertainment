@@ -23,7 +23,7 @@ public class GooglePlacesApiDemo {
 
         GooglePoiService loader;
         try {
-            loader = new GooglePoiService( false, 100, 100);
+            loader = new GooglePoiService( false, 100, 100, null);
 
             List<GooglePoi> pois=loader.loadPlaceForCircleAndType(tiergarten1,
                     500,

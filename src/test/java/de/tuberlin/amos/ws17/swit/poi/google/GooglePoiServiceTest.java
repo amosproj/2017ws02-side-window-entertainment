@@ -1,10 +1,12 @@
 package de.tuberlin.amos.ws17.swit.poi.google;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
 
 import de.tuberlin.amos.ws17.swit.common.GpsPosition;
+import de.tuberlin.amos.ws17.swit.common.PointOfInterest;
 import de.tuberlin.amos.ws17.swit.common.exceptions.ModuleNotWorkingException;
 import de.tuberlin.amos.ws17.swit.poi.PoiType;
 import de.tuberlin.amos.ws17.swit.poi.GeographicCalculator;
@@ -22,7 +24,29 @@ public class GooglePoiServiceTest {
 	@Before
 	public void constrution() throws ModuleNotWorkingException{
 		try{
-			loader=new GooglePoiService(false, 100, 100);
+			loader=new GooglePoiService(false, 100, 100, null);
+		} catch (ModuleNotWorkingException e){
+			e.printStackTrace();
+			fail();
+		}
+		loadOneTypeTest();
+	}
+
+	@Test
+	public void forbiddenInNameTest() {
+		String forbiddenLetter="a";
+		List<String> forbiddenInName=new ArrayList<>();
+		forbiddenInName.add(forbiddenLetter);
+		try{
+			loader=new GooglePoiService(false, 100, 100, forbiddenInName);
+
+			List<GooglePoi> pois=loader.loadPlaceForCircle(TestData.TIERGARTEN_POSITION_1, 500);
+			System.out.println("Check forbidden name for "+pois.size()+" Pois.");
+			for(PointOfInterest poi:pois){
+				assertFalse(poi.getName().contains(forbiddenLetter));
+			}
+			System.out.println("No place contains test letter: "+forbiddenLetter);
+
 		} catch (ModuleNotWorkingException e){
 			e.printStackTrace();
 			fail();
