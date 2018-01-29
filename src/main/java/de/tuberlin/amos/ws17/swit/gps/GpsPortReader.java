@@ -74,6 +74,7 @@ public class GpsPortReader implements SentenceListener{
                     if (debug) System.out.println("latitude updated! (" + latitude + ")");
                     longitude = gga.getPosition().getLongitude();
                     if (debug) System.out.println("longitude updated! (" + longitude + ")");
+                    DebugLog.log("GPS: coordinate updated: " + latitude + ", " + longitude);
                     update = true;
 
                     // create KinematicProperties object for GpsTrack
@@ -84,6 +85,11 @@ public class GpsPortReader implements SentenceListener{
                     obj.setVelocity(velocity);
                     obj.setCourse(course);
                     gpsTrack.push(obj);
+
+                    // not sure, if too old elements need to be removed. We want the whole drive to be accessible
+                    if (gpsTrack.size() > 1000){
+                        gpsTrack.remove(0);
+                    }
 
                 }
                 catch (net.sf.marineapi.nmea.parser.DataNotAvailableException e) {

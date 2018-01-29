@@ -1,5 +1,6 @@
 package de.tuberlin.amos.ws17.swit.gps;
 
+import de.tuberlin.amos.ws17.swit.common.DebugLog;
 import de.tuberlin.amos.ws17.swit.common.KinematicProperties;
 
 import java.awt.image.BufferedImage;
@@ -43,17 +44,21 @@ public class GpsTrackerImplementation implements GpsTracker {
 	public KinematicProperties fillDumpObject(KinematicProperties kinProp) throws ModuleNotWorkingException{
 		if (portReader.isUpdated()){
 			portReader.fillKinematicProperties(kinProp);
-			if (kinProp == null)
+			if (kinProp == null){
+				DebugLog.log("No new GPS data available.");
 				throw new ModuleNotWorkingException(); // later: throw noSignalException or something like that
+			}
 			return kinProp;
 		}
 		else {
+			DebugLog.log("No new GPS data available.");
 			throw new ModuleNotWorkingException();
 		}
 	}
 
 	public void startModule() throws ModuleNotWorkingException{
 		if (portReader.start() == false){
+			DebugLog.log("No GPS device could be found.");
 			throw new ModuleNotWorkingException();
 		}
 	}
