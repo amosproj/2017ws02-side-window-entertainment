@@ -1,5 +1,6 @@
 package de.tuberlin.amos.ws17.swit.gps;
 
+import de.tuberlin.amos.ws17.swit.common.GpsPosition;
 import de.tuberlin.amos.ws17.swit.common.KinematicProperties;
 import de.tuberlin.amos.ws17.swit.common.exceptions.ModuleNotWorkingException;
 import de.tuberlin.amos.ws17.swit.common.DebugLog;
@@ -31,6 +32,8 @@ public class GpsPortReader implements SentenceListener{
     private double course;
     private double velocity;
     private LinkedList<KinematicProperties> gpsTrack;
+    private GpsPosition firstPoint;
+    private DateTime firstTime;
 
     public GpsPortReader(){
         update = false;
@@ -77,6 +80,14 @@ public class GpsPortReader implements SentenceListener{
                     DebugLog.log("GPS: coordinate updated: " + latitude + ", " + longitude);
                     update = true;
 
+                    // fill first GpsPosition, if it's empty
+                    if(firstPoint == null && firstTime == null){
+                        firstPoint = new GpsPosition();
+                        firstPoint.setLatitude(latitude);
+                        firstPoint.setLongitude(longitude);
+                        firstTime = new DateTime();
+                    }
+
                     // create KinematicProperties object for GpsTrack
                     KinematicProperties obj = new KinematicProperties();
                     obj.setTimeStamp(lastMessageReceived);
@@ -108,6 +119,7 @@ public class GpsPortReader implements SentenceListener{
                     // set 'course' for filling up KinematicProperties object
                     course = rmc.getCourse();
                     if (debug) System.out.println("course updated! (" + course + ")");
+                    DebugLog.log("GPS: course ");
                 }
             }
             catch (net.sf.marineapi.nmea.parser.DataNotAvailableException e){
@@ -226,6 +238,25 @@ public class GpsPortReader implements SentenceListener{
         }
 
         return list;
+    }
+
+    public double getDistanceTravelled(){
+        if (latitude != -1 && longitude != -1 && firstPoint != null){
+            GpsPosition currentPos = new GpsPosition();
+            currentPos.setLongitude(longitude);
+            currentPos.setLatitude(latitude);
+            return firstPoint.distanceTo(currentPos);
+        }
+        else
+            return -1;
+    }
+
+    public long getTimePassed(){
+        if (firstTime != null){
+            DateTime now = new DateTime();
+            return  now.getMillis() - firstTime.getMillis();
+        }
+        return -1;
     }
 
     public static void main(String[] args) {

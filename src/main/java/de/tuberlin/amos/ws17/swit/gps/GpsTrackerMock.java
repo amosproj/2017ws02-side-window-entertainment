@@ -14,6 +14,7 @@ import javax.imageio.ImageIO;
 public class GpsTrackerMock extends GpsTrackerImplementation {
 
     private LinkedList<KinematicProperties> returnList;
+    private LinkedList<KinematicProperties> travelledList;
 
     private int index = -1;
     private int skipCount = 1;
@@ -21,7 +22,7 @@ public class GpsTrackerMock extends GpsTrackerImplementation {
     // constructor
     public GpsTrackerMock() {
         // DateTime timeStamp, double course, double velocity, double acceleration
-        returnList = new LinkedList<>();
+        returnList = new LinkedList<KinematicProperties>();
         KinematicProperties one = new KinematicProperties(null, 180, 10, 0);
         one.setLatitude(52.5219184);
         one.setLongitude(13.411026);
@@ -42,6 +43,8 @@ public class GpsTrackerMock extends GpsTrackerImplementation {
         returnList.add(three);
         returnList.add(four);
         returnList.add(five);
+
+        travelledList = new LinkedList<KinematicProperties>();
     }
 
     // returns latest gps position from either the file reader or the port reader
@@ -74,6 +77,7 @@ public class GpsTrackerMock extends GpsTrackerImplementation {
                 index -= returnList.size();
         }
         returnList.get(index).setTimeStamp(now);
+        travelledList.push(returnList.get(index));
         return returnList.get(index);
     }
 
@@ -90,11 +94,11 @@ public class GpsTrackerMock extends GpsTrackerImplementation {
     @Override
     public LinkedList<KinematicProperties> getGpsTrack(int count) {
 
-        int end=count-1;
-
-        if(count>returnList.size())
-            end=returnList.size()-1;
-
-        return new LinkedList<>(returnList.subList(0, end));
+        if (travelledList.size() <= count) {
+            return travelledList;
+        } else {
+            int start = travelledList.size() - count;
+            return new LinkedList<>(travelledList.subList(start, travelledList.size() - 1));
+        }
     }
 }

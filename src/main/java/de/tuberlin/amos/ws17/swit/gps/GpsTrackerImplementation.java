@@ -8,6 +8,7 @@ import java.io.*;
 import java.util.LinkedList;
 
 import de.tuberlin.amos.ws17.swit.common.exceptions.ModuleNotWorkingException;
+import org.joda.time.DateTime;
 
 
 import javax.imageio.ImageIO;
@@ -61,6 +62,9 @@ public class GpsTrackerImplementation implements GpsTracker {
 			DebugLog.log("No GPS device could be found.");
 			throw new ModuleNotWorkingException();
 		}
+		else {
+			DebugLog.log("GPS module started.");
+		}
 	}
 
 	public boolean stopModule(){
@@ -71,5 +75,15 @@ public class GpsTrackerImplementation implements GpsTracker {
 	@Override
 	public LinkedList<KinematicProperties> getGpsTrack(int count) {
 		return portReader.getGpsTrack(count);
+	}
+
+	@Override
+	public double getDistanceTravelled() {
+		return portReader.getDistanceTravelled();
+	}
+
+	@Override
+	public long getTimePassed() {
+		return portReader.getTimePassed();
 	}
 }
