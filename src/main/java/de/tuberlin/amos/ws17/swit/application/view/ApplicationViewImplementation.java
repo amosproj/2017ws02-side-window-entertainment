@@ -1,9 +1,7 @@
 package de.tuberlin.amos.ws17.swit.application.view;
 
-import de.tuberlin.amos.ws17.swit.application.viewmodel.ApplicationViewModelImplementation;
-import de.tuberlin.amos.ws17.swit.application.viewmodel.ModuleStatusViewModel;
-import de.tuberlin.amos.ws17.swit.application.viewmodel.PoiViewModel;
-import de.tuberlin.amos.ws17.swit.application.viewmodel.UserExpressionViewModel;
+import de.tuberlin.amos.ws17.swit.application.AppProperties;
+import de.tuberlin.amos.ws17.swit.application.viewmodel.*;
 import de.tuberlin.amos.ws17.swit.common.Module;
 import de.tuberlin.amos.ws17.swit.image_analysis.ImageUtils;
 import javafx.application.Application;
@@ -21,8 +19,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.util.Callback;
-
-import java.util.Stack;
+import org.apache.jena.base.Sys;
 
 public class ApplicationViewImplementation extends Application implements ApplicationView {
 
@@ -48,14 +45,12 @@ public class ApplicationViewImplementation extends Application implements Applic
 
     private static final String FONTNAME = "Helvetica Neue";
 
-    private static ApplicationViewModelImplementation controller;
+    private static ApplicationViewModel viewModel;
 
     public void init() {
-        ApplicationViewImplementation app = this;
-
         initElements();
         initExpansion();
-        controller = new ApplicationViewModelImplementation(this);
+        viewModel = new ApplicationViewModelImplementation(this);
 
         initBindings();
         initCellFactories();
@@ -66,18 +61,7 @@ public class ApplicationViewImplementation extends Application implements Applic
         stage.setTitle("Side Window Infotainment");
 
         Scene scene = new Scene(root, 800, 600, Color.WHITE);
-        scene.setOnKeyPressed(event -> {
-            switch (event.getCode()) {
-                case F:
-                    controller.analyzeImage();
-                    break;
-                case D:
-                    toggleDebugLog();
-                    break;
-                default:
-                    break;
-            }
-        });
+        scene.setOnKeyPressed(event -> viewModel.onKeyPressed(event.getCode()));
         scene.getStylesheets().add("/stylesheets/TransparentApplicationViewStylesheet.css");
         stage.setScene(scene);
         stage.show();
@@ -153,28 +137,29 @@ public class ApplicationViewImplementation extends Application implements Applic
         listDebugLog.setVisible(show);
     }
 
-    private void toggleDebugLog() {
+    @Override
+    public void toggleDebugLog() {
         listDebugLog.setVisible(!listDebugLog.isVisible());
     }
 
     private void initBindings() {
         ImageView cameraImage = new ImageView();
-        cameraImage.imageProperty().bindBidirectional(controller.propertyCameraImageProperty());
+        cameraImage.imageProperty().bindBidirectional(viewModel.propertyCameraImageProperty());
 
         try {
-            expansionButton.visibleProperty().bind(Bindings.equal(controller.getExpandedPOI().nameProperty(), "").not());
-            expansionButton.onActionProperty().bindBidirectional(controller.propertyCloseButtonProperty());
-            expansionName.textProperty().bindBidirectional(controller.getExpandedPOI().nameProperty());
-            expansionImage.imageProperty().bindBidirectional(controller.getExpandedPOI().imageProperty());
-            expansionInformation.textProperty().bindBidirectional(controller.getExpandedPOI().informationAbstractProperty());
-            listModuleStatus.itemsProperty().bindBidirectional(controller.listModuleStatusProperty());
-            listExpressionStatus.itemsProperty().bindBidirectional(controller.listExpressionStatusProperty());
-            listPoiCamera.itemsProperty().bindBidirectional(controller.propertyPoiCameraProperty());
-            listPoiMaps.itemsProperty().bindBidirectional(controller.propertyPoiMapsProperty());
+            expansionButton.visibleProperty().bind(Bindings.equal(viewModel.getExpandedPOI().nameProperty(), "").not());
+            expansionButton.onActionProperty().bindBidirectional(viewModel.propertyCloseButtonProperty());
+            expansionName.textProperty().bindBidirectional(viewModel.getExpandedPOI().nameProperty());
+            expansionImage.imageProperty().bindBidirectional(viewModel.getExpandedPOI().imageProperty());
+            expansionInformation.textProperty().bindBidirectional(viewModel.getExpandedPOI().informationAbstractProperty());
+            listModuleStatus.itemsProperty().bindBidirectional(viewModel.listModuleStatusProperty());
+            listExpressionStatus.itemsProperty().bindBidirectional(viewModel.listExpressionStatusProperty());
+            listPoiCamera.itemsProperty().bindBidirectional(viewModel.propertyPoiCameraProperty());
+            listPoiMaps.itemsProperty().bindBidirectional(viewModel.propertyPoiMapsProperty());
 
-            listDebugLog.itemsProperty().bindBidirectional(controller.propertyDebugLogProperty());
-            if (!controller.useDemoVideo()) {
-                pnFoundation.backgroundProperty().bindBidirectional(controller.backgroundProperty);
+            listDebugLog.itemsProperty().bindBidirectional(viewModel.propertyDebugLogProperty());
+            if (!AppProperties.getInstance().useDemoVideo) {
+                pnFoundation.backgroundProperty().bindBidirectional(viewModel.getBackgroundProperty());
             }
 
         } catch (Exception e) {
@@ -204,7 +189,7 @@ public class ApplicationViewImplementation extends Application implements Applic
                             BorderPane pane = new BorderPane();
                             pane.setTop(lblName);
                             pane.setCenter(imageView);
-                            pane.setOnMouseClicked(event -> controller.expandPoi(item.getId()));
+                            pane.setOnMouseClicked(event -> viewModel.expandPoi(item.getId()));
                             setGraphic(pane);
                             listPoiCamera.refresh();
                             listPoiMaps.refresh();
@@ -322,13 +307,15 @@ public class ApplicationViewImplementation extends Application implements Applic
 
     @Override
     public void stop() {
-        controller.isRunning = false;
-        for (Module m : controller.getModuleList()) {
+        viewModel.setRunning(false);
+        for (Module m : viewModel.getModuleList()) {
             m.stopModule();
         }
+        System.exit(0);
     }
 
 
+    @Override
     public MediaView getMediaView() {
         return mediaView;
     }

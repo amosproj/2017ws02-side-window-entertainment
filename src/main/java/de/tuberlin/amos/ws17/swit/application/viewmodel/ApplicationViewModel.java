@@ -1,38 +1,41 @@
 package de.tuberlin.amos.ws17.swit.application.viewmodel;
 
-import java.awt.image.BufferedImage;
+import de.tuberlin.amos.ws17.swit.common.Module;
+import javafx.beans.property.Property;
+import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.scene.image.Image;
+import javafx.scene.input.KeyCode;
+import javafx.scene.layout.Background;
+
+import java.util.List;
 
 public interface ApplicationViewModel {
 
-    /**
-     * Sets the view
-     * @param view View for the controller
-     */
-    //void setView(ApplicationView view);
+    void onKeyPressed(KeyCode code);
 
-    /**
-     * Adds a new POI to the list of current POI
-     * @param id ID of the POI
-     * @param name name of the POI
-     * @param image iage of the POI
-     * @param information information from the information source about the POI
-     */
-    //void addPOI(int id, String name, BufferedImage image, String information);
+    Property<Image> propertyCameraImageProperty();
 
-    /**
-     * Analyze given image and add detected POIs to list
-     */
-    //void analyzeImage();
+    PoiViewModel getExpandedPOI();
 
-    /**
-     * Capture image from camera
-     * @return Image taken from camera
-     */
-    //BufferedImage captureImage();
+    Property<EventHandler<ActionEvent>> propertyCloseButtonProperty();
 
-    /**
-     * React when user clicks on POI
-     * @param poi clicked POI by user
-     */
-    //void onPoiClicked(PoiViewModel poi);
+    Property<ObservableList<ModuleStatusViewModel>> listModuleStatusProperty();
+
+    Property<ObservableList<UserExpressionViewModel>> listExpressionStatusProperty();
+
+    Property<ObservableList<PoiViewModel>> propertyPoiCameraProperty();
+
+    Property<ObservableList<PoiViewModel>> propertyPoiMapsProperty();
+
+    Property<ObservableList<String>> propertyDebugLogProperty();
+
+    Property<Background> getBackgroundProperty();
+
+    boolean expandPoi(String id);
+
+    List<Module> getModuleList();
+
+    void setRunning(boolean running);
 }

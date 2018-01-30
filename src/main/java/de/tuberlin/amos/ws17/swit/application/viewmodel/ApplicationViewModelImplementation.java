@@ -1,5 +1,7 @@
 package de.tuberlin.amos.ws17.swit.application.viewmodel;
 
+import de.tuberlin.amos.ws17.swit.application.AppProperties;
+import de.tuberlin.amos.ws17.swit.application.view.ApplicationView;
 import de.tuberlin.amos.ws17.swit.application.view.ApplicationViewImplementation;
 import de.tuberlin.amos.ws17.swit.common.*;
 import de.tuberlin.amos.ws17.swit.common.Module;
@@ -30,33 +32,38 @@ import javafx.application.Platform;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
-import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.Image;
 import javafx.event.EventHandler;
 import javafx.event.ActionEvent;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
+import org.apache.jena.atlas.logging.Log;
 import org.joda.time.DateTime;
 
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ApplicationViewModelImplementation implements ApplicationViewModel {
 
+    private final static Logger LOGGER = Logger.getLogger(ApplicationViewModel.class.getName());
+
     //Module
-    private ApplicationViewImplementation view;
-    private LandmarkDetector              cloudVision;
-    private LandscapeTracker              landscapeTracker;
-    private UserTracker                   userTracker;
-    private GpsTracker                    gpsTracker;
-    private WikiAbstractProvider          abstractProvider;
-    private PoiService                    poiService;
+    private ApplicationView      view;
+    private LandmarkDetector     cloudVision;
+    private LandscapeTracker     landscapeTracker;
+    private UserTracker          userTracker;
+    private GpsTracker           gpsTracker;
+    private WikiAbstractProvider abstractProvider;
+    private PoiService           poiService;
     private PoisInSightFinder sightFinder = new PoisInSightFinder(300, 200, 200);
     private InformationProvider knowledgeGraphSearch;
 
     //Threads
-    public  boolean isRunning;
+    private boolean isRunning;
     private Thread  updateThread;
     private Thread  cameraThread;
     private Thread  mapsThread;
@@ -73,7 +80,6 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     private SimpleListProperty<UserExpressionViewModel>     listExpressionStatus = new SimpleListProperty<>();
     private List<Module>                                    moduleList           = new ArrayList<>();
 
-    private boolean useDemoVideo = false;
     private int     searchRadius = 1000;
 
     private Property<Image> propertyCameraImage = new SimpleObjectProperty<>();
@@ -83,11 +89,10 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     private BackgroundImage backgroundImage;
     private Background      background;
 
-    private Properties properties;
+    private AppProperties properties = AppProperties.getInstance();
 
     public ApplicationViewModelImplementation(ApplicationViewImplementation view) {
         this.view = view;
-        initProperties();
         initObjects();
         initModules();
 
@@ -96,26 +101,13 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         initMapsThread();
         initCameraThread();
 
-        if (properties.get("debuglog").equals("1")) {
+        if (properties.useDebugLog) {
             initDebugLog();
         }
 
         updateBackgroundImage();
 
         updateThread.start();
-    }
-
-    private void initProperties() {
-        System.out.println("loading properties...");
-        properties = new Properties();
-        try {
-            InputStream input = getClass().getClassLoader().getResourceAsStream("viewmodel.properties");
-            properties.load(input);
-        } catch (IOException e) {
-            System.out.println("unable to load properties: viewmodel.properties not found");
-        } catch (Exception e) {
-            System.out.println("unable to load properties: unexpected error");
-        }
     }
 
     private void initObjects() {
@@ -142,7 +134,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         String currentModule;
         //GPS
         currentModule = "GpsTracker";
-        if (properties.get("gpsmodule").equals("1")) {
+        if (properties.useGpsModule) {
             try {
                 System.out.println("loading " + currentModule + "...");
                 gpsTracker = new GpsTrackerImplementation();
@@ -156,7 +148,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 e.printStackTrace();
                 setModuleStatus(ModuleErrors.NOGPSHARDWARE, false);
             }
-        } else if (properties.get("gpsmodule").equals("0")) {
+        } else {
             try {
                 System.out.println("loading " + currentModule + "Mock...");
                 gpsTracker = new GpsTrackerMock();
@@ -166,203 +158,156 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
             } catch (ModuleNotWorkingException e) {
                 setModuleStatus(ModuleErrors.NOGPSHARDWARE, false);
             }
-        } else {
-            setModuleStatus(ModuleErrors.NOGPSHARDWARE, false);
-            System.out.println("failed to load GpsTracker");
         }
 
         //User Tracking
         currentModule = "UserTracker";
-        switch (properties.getProperty("usercamera")) {
-            case "1":
-                try {
-                    System.out.println("loading " + currentModule + "...");
-                    userTracker = new JavoNetUserTracker();
-                    userTracker.startTracking();
-                    setModuleStatus(ModuleErrors.NOUSERCAMERA, true);
-                } catch (Exception e) {
-                    System.out.println("unexpected error loading " + currentModule);
-                    e.printStackTrace();
-                    setModuleStatus(ModuleErrors.NOUSERCAMERA, false);
-                }
-                break;
-            case "0":
-                try {
-                    System.out.println("loading " + currentModule + "Mock...");
-                    userTracker = new UserTrackerMock();
-                    userTracker.startTracking();
-                    setModuleStatus(ModuleErrors.NOUSERCAMERA, true);
-                } catch (Exception e) {
-                    System.out.println("unexpected error loading " + currentModule + "Mock");
-                    e.printStackTrace();
-                    setModuleStatus(ModuleErrors.NOUSERCAMERA, false);
-                }
-                break;
-            default:
-                System.out.println("failed to load UserTracker");
+        if (properties.useIntelRealSense) {
+            try {
+                System.out.println("loading " + currentModule + "...");
+                userTracker = new JavoNetUserTracker();
+                userTracker.startTracking();
+                setModuleStatus(ModuleErrors.NOUSERCAMERA, true);
+            } catch (Exception e) {
+                System.out.println("unexpected error loading " + currentModule);
+                e.printStackTrace();
                 setModuleStatus(ModuleErrors.NOUSERCAMERA, false);
-                break;
+            }
+        } else {
+            try {
+                System.out.println("loading " + currentModule + "Mock...");
+                userTracker = new UserTrackerMock();
+                userTracker.startTracking();
+                setModuleStatus(ModuleErrors.NOUSERCAMERA, true);
+            } catch (Exception e) {
+                System.out.println("unexpected error loading " + currentModule + "Mock");
+                e.printStackTrace();
+                setModuleStatus(ModuleErrors.NOUSERCAMERA, false);
+            }
         }
 
         //Landscape Tracking
         currentModule = "LandscapeTracker";
-        switch (properties.getProperty("camera")) {
-            case "1":
-                try {
-                    System.out.println("loading " + currentModule + "...");
-                    landscapeTracker = new LandscapeTrackerImplementation();
-                    moduleList.add(landscapeTracker);
-                    landscapeTracker.startModule();
-                    setModuleStatus(ModuleErrors.NOCAMERA, true);
-                } catch (ModuleNotWorkingException e) {
-                    setModuleStatus(ModuleErrors.NOCAMERA, false);
-                } catch (Exception e) {
-                    System.out.println("unexpected error loading " + currentModule);
-                    e.printStackTrace();
-                    setModuleStatus(ModuleErrors.NOCAMERA, false);
-                }
-                break;
-            case "0":
-                try {
-                    System.out.println("loading " + currentModule + "Mock...");
-                    landscapeTracker = new LandscapeTrackerMock();
-                    moduleList.add(landscapeTracker);
-                    landscapeTracker.startModule();
-                    setModuleStatus(ModuleErrors.NOCAMERA, true);
-                } catch (ModuleNotWorkingException e) {
-                    setModuleStatus(ModuleErrors.NOCAMERA, false);
-                } catch (Exception e) {
-                    System.out.println("unexpected error loading " + currentModule + "Mock");
-                    e.printStackTrace();
-                    setModuleStatus(ModuleErrors.NOCAMERA, false);
-                }
-                break;
-            case "2":
-                System.out.println("loading " + currentModule + "Demo...");
-                landscapeTracker = new DemoVideoLandscapeTracker(view.getMediaView());
+        if (properties.useExternalCamera) {
+            try {
+                System.out.println("loading " + currentModule + "...");
+                landscapeTracker = new LandscapeTrackerImplementation();
                 moduleList.add(landscapeTracker);
-                try {
-                    landscapeTracker.startModule();
-                } catch (ModuleNotWorkingException e) {
-                    e.printStackTrace();
-                }
+                landscapeTracker.startModule();
                 setModuleStatus(ModuleErrors.NOCAMERA, true);
-                useDemoVideo = true;
-                break;
-            default:
-                System.out.println("failed to load LandscapeTracker");
+            } catch (ModuleNotWorkingException e) {
                 setModuleStatus(ModuleErrors.NOCAMERA, false);
-                break;
+            } catch (Exception e) {
+                System.out.println("unexpected error loading " + currentModule);
+                e.printStackTrace();
+                setModuleStatus(ModuleErrors.NOCAMERA, false);
+            }
+        } else if (properties.useDemoVideo) {
+            System.out.println("loading " + currentModule + "Demo...");
+            landscapeTracker = new DemoVideoLandscapeTracker(view.getMediaView());
+            moduleList.add(landscapeTracker);
+            try {
+                landscapeTracker.startModule();
+            } catch (ModuleNotWorkingException e) {
+                e.printStackTrace();
+            }
+            setModuleStatus(ModuleErrors.NOCAMERA, true);
+        } else {
+            try {
+                System.out.println("loading " + currentModule + "Mock...");
+                landscapeTracker = new LandscapeTrackerMock();
+                moduleList.add(landscapeTracker);
+                landscapeTracker.startModule();
+                setModuleStatus(ModuleErrors.NOCAMERA, true);
+            } catch (ModuleNotWorkingException e) {
+                setModuleStatus(ModuleErrors.NOCAMERA, false);
+            } catch (Exception e) {
+                System.out.println("unexpected error loading " + currentModule + "Mock");
+                e.printStackTrace();
+                setModuleStatus(ModuleErrors.NOCAMERA, false);
+            }
         }
 
         //CloudVision
         currentModule = "LandmarkDetector";
-        switch (properties.getProperty("image_analysis")) {
-            case "1":
-                try {
-                    System.out.println("loading " + currentModule + "...");
-                    cloudVision = CloudVision.getInstance();
-                    setModuleStatus(ModuleErrors.NOINTERNET, true);
-                } catch (Exception e) {
-                    System.out.println("unexpected error loading " + currentModule);
-                    e.printStackTrace();
-                    setModuleStatus(ModuleErrors.NOINTERNET, false);
-                }
-                break;
-            case "0":
-                System.out.println("loading " + currentModule + "Mock...");
-                cloudVision = LandmarkDetectorMock.getInstance();
+        if (properties.useCloudVision) {
+            try {
+                System.out.println("loading " + currentModule + "...");
+                cloudVision = CloudVision.getInstance();
                 setModuleStatus(ModuleErrors.NOINTERNET, true);
-                break;
-            default:
-                System.out.println("failed to load CloudVision");
+            } catch (Exception e) {
+                System.out.println("unexpected error loading " + currentModule);
+                e.printStackTrace();
                 setModuleStatus(ModuleErrors.NOINTERNET, false);
-                break;
+            }
+        } else {
+            System.out.println("loading " + currentModule + "Mock...");
+            cloudVision = LandmarkDetectorMock.getInstance();
+            setModuleStatus(ModuleErrors.NOINTERNET, true);
         }
 
         //Information Source
         currentModule = "AbstractProvider";
-        switch (properties.getProperty("information_source")) {
-            case "1":
-                try {
-                    System.out.println("loading " + currentModule + "...");
-                    abstractProvider = new WikiAbstractProvider();
-                    moduleList.add(abstractProvider);
-                    abstractProvider.startModule();
-                    setModuleStatus(ModuleErrors.NOINTERNET, true);
-                } catch (ModuleNotWorkingException e) {
-                    setModuleStatus(ModuleErrors.NOINTERNET, false);
-                } catch (Exception e) {
-                    System.out.println("unexpected error loading " + currentModule);
-                    e.printStackTrace();
-                    setModuleStatus(ModuleErrors.NOINTERNET, false);
-                }
-                break;
-            case "0":
+        if (properties.useWikipedia) {
+            try {
+                System.out.println("loading " + currentModule + "...");
                 abstractProvider = new WikiAbstractProvider();
-                System.out.println("loading " + currentModule + "Mock...");
+                moduleList.add(abstractProvider);
+                abstractProvider.startModule();
+                setModuleStatus(ModuleErrors.NOINTERNET, true);
+            } catch (ModuleNotWorkingException e) {
                 setModuleStatus(ModuleErrors.NOINTERNET, false);
-                break;
-            default:
-                System.out.println("failed to load AbstractProvider");
+            } catch (Exception e) {
+                System.out.println("unexpected error loading " + currentModule);
+                e.printStackTrace();
                 setModuleStatus(ModuleErrors.NOINTERNET, false);
-                break;
+            }
+        } else {
+            abstractProvider = new WikiAbstractProvider();
+            System.out.println("loading " + currentModule + "Mock...");
+            setModuleStatus(ModuleErrors.NOINTERNET, false);
         }
 
         //Google KnowledgeGraphSearch
         currentModule = "KnowledgeGraphSearch";
-        switch (properties.getProperty("information_source")) {
-            case "1":
-                try {
-                    System.out.println("loading " + currentModule + "...");
-                    knowledgeGraphSearch = KnowledgeGraphSearch.getInstance();
-                    setModuleStatus(ModuleErrors.NOINTERNET, true);
-                } catch (ModuleNotWorkingException e) {
-                    setModuleStatus(ModuleErrors.NOINTERNET, false);
-                } catch (Exception e) {
-                    System.out.println("unexpected error loading " + currentModule);
-                    e.printStackTrace();
-                    setModuleStatus(ModuleErrors.NOINTERNET, false);
-                }
-                break;
-            case "0":
-                System.out.println("loading " + currentModule + "Mock...");
-                knowledgeGraphSearch = new InformationProviderMock();
+        if (properties.useKnowledgeGraph) {
+            try {
+                System.out.println("loading " + currentModule + "...");
+                knowledgeGraphSearch = KnowledgeGraphSearch.getInstance();
+                setModuleStatus(ModuleErrors.NOINTERNET, true);
+            } catch (ModuleNotWorkingException e) {
                 setModuleStatus(ModuleErrors.NOINTERNET, false);
-                break;
-            default:
-                System.out.println("failed to load KnowledgeGraphSearch");
+            } catch (Exception e) {
+                System.out.println("unexpected error loading " + currentModule);
+                e.printStackTrace();
                 setModuleStatus(ModuleErrors.NOINTERNET, false);
-                break;
+            }
+        } else {
+            System.out.println("loading " + currentModule + "Mock...");
+            knowledgeGraphSearch = new InformationProviderMock();
+            setModuleStatus(ModuleErrors.NOINTERNET, false);
         }
 
         //Google POI loader
         currentModule = "PoiService";
-        switch (properties.getProperty("poi_analysis")) {
-            case "1":
-                try {
-                    System.out.println("loading " + currentModule + "...");
-                    //instantiate with the forbidden words from the properties file
-                    poiService = new GooglePoiService(500, 800,
-                            Arrays.asList(properties.getProperty("places_to_ignore").split(",")));
-                    setModuleStatus(ModuleErrors.NOINTERNET, true);
-                } catch (ModuleNotWorkingException e) {
-                    setModuleStatus(ModuleErrors.NOINTERNET, false);
-                } catch (Exception e) {
-                    System.out.println("unexpected error loading " + currentModule);
-                    e.printStackTrace();
-                    setModuleStatus(ModuleErrors.NOINTERNET, false);
-                }
-                break;
-            case "0":
-                System.out.println("loading " + currentModule + "Mock...");
-                poiService = new MockedPoiService();
+        if (properties.usePoiService) {
+            try {
+                System.out.println("loading " + currentModule + "...");
+                //instantiate with the forbidden words from the properties file
+                poiService = new GooglePoiService(500, 800,
+                        Arrays.asList(properties.getProperty("places_to_ignore").split(",")));
                 setModuleStatus(ModuleErrors.NOINTERNET, true);
-                break;
-            default:
-                System.out.println("failed to load GooglePoiService");
+            } catch (ModuleNotWorkingException e) {
                 setModuleStatus(ModuleErrors.NOINTERNET, false);
-                break;
+            } catch (Exception e) {
+                System.out.println("unexpected error loading " + currentModule);
+                e.printStackTrace();
+                setModuleStatus(ModuleErrors.NOINTERNET, false);
+            }
+        } else {
+            System.out.println("loading " + currentModule + "Mock...");
+            poiService = new MockedPoiService();
+            setModuleStatus(ModuleErrors.NOINTERNET, true);
         }
     }
 
@@ -428,6 +373,20 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
             }
         });
         updateThread.setDaemon(true);
+    }
+
+    @Override
+    public void onKeyPressed(KeyCode code) {
+        switch (code) {
+            case F:
+                analyzeImage();
+                break;
+            case D:
+                view.toggleDebugLog();
+                break;
+            default:
+                break;
+        }
     }
 
     private void initMapsThread() {
@@ -597,7 +556,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 return;
             }
 
-            if (useDemoVideo) {
+            if (properties.useDemoVideo) {
                 Platform.runLater(this::analyzeImage);
             } else {
                 analyzeImage();
@@ -728,6 +687,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         return result;
     }
 
+    @Override
     public boolean expandPoi(String id) {
         for (PoiViewModel item : propertyPoiCamera) {
             if (item.getId().equals(id)) {
@@ -760,77 +720,49 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         view.showExpandedPoi(true);
     }
 
-    //Getter und Setter
-    public List<PointOfInterest> getPointsOfInterest() {
-        return pointsOfInterest;
-    }
-
-    public void setPointsOfInterest(List<PointOfInterest> pointsOfInterest) {
-        this.pointsOfInterest = pointsOfInterest;
-    }
-
+    @Override
     public PoiViewModel getExpandedPOI() {
         return expandedPOI;
     }
 
-    public ObservableList<PoiViewModel> getPropertyPoiMaps() {
-        return propertyPoiMaps.get();
-    }
-
+    @Override
     public SimpleListProperty<PoiViewModel> propertyPoiMapsProperty() {
         return propertyPoiMaps;
     }
 
-    public void setPropertyPoiMaps(ObservableList<PoiViewModel> propertyPoiMaps) {
-        this.propertyPoiMaps.set(propertyPoiMaps);
-    }
-
-    public ObservableList<PoiViewModel> getPropertyPoiCamera() {
-        return propertyPoiCamera.get();
-    }
-
+    @Override
     public SimpleListProperty<PoiViewModel> propertyPoiCameraProperty() {
         return propertyPoiCamera;
     }
 
-    public void setPropertyPoiCamera(ObservableList<PoiViewModel> propertyPoiCamera) {
-        this.propertyPoiCamera.set(propertyPoiCamera);
-    }
-
-    public EventHandler getPropertyCloseButton() {
-        return propertyCloseButton.get();
-    }
-
+    @Override
     public SimpleObjectProperty<EventHandler<ActionEvent>> propertyCloseButtonProperty() {
         return propertyCloseButton;
     }
 
-    public void setPropertyCloseButton(EventHandler propertyCloseButton) {
-        this.propertyCloseButton.set(propertyCloseButton);
-    }
-
-    public ObservableList<String> getPropertyDebugLog() {
-        return propertyDebugLog.get();
-    }
-
+    @Override
     public SimpleListProperty<String> propertyDebugLogProperty() {
         return propertyDebugLog;
     }
 
-    public ObservableList<ModuleStatusViewModel> getListModuleStatus() {
-        return listModuleStatus.get();
+    @Override
+    public Property<Background> getBackgroundProperty() {
+        return backgroundProperty;
     }
 
+    @Override
     public SimpleListProperty<ModuleStatusViewModel> listModuleStatusProperty() {
         return listModuleStatus;
     }
 
+    @Override
     public List<Module> getModuleList() {
         return moduleList;
     }
 
-    public ObservableList<UserExpressionViewModel> getListExpressionStatus() {
-        return listExpressionStatus.get();
+    @Override
+    public void setRunning(boolean running) {
+
     }
 
     public SimpleListProperty<UserExpressionViewModel> listExpressionStatusProperty() {
@@ -840,9 +772,4 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     public Property<Image> propertyCameraImageProperty() {
         return propertyCameraImage;
     }
-
-    public boolean useDemoVideo() {
-        return useDemoVideo;
-    }
-
 }
