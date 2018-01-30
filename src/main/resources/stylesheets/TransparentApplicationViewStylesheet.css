@@ -4,12 +4,14 @@
 }
 
 #listDebugLog {
-    -fx-min-width: 250px;
-    -fx-max-width: 250px;
+    -fx-min-width: 200px;
+    -fx-max-width: 500px;
+    -fx-max-height: 400px;
+    -fx-background-color: rgba(0, 0, 0, 0.7);
 }
 
 #listDebugLog .label {
-    -fx-font-size: 15px;
+    -fx-font-size: 12px;
 }
 
 #expansionPane {
@@ -39,14 +41,14 @@
     -fx-max-height: 250px;
 }
 
-#listPOImaps {
+#listPoiMaps {
     -fx-orientation: horizontal;
     -fx-pref-height: 150px;
     -fx-max-height: 150px;
     -fx-background-color: rgba(0, 0, 0, 0.5);
 }
 
-#listPOIcamera {
+#listPoiCamera {
     -fx-orientation: horizontal;
     -fx-pref-height: 150px;
     -fx-max-height: 150px;

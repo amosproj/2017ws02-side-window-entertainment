@@ -66,7 +66,7 @@ public class DebugLog {
 
         @Override
         public String toString() {
-            return "[" + source + "," + timeStamp.toString("HH:mm:ss.SSS") + "]: " + message;
+            return "[" + source + " " + timeStamp.toString("HH:mm:ss") + "]: " + message;
         }
     }
 }

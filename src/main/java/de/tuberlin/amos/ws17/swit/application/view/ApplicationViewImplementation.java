@@ -1,84 +1,56 @@
 package de.tuberlin.amos.ws17.swit.application.view;
 
-import de.tuberlin.amos.ws17.swit.application.viewmodel.ApplicationViewModelImplementation;
-import de.tuberlin.amos.ws17.swit.application.viewmodel.ModuleStatusViewModel;
-import de.tuberlin.amos.ws17.swit.application.viewmodel.PoiViewModel;
-import de.tuberlin.amos.ws17.swit.application.viewmodel.UserExpressionViewModel;
+import de.tuberlin.amos.ws17.swit.application.AppProperties;
+import de.tuberlin.amos.ws17.swit.application.viewmodel.*;
 import de.tuberlin.amos.ws17.swit.common.Module;
 import de.tuberlin.amos.ws17.swit.image_analysis.ImageUtils;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.Property;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.ObservableList;
-import javafx.embed.swing.SwingFXUtils;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.geometry.Insets;
-import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
-import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.ImagePattern;
-import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
-import javafx.scene.web.WebEngine;
-import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import javafx.util.Callback;
-import org.bridj.cpp.com.IDispatch;
-
-import java.awt.image.BufferedImage;
-import java.nio.charset.Charset;
-import java.util.regex.Pattern;
+import org.apache.jena.base.Sys;
 
 public class ApplicationViewImplementation extends Application implements ApplicationView {
 
-    private BorderPane pnFoundation;
-    private ListView<PoiViewModel> listPOIcamera;
-    private ListView<PoiViewModel> listPOImaps;
-    private ListView<String> listDebugLog;
-    private ListView<ModuleStatusViewModel> listModuleStatus;
-    private ListView<UserExpressionViewModel> listExpressionStatus;
+    private BorderPane                        pnFoundation         = new BorderPane();
+    private ListView<PoiViewModel>            listPoiCamera        = new ListView<>();
+    private ListView<PoiViewModel>            listPoiMaps          = new ListView<>();
+    private ListView<String>                  listDebugLog         = new ListView<>();
+    private ListView<ModuleStatusViewModel>   listModuleStatus     = new ListView<>();
+    private ListView<UserExpressionViewModel> listExpressionStatus = new ListView<>();
 
-    private BorderPane expansionPane;
-    private BorderPane expansionTopPane;
-    private BorderPane expansionContentPane;
-    private Button expansionButton;
-    private Label expansionName;
-    private Label expansionInformation;
-    private ImageView expansionImage;
-    private ScrollPane expansionScrollPane;
-    private HBox statusPane;
-    StackPane root;
-    MediaPlayer mp;
-    MediaView mv;
-    private WebEngine webEngine;
-    private WebView browser;
+    private BorderPane  expansionPane        = new BorderPane();
+    private BorderPane  expansionTopPane     = new BorderPane();
+    private BorderPane  expansionContentPane = new BorderPane();
+    private Button      expansionButton      = new Button("X");
+    private Label       expansionName        = new Label();
+    private Label       expansionInformation = new Label();
+    private ImageView   expansionImage       = new ImageView();
+    private ScrollPane  expansionScrollPane  = new ScrollPane();
+    private HBox        statusPane           = new HBox();
+    private StackPane   root                 = new StackPane();
+    private MediaPlayer mediaPlayer          = new MediaPlayer(ImageUtils.getTestVideo("Berlin.mp4"));
+    private MediaView mediaView;
 
     private static final String FONTNAME = "Helvetica Neue";
-    public static ApplicationViewImplementation app;
-    private static ApplicationViewModelImplementation controller;
-    private Stage primaryStage;
+
+    private static ApplicationViewModel viewModel;
 
     public void init() {
-        app = this;
-
         initElements();
         initExpansion();
-        controller = new ApplicationViewModelImplementation(this);
+        viewModel = new ApplicationViewModelImplementation(this);
 
         initBindings();
         initCellFactories();
@@ -86,89 +58,56 @@ public class ApplicationViewImplementation extends Application implements Applic
 
     @Override
     public void start(Stage stage) {
-
-        primaryStage = stage;
-        primaryStage.setTitle("Side Window Infotainment");
-
-
-        //primaryStage.initStyle(StageStyle.TRANSPARENT);
-        //primaryStage.setMaximized(true);
+        stage.setTitle("Side Window Infotainment");
 
         Scene scene = new Scene(root, 800, 600, Color.WHITE);
-        scene.setOnKeyPressed(event -> {
-            switch (event.getCode()) {
-                case F: controller.analyzeImage();
-                    break;
-                default:
-                    break;
-            }
-        });
-        //scene.getStylesheets().add("/stylesheets/ApplicationViewStylesheet.css");
+        scene.setOnKeyPressed(event -> viewModel.onKeyPressed(event.getCode()));
         scene.getStylesheets().add("/stylesheets/TransparentApplicationViewStylesheet.css");
-        primaryStage.setScene(scene);
-        primaryStage.show();
+        stage.setScene(scene);
+        stage.show();
     }
 
     private void initElements() {
-        pnFoundation = new BorderPane();
         pnFoundation.setId("pnFoundation");
-
-        listPOIcamera = new ListView<>();
-
-        listPOIcamera.setId("listPOIcamera");
-        pnFoundation.setTop(listPOIcamera);
-        listPOImaps = new ListView<>();
-        listPOImaps.setId("listPOImaps");
-        pnFoundation.setBottom(listPOImaps);
-
-        statusPane = new HBox();
-        statusPane.setId("statusPane");
+        pnFoundation.setTop(listPoiCamera);
+        pnFoundation.setBottom(listPoiMaps);
         pnFoundation.setLeft(statusPane);
 
-        listModuleStatus = new ListView<>();
-        listModuleStatus.setId("listModuleStatus");
-        statusPane.getChildren().add(listModuleStatus);
+        listPoiCamera.setId("listPoiCamera");
+        listPoiMaps.setId("listPoiMaps");
 
-        listExpressionStatus = new ListView<>();
-        listExpressionStatus.setId("listExpressionStatus");
+        statusPane.setId("statusPane");
+        statusPane.getChildren().add(listModuleStatus);
         statusPane.getChildren().add(listExpressionStatus);
 
-        listDebugLog = new ListView<>();
-        listDebugLog.setId("listDebugLog");
-        pnFoundation.setRight(listDebugLog);
+        listModuleStatus.setId("listModuleStatus");
 
-        expansionPane = new BorderPane();
+        listExpressionStatus.setId("listExpressionStatus");
+
+        listDebugLog.setId("listDebugLog");
         expansionPane.setId("expansionPane");
         expansionPane.setVisible(false);
-        expansionTopPane = new BorderPane();
         expansionTopPane.setId("expansionTopPane");
-        expansionButton = new Button("X");
         expansionButton.setId("expansionButton");
-        expansionName = new Label();
         expansionName.setId("expansionName");
-
-        expansionContentPane = new BorderPane();
         expansionContentPane.setId("expansionContentPane");
-        expansionInformation = new Label();
         expansionInformation.setId("expansionInformation");
-        expansionImage = new ImageView();
         expansionImage.setId("expansionImage");
-        expansionScrollPane = new ScrollPane();
         expansionScrollPane.setId("expansionScrollPane");
 
-        root = new StackPane();
-        mp = new MediaPlayer(ImageUtils.getTestVideo("Berlin.mp4"));
-        mv = new MediaView(mp);
-        mv.setVisible(false);
-        final DoubleProperty width = mv.fitWidthProperty();
-        final DoubleProperty height = mv.fitHeightProperty();
+        mediaView = new MediaView(mediaPlayer);
+        mediaView.setVisible(false);
+        final DoubleProperty width = mediaView.fitWidthProperty();
+        final DoubleProperty height = mediaView.fitHeightProperty();
 
-        width.bind(Bindings.selectDouble(mv.sceneProperty(), "width"));
-        height.bind(Bindings.selectDouble(mv.sceneProperty(), "height"));
-        mv.setPreserveRatio(true);
+        width.bind(Bindings.selectDouble(mediaView.sceneProperty(), "width"));
+        height.bind(Bindings.selectDouble(mediaView.sceneProperty(), "height"));
+        mediaView.setPreserveRatio(true);
 
-        root.getChildren().add(mv);
+        root.getChildren().add(mediaView);
         root.getChildren().add(pnFoundation);
+        root.getChildren().add(listDebugLog);
+        StackPane.setAlignment(listDebugLog, Pos.TOP_RIGHT);
     }
 
     private void initExpansion() {
@@ -193,29 +132,37 @@ public class ApplicationViewImplementation extends Application implements Applic
         expansionScrollPane.setFitToWidth(true);
     }
 
+    @Override
+    public void showDebugLog(boolean show) {
+        listDebugLog.setVisible(show);
+    }
+
+    @Override
+    public void toggleDebugLog() {
+        listDebugLog.setVisible(!listDebugLog.isVisible());
+    }
+
     private void initBindings() {
         ImageView cameraImage = new ImageView();
-        //pnFoundation.setRight(cameraImage);
-        cameraImage.imageProperty().bindBidirectional(controller.propertyCameraImageProperty());
+        cameraImage.imageProperty().bindBidirectional(viewModel.propertyCameraImageProperty());
 
         try {
-            expansionButton.visibleProperty().bind(Bindings.equal(controller.getExpandedPOI().nameProperty(), "").not());
-            expansionButton.onActionProperty().bindBidirectional(controller.propertyCloseButtonProperty());
-            expansionName.textProperty().bindBidirectional(controller.getExpandedPOI().nameProperty());
-            expansionImage.imageProperty().bindBidirectional(controller.getExpandedPOI().imageProperty());
-            expansionInformation.textProperty().bindBidirectional(controller.getExpandedPOI().informationAbstractProperty());
-            listModuleStatus.itemsProperty().bindBidirectional(controller.listModuleStatusProperty());
-            listExpressionStatus.itemsProperty().bindBidirectional(controller.listExpressionStatusProperty());
-            listPOIcamera.itemsProperty().bindBidirectional(controller.propertyPOIcameraProperty());
-            listPOImaps.itemsProperty().bindBidirectional(controller.propertyPOImapsProperty());
+            expansionButton.visibleProperty().bind(Bindings.equal(viewModel.getExpandedPOI().nameProperty(), "").not());
+            expansionButton.onActionProperty().bindBidirectional(viewModel.propertyCloseButtonProperty());
+            expansionName.textProperty().bindBidirectional(viewModel.getExpandedPOI().nameProperty());
+            expansionImage.imageProperty().bindBidirectional(viewModel.getExpandedPOI().imageProperty());
+            expansionInformation.textProperty().bindBidirectional(viewModel.getExpandedPOI().informationAbstractProperty());
+            listModuleStatus.itemsProperty().bindBidirectional(viewModel.listModuleStatusProperty());
+            listExpressionStatus.itemsProperty().bindBidirectional(viewModel.listExpressionStatusProperty());
+            listPoiCamera.itemsProperty().bindBidirectional(viewModel.propertyPoiCameraProperty());
+            listPoiMaps.itemsProperty().bindBidirectional(viewModel.propertyPoiMapsProperty());
 
-            listDebugLog.itemsProperty().bindBidirectional(controller.listDebugLogProperty());
-            if (!controller.useDemoVideo()) {
-                pnFoundation.backgroundProperty().bindBidirectional(controller.backgroundProperty);
+            listDebugLog.itemsProperty().bindBidirectional(viewModel.propertyDebugLogProperty());
+            if (!AppProperties.getInstance().useDemoVideo) {
+                pnFoundation.backgroundProperty().bindBidirectional(viewModel.getBackgroundProperty());
             }
 
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -230,7 +177,7 @@ public class ApplicationViewImplementation extends Application implements Applic
                     @Override
                     public void updateItem(PoiViewModel item, boolean empty) {
                         super.updateItem(item, empty);
-                        if(empty || item == null) {
+                        if (empty || item == null) {
                             setGraphic(null);
                             setText(null);
                         } else {
@@ -242,17 +189,17 @@ public class ApplicationViewImplementation extends Application implements Applic
                             BorderPane pane = new BorderPane();
                             pane.setTop(lblName);
                             pane.setCenter(imageView);
-                            pane.setOnMouseClicked(event -> controller.expandPOI(item.getId()));
+                            pane.setOnMouseClicked(event -> viewModel.expandPoi(item.getId()));
                             setGraphic(pane);
-                            listPOIcamera.refresh();
-                            listPOImaps.refresh();
+                            listPoiCamera.refresh();
+                            listPoiMaps.refresh();
                         }
                     }
                 };
             }
         };
-        listPOIcamera.setCellFactory(callback);
-        listPOImaps.setCellFactory(callback);
+        listPoiCamera.setCellFactory(callback);
+        listPoiMaps.setCellFactory(callback);
 
         listDebugLog.setCellFactory(new Callback<ListView<String>, ListCell<String>>() {
             @Override
@@ -261,14 +208,17 @@ public class ApplicationViewImplementation extends Application implements Applic
                     @Override
                     public void updateItem(String item, boolean empty) {
                         super.updateItem(item, empty);
-                        if(empty || item == null) {
-                            setGraphic(null);
-                            setText(null);
-                        } else {
-                            Label debugText = new Label(item);
-                            setGraphic(debugText);
-                            listDebugLog.refresh();
-                        }
+                        Platform.runLater(() -> {
+                            if (empty || item == null) {
+                                setGraphic(null);
+                                setText(null);
+                            } else {
+                                Label debugText = new Label(item);
+                                setGraphic(debugText);
+                                listDebugLog.refresh();
+                            }
+                        });
+
                     }
                 };
             }
@@ -281,7 +231,7 @@ public class ApplicationViewImplementation extends Application implements Applic
                     @Override
                     public void updateItem(ModuleStatusViewModel item, boolean empty) {
                         super.updateItem(item, empty);
-                        if(empty || item == null) {
+                        if (empty || item == null) {
                             setGraphic(null);
                             setText(null);
                         } else {
@@ -312,7 +262,7 @@ public class ApplicationViewImplementation extends Application implements Applic
                     @Override
                     public void updateItem(UserExpressionViewModel item, boolean empty) {
                         super.updateItem(item, empty);
-                        if(empty || item == null) {
+                        if (empty || item == null) {
                             setGraphic(null);
                             setText(null);
                         } else {
@@ -338,7 +288,7 @@ public class ApplicationViewImplementation extends Application implements Applic
     }
 
     private void statusIcon(Label lbl, boolean status) {
-        if(status) {
+        if (status) {
             String text = new String(Character.toChars(10003));
             lbl.setText(text);
             lbl.setStyle("-fx-text-fill: green; -fx-font-size: 20px; -fx-font-weight: bold; " +
@@ -356,15 +306,17 @@ public class ApplicationViewImplementation extends Application implements Applic
     }
 
     @Override
-    public void stop(){
-        controller.run = false;
-        for(Module m: controller.getModuleList()) {
+    public void stop() {
+        viewModel.setRunning(false);
+        for (Module m : viewModel.getModuleList()) {
             m.stopModule();
         }
+        System.exit(0);
     }
 
 
+    @Override
     public MediaView getMediaView() {
-        return mv;
+        return mediaView;
     }
 }

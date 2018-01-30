@@ -28,8 +28,11 @@ public class PoisInSightFinder {
      */
     public  Map<PointOfInterest, Float> getPoisInViewAngle(GpsPosition oldPosition, GpsPosition currentPosition, Collection<PointOfInterest> pois){
 
+        if(oldPosition==null)
+            getPoisInRange(currentPosition, pois, -1);
+
         if(oldPosition.equals(currentPosition)){
-            return calculateDistances(currentPosition, pois);
+            getPoisInRange(currentPosition, pois, -1);
         }
 
         Polygon sight=calculateSight(currentPosition, oldPosition);
@@ -48,6 +51,27 @@ public class PoisInSightFinder {
         inViewRange=sortByComparator(inViewRange, true);
 
         return inViewRange;
+    }
+
+    /**
+     * Calculate which pois are in range the default range is specified by the sum of the edges.
+     * @param currentPosition
+     * @param pois
+     * @param range the maxrange, will be replaced by a default if 0
+     */
+    private void getPoisInRange(GpsPosition currentPosition, Collection<PointOfInterest> pois, int range) {
+        Map<PointOfInterest, Float> poisWithDistance = calculateDistances(currentPosition, pois);
+        Map<PointOfInterest, Float> poisInRange = new HashMap<>();
+
+        int maxDistance=range;
+
+        if(range<0)
+            maxDistance=metersAgainstDrivingDirection+metersBraod+metersInDrivinDirection;
+
+        for(PointOfInterest poi: poisWithDistance.keySet()){
+            if(poisWithDistance.get(poi)<=maxDistance)
+                poisInRange.put(poi, poisWithDistance.get(poi));
+        }
     }
 
     public Map<PointOfInterest, Float> calculateDistances(GpsPosition currentPosition, Collection<PointOfInterest> pois){
