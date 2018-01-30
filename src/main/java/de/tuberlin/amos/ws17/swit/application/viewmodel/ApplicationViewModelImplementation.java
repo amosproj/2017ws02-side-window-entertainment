@@ -631,8 +631,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         PoiViewModel item = convertPoi(poi);
         if (!propertyPoiCamera.contains(poi)) {
             pointsOfInterest.add(poi);
-            Platform.runLater(() -> propertyPoiCamera.add(item));
-
+            Platform.runLater(() -> propertyPoiCamera.add(0, item));
         }
     }
 
@@ -648,15 +647,9 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
 
     private void addMapsPoi(PointOfInterest poi) {
         PoiViewModel item = convertPoi(poi);
-        System.out.println("item: " + item.getId() + " " + item.getName());
-        System.out.println(propertyPoiMaps.contains(item));
-        System.out.println("size: " + propertyPoiMaps.size());
-        for (PoiViewModel p : propertyPoiMaps) {
-            System.out.println("comp: " + p.equals(item));
-        }
         if (!propertyPoiMaps.contains(poi)) {
             pointsOfInterest.add(poi);
-            Platform.runLater(() -> propertyPoiMaps.add(item));
+            Platform.runLater(() -> propertyPoiMaps.add(0, item));
         }
     }
 
