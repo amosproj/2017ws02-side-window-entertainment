@@ -7,7 +7,10 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.LinkedList;
 
+import de.tuberlin.amos.ws17.swit.common.exceptions.GpsModuleNotAvailableException;
+import de.tuberlin.amos.ws17.swit.common.exceptions.HardwareNotAvailableException;
 import de.tuberlin.amos.ws17.swit.common.exceptions.ModuleNotWorkingException;
+import de.tuberlin.amos.ws17.swit.common.exceptions.ServiceNotAvailableException;
 import org.joda.time.DateTime;
 
 
@@ -42,25 +45,25 @@ public class GpsTrackerImplementation implements GpsTracker {
 	// Latitude and longitude are always updated values, the others may be outdated (but still the most actual)
 	// isUpdated() only is true, if latitude and longitude are new
 	// throws ModuleNotWorkingException, if no new data is available
-	public KinematicProperties fillDumpObject(KinematicProperties kinProp) throws ModuleNotWorkingException{
+	public KinematicProperties fillDumpObject(KinematicProperties kinProp) throws ServiceNotAvailableException{
 		if (portReader.isUpdated()){
 			portReader.fillKinematicProperties(kinProp);
 			if (kinProp == null){
 				DebugLog.log("No new GPS data available.");
-				throw new ModuleNotWorkingException(); // later: throw noSignalException or something like that
+				throw new ServiceNotAvailableException(); // later: throw noSignalException or something like that
 			}
 			return kinProp;
 		}
 		else {
 			DebugLog.log("No new GPS data available.");
-			throw new ModuleNotWorkingException();
+			throw new ServiceNotAvailableException();
 		}
 	}
 
-	public void startModule() throws ModuleNotWorkingException{
+	public void startModule() throws GpsModuleNotAvailableException{
 		if (portReader.start() == false){
 			DebugLog.log("No GPS device could be found.");
-			throw new ModuleNotWorkingException();
+			throw new GpsModuleNotAvailableException();
 		}
 		else {
 			DebugLog.log("GPS module started.");

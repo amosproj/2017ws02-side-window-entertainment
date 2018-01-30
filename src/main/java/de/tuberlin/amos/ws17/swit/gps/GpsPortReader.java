@@ -2,6 +2,8 @@ package de.tuberlin.amos.ws17.swit.gps;
 
 import de.tuberlin.amos.ws17.swit.common.GpsPosition;
 import de.tuberlin.amos.ws17.swit.common.KinematicProperties;
+import de.tuberlin.amos.ws17.swit.common.exceptions.GpsModuleNotAvailableException;
+import de.tuberlin.amos.ws17.swit.common.exceptions.HardwareNotAvailableException;
 import de.tuberlin.amos.ws17.swit.common.exceptions.ModuleNotWorkingException;
 import de.tuberlin.amos.ws17.swit.common.DebugLog;
 import gnu.io.SerialPort;
@@ -192,7 +194,7 @@ public class GpsPortReader implements SentenceListener{
 
     public boolean isUpdated(){ return update; }
 
-    public boolean start() throws ModuleNotWorkingException{
+    public boolean start() throws GpsModuleNotAvailableException{
         if (!running){
             try {
                 SerialPort sp = getSerialPort();
@@ -204,7 +206,7 @@ public class GpsPortReader implements SentenceListener{
                     sr.start();
                 }
                 else{
-                    throw new ModuleNotWorkingException();
+                    throw new GpsModuleNotAvailableException();
                 }
             }
             catch (IOException e){
