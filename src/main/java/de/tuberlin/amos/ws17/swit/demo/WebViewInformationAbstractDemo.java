@@ -12,7 +12,7 @@ public class WebViewInformationAbstractDemo extends Application {
         LandmarkDetector landmarkDetector = CloudVision.getInstance();
         final InformationProvider entity;
         try {
-            entity = KnowledgeGraphSearch.getInstance();
+            entity = AbstractProvider.getInstance();
         } catch (ServiceNotAvailableException e) {
             e.printStackTrace();
         }
