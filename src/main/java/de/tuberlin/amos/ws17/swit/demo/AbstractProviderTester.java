@@ -3,13 +3,13 @@ package de.tuberlin.amos.ws17.swit.demo;
 import de.tuberlin.amos.ws17.swit.common.GpsPosition;
 import de.tuberlin.amos.ws17.swit.common.PointOfInterest;
 import de.tuberlin.amos.ws17.swit.common.exceptions.ServiceNotAvailableException;
-import de.tuberlin.amos.ws17.swit.information_source.WikiAbstractProvider;
+import de.tuberlin.amos.ws17.swit.information_source.AbstractProvider;
 
 public class AbstractProviderTester {
 
 
     public static void main(String[] args) {
-        WikiAbstractProvider wp = new WikiAbstractProvider();
+        AbstractProvider wp = new AbstractProvider();
         PointOfInterest a = new PointOfInterest("", "post hoc ergo propter hoc", new GpsPosition(5.5, 6.6));
         PointOfInterest b = new PointOfInterest("", "gibberish", new GpsPosition(5.5, 6.6));
         PointOfInterest c = new PointOfInterest("", "ghoti", new GpsPosition(5.5, 6.6));
