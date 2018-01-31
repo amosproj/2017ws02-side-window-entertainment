@@ -4,9 +4,11 @@ package de.tuberlin.amos.ws17.swit.information_source;
 import de.tuberlin.amos.ws17.swit.common.Module;
 import de.tuberlin.amos.ws17.swit.common.PointOfInterest;
 import de.tuberlin.amos.ws17.swit.common.exceptions.ModuleNotWorkingException;
+import de.tuberlin.amos.ws17.swit.common.DebugLog;
 import de.tuberlin.amos.ws17.swit.common.exceptions.ServiceNotAvailableException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
+
 
 import javax.annotation.Nullable;
 import javax.imageio.ImageIO;
@@ -20,6 +22,8 @@ import java.net.URL;
 import java.util.Arrays;
 
 public class WikiAbstractProvider implements InformationProvider, Module {
+
+
     /**
      * Provides an abstract for a POI
      *
@@ -58,8 +62,10 @@ public class WikiAbstractProvider implements InformationProvider, Module {
                 knowledgeGraphSearch = KnowledgeGraphSearch.getInstance();
                 poi = knowledgeGraphSearch.setInfoAndUrl(poi);
                 String wikiUrl = poi.getWikiUrl();
+                DebugLog.log("Get WikiUrl of POI: " + wikiUrl);
                 if (wikiUrl==null){
                     String abstractInfo= getAbstract(poi.getName(), "en");
+                    DebugLog.log("Retrieving abstractInfo from KnowledgeGraph: " + abstractInfo);
                     if (abstractInfo == null) {
                         throw new ServiceNotAvailableException("Information is not available");
                     } else {
@@ -69,6 +75,7 @@ public class WikiAbstractProvider implements InformationProvider, Module {
                 if (!StringUtils.isEmpty(wikiUrl)) {
                     // if wiki url available -> query info from wikipedia
                     String abstractInfo = getAbstract(wikiUrl);
+                    DebugLog.log("Fetching abstractInfo from Wiki Article: " + abstractInfo);
                     if (!StringUtils.isEmpty(abstractInfo)) {
                         poi.setInformationAbstract(abstractInfo);
                     } else {
@@ -82,7 +89,7 @@ public class WikiAbstractProvider implements InformationProvider, Module {
 
             return poi;
         } else {
-            throw new ServiceNotAvailableException("No POI could be find");
+            throw new ServiceNotAvailableException("No POI could be found");
         }
     }
 
