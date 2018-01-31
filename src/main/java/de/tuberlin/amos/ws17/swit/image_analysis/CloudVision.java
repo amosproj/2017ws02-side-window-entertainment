@@ -141,9 +141,7 @@ public class CloudVision implements LandmarkDetector {
                             ? response.getError().getMessage()
                             : "Unknown error getting image annotations");
         }
-        List<EntityAnnotation> res = response.getLandmarkAnnotations();
-        List<LandmarkResult> landmarkResults = convertToLandmarkResults(response.getLandmarkAnnotations());
-        return landmarkResults;
+        return convertToLandmarkResults(response.getLandmarkAnnotations());
     }
 
     private List<LandmarkResult> convertToLandmarkResults(List<EntityAnnotation> annotations) {
