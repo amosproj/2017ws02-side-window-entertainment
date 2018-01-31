@@ -430,7 +430,11 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                         }
                     }
 
-                    System.out.println(pois.size() + " number of POIs found.");
+                System.out.println(pois.size() + " POIs found.");
+
+                clearDuplicates(pois.keySet(), "map");
+
+                System.out.println(pois.size() + "NEW POIs found.");
 
                     if (properties.getProperty("load_images").equals("1")) {
                         poiService.addImages(pois.keySet());
@@ -528,7 +532,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         cameraThread.setDaemon(true);
     }
 
-    private void clearDuplicates(List<PointOfInterest> pois, String propertyList) {
+    private void clearDuplicates(Collection<PointOfInterest> pois, String propertyList) {
         ArrayList<PointOfInterest> list = new ArrayList<>();
         for (PointOfInterest poi : pois) {
             PoiViewModel item = convertPoi(poi);
@@ -542,11 +546,10 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 }
             }
         }
+        pois.removeAll(list);
 
-        for (PointOfInterest poi : list) {
-            pois.remove(poi);
-        }
     }
+
 
     private void setModuleStatus(ModuleErrors type, boolean working) {
         for (ModuleStatusViewModel status : listModuleStatus) {
