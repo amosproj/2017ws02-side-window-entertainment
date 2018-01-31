@@ -78,6 +78,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     private List<Module>                                    moduleList           = new ArrayList<>();
 
     private int     searchRadius = 1000;
+    private GpsPosition lastRequestPosition;
 
     private Property<Image> propertyCameraImage = new SimpleObjectProperty<>();
     private Image cameraImage;
@@ -388,7 +389,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 DateTime timeStamp = kinematicProperties.getTimeStamp();
                 Double latitude = kinematicProperties.getLatitude();
                 Double longitude = kinematicProperties.getLongitude();
-                DebugLog.log(timeStamp.toString("HH:mm:ss") + " Lat: " +
+                DebugLog.log("Lat: " +
                         latitude + ", Lng: " + longitude);
             } catch (ModuleNotWorkingException e) {
                 setModuleStatus(ModuleErrors.NOGPSHARDWARE, false);
@@ -402,53 +403,58 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 return;
             }
 
-            //POI maps
-            Map<PointOfInterest, Float> pois;
-            try {
-                List<PointOfInterest> poisFound = poiService.loadPlaceForCircleAndPoiType(kinematicProperties, searchRadius,
-                        PoiType.LEISURE, PoiType.TOURISM);
+            if (lastRequestPosition != null) { System.out.println(kinematicProperties.distanceTo(lastRequestPosition));};
+            if (lastRequestPosition == null || kinematicProperties.distanceTo(lastRequestPosition) > 300) {
+                lastRequestPosition = new GpsPosition(kinematicProperties.getLongitude(), kinematicProperties.getLatitude());
 
-                pois = sightFinder.calculateDistances(kinematicProperties, poisFound);
+                //POI maps
+                Map<PointOfInterest, Float> pois;
+                try {
+                    List<PointOfInterest> poisFound = poiService.loadPlaceForCircleAndPoiType(kinematicProperties, searchRadius,
+                            PoiType.LEISURE, PoiType.TOURISM);
 
-                //if there is a history: remove POIs out of viewrange
-                //or: no or irrelevant history
-                if (properties.getProperty("calculatePoisInSight").equals("1")
-                        && history != null) {
+                    pois = sightFinder.calculateDistances(kinematicProperties, poisFound);
+
+                    //if there is a history: remove POIs out of viewrange
                     //or: no or irrelevant history
-                    if (!history.isEmpty()) {
-                        GpsPosition historyPoint = history.get(0);
-                        if (historyPoint.distanceTo(kinematicProperties) > 0.5) {
-                            System.out.println("Point in histroy found. Size of POIs now: " + pois.size());
-                            pois = sightFinder.getPoisInViewAngle(historyPoint, kinematicProperties, pois.keySet());
-                            System.out.println("Used viewrange calculation now pois are of size: " + pois.size());
+                    if (properties.getProperty("calculatePoisInSight").equals("1")
+                            && history != null) {
+                        //or: no or irrelevant history
+                        if (!history.isEmpty()) {
+                            GpsPosition historyPoint = history.get(0);
+                            if (historyPoint.distanceTo(kinematicProperties) > 0.5) {
+                                System.out.println("Point in histroy found. Size of POIs now: " + pois.size());
+                                pois = sightFinder.getPoisInViewAngle(historyPoint, kinematicProperties, pois.keySet());
+                                System.out.println("Used viewrange calculation now pois are of size: " + pois.size());
+                            }
                         }
                     }
+
+                    System.out.println(pois.size() + " number of POIs found.");
+
+                    if (properties.getProperty("load_images").equals("1")) {
+                        poiService.addImages(pois.keySet());
+                        System.out.println(pois.size() + " images added.");
+                    } else
+                        System.out.println("Image download is turned of.");
+
+                    setModuleStatus(ModuleErrors.NOINTERNET, true);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    setModuleStatus(ModuleErrors.NOINTERNET, false);
+                    return;
                 }
 
-                System.out.println(pois.size() + " number of POIs found.");
+                if (pois.isEmpty()) {
+                    return;
+                }
 
-                if (properties.getProperty("load_images").equals("1")) {
-                    poiService.addImages(pois.keySet());
-                    System.out.println(pois.size() + " images added.");
-                } else
-                    System.out.println("Image download is turned of.");
+                //retrieve information
+                getAbstract(new ArrayList<>(pois.keySet()));
 
-                setModuleStatus(ModuleErrors.NOINTERNET, true);
-            } catch (Exception e) {
-                e.printStackTrace();
-                setModuleStatus(ModuleErrors.NOINTERNET, false);
-                return;
-            }
-
-            if (pois.isEmpty()) {
-                return;
-            }
-
-            //retrieve information
-            getAbstract(new ArrayList<>(pois.keySet()));
-
-            for (PointOfInterest poi : pois.keySet()) {
-                addMapsPoi(poi);
+                for (PointOfInterest poi : pois.keySet()) {
+                    addMapsPoi(poi);
+                }
             }
         });
         // thread will not prevent application shutdown
