@@ -1,6 +1,7 @@
 package de.tuberlin.amos.ws17.swit.landscape_tracking;
 
 import com.github.sarxos.webcam.Webcam;
+import de.tuberlin.amos.ws17.swit.common.DebugLog;
 import de.tuberlin.amos.ws17.swit.common.exceptions.ModuleNotWorkingException;
 
 import javax.imageio.ImageIO;
@@ -49,8 +50,26 @@ public class LandscapeTrackerImplementation implements LandscapeTracker {
         }
 
         if (logitechC920webcam == null) {
+            DebugLog.log("Logitech HD Pro Webcam C920 not found");
+            try {
+                List<Webcam> webcams = Webcam.getWebcams(2000);
+                logitechC920webcam = webcams.stream().findFirst().orElse(null);
+            } catch (TimeoutException e) {
+                throw new ModuleNotWorkingException(e.getMessage());
+            }
+        }
+        else {
+            DebugLog.log("Logitech HD Pro Webcam C920 found");
+        }
+
+        if (logitechC920webcam == null) {
+            DebugLog.log("webcam not found");
             throw new ModuleNotWorkingException("Logitech Kamera nicht vorhanden.");
         }
+        else {
+            DebugLog.log("webcam found");
+        }
+
     }
 
     private void startLogitechC920() throws ModuleNotWorkingException {
@@ -66,7 +85,11 @@ public class LandscapeTrackerImplementation implements LandscapeTracker {
             logitechC920webcam.setCustomViewSizes(customViewSizes);
             logitechC920webcam.setViewSize(fullHD);
             if (!logitechC920webcam.open()) {
+                DebugLog.log("tracking started");
                 throw new ModuleNotWorkingException("Logitech Kamera konnte nicht gestartet werden.");
+            }
+            else {
+                DebugLog.log("tracking not started");
             }
         }
     }

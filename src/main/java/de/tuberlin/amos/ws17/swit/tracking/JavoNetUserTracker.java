@@ -92,10 +92,10 @@ public class JavoNetUserTracker implements UserTracker {
         try {
             JavoNetService.dotNetUserTracker.invoke("StartTracking");
         } catch (JavonetException e) {
-            DebugLog.log("JavoNetUserTracker Tracking Thread not started");
+            DebugLog.log("Tracking Thread not started");
             return false;
         }
-        DebugLog.log("JavoNetUserTracker Tracking Thread started");
+        DebugLog.log("Tracking Thread started");
         return true;
     }
 
@@ -104,10 +104,10 @@ public class JavoNetUserTracker implements UserTracker {
         try {
             JavoNetService.dotNetUserTracker.invoke("StopTracking");
         } catch (JavonetException e) {
-            DebugLog.log("JavoNetUserTracker Tracking Thread not stopped");
+            DebugLog.log("Tracking Thread not stopped");
             return false;
         }
-        DebugLog.log("JavoNetUserTracker Tracking Thread stopped");
+        DebugLog.log("Tracking Thread stopped");
         return true;
     }
 }

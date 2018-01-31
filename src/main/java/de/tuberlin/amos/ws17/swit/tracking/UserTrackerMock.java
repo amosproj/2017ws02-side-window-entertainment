@@ -72,14 +72,14 @@ public class UserTrackerMock implements UserTracker, Runnable {
 
         Thread threadLoop = new Thread(this);
         threadLoop.start();
-        DebugLog.log("UserTrackerMock Tracking Thread started");
+        DebugLog.log("Tracking Thread started");
         return true;
     }
 
     @Override
     public boolean stopTracking() {
         isTracking = false;
-        DebugLog.log("UserTrackerMock Tracking Thread stopped");
+        DebugLog.log("Tracking Thread stopped");
         return true;
     }
 
