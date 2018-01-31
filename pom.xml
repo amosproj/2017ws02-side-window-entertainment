@@ -99,6 +99,39 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+
+            <groupId>com.googlecode.maven-download-plugin</groupId>
+                <artifactId>download-maven-plugin</artifactId>
+                <version>1.4.0</version>
+                <executions>
+                    <execution>
+                        <id>download-model-labels</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>wget</goal>
+                        </goals>
+                        <configuration>
+                            <url>https://storage.googleapis.com/hopeful-canto-143518.appspot.com/labels.txt</url>
+                            <overwrite>false</overwrite>
+                            <outputDirectory>${project.basedir}/src/main/resources</outputDirectory>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>download-model-graph</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>wget</goal>
+                        </goals>
+                        <configuration>
+                            <url>https://storage.googleapis.com/hopeful-canto-143518.appspot.com/graph.pb</url>
+                            <overwrite>false</overwrite>
+                            <outputDirectory>${project.basedir}/src/main/resources</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
         </plugins>
         <resources>
             <resource>
@@ -152,7 +185,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>20.0</version>
+            <version>23.6-jre</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.googlecode.json-simple/json-simple -->
         <dependency>
@@ -240,6 +273,12 @@
             <groupId>com.javonet</groupId>
             <artifactId>javonet</artifactId>
             <version>1.4hf89-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.tensorflow</groupId>
+            <artifactId>tensorflow</artifactId>
+            <version>1.5.0</version>
         </dependency>
 
     </dependencies>
