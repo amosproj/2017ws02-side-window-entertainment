@@ -1,6 +1,7 @@
 package de.tuberlin.amos.ws17.swit.tracking.camera;
 
 import com.javonet.JavonetException;
+import de.tuberlin.amos.ws17.swit.common.DebugLog;
 import de.tuberlin.amos.ws17.swit.tracking.javonet.JavoNetService;
 
 public class JavoNetCameraService implements CameraService {
@@ -23,8 +24,10 @@ public class JavoNetCameraService implements CameraService {
             boolean result = JavoNetService.dotNetCameraService.invoke("SelectIntelRealSenseSR300");
 
             if (!result) {
+                DebugLog.log("Intel RealSenseSR300 found");
                 throw new CameraNotFoundException();
             }
+            DebugLog.log("Intel RealSenseSR300 not found");
         } catch (JavonetException e) {
             e.printStackTrace();
         }

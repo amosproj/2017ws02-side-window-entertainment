@@ -1,5 +1,6 @@
 package de.tuberlin.amos.ws17.swit.landscape_tracking;
 
+import de.tuberlin.amos.ws17.swit.common.DebugLog;
 import de.tuberlin.amos.ws17.swit.common.exceptions.ModuleNotWorkingException;
 import de.tuberlin.amos.ws17.swit.image_analysis.ImageUtils;
 import org.joda.time.DateTime;
@@ -37,6 +38,7 @@ public class LandscapeTrackerMock implements LandscapeTracker {
     private void loadImage() {
         currentImage = ImageUtils.getRandomTestImage();
         dateTimeLoadImage = new DateTime();
+        DebugLog.log("new random image loaded");
     }
 
     @Override
