@@ -6,8 +6,8 @@ import de.tuberlin.amos.ws17.swit.image_analysis.ImageUtils;
 import de.tuberlin.amos.ws17.swit.image_analysis.LandmarkDetector;
 import de.tuberlin.amos.ws17.swit.image_analysis.CloudVision;
 import de.tuberlin.amos.ws17.swit.image_analysis.LandmarkResult;
+import de.tuberlin.amos.ws17.swit.information_source.AbstractProvider;
 import de.tuberlin.amos.ws17.swit.information_source.InformationProvider;
-import de.tuberlin.amos.ws17.swit.information_source.KnowledgeGraphSearch;
 
 import javax.swing.*;
 import java.awt.*;
@@ -25,7 +25,7 @@ public class LandmarkExtractionDemo {
         LandmarkDetector landmarkDetector = CloudVision.getInstance();
         InformationProvider infoProvider = null;
         try {
-            infoProvider = KnowledgeGraphSearch.getInstance();
+            infoProvider = AbstractProvider.getInstance();
         } catch (ServiceNotAvailableException e) {
             e.printStackTrace();
         }
