@@ -13,6 +13,7 @@ import de.tuberlin.amos.ws17.swit.image_analysis.CloudVision;
 import de.tuberlin.amos.ws17.swit.image_analysis.LandmarkDetector;
 import de.tuberlin.amos.ws17.swit.image_analysis.LandmarkDetectorMock;
 import de.tuberlin.amos.ws17.swit.information_source.AbstractProvider;
+import de.tuberlin.amos.ws17.swit.image_analysis.TFLandmarkClassifier;
 import de.tuberlin.amos.ws17.swit.information_source.InformationProviderMock;
 import de.tuberlin.amos.ws17.swit.landscape_tracking.DemoVideoLandscapeTracker;
 import de.tuberlin.amos.ws17.swit.landscape_tracking.LandscapeTracker;
@@ -30,6 +31,7 @@ import javafx.application.Platform;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.Image;
 import javafx.event.EventHandler;
@@ -37,6 +39,7 @@ import javafx.event.ActionEvent;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
 import org.apache.jena.atlas.logging.Log;
+import org.apache.jena.base.Sys;
 import org.joda.time.DateTime;
 
 import java.awt.image.BufferedImage;
@@ -84,7 +87,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     private SimpleListProperty<String>                      propertyDebugLog     = new SimpleListProperty<>();
     private SimpleListProperty<ModuleStatusViewModel>       listModuleStatus     = new SimpleListProperty<>();
     private SimpleListProperty<UserExpressionViewModel>     listExpressionStatus = new SimpleListProperty<>();
-    private List<Module>                                    moduleList           = new ArrayList<>();
+    private SimpleListProperty<String>                      propertyDebugLogTF   = new SimpleListProperty<>();
 
 
     private SimpleDoubleProperty                            infoBoxRotation =       new SimpleDoubleProperty();
@@ -93,6 +96,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
 
     private int searchRadius = 1000;
     private GpsPosition lastRequestPosition;
+    private List<Module> moduleList = new ArrayList<>();
 
     private Property<Image> propertyCameraImage = new SimpleObjectProperty<>();
     private Image cameraImage;
@@ -128,6 +132,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         propertyPoiMaps.set(FXCollections.observableList(new ArrayList<>()));
         propertyPoiCamera.set(FXCollections.observableList(new ArrayList<>()));
         propertyDebugLog.set(FXCollections.observableList(new ArrayList<>()));
+        propertyDebugLogTF.set(FXCollections.observableList(new ArrayList<>()));
         propertyCloseButton.set(event -> minimizePoi());
         propertyToggleGpsButton.set(event -> DebugLog.toggleModule("GPS"));
         propertyTogglePoiButton.set(event -> DebugLog.toggleModule("POI"));
@@ -151,6 +156,14 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
             propertyDebugLog.clear();
             for (DebugLog.DebugEntry de : c.getList()) {
                 propertyDebugLog.add(de.toString());
+            }
+        });
+
+        DebugLogTF.getDebugLogTF().addListener((ListChangeListener<DebugLog.DebugEntry>) c -> {
+            c.next();
+            propertyDebugLogTF.clear();
+            for (DebugLogTF.DebugEntry de : c.getAddedSubList()) {
+                propertyDebugLogTF.add(de.getMessage());
             }
         });
     }
@@ -258,7 +271,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         if (properties.useCloudVision) {
             try {
                 System.out.println("loading " + currentModule + "...");
-                cloudVision = CloudVision.getInstance();
+                cloudVision = new TFLandmarkClassifier(); //CloudVision.getInstance();
                 setModuleStatus(ModuleErrors.NOINTERNET, true);
             } catch (Exception e) {
                 System.out.println("unexpected error loading " + currentModule);
@@ -525,7 +538,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         if (pois.isEmpty()) {
             return;
         }
-        clearDuplicates(pois, "camera");
+//        clearDuplicates(pois, "camera");
 
         getAbstract(pois);
 
@@ -542,11 +555,11 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 return;
             }
 
-            if (properties.useDemoVideo) {
-                Platform.runLater(this::analyzeImage);
-            } else {
-                analyzeImage();
-            }
+//            if (properties.useDemoVideo) {
+//                Platform.runLater(this::analyzeImage);
+//            } else {
+            analyzeImage();
+//            }
         });
 
         // thread will not prevent application shutdown
@@ -593,10 +606,14 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     }
 
     private void updateBackgroundImage() {
-
+        if (AppProperties.getInstance().useDemoVideo) {
+            return;
+        }
         Platform.runLater(() -> {
             try {
                 if (landscapeTracker != null) {
+                    System.out.println("Platform run later updateBackgroundImage");
+
                     cameraImage = SwingFXUtils.toFXImage(landscapeTracker.getImage(), null);
                     backgroundImage = new BackgroundImage(cameraImage,
                             BackgroundRepeat.NO_REPEAT,
@@ -756,6 +773,11 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     @Override
     public SimpleListProperty<String> propertyDebugLogProperty() {
         return propertyDebugLog;
+    }
+
+    @Override
+    public SimpleListProperty<String> propertyDebugLogTFProperty() {
+        return propertyDebugLogTF;
     }
 
     @Override

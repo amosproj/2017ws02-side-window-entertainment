@@ -8,18 +8,20 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.DoubleProperty;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.*;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.util.Callback;
-import org.apache.jena.base.Sys;
 
 public class ApplicationViewImplementation extends Application implements ApplicationView {
 
@@ -27,6 +29,7 @@ public class ApplicationViewImplementation extends Application implements Applic
     private ListView<PoiViewModel>            listPoiCamera        = new ListView<>();
     private ListView<PoiViewModel>            listPoiMaps          = new ListView<>();
     private ListView<String>                  listDebugLog         = new ListView<>();
+    private ListView<String>                  listDebugLogTF       = new ListView<>();
     private ListView<ModuleStatusViewModel>   listModuleStatus     = new ListView<>();
     private ListView<UserExpressionViewModel> listExpressionStatus = new ListView<>();
 
@@ -128,6 +131,7 @@ public class ApplicationViewImplementation extends Application implements Applic
         debugPane.getChildren().add(listDebugLog);
 
         listDebugLog.setId("listDebugLog");
+        listDebugLogTF.setId("listDebugLogTF");
         expansionPane.setId("expansionPane");
         expansionPane.setVisible(false);
         expansionTopPane.setId("expansionTopPane");
@@ -153,6 +157,7 @@ public class ApplicationViewImplementation extends Application implements Applic
        // StackPane.setAlignment(listDebugLog, Pos.TOP_RIGHT);
         root.getChildren().add(debugPane);
         StackPane.setAlignment(debugPane, Pos.TOP_RIGHT);
+        root.getChildren().add(listDebugLogTF);
     }
 
     private void initExpansion() {
@@ -220,6 +225,7 @@ public class ApplicationViewImplementation extends Application implements Applic
             listPoiMaps.itemsProperty().bindBidirectional(viewModel.propertyPoiMapsProperty());
 
             listDebugLog.itemsProperty().bindBidirectional(viewModel.propertyDebugLogProperty());
+            listDebugLogTF.itemsProperty().bindBidirectional(viewModel.propertyDebugLogTFProperty());
             if (!AppProperties.getInstance().useDemoVideo) {
                 pnFoundation.backgroundProperty().bindBidirectional(viewModel.getBackgroundProperty());
             }
@@ -266,28 +272,11 @@ public class ApplicationViewImplementation extends Application implements Applic
         listPoiCamera.setCellFactory(callback);
         listPoiMaps.setCellFactory(callback);
 
-        listDebugLog.setCellFactory(new Callback<ListView<String>, ListCell<String>>() {
-            @Override
-            public ListCell<String> call(ListView<String> param) {
-                return new ListCell<String>() {
-                    @Override
-                    public void updateItem(String item, boolean empty) {
-                        super.updateItem(item, empty);
-                        Platform.runLater(() -> {
-                            if (empty || item == null) {
-                                setGraphic(null);
-                                setText(null);
-                            } else {
-                                Label debugText = new Label(item);
-                                setGraphic(debugText);
-                                listDebugLog.refresh();
-                            }
-                        });
+        Callback<ListView<String>, ListCell<String>> logCallBack = param -> new LogTextCell();
 
-                    }
-                };
-            }
-        });
+        listDebugLog.setCellFactory(logCallBack);
+
+        listDebugLogTF.setCellFactory(logCallBack);
 
         listModuleStatus.setCellFactory(new Callback<ListView<ModuleStatusViewModel>, ListCell<ModuleStatusViewModel>>() {
             @Override
@@ -320,7 +309,9 @@ public class ApplicationViewImplementation extends Application implements Applic
             }
         });
 
-        listExpressionStatus.setCellFactory(new Callback<ListView<UserExpressionViewModel>, ListCell<UserExpressionViewModel>>() {
+        listExpressionStatus.setCellFactory(new Callback<ListView<UserExpressionViewModel>, ListCell<UserExpressionViewModel>>()
+
+        {
             @Override
             public ListCell<UserExpressionViewModel> call(ListView<UserExpressionViewModel> param) {
                 return new ListCell<UserExpressionViewModel>() {
@@ -386,5 +377,16 @@ public class ApplicationViewImplementation extends Application implements Applic
     @Override
     public MediaView getMediaView() {
         return mediaView;
+    }
+
+    static class LogTextCell extends ListCell<String> {
+        @Override
+        public void updateItem(String item, boolean empty) {
+            super.updateItem(item, empty);
+            Platform.runLater(() -> {
+                Label debugText = new Label(item);
+                setGraphic(debugText);
+            });
+        }
     }
 }
