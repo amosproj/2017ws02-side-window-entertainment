@@ -7,6 +7,7 @@ import javafx.scene.image.WritableImage;
 import javafx.scene.media.MediaView;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -18,11 +19,25 @@ public class DemoVideoLandscapeTracker implements LandscapeTracker {
     public DemoVideoLandscapeTracker(MediaView mediaView) {
         this.mediaView = mediaView;
     }
+//
+//    @Override
+//    public BufferedImage getImage() throws IOException {
+//        WritableImage wim = mediaView.snapshot(new SnapshotParameters(), null);
+//        return SwingFXUtils.fromFXImage(wim, null);
+//    }
 
     @Override
-    public BufferedImage getImage() throws IOException {
-        WritableImage wim = mediaView.snapshot(new SnapshotParameters(), null);
-        return SwingFXUtils.fromFXImage(wim, null);
+    public BufferedImage getImage() {
+//        WritableImage wim = mediaView.snapshot(new SnapshotParameters(), null);
+//        return SwingFXUtils.fromFXImage(wim, null);
+        BufferedImage capture = null;
+        Rectangle screenRect = new Rectangle(Toolkit.getDefaultToolkit().getScreenSize());
+        try {
+            capture = new Robot().createScreenCapture(screenRect);
+        } catch (AWTException e) {
+            e.printStackTrace();
+        }
+        return capture;
     }
 
     @Override
