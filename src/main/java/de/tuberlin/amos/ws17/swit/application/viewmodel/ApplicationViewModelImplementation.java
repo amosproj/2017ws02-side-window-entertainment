@@ -122,6 +122,11 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     private void initDebugLog() {
         view.showDebugLog(true);
         System.out.println("loading DebugLog...");
+
+        for (DebugLog.DebugEntry debugEntry:DebugLog.getDebugLog()) {
+            propertyDebugLog.add(debugEntry.toString());
+        }
+
         DebugLog.getDebugLog().addListener((ListChangeListener<DebugLog.DebugEntry>) c -> {
             c.next();
             for (DebugLog.DebugEntry de : c.getAddedSubList()) {

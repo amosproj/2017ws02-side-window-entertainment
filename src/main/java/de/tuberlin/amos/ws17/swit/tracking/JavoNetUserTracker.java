@@ -1,6 +1,7 @@
 package de.tuberlin.amos.ws17.swit.tracking;
 
 import com.javonet.JavonetException;
+import de.tuberlin.amos.ws17.swit.common.DebugLog;
 import de.tuberlin.amos.ws17.swit.common.UserExpressions;
 import de.tuberlin.amos.ws17.swit.common.UserPosition;
 import de.tuberlin.amos.ws17.swit.common.Vector3D;
@@ -91,8 +92,10 @@ public class JavoNetUserTracker implements UserTracker {
         try {
             JavoNetService.dotNetUserTracker.invoke("StartTracking");
         } catch (JavonetException e) {
+            DebugLog.log("JavoNetUserTracker Tracking Thread not started");
             return false;
         }
+        DebugLog.log("JavoNetUserTracker Tracking Thread started");
         return true;
     }
 
@@ -101,8 +104,10 @@ public class JavoNetUserTracker implements UserTracker {
         try {
             JavoNetService.dotNetUserTracker.invoke("StopTracking");
         } catch (JavonetException e) {
+            DebugLog.log("JavoNetUserTracker Tracking Thread not stopped");
             return false;
         }
+        DebugLog.log("JavoNetUserTracker Tracking Thread stopped");
         return true;
     }
 }

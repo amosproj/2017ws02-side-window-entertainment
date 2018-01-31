@@ -1,5 +1,6 @@
 package de.tuberlin.amos.ws17.swit.tracking;
 
+import de.tuberlin.amos.ws17.swit.common.DebugLog;
 import de.tuberlin.amos.ws17.swit.common.UserExpressions;
 import de.tuberlin.amos.ws17.swit.common.UserPosition;
 import de.tuberlin.amos.ws17.swit.common.Vector3D;
@@ -71,14 +72,14 @@ public class UserTrackerMock implements UserTracker, Runnable {
 
         Thread threadLoop = new Thread(this);
         threadLoop.start();
-
+        DebugLog.log("UserTrackerMock Tracking Thread started");
         return true;
     }
 
     @Override
     public boolean stopTracking() {
         isTracking = false;
-
+        DebugLog.log("UserTrackerMock Tracking Thread stopped");
         return true;
     }
 

@@ -24,6 +24,7 @@ public class JavoNetService {
             dotNetCameraService = Javonet.New("CameraService");
             dotNetUserTracker = Javonet.New("UserTracker");
             isInitialized = true;
+            DebugLog.log("JavoNet Bridge constructed.");
         }
     }
 }
