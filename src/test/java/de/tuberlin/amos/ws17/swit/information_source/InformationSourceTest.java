@@ -16,7 +16,7 @@ public class InformationSourceTest {
 
 
     private PoiService poiService = new MockedPoiService();
-    private WikiAbstractProvider wiki= new WikiAbstractProvider();
+    private AbstractProvider wiki= new AbstractProvider();
 
     // check whether Module could successfully fetch the accurate article
     @Test
