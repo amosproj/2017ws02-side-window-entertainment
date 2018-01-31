@@ -1,7 +1,12 @@
 package de.tuberlin.amos.ws17.swit.application;
 
+import de.tuberlin.amos.ws17.swit.common.PathService;
+import org.apache.jena.base.Sys;
+
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Paths;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -9,6 +14,8 @@ import java.util.logging.Logger;
 public class AppProperties extends Properties {
     private static Logger LOGGER = Logger.getLogger(AppProperties.class.getName());
     private static AppProperties instance;
+
+    private static String appPropertiesFilename = "app.properties";
 
     public boolean usePoiService;
     public boolean useKnowledgeGraph;
@@ -20,21 +27,35 @@ public class AppProperties extends Properties {
     public boolean useGpsModule;
     public boolean useDebugLog;
 
-    private AppProperties() {}
-
     public static AppProperties getInstance() {
         if (instance == null) {
+            String pathOfRunningJar = PathService.getPathOfRunningJar();
+            String filePath = Paths.get(pathOfRunningJar, appPropertiesFilename).toString();
+
             try {
-                instance = new AppProperties("app.properties");
+                instance = new AppProperties(filePath);
             } catch (IOException e) {
-                LOGGER.log(Level.SEVERE, "Could not load app.properties!");
+                LOGGER.log(Level.SEVERE, "Could not load app.properties from file check " + filePath);
+                instance = new AppProperties();
             }
         }
         return instance;
     }
 
+    private AppProperties() {
+        useGpsModule = false;
+        useIntelRealSense = false;
+        useExternalCamera = false;
+        useDemoVideo = false;
+        useCloudVision = false;
+        useWikipedia = false;
+        useKnowledgeGraph = false;
+        usePoiService = false;
+        useDebugLog = true;
+    }
+
     private AppProperties(String propertyFilePath) throws IOException {
-        InputStream input = getClass().getClassLoader().getResourceAsStream(propertyFilePath);
+        InputStream input = new FileInputStream(propertyFilePath);
         load(input);
         initProperties();
     }

@@ -48,7 +48,7 @@ public class GpsTrackerMock extends GpsTrackerImplementation {
     }
     // returns an object filled with the fake values (fot testing without hardware)
     // for every second new request, a new coordinate is sent
-    public KinematicProperties fillDumpObject(KinematicProperties kinProp) throws ModuleNotWorkingException{
+    public KinematicProperties fillDumpObject(KinematicProperties kinProp) {
         DateTime now = new DateTime();
 
         //get return values
@@ -71,7 +71,7 @@ public class GpsTrackerMock extends GpsTrackerImplementation {
 
     }
 
-    public void startModule() throws ModuleNotWorkingException{
+    public void startModule() {
         // not a real module, does not need starting
     }
 
