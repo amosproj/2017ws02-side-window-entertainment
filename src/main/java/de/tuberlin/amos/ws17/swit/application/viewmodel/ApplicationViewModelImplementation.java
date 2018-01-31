@@ -12,10 +12,8 @@ import de.tuberlin.amos.ws17.swit.gps.GpsTrackerMock;
 import de.tuberlin.amos.ws17.swit.image_analysis.CloudVision;
 import de.tuberlin.amos.ws17.swit.image_analysis.LandmarkDetector;
 import de.tuberlin.amos.ws17.swit.image_analysis.LandmarkDetectorMock;
-import de.tuberlin.amos.ws17.swit.information_source.InformationProvider;
+import de.tuberlin.amos.ws17.swit.information_source.AbstractProvider;
 import de.tuberlin.amos.ws17.swit.information_source.InformationProviderMock;
-import de.tuberlin.amos.ws17.swit.information_source.KnowledgeGraphSearch;
-import de.tuberlin.amos.ws17.swit.information_source.WikiAbstractProvider;
 import de.tuberlin.amos.ws17.swit.landscape_tracking.DemoVideoLandscapeTracker;
 import de.tuberlin.amos.ws17.swit.landscape_tracking.LandscapeTracker;
 import de.tuberlin.amos.ws17.swit.landscape_tracking.LandscapeTrackerImplementation;
@@ -57,10 +55,9 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     private LandscapeTracker     landscapeTracker;
     private UserTracker          userTracker;
     private GpsTracker           gpsTracker;
-    private WikiAbstractProvider abstractProvider;
+    private AbstractProvider     abstractProvider;
     private PoiService           poiService;
-    private PoisInSightFinder sightFinder = new PoisInSightFinder(300, 200, 200);
-    private InformationProvider knowledgeGraphSearch;
+    private PoisInSightFinder    sightFinder = new PoisInSightFinder(300, 200, 200);
 
     //Threads
     private boolean isRunning;
@@ -251,7 +248,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         if (properties.useWikipedia) {
             try {
                 System.out.println("loading " + currentModule + "...");
-                abstractProvider = new WikiAbstractProvider();
+                abstractProvider = AbstractProvider.getInstance();
                 moduleList.add(abstractProvider);
                 abstractProvider.startModule();
                 setModuleStatus(ModuleErrors.NOINTERNET, true);
@@ -263,28 +260,8 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 setModuleStatus(ModuleErrors.NOINTERNET, false);
             }
         } else {
-            abstractProvider = new WikiAbstractProvider();
+            abstractProvider = new InformationProviderMock();
             System.out.println("loading " + currentModule + "Mock...");
-            setModuleStatus(ModuleErrors.NOINTERNET, false);
-        }
-
-        //Google KnowledgeGraphSearch
-        currentModule = "KnowledgeGraphSearch";
-        if (properties.useKnowledgeGraph) {
-            try {
-                System.out.println("loading " + currentModule + "...");
-                knowledgeGraphSearch = KnowledgeGraphSearch.getInstance();
-                setModuleStatus(ModuleErrors.NOINTERNET, true);
-            } catch (ModuleNotWorkingException e) {
-                setModuleStatus(ModuleErrors.NOINTERNET, false);
-            } catch (Exception e) {
-                System.out.println("unexpected error loading " + currentModule);
-                e.printStackTrace();
-                setModuleStatus(ModuleErrors.NOINTERNET, false);
-            }
-        } else {
-            System.out.println("loading " + currentModule + "Mock...");
-            knowledgeGraphSearch = new InformationProviderMock();
             setModuleStatus(ModuleErrors.NOINTERNET, false);
         }
 
@@ -391,7 +368,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
 
     private void initMapsThread() {
         mapsThread = new Thread(() -> {
-            if (gpsTracker == null || poiService == null || knowledgeGraphSearch == null) {
+            if (gpsTracker == null || poiService == null || abstractProvider == null) {
                 System.out.println("unable to isRunning maps thread because of uninitialized modules");
                 return;
             }
@@ -473,32 +450,6 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         mapsThread.setDaemon(true);
     }
 
-    private boolean movedRelevantDistance(KinematicProperties newPos, KinematicProperties oldPos) {
-
-        double newLong = newPos.getLongitude();
-        double newLat = newPos.getLatitude();
-        double oldLong = oldPos.getLongitude();
-        double oldLat = oldPos.getLatitude();
-
-        final int R = 6371; // Radius of the earth
-
-        double latDistance = Math.toRadians(newLong - oldLong);
-        double lonDistance = Math.toRadians(newLat - oldLat);
-        double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
-                + Math.cos(Math.toRadians(newLong)) * Math.cos(Math.toRadians(newLat))
-                * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
-        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        double distance = R * c * 1000; // convert to meters
-
-        //double height = 0.0 - 0.0;
-
-        //distance = Math.pow(distance, 2) + Math.pow(height, 2);
-
-        //double distance = Math.sqrt(Math.pow(newLat - oldLat, 2) + Math.pow(newLong - oldLong, 2));
-
-        return distance > 100;
-    }
-
     private void getAbstract(List<PointOfInterest> pois) {
         try {
             for (PointOfInterest poi : pois) {
@@ -509,7 +460,6 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
             setModuleStatus(ModuleErrors.NOINTERNET, false);
         }
     }
-
 
     public void analyzeImage() {
         BufferedImage image;
@@ -551,7 +501,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     private void initCameraThread() {
         cameraThread = new Thread(() -> {
 
-            if (landscapeTracker == null || cloudVision == null || knowledgeGraphSearch == null) {
+            if (landscapeTracker == null || cloudVision == null || abstractProvider == null) {
                 System.out.println("unable to isRunning camera thread because of uninitialized modules");
                 return;
             }
