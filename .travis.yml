@@ -3,3 +3,5 @@ sudo: false
 script: mvn clean verify -DskipTests
 notifications:
     slack: amos2:gCnDsRFqmdoQztWwcQA3mcd7
+    on_success: change # default: always
+    on_failure: always # default: always
