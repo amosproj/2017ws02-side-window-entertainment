@@ -1,9 +1,9 @@
 package de.tuberlin.amos.ws17.swit.image_analysis;
 
 import com.google.common.io.ByteStreams;
-import de.tuberlin.amos.ws17.swit.common.DebugLog;
-import de.tuberlin.amos.ws17.swit.common.DebugLogTF;
+import de.tuberlin.amos.ws17.swit.common.DebugTF;
 import de.tuberlin.amos.ws17.swit.common.PointOfInterest;
+import javafx.application.Platform;
 import org.tensorflow.Graph;
 import org.tensorflow.Session;
 import org.tensorflow.Tensor;
@@ -94,7 +94,7 @@ public class TFLandmarkClassifier implements LandmarkDetector {
                 int index = sortedIndices[i];
                 log.append(String.format("%-15s (%.2f%% likely)\n", labels.get(index), probabilities[index] * 100.0));
             }
-            DebugLogTF.log(log.toString());
+            Platform.runLater(() -> DebugTF.log(log.toString()));
             float bestScore = probabilities[sortedIndices[0]];
 
             // threshold

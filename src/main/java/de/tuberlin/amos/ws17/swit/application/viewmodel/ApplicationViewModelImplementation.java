@@ -9,7 +9,6 @@ import de.tuberlin.amos.ws17.swit.common.exceptions.ModuleNotWorkingException;
 import de.tuberlin.amos.ws17.swit.gps.GpsTracker;
 import de.tuberlin.amos.ws17.swit.gps.GpsTrackerImplementation;
 import de.tuberlin.amos.ws17.swit.gps.GpsTrackerMock;
-import de.tuberlin.amos.ws17.swit.image_analysis.CloudVision;
 import de.tuberlin.amos.ws17.swit.image_analysis.LandmarkDetector;
 import de.tuberlin.amos.ws17.swit.image_analysis.LandmarkDetectorMock;
 import de.tuberlin.amos.ws17.swit.information_source.AbstractProvider;
@@ -31,30 +30,29 @@ import javafx.application.Platform;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
-import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.Image;
 import javafx.event.EventHandler;
 import javafx.event.ActionEvent;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
-import org.apache.jena.atlas.logging.Log;
-import org.apache.jena.base.Sys;
 import org.joda.time.DateTime;
 
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.*;
-import java.util.logging.Level;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.logging.Logger;
 
 public class ApplicationViewModelImplementation implements ApplicationViewModel {
 
     private final static Logger LOGGER = Logger.getLogger(ApplicationViewModel.class.getName());
+    public static final String videoFileName = "Berlin.mp4";
 
     //Module
     private ApplicationView  view;
-    private LandmarkDetector cloudVision;
+    private LandmarkDetector landmarkDetector;
     private LandscapeTracker landscapeTracker;
     private UserTracker      userTracker;
     private GpsTracker       gpsTracker;
@@ -87,7 +85,6 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     private SimpleListProperty<String>                      propertyDebugLog     = new SimpleListProperty<>();
     private SimpleListProperty<ModuleStatusViewModel>       listModuleStatus     = new SimpleListProperty<>();
     private SimpleListProperty<UserExpressionViewModel>     listExpressionStatus = new SimpleListProperty<>();
-    private SimpleListProperty<String>                      propertyDebugLogTF   = new SimpleListProperty<>();
 
 
     private SimpleDoubleProperty                            infoBoxRotation =       new SimpleDoubleProperty();
@@ -100,10 +97,11 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
 
     private Property<Image> propertyCameraImage = new SimpleObjectProperty<>();
     private Image cameraImage;
-    public Property<Background> backgroundProperty = new SimpleObjectProperty<>();
+    private Property<Background> backgroundProperty = new SimpleObjectProperty<>();
 
     private BackgroundImage backgroundImage;
     private Background      background;
+    private ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
     private AppProperties properties = AppProperties.getInstance();
 
@@ -124,6 +122,16 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         updateBackgroundImage();
 
         updateThread.start();
+        Timer timer = new Timer();
+
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                analyzeImage();
+            }
+        }, 0, 1000);
+
+//        scheduler.scheduleAtFixedRate(this::analyzeImage, 0, 1, TimeUnit.SECONDS);
     }
 
     private void initObjects() {
@@ -132,7 +140,6 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         propertyPoiMaps.set(FXCollections.observableList(new ArrayList<>()));
         propertyPoiCamera.set(FXCollections.observableList(new ArrayList<>()));
         propertyDebugLog.set(FXCollections.observableList(new ArrayList<>()));
-        propertyDebugLogTF.set(FXCollections.observableList(new ArrayList<>()));
         propertyCloseButton.set(event -> minimizePoi());
         propertyToggleGpsButton.set(event -> DebugLog.toggleModule("GPS"));
         propertyTogglePoiButton.set(event -> DebugLog.toggleModule("POI"));
@@ -159,13 +166,6 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
             }
         });
 
-        DebugLogTF.getDebugLogTF().addListener((ListChangeListener<DebugLog.DebugEntry>) c -> {
-            c.next();
-            propertyDebugLogTF.clear();
-            for (DebugLogTF.DebugEntry de : c.getAddedSubList()) {
-                propertyDebugLogTF.add(de.getMessage());
-            }
-        });
     }
 
     private void initModules() {
@@ -242,7 +242,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
             }
         } else if (properties.useDemoVideo) {
             System.out.println("loading " + currentModule + "Demo...");
-            landscapeTracker = new DemoVideoLandscapeTracker(view.getMediaView());
+            landscapeTracker = new DemoVideoLandscapeTracker(view.getMediaView(), videoFileName);
             moduleList.add(landscapeTracker);
             try {
                 landscapeTracker.startModule();
@@ -271,7 +271,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         if (properties.useCloudVision) {
             try {
                 System.out.println("loading " + currentModule + "...");
-                cloudVision = new TFLandmarkClassifier(); //CloudVision.getInstance();
+                landmarkDetector = new TFLandmarkClassifier(); //CloudVision.getInstance();
                 setModuleStatus(ModuleErrors.NOINTERNET, true);
             } catch (Exception e) {
                 System.out.println("unexpected error loading " + currentModule);
@@ -280,7 +280,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
             }
         } else {
             System.out.println("loading " + currentModule + "Mock...");
-            cloudVision = LandmarkDetectorMock.getInstance();
+            landmarkDetector = LandmarkDetectorMock.getInstance();
             setModuleStatus(ModuleErrors.NOINTERNET, true);
         }
 
@@ -393,7 +393,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     public void onKeyPressed(KeyCode code) {
         switch (code) {
             case F:
-                analyzeImage();
+                new Thread(this::analyzeImage).start();
                 break;
             case D:
                 view.toggleDebugLog();
@@ -510,7 +510,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         }
     }
 
-    public void analyzeImage() {
+    private void analyzeImage() {
         BufferedImage image;
         try {
             image = landscapeTracker.getImage();
@@ -527,7 +527,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         //Analyse Bild
         List<PointOfInterest> pois;
         try {
-            pois = cloudVision.identifyPOIs(image);
+            pois = landmarkDetector.identifyPOIs(image);
             setModuleStatus(ModuleErrors.NOINTERNET, true);
         } catch (Exception e) {
             e.printStackTrace();
@@ -538,28 +538,26 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         if (pois.isEmpty()) {
             return;
         }
-//        clearDuplicates(pois, "camera");
 
         getAbstract(pois);
 
         for (PointOfInterest poi : pois) {
-            addCameraPoi(poi);
+            PoiViewModel item = convertPoi(poi);
+            if (!propertyPoiCamera.contains(item)) {
+                addCameraPoi(poi);
+            }
         }
     }
 
     private void initCameraThread() {
         cameraThread = new Thread(() -> {
 
-            if (landscapeTracker == null || cloudVision == null || abstractProvider == null) {
+            if (landscapeTracker == null || landmarkDetector == null || abstractProvider == null) {
                 System.out.println("unable to isRunning camera thread because of uninitialized modules");
                 return;
             }
 
-//            if (properties.useDemoVideo) {
-//                Platform.runLater(this::analyzeImage);
-//            } else {
             analyzeImage();
-//            }
         });
 
         // thread will not prevent application shutdown
@@ -580,7 +578,11 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 }
             }
         }
-        pois.removeAll(list);
+        try {
+            pois.removeAll(list);
+        } catch (UnsupportedOperationException e) {
+            e.printStackTrace();
+        }
 
     }
 
@@ -612,8 +614,6 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         Platform.runLater(() -> {
             try {
                 if (landscapeTracker != null) {
-                    System.out.println("Platform run later updateBackgroundImage");
-
                     cameraImage = SwingFXUtils.toFXImage(landscapeTracker.getImage(), null);
                     backgroundImage = new BackgroundImage(cameraImage,
                             BackgroundRepeat.NO_REPEAT,
@@ -776,11 +776,6 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     }
 
     @Override
-    public SimpleListProperty<String> propertyDebugLogTFProperty() {
-        return propertyDebugLogTF;
-    }
-
-    @Override
     public Property<Background> getBackgroundProperty() {
         return backgroundProperty;
     }
@@ -797,7 +792,9 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
 
     @Override
     public void setRunning(boolean running) {
-
+        if (!running) {
+            scheduler.shutdown();
+        }
     }
 
     @Override

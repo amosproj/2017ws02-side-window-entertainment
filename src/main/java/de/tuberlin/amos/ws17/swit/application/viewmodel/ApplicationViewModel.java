@@ -41,8 +41,6 @@ public interface ApplicationViewModel {
 
     Property<ObservableList<String>> propertyDebugLogProperty();
 
-    SimpleListProperty<String> propertyDebugLogTFProperty();
-
     Property<Background> getBackgroundProperty();
 
     boolean expandPoi(String id);

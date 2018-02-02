@@ -2,6 +2,7 @@ package de.tuberlin.amos.ws17.swit.application.view;
 
 import de.tuberlin.amos.ws17.swit.application.AppProperties;
 import de.tuberlin.amos.ws17.swit.application.viewmodel.*;
+import de.tuberlin.amos.ws17.swit.common.DebugTF;
 import de.tuberlin.amos.ws17.swit.common.Module;
 import de.tuberlin.amos.ws17.swit.image_analysis.ImageUtils;
 import javafx.application.Application;
@@ -29,7 +30,7 @@ public class ApplicationViewImplementation extends Application implements Applic
     private ListView<PoiViewModel>            listPoiCamera        = new ListView<>();
     private ListView<PoiViewModel>            listPoiMaps          = new ListView<>();
     private ListView<String>                  listDebugLog         = new ListView<>();
-    private ListView<String>                  listDebugLogTF       = new ListView<>();
+    private Label                             textTFDebug          = new Label();
     private ListView<ModuleStatusViewModel>   listModuleStatus     = new ListView<>();
     private ListView<UserExpressionViewModel> listExpressionStatus = new ListView<>();
 
@@ -54,7 +55,7 @@ public class ApplicationViewImplementation extends Application implements Applic
     private HBox        debugPane            = new HBox();
     private VBox        togglePane           = new VBox();
     private StackPane   root                 = new StackPane();
-    private MediaPlayer mediaPlayer          = new MediaPlayer(ImageUtils.getTestVideo("Berlin.mp4"));
+    private MediaPlayer mediaPlayer          = new MediaPlayer(ImageUtils.getTestVideo(ApplicationViewModelImplementation.videoFileName));
     private MediaView mediaView;
 
     private static final String FONTNAME = "Helvetica Neue";
@@ -131,7 +132,7 @@ public class ApplicationViewImplementation extends Application implements Applic
         debugPane.getChildren().add(listDebugLog);
 
         listDebugLog.setId("listDebugLog");
-        listDebugLogTF.setId("listDebugLogTF");
+        textTFDebug.setId("textTFDebug");
         expansionPane.setId("expansionPane");
         expansionPane.setVisible(false);
         expansionTopPane.setId("expansionTopPane");
@@ -157,7 +158,10 @@ public class ApplicationViewImplementation extends Application implements Applic
        // StackPane.setAlignment(listDebugLog, Pos.TOP_RIGHT);
         root.getChildren().add(debugPane);
         StackPane.setAlignment(debugPane, Pos.TOP_RIGHT);
-        root.getChildren().add(listDebugLogTF);
+        root.getChildren().add(textTFDebug);
+        StackPane.setAlignment(textTFDebug, Pos.BOTTOM_RIGHT);
+        Insets insets = new Insets(0, 0, 150, 0);
+        StackPane.setMargin(textTFDebug, insets);
     }
 
     private void initExpansion() {
@@ -225,7 +229,7 @@ public class ApplicationViewImplementation extends Application implements Applic
             listPoiMaps.itemsProperty().bindBidirectional(viewModel.propertyPoiMapsProperty());
 
             listDebugLog.itemsProperty().bindBidirectional(viewModel.propertyDebugLogProperty());
-            listDebugLogTF.itemsProperty().bindBidirectional(viewModel.propertyDebugLogTFProperty());
+            textTFDebug.textProperty().bindBidirectional(DebugTF.logString);
             if (!AppProperties.getInstance().useDemoVideo) {
                 pnFoundation.backgroundProperty().bindBidirectional(viewModel.getBackgroundProperty());
             }
@@ -236,7 +240,6 @@ public class ApplicationViewImplementation extends Application implements Applic
         } catch (Exception e) {
             e.printStackTrace();
         }
-
 
     }
 
@@ -275,8 +278,6 @@ public class ApplicationViewImplementation extends Application implements Applic
         Callback<ListView<String>, ListCell<String>> logCallBack = param -> new LogTextCell();
 
         listDebugLog.setCellFactory(logCallBack);
-
-        listDebugLogTF.setCellFactory(logCallBack);
 
         listModuleStatus.setCellFactory(new Callback<ListView<ModuleStatusViewModel>, ListCell<ModuleStatusViewModel>>() {
             @Override
