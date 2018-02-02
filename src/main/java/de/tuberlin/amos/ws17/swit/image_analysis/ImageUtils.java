@@ -86,9 +86,16 @@ public class ImageUtils {
     }
 
     public static Media getTestVideo(String name) {
+        return new Media(getTestVideoPath(name));
+    }
+
+    public static String getTestVideoPath(String name) {
         ClassLoader classLoader = ImageUtils.class.getClassLoader();
         URL url = classLoader.getResource(name);
-        return new Media(url.toExternalForm());
+        if (url != null) {
+            return url.toExternalForm();
+        }
+        return null;
     }
 
     public static BufferedImage cropImage(BufferedImage image, Rectangle rect) {

@@ -1,13 +1,14 @@
 package de.tuberlin.amos.ws17.swit.landscape_tracking;
 
-import de.tuberlin.amos.ws17.swit.common.exceptions.ModuleNotWorkingException;
-import javafx.embed.swing.SwingFXUtils;
-import javafx.scene.SnapshotParameters;
-import javafx.scene.image.WritableImage;
+import de.tuberlin.amos.ws17.swit.image_analysis.ImageUtils;
 import javafx.scene.media.MediaView;
+import org.apache.jena.base.Sys;
+import org.bytedeco.javacv.FFmpegFrameGrabber;
+import org.bytedeco.javacv.Frame;
+import org.bytedeco.javacv.FrameGrabber;
+import org.bytedeco.javacv.Java2DFrameConverter;
 
 import javax.imageio.ImageIO;
-import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -15,41 +16,60 @@ import java.io.IOException;
 public class DemoVideoLandscapeTracker implements LandscapeTracker {
 
     private MediaView mediaView;
+    private Java2DFrameConverter converter = new Java2DFrameConverter();
+    private FFmpegFrameGrabber   grabber;
 
-    public DemoVideoLandscapeTracker(MediaView mediaView) {
-        this.mediaView = mediaView;
+    private BufferedImage getFrame(double second) throws FrameGrabber.Exception {
+        System.out.println("Grabbing image at " + second + "s");
+
+        double frameRate = grabber.getFrameRate();
+        int frameNumber = (int) (frameRate * second);
+        grabber.setFrameNumber(frameNumber);
+        Frame frame = grabber.grab();
+        BufferedImage image = converter.convert(frame);
+        if (image == null) {
+            System.err.println("Failed to grad image at " + second + "s");
+        }
+        return image;
     }
-//
-//    @Override
-//    public BufferedImage getImage() throws IOException {
-//        WritableImage wim = mediaView.snapshot(new SnapshotParameters(), null);
-//        return SwingFXUtils.fromFXImage(wim, null);
-//    }
+
+    public DemoVideoLandscapeTracker(MediaView mediaView, String videoName) {
+        this.mediaView = mediaView;
+        grabber = new FFmpegFrameGrabber(ImageUtils.getTestVideoPath(videoName));
+    }
 
     @Override
     public BufferedImage getImage() {
-//        WritableImage wim = mediaView.snapshot(new SnapshotParameters(), null);
-//        return SwingFXUtils.fromFXImage(wim, null);
-        BufferedImage capture = null;
-        Rectangle screenRect = new Rectangle(Toolkit.getDefaultToolkit().getScreenSize());
+        double currentSecond = mediaView.getMediaPlayer().getCurrentTime().toSeconds();
+        BufferedImage image = null;
         try {
-            capture = new Robot().createScreenCapture(screenRect);
-        } catch (AWTException e) {
+            image = getFrame(currentSecond);
+        } catch (FrameGrabber.Exception e) {
             e.printStackTrace();
         }
-        return capture;
+        return image;
     }
 
     @Override
-    public void startModule() throws ModuleNotWorkingException {
+    public void startModule() {
         mediaView.setVisible(true);
         mediaView.getMediaPlayer().play();
+        try {
+            grabber.start();
+        } catch (FrameGrabber.Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public boolean stopModule() {
         mediaView.setVisible(false);
         mediaView.getMediaPlayer().stop();
+        try {
+            grabber.stop();
+        } catch (FrameGrabber.Exception e) {
+            e.printStackTrace();
+        }
         return true;
     }
 
