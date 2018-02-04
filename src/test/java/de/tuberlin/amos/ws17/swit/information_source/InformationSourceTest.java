@@ -2,6 +2,7 @@ package de.tuberlin.amos.ws17.swit.information_source;
 
 import de.tuberlin.amos.ws17.swit.common.GpsPosition;
 import de.tuberlin.amos.ws17.swit.common.PointOfInterest;
+import de.tuberlin.amos.ws17.swit.common.exceptions.InformationNotAvailableException;
 import de.tuberlin.amos.ws17.swit.common.exceptions.ServiceNotAvailableException;
 import de.tuberlin.amos.ws17.swit.poi.MockedPoiService;
 import de.tuberlin.amos.ws17.swit.poi.PoiService;
@@ -25,8 +26,9 @@ public class InformationSourceTest {
         for (PointOfInterest poi:pois ) {
             try {
                 poi = wiki.setInfoAndUrl(poi);
+
             }
-            catch (Exception ex) {
+            catch (ServiceNotAvailableException ex) {
                 ex.printStackTrace();
             }
             System.out.println(poi);
@@ -46,6 +48,8 @@ public class InformationSourceTest {
             ex.printStackTrace();
         }
     }
+
+
 
 
 }
