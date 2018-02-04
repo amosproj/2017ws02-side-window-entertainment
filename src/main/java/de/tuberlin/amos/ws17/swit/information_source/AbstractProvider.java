@@ -10,6 +10,7 @@ import de.tuberlin.amos.ws17.swit.common.Module;
 import de.tuberlin.amos.ws17.swit.common.PointOfInterest;
 import de.tuberlin.amos.ws17.swit.common.exceptions.ModuleNotWorkingException;
 import de.tuberlin.amos.ws17.swit.common.exceptions.ServiceNotAvailableException;
+import de.tuberlin.amos.ws17.swit.common.exceptions.InformationNotAvailableException;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.json.simple.JSONArray;
@@ -69,30 +70,27 @@ public class AbstractProvider implements InformationProvider, Module{
     }
 
 
-    private void getWikiInformation (PointOfInterest poi) throws ServiceNotAvailableException{
+    private void getWikiInformation (PointOfInterest poi) throws ServiceNotAvailableException {
         if (poi != null) {
             try {
             String wikiUrl = poi.getWikiUrl();
-
+                DebugLog.log("Fetching Wiki-Article...");
             if (wikiUrl==null){
-                DebugLog.log("No WikiUrl found. Proceeding to retrieve the abstract via the name of the POI");
+
                 String abstractInfo= getAbstract(poi.getName(), LANGUAGE);
-                if (abstractInfo == null) {
-                    throw new ServiceNotAvailableException("Information is not available");
+                if (StringUtils.isEmpty(abstractInfo)) {
+                    throw new InformationNotAvailableException("Information is not available on Wikipedia");
                 } else {
-                    DebugLog.log("Successfully retrieved the abstract via the POI name");
                     poi.setInformationAbstract(abstractInfo);
                 }
             }
             if (!StringUtils.isEmpty(wikiUrl)) {
-                DebugLog.log("Successfully retrieved WikiUrl of POI");
                 // if wiki url available -> query info from wikipedia
                 String abstractInfo = getAbstract(wikiUrl);
                 if (!StringUtils.isEmpty(abstractInfo)) {
-                    DebugLog.log("Successfully retrieved the abstract via the WikiUrl");
                     poi.setInformationAbstract(abstractInfo);
                 } else {
-                    throw new ServiceNotAvailableException("Information is not available");
+                    throw new InformationNotAvailableException("Information is not available on Wikipedia");
                 }
             }
 
@@ -100,7 +98,7 @@ public class AbstractProvider implements InformationProvider, Module{
                 ex.printStackTrace();
             }
         } else {
-            throw new ServiceNotAvailableException("No POI could be find");
+            throw new ServiceNotAvailableException("No POI could be found");
         }
     }
 
