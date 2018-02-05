@@ -369,6 +369,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 break;
             case L:
                 view.toggleLists();
+                break;
             default:
                 break;
         }
