@@ -50,14 +50,14 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     private final static Logger LOGGER = Logger.getLogger(ApplicationViewModel.class.getName());
 
     //Module
-    private ApplicationView      view;
-    private LandmarkDetector     cloudVision;
-    private LandscapeTracker     landscapeTracker;
-    private UserTracker          userTracker;
-    private GpsTracker           gpsTracker;
-    private AbstractProvider     abstractProvider;
-    private PoiService           poiService;
-    private PoisInSightFinder    sightFinder = new PoisInSightFinder(300, 200, 200);
+    private ApplicationView  view;
+    private LandmarkDetector cloudVision;
+    private LandscapeTracker landscapeTracker;
+    private UserTracker      userTracker;
+    private GpsTracker       gpsTracker;
+    private AbstractProvider abstractProvider;
+    private PoiService       poiService;
+    private PoisInSightFinder sightFinder = new PoisInSightFinder(300, 200, 200);
 
     //Threads
     private boolean isRunning;
@@ -77,7 +77,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     private SimpleListProperty<UserExpressionViewModel>     listExpressionStatus = new SimpleListProperty<>();
     private List<Module>                                    moduleList           = new ArrayList<>();
 
-    private int     searchRadius = 1000;
+    private int searchRadius = 1000;
     private GpsPosition lastRequestPosition;
 
     private Property<Image> propertyCameraImage = new SimpleObjectProperty<>();
@@ -121,7 +121,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         view.showDebugLog(true);
         System.out.println("loading DebugLog...");
 
-        for (DebugLog.DebugEntry debugEntry:DebugLog.getDebugLog()) {
+        for (DebugLog.DebugEntry debugEntry : DebugLog.getDebugLog()) {
             propertyDebugLog.add(debugEntry.toString());
         }
 
@@ -363,6 +363,9 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
             case D:
                 view.toggleDebugLog();
                 break;
+            case L:
+                view.toggleLists();
+                break;
             default:
                 break;
         }
@@ -426,11 +429,11 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                         }
                     }
 
-                System.out.println(pois.size() + " POIs found.");
+                    System.out.println(pois.size() + " POIs found.");
 
-                clearDuplicates(pois.keySet(), "map");
+                    clearDuplicates(pois.keySet(), "map");
 
-                System.out.println(pois.size() + "NEW POIs found.");
+                    System.out.println(pois.size() + "NEW POIs found.");
 
                     if (properties.getProperty("load_images").equals("1")) {
                         poiService.addImages(pois.keySet());

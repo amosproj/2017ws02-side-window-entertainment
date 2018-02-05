@@ -172,6 +172,16 @@ public class ApplicationViewImplementation extends Application implements Applic
     }
 
     @Override
+    public void toggleLists() {
+        showPoiLists(!listPoiCamera.isVisible());
+    }
+
+    private void showPoiLists(boolean show) {
+        listPoiCamera.setVisible(show);
+        listPoiMaps.setVisible(show);
+    }
+
+    @Override
     public void toggleDebugLog() {
         listDebugLog.setVisible(!listDebugLog.isVisible());
     }

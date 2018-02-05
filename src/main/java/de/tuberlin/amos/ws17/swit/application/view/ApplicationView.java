@@ -17,4 +17,7 @@ public interface ApplicationView {
     MediaView getMediaView();
 
     void showExpandedPoi(boolean show);
+
+    void toggleLists();
 }
+
