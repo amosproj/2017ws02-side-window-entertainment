@@ -12,9 +12,14 @@ public class PathService {
 
     public static String getPathOfRunningJar() {
         try {
+
             String pathName = ApplicationViewImplementation.class.getProtectionDomain().getCodeSource().getLocation().getPath();
             URLDecoder.decode(pathName,"utf-8");
-            pathName = pathName.substring(1,pathName.lastIndexOf("/") );
+
+            if (!System.getProperty("os.name").contains("Linux")) {
+                pathName = pathName.substring(1,pathName.lastIndexOf("/") );
+            }
+
             return pathName;
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
