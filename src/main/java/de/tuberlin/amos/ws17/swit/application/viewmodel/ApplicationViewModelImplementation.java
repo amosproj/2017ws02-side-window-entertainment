@@ -295,12 +295,16 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     }
 
     private void initUpdateThread() {
+        long startTime = new Date().getTime();
         updateThread = new Thread(() -> {
-            int iterations = 0;
-            int lastExpression = 0;
-            int lastCameraExecution = 0;
-            int lastMapsExecution = 0;
+            //long iterations = 0;
+            long lastExpression = startTime;
+            //int lastCameraExecution = 0;
+            long lastMapsExecution = startTime;
             while (isRunning) {
+                long currentTime = new Date().getTime();
+                long expressionTimeDiff = currentTime - lastExpression;
+                long mapsTimeDiff = currentTime - lastMapsExecution;
                 UserExpressions userExpressions;
                 if (userTracker.isUserTracked()) {
                     setExpressionStatus(ExpressionType.ISRACKED, true);
@@ -311,12 +315,13 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                         setExpressionStatus(ExpressionType.SMILE, userExpressions.isSmile());
                         setExpressionStatus(ExpressionType.TONGUEOUT, userExpressions.isTongueOut());
                     }
-                    if (userExpressions != null && userExpressions.isKiss() && (iterations - lastExpression) >= 10) {
+                    if (userExpressions != null && userExpressions.isKiss() && expressionTimeDiff >= 30) {
+                        System.out.println("ich mach expressions " + expressionTimeDiff);
                         if (cameraThread.getState() == Thread.State.NEW) {
-                            lastExpression = iterations;
+                            lastExpression = currentTime;
                             cameraThread.start();
                         } else if (cameraThread.getState() == Thread.State.TERMINATED) {
-                            lastExpression = iterations;
+                            lastExpression = currentTime;
                             initCameraThread();
                             cameraThread.start();
                         }
@@ -324,35 +329,26 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 } else {
                     setExpressionStatus(ExpressionType.ISRACKED, false);
                 }
-                /*if((iterations - lastCameraExecution) >= 10) {
-                    if(cameraThread.getState() == Thread.State.NEW) {
-                        lastCameraExecution = iterations;
-                        cameraThread.start();
-                    } else if(cameraThread.getState() == Thread.State.TERMINATED) {
-                        lastCameraExecution = iterations;
-                        initCameraThread();
-                        cameraThread.start();
-                    }
-                }*/
-                if ((iterations - lastMapsExecution) >= 10) {
+                if (mapsTimeDiff >= 30) {
+                    System.out.println("ich mach maps " + mapsTimeDiff);
                     if (mapsThread.getState() == Thread.State.NEW) {
-                        lastMapsExecution = iterations;
+                        lastMapsExecution = currentTime;
                         mapsThread.start();
                     } else if (mapsThread.getState() == Thread.State.TERMINATED) {
-                        lastMapsExecution = iterations;
+                        lastMapsExecution = currentTime;
                         initMapsThread();
                         mapsThread.start();
                     }
                 }
-                try {
+                /*try {
                     Thread.sleep(500);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
-                }
+                }*/
 
                 updateBackgroundImage();
 
-                iterations++;
+                //iterations++;
             }
         });
         updateThread.setDaemon(true);
@@ -404,9 +400,6 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
             }
 
             int mapsPoisLoadDistance = properties.mapsPoisLoadDistance;
-            if (lastRequestPosition != null) {
-                System.out.println(kinematicProperties.distanceTo(lastRequestPosition));
-            }
             if (lastRequestPosition == null || kinematicProperties.distanceTo(lastRequestPosition) > mapsPoisLoadDistance) {
                 lastRequestPosition = new GpsPosition(kinematicProperties.getLongitude(), kinematicProperties.getLatitude());
 
