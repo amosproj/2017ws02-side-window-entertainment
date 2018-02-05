@@ -30,6 +30,15 @@ public class ApplicationViewImplementation extends Application implements Applic
     private ListView<ModuleStatusViewModel>   listModuleStatus     = new ListView<>();
     private ListView<UserExpressionViewModel> listExpressionStatus = new ListView<>();
 
+    // DebugLog Buttons
+    private Button toggleUserTrackingLog       = new Button("user_tracking");
+    private Button toggleLandscapeTrackingLog  = new Button("landscape_tracking");
+    private Button togglePoiLog                = new Button("POI");
+    private Button toggleInformationSourceLog  = new Button("information_source");
+    private Button toggleImageAnalysisLog      = new Button("image_analysis");
+    private Button toggleApplicationViewLog    = new Button("application_view");
+    private Button toggleGpsLog                = new Button("GPS");
+
     private BorderPane  expansionPane        = new BorderPane();
     private BorderPane  expansionTopPane     = new BorderPane();
     private BorderPane  expansionContentPane = new BorderPane();
@@ -39,6 +48,8 @@ public class ApplicationViewImplementation extends Application implements Applic
     private ImageView   expansionImage       = new ImageView();
     private ScrollPane  expansionScrollPane  = new ScrollPane();
     private HBox        statusPane           = new HBox();
+    private HBox        debugPane            = new HBox();
+    private VBox        togglePane           = new VBox();
     private StackPane   root                 = new StackPane();
     private MediaPlayer mediaPlayer          = new MediaPlayer(ImageUtils.getTestVideo("Berlin.mp4"));
     private MediaView mediaView;
@@ -84,6 +95,26 @@ public class ApplicationViewImplementation extends Application implements Applic
 
         listExpressionStatus.setId("listExpressionStatus");
 
+        togglePane.setId("togglePane");
+        toggleApplicationViewLog.setId("toggleApplicationView");
+        toggleImageAnalysisLog.setId("toggleImageAnalysis");
+        toggleInformationSourceLog.setId("toggleInformationSource");
+        toggleLandscapeTrackingLog.setId("toggleLandscapeTracking");
+        togglePoiLog.setId("togglePoi");
+        toggleUserTrackingLog.setId("toggleUserTracking");
+        toggleGpsLog.setId("toggleGpsLog");
+        togglePane.getChildren().add(toggleApplicationViewLog);
+        togglePane.getChildren().add(toggleGpsLog);
+        togglePane.getChildren().add(toggleImageAnalysisLog);
+        togglePane.getChildren().add(toggleInformationSourceLog);
+        togglePane.getChildren().add(toggleLandscapeTrackingLog);
+        togglePane.getChildren().add(togglePoiLog);
+        togglePane.getChildren().add(toggleUserTrackingLog);
+
+        debugPane.setId("debugPane");
+        debugPane.getChildren().add(togglePane);
+        debugPane.getChildren().add(listDebugLog);
+
         listDebugLog.setId("listDebugLog");
         expansionPane.setId("expansionPane");
         expansionPane.setVisible(false);
@@ -108,6 +139,8 @@ public class ApplicationViewImplementation extends Application implements Applic
         root.getChildren().add(pnFoundation);
         root.getChildren().add(listDebugLog);
         StackPane.setAlignment(listDebugLog, Pos.TOP_RIGHT);
+        //root.getChildren().add(debugPane);
+        //StackPane.setAlignment(debugPane, Pos.TOP_RIGHT);
     }
 
     private void initExpansion() {
