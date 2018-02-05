@@ -403,8 +403,11 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 return;
             }
 
-            if (lastRequestPosition != null) { System.out.println(kinematicProperties.distanceTo(lastRequestPosition));};
-            if (lastRequestPosition == null || kinematicProperties.distanceTo(lastRequestPosition) > 300) {
+            int mapsPoisLoadDistance = properties.mapsPoisLoadDistance;
+            if (lastRequestPosition != null) {
+                System.out.println(kinematicProperties.distanceTo(lastRequestPosition));
+            }
+            if (lastRequestPosition == null || kinematicProperties.distanceTo(lastRequestPosition) > mapsPoisLoadDistance) {
                 lastRequestPosition = new GpsPosition(kinematicProperties.getLongitude(), kinematicProperties.getLatitude());
 
                 //POI maps
