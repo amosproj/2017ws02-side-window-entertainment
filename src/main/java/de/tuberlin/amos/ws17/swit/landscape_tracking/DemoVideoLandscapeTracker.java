@@ -12,6 +12,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 
 public class DemoVideoLandscapeTracker implements LandscapeTracker {
 
@@ -35,7 +36,11 @@ public class DemoVideoLandscapeTracker implements LandscapeTracker {
 
     public DemoVideoLandscapeTracker(MediaView mediaView, String videoName) {
         this.mediaView = mediaView;
-        grabber = new FFmpegFrameGrabber(ImageUtils.getTestVideoPath(videoName));
+        try {
+            grabber = new FFmpegFrameGrabber(ImageUtils.getTestVideoPath(videoName));
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

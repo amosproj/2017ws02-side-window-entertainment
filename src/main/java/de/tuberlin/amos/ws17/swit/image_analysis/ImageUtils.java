@@ -3,17 +3,17 @@ package de.tuberlin.amos.ws17.swit.image_analysis;
 import com.google.api.services.vision.v1.model.Image;
 import javafx.scene.media.Media;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.RasterFormatException;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Paths;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class ImageUtils {
@@ -85,19 +85,31 @@ public class ImageUtils {
         return null;
     }
 
+    @Nullable
     public static Media getTestVideo(String name) {
-        return new Media(getTestVideoPath(name));
-    }
 
-    public static String getTestVideoPath(String name) {
-        ClassLoader classLoader = ImageUtils.class.getClassLoader();
-        URL url = classLoader.getResource(name);
-        if (url != null) {
-            return url.toExternalForm();
+        try {
+            String path = getTestVideoPath(name);
+            if (path != null) {
+                return new Media(Paths.get(path).toUri().toString());
+            }
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
         }
         return null;
     }
 
+    @Nullable
+    public static String getTestVideoPath(String name) throws URISyntaxException {
+        ClassLoader classLoader = ImageUtils.class.getClassLoader();
+        URL url = classLoader.getResource(name);
+        if (url != null) {
+            return new File(url.toURI()).getAbsolutePath();
+        }
+        return null;
+    }
+
+    @Nonnull
     public static BufferedImage cropImage(BufferedImage image, Rectangle rect) {
         try {
             BufferedImage img = image.getSubimage(rect.x, rect.y, rect.width, rect.height);
