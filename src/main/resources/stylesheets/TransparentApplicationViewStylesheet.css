@@ -147,3 +147,13 @@
 .list-view:horizontal .list-cell:filled:selected, .list-view:horizontal .list-cell:filled:selected:hover {
     -fx-background-color: transparent;
 }
+
+#togglePane{
+    -fx-font-size: 5 !important;
+    -fx-background-color: rgba(0,0,0,0.7);
+}
+
+#togglePane .button{
+    -fx-background-color: blue; !important;
+    -fx-font-size: 1;
+}

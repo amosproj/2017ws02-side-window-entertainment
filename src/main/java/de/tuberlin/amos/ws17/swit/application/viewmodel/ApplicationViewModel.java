@@ -21,6 +21,14 @@ public interface ApplicationViewModel {
 
     Property<EventHandler<ActionEvent>> propertyCloseButtonProperty();
 
+    Property<EventHandler<ActionEvent>> propertyToggleGpsButtonProperty();
+    Property<EventHandler<ActionEvent>> propertyTogglePoiButtonProperty();
+    Property<EventHandler<ActionEvent>> propertyToggleLandscapeTrackingButtonProperty();
+    Property<EventHandler<ActionEvent>> propertyToggleUserTrackingButtonProperty();
+    Property<EventHandler<ActionEvent>> propertyToggleApplicationViewButtonProperty();
+    Property<EventHandler<ActionEvent>> propertyToggleInformationSourceButtonProperty();
+    Property<EventHandler<ActionEvent>> propertyToggleImageAnalysisButtonProperty();
+
     Property<ObservableList<ModuleStatusViewModel>> listModuleStatusProperty();
 
     Property<ObservableList<UserExpressionViewModel>> listExpressionStatusProperty();

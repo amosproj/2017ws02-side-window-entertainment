@@ -103,6 +103,17 @@ public class ApplicationViewImplementation extends Application implements Applic
         togglePoiLog.setId("togglePoi");
         toggleUserTrackingLog.setId("toggleUserTracking");
         toggleGpsLog.setId("toggleGpsLog");
+
+        //togglePane.getStyleClass().add("toggleButton");
+        toggleApplicationViewLog.setId("toggleApplicationView");
+        toggleApplicationViewLog.getStyleClass().add("toggleButton");
+        toggleImageAnalysisLog.setId("toggleImageAnalysis");
+        toggleInformationSourceLog.setId("toggleInformationSource");
+        toggleLandscapeTrackingLog.setId("toggleLandscapeTracking");
+        togglePoiLog.setId("togglePoi");
+        toggleUserTrackingLog.setId("toggleUserTracking");
+        toggleGpsLog.setId("toggleGpsLog");
+
         togglePane.getChildren().add(toggleApplicationViewLog);
         togglePane.getChildren().add(toggleGpsLog);
         togglePane.getChildren().add(toggleImageAnalysisLog);
@@ -137,10 +148,10 @@ public class ApplicationViewImplementation extends Application implements Applic
 
         root.getChildren().add(mediaView);
         root.getChildren().add(pnFoundation);
-        root.getChildren().add(listDebugLog);
-        StackPane.setAlignment(listDebugLog, Pos.TOP_RIGHT);
-        //root.getChildren().add(debugPane);
-        //StackPane.setAlignment(debugPane, Pos.TOP_RIGHT);
+       // root.getChildren().add(listDebugLog);
+       // StackPane.setAlignment(listDebugLog, Pos.TOP_RIGHT);
+        root.getChildren().add(debugPane);
+        StackPane.setAlignment(debugPane, Pos.TOP_RIGHT);
     }
 
     private void initExpansion() {
@@ -182,6 +193,13 @@ public class ApplicationViewImplementation extends Application implements Applic
         try {
             expansionButton.visibleProperty().bind(Bindings.equal(viewModel.getExpandedPOI().nameProperty(), "").not());
             expansionButton.onActionProperty().bindBidirectional(viewModel.propertyCloseButtonProperty());
+            toggleGpsLog.onActionProperty().bindBidirectional(viewModel.propertyToggleGpsButtonProperty());
+            togglePoiLog.onActionProperty().bindBidirectional(viewModel.propertyTogglePoiButtonProperty());
+            toggleUserTrackingLog.onActionProperty().bindBidirectional(viewModel.propertyToggleUserTrackingButtonProperty());
+            toggleLandscapeTrackingLog.onActionProperty().bindBidirectional(viewModel.propertyToggleLandscapeTrackingButtonProperty());
+            toggleImageAnalysisLog.onActionProperty().bindBidirectional(viewModel.propertyToggleImageAnalysisButtonProperty());
+            toggleInformationSourceLog.onActionProperty().bindBidirectional(viewModel.propertyToggleInformationSourceButtonProperty());
+            toggleApplicationViewLog.onActionProperty().bindBidirectional(viewModel.propertyToggleApplicationViewButtonProperty());
             expansionName.textProperty().bindBidirectional(viewModel.getExpandedPOI().nameProperty());
             expansionImage.imageProperty().bindBidirectional(viewModel.getExpandedPOI().imageProperty());
             expansionInformation.textProperty().bindBidirectional(viewModel.getExpandedPOI().informationAbstractProperty());

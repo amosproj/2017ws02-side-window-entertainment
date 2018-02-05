@@ -72,6 +72,15 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     private SimpleListProperty<PoiViewModel>                propertyPoiMaps      = new SimpleListProperty<>();
     private SimpleListProperty<PoiViewModel>                propertyPoiCamera    = new SimpleListProperty<>();
     private SimpleObjectProperty<EventHandler<ActionEvent>> propertyCloseButton  = new SimpleObjectProperty<>();
+
+    private SimpleObjectProperty<EventHandler<ActionEvent>> propertyToggleGpsButton  = new SimpleObjectProperty<>();
+    private SimpleObjectProperty<EventHandler<ActionEvent>> propertyTogglePoiButton  = new SimpleObjectProperty<>();
+    private SimpleObjectProperty<EventHandler<ActionEvent>> propertyToggleUserTrackingButton  = new SimpleObjectProperty<>();
+    private SimpleObjectProperty<EventHandler<ActionEvent>> propertyToggleLandscapeTrackingButton  = new SimpleObjectProperty<>();
+    private SimpleObjectProperty<EventHandler<ActionEvent>> propertyToggleInformationSourceButton  = new SimpleObjectProperty<>();
+    private SimpleObjectProperty<EventHandler<ActionEvent>> propertyToggleImageAnalysisButton  = new SimpleObjectProperty<>();
+    private SimpleObjectProperty<EventHandler<ActionEvent>> propertyToggleApplicationViewButton  = new SimpleObjectProperty<>();
+
     private SimpleListProperty<String>                      propertyDebugLog     = new SimpleListProperty<>();
     private SimpleListProperty<ModuleStatusViewModel>       listModuleStatus     = new SimpleListProperty<>();
     private SimpleListProperty<UserExpressionViewModel>     listExpressionStatus = new SimpleListProperty<>();
@@ -115,6 +124,13 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         propertyPoiCamera.set(FXCollections.observableList(new ArrayList<>()));
         propertyDebugLog.set(FXCollections.observableList(new ArrayList<>()));
         propertyCloseButton.set(event -> minimizePoi());
+        propertyToggleGpsButton.set(event -> DebugLog.toggleModule("GPS"));
+        propertyTogglePoiButton.set(event -> DebugLog.toggleModule("POI"));
+        propertyToggleUserTrackingButton.set(event -> DebugLog.toggleModule("UserTracking"));
+        propertyToggleLandscapeTrackingButton.set(event -> DebugLog.toggleModule("LandscapeTracking"));
+        propertyToggleImageAnalysisButton.set(event -> DebugLog.toggleModule("ImageAnalysis"));
+        propertyToggleApplicationViewButton.set(event -> DebugLog.toggleModule("ApplicationView"));
+        propertyToggleInformationSourceButton.set(event -> DebugLog.toggleModule("InformationSource"));
     }
 
     private void initDebugLog() {
@@ -127,7 +143,8 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
 
         DebugLog.getDebugLog().addListener((ListChangeListener<DebugLog.DebugEntry>) c -> {
             c.next();
-            for (DebugLog.DebugEntry de : c.getAddedSubList()) {
+            propertyDebugLog.clear();
+            for (DebugLog.DebugEntry de : c.getList()) {
                 propertyDebugLog.add(de.toString());
             }
         });
@@ -696,6 +713,27 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     public SimpleObjectProperty<EventHandler<ActionEvent>> propertyCloseButtonProperty() {
         return propertyCloseButton;
     }
+
+    @Override
+    public SimpleObjectProperty<EventHandler<ActionEvent>> propertyToggleGpsButtonProperty() { return propertyToggleGpsButton; }
+
+    @Override
+    public SimpleObjectProperty<EventHandler<ActionEvent>> propertyTogglePoiButtonProperty() { return propertyTogglePoiButton; }
+
+    @Override
+    public SimpleObjectProperty<EventHandler<ActionEvent>> propertyToggleUserTrackingButtonProperty() { return propertyToggleUserTrackingButton; }
+
+    @Override
+    public SimpleObjectProperty<EventHandler<ActionEvent>> propertyToggleLandscapeTrackingButtonProperty() { return propertyToggleLandscapeTrackingButton; }
+
+    @Override
+    public SimpleObjectProperty<EventHandler<ActionEvent>> propertyToggleInformationSourceButtonProperty() { return propertyToggleInformationSourceButton; }
+
+    @Override
+    public SimpleObjectProperty<EventHandler<ActionEvent>> propertyToggleApplicationViewButtonProperty() { return propertyToggleApplicationViewButton; }
+
+    @Override
+    public SimpleObjectProperty<EventHandler<ActionEvent>> propertyToggleImageAnalysisButtonProperty() { return propertyToggleImageAnalysisButton; }
 
     @Override
     public SimpleListProperty<String> propertyDebugLogProperty() {

@@ -15,7 +15,7 @@ public class DebugLog {
     private static boolean showPoi = true;
     private static boolean showInformationSource = true;
     private static boolean showImageAnalysis = true;
-    private static boolean showGps = true;
+    private static boolean showGps = false;
     private static boolean showApplicationView = true;
 
     private static ObservableList<DebugEntry> debugLog = FXCollections.observableList(new ArrayList<>());
@@ -26,7 +26,7 @@ public class DebugLog {
     private static void addEntry(DebugEntry entry, boolean both){
         if (both) debugLog.add(entry);
         String src = entry.source;
-        System.out.println("src: " + src);
+        //System.out.println("src: " + src);
         if ((showUserTracking && (src.equals("JavoNetUserTracker") || src.equals("UserTrackerMock") ))
                 || (showGps && (src.equals("GpsTrackerMock") || src.equals("GpsPortReader") || src.equals("GpsTrackerImplementation")))
                 || (showImageAnalysis && src.equals("CloudVision"))
@@ -69,8 +69,8 @@ public class DebugLog {
     }
 
     public static ObservableList<DebugEntry> getDebugLog() {
-        return debugLog;
-        //return shownLog;
+        //return debugLog;
+        return shownLog;
     }
 
     public static void toggleModule(String module){
@@ -83,8 +83,11 @@ public class DebugLog {
         if (module == "GPS") showGps = !showGps;
         if (module == "ApplicationView") showApplicationView = !showApplicationView;
 
+        System.out.println("toggleModule: " + module + " -> " + showGps);
+
         // clear shownLog and refill it with the selected values
         shownLog.clear();
+        System.out.println("shownLog size: " + shownLog.size());
         for (int i = 0; i < debugLog.size(); i++){
             addEntry(debugLog.get(i), false);
         }
