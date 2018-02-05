@@ -316,7 +316,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                         setExpressionStatus(ExpressionType.TONGUEOUT, userExpressions.isTongueOut());
                     }
                     if (userExpressions != null && userExpressions.isKiss() && expressionTimeDiff >= 30) {
-                        System.out.println("ich mach expressions " + expressionTimeDiff);
+                        //System.out.println("ich mach expressions " + expressionTimeDiff);
                         if (cameraThread.getState() == Thread.State.NEW) {
                             lastExpression = currentTime;
                             cameraThread.start();
@@ -330,7 +330,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                     setExpressionStatus(ExpressionType.ISRACKED, false);
                 }
                 if (mapsTimeDiff >= 30) {
-                    System.out.println("ich mach maps " + mapsTimeDiff);
+                    //System.out.println("ich mach maps " + mapsTimeDiff);
                     if (mapsThread.getState() == Thread.State.NEW) {
                         lastMapsExecution = currentTime;
                         mapsThread.start();
