@@ -9,6 +9,7 @@ import de.tuberlin.amos.ws17.swit.common.exceptions.ModuleNotWorkingException;
 import de.tuberlin.amos.ws17.swit.gps.GpsTracker;
 import de.tuberlin.amos.ws17.swit.gps.GpsTrackerImplementation;
 import de.tuberlin.amos.ws17.swit.gps.GpsTrackerMock;
+import de.tuberlin.amos.ws17.swit.image_analysis.CloudVision;
 import de.tuberlin.amos.ws17.swit.image_analysis.LandmarkDetector;
 import de.tuberlin.amos.ws17.swit.image_analysis.LandmarkDetectorMock;
 import de.tuberlin.amos.ws17.swit.information_source.AbstractProvider;
@@ -43,21 +44,23 @@ import java.io.*;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 public class ApplicationViewModelImplementation implements ApplicationViewModel {
 
-    private final static Logger LOGGER = Logger.getLogger(ApplicationViewModel.class.getName());
-    public static final String videoFileName = "Berlin.mp4";
+    private final static Logger LOGGER        = Logger.getLogger(ApplicationViewModel.class.getName());
+    public static final  String videoFileName = "Berlin.mp4";
 
     //Module
-    private ApplicationView  view;
-    private LandmarkDetector landmarkDetector;
-    private LandscapeTracker landscapeTracker;
-    private UserTracker      userTracker;
-    private GpsTracker       gpsTracker;
-    private AbstractProvider abstractProvider;
-    private PoiService       poiService;
+    private ApplicationView      view;
+    private LandmarkDetector     cloudVision;
+    private LandscapeTracker     landscapeTracker;
+    private TFLandmarkClassifier tensorflowClassifier;
+    private UserTracker          userTracker;
+    private GpsTracker           gpsTracker;
+    private AbstractProvider     abstractProvider;
+    private PoiService           poiService;
     private PoisInSightFinder sightFinder = new PoisInSightFinder(300, 200, 200);
 
     //Threads
@@ -122,16 +125,19 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         updateBackgroundImage();
 
         updateThread.start();
-        Timer timer = new Timer();
+        if (properties.useTensorflow) {
+            initTFClassifier();
+        }
 
-        timer.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                analyzeImage();
+    }
+
+    private void initTFClassifier() {
+        scheduler.scheduleAtFixedRate(() -> {
+            BufferedImage image = getLandscapeTrackerImage();
+            if (image != null) {
+                tensorflowClassifier.identifyPOIs(image);
             }
-        }, 0, 1000);
-
-//        scheduler.scheduleAtFixedRate(this::analyzeImage, 0, 1, TimeUnit.SECONDS);
+        }, 3, 1, TimeUnit.SECONDS);
     }
 
     private void initObjects() {
@@ -266,12 +272,21 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
             }
         }
 
+        if (properties.useTensorflow) {
+            try {
+                System.out.println("loading Tensorflow model");
+                tensorflowClassifier = new TFLandmarkClassifier();
+            } catch (IOException e) {
+                System.out.println("Failed to load Tensorflow model graph");
+            }
+        }
+
         //CloudVision
         currentModule = "LandmarkDetector";
         if (properties.useCloudVision) {
             try {
                 System.out.println("loading " + currentModule + "...");
-                landmarkDetector = new TFLandmarkClassifier(); //CloudVision.getInstance();
+                cloudVision = CloudVision.getInstance();
                 setModuleStatus(ModuleErrors.NOINTERNET, true);
             } catch (Exception e) {
                 System.out.println("unexpected error loading " + currentModule);
@@ -280,7 +295,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
             }
         } else {
             System.out.println("loading " + currentModule + "Mock...");
-            landmarkDetector = LandmarkDetectorMock.getInstance();
+            cloudVision = LandmarkDetectorMock.getInstance();
             setModuleStatus(ModuleErrors.NOINTERNET, true);
         }
 
@@ -510,29 +525,37 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         }
     }
 
-    private void analyzeImage() {
-        BufferedImage image;
+    private BufferedImage getLandscapeTrackerImage() {
+        BufferedImage image = null;
         try {
             image = landscapeTracker.getImage();
             setModuleStatus(ModuleErrors.NOCAMERA, true);
         } catch (Exception e) {
             e.printStackTrace();
             setModuleStatus(ModuleErrors.NOCAMERA, false);
-            return;
         }
+        return image;
+    }
+
+    private void analyzeImage() {
+        BufferedImage image = getLandscapeTrackerImage();
         if (image == null) {
             return;
         }
 
         //Analyse Bild
         List<PointOfInterest> pois;
-        try {
-            pois = landmarkDetector.identifyPOIs(image);
-            setModuleStatus(ModuleErrors.NOINTERNET, true);
-        } catch (Exception e) {
-            e.printStackTrace();
-            setModuleStatus(ModuleErrors.NOINTERNET, false);
-            return;
+        if (tensorflowClassifier != null && tensorflowClassifier.lastClassifiedPoi != null) {
+            pois = Collections.singletonList(tensorflowClassifier.lastClassifiedPoi);
+        } else {
+            try {
+                pois = cloudVision.identifyPOIs(image);
+                setModuleStatus(ModuleErrors.NOINTERNET, true);
+            } catch (Exception e) {
+                e.printStackTrace();
+                setModuleStatus(ModuleErrors.NOINTERNET, false);
+                return;
+            }
         }
 
         if (pois.isEmpty()) {
@@ -552,7 +575,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     private void initCameraThread() {
         cameraThread = new Thread(() -> {
 
-            if (landscapeTracker == null || landmarkDetector == null || abstractProvider == null) {
+            if (landscapeTracker == null || cloudVision == null || abstractProvider == null) {
                 System.out.println("unable to isRunning camera thread because of uninitialized modules");
                 return;
             }
