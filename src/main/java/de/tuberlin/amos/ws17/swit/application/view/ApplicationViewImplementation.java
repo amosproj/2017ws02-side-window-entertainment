@@ -75,6 +75,7 @@ public class ApplicationViewImplementation extends Application implements Applic
         scene.setOnKeyPressed(event -> viewModel.onKeyPressed(event.getCode()));
         scene.getStylesheets().add("/stylesheets/TransparentApplicationViewStylesheet.css");
         stage.setScene(scene);
+        stage.setFullScreen(true);
         stage.show();
     }
 
@@ -179,6 +180,16 @@ public class ApplicationViewImplementation extends Application implements Applic
     @Override
     public void showDebugLog(boolean show) {
         listDebugLog.setVisible(show);
+    }
+
+    @Override
+    public void toggleLists() {
+        showPoiLists(!listPoiCamera.isVisible());
+    }
+
+    private void showPoiLists(boolean show) {
+        listPoiCamera.setVisible(show);
+        listPoiMaps.setVisible(show);
     }
 
     @Override

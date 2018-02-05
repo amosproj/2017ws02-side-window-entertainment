@@ -26,6 +26,8 @@ public class AppProperties extends Properties {
     public boolean useCloudVision;
     public boolean useGpsModule;
     public boolean useDebugLog;
+    public boolean fullscreen;
+    public int mapsPoisLoadDistance;
 
     public static AppProperties getInstance() {
         if (instance == null) {
@@ -52,6 +54,8 @@ public class AppProperties extends Properties {
         useKnowledgeGraph = false;
         usePoiService = false;
         useDebugLog = true;
+        fullscreen = false;
+        mapsPoisLoadDistance = 300;
     }
 
     private AppProperties(String propertyFilePath) throws IOException {
@@ -70,5 +74,8 @@ public class AppProperties extends Properties {
         useKnowledgeGraph = get("information_source").equals("1");
         usePoiService = get("poi_analysis").equals("1");
         useDebugLog = get("debuglog").equals("1");
+        fullscreen = get("fullscreen").equals("1");
+        mapsPoisLoadDistance = Integer.parseInt(get("mapsPoisLoadDistance").toString());
+        System.out.println();
     }
 }
