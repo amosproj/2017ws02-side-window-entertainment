@@ -325,8 +325,8 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
             long lastMapsExecution = startTime;
             while (isRunning) {
                 long currentTime = new Date().getTime();
-                long expressionTimeDiff = currentTime - lastExpression;
-                long mapsTimeDiff = currentTime - lastMapsExecution;
+                long expressionTimeDiff = (currentTime - lastExpression) / 1000;
+                long mapsTimeDiff = (currentTime - lastMapsExecution) / 1000;
                 UserExpressions userExpressions;
                 if (userTracker.isUserTracked()) {
                     setExpressionStatus(ExpressionType.ISRACKED, true);
@@ -337,7 +337,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                         setExpressionStatus(ExpressionType.SMILE, userExpressions.isSmile());
                         setExpressionStatus(ExpressionType.TONGUEOUT, userExpressions.isTongueOut());
                     }
-                    if (userExpressions != null && userExpressions.isKiss() && expressionTimeDiff >= 3000) {
+                    if (userExpressions != null && userExpressions.isKiss() && expressionTimeDiff >= 5) {
                         //System.out.println("ich mach expressions " + expressionTimeDiff);
                         if (cameraThread.getState() == Thread.State.NEW) {
                             lastExpression = currentTime;
@@ -351,7 +351,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 } else {
                     setExpressionStatus(ExpressionType.ISRACKED, false);
                 }
-                if (mapsTimeDiff >= 5000) {
+                if (mapsTimeDiff >= 5) {
                     //System.out.println("ich mach maps " + mapsTimeDiff);
                     if (mapsThread.getState() == Thread.State.NEW) {
                         lastMapsExecution = currentTime;
@@ -363,7 +363,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                     }
                 }
                 try {
-                    Thread.sleep(25);
+                    Thread.sleep(75);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -612,20 +612,6 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         });
     }
 
-    private void updateInfoBox() {
-        if (userTracker.isUserTracked()) {
-            UserPosition userPosition = userTracker.getUserPosition();
-            infoBoxRotation.set(userPosition.getLineOfSight().getX()/1.5);
-            infoBoxTranslationX.set(-userPosition.getHeadCenterPosition().getX());
-            infoBoxTranslationY.set(-userPosition.getHeadCenterPosition().getY());
-        }
-        else {
-            infoBoxRotation.set(0);
-            infoBoxTranslationX.set(0);
-            infoBoxTranslationY.set(0);
-        }
-    }
-
     private void addCameraPoi(PointOfInterest poi) {
         PoiViewModel item = convertPoi(poi);
         if (!propertyPoiCamera.contains(poi)) {
@@ -776,21 +762,6 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     @Override
     public void setRunning(boolean running) {
 
-    }
-
-    @Override
-    public SimpleDoubleProperty getInfoBoxRotation() {
-        return infoBoxRotation;
-    }
-
-    @Override
-    public SimpleDoubleProperty getInfoBoxTranslationX() {
-        return infoBoxTranslationX;
-    }
-
-    @Override
-    public SimpleDoubleProperty getInfoBoxTranslationY() {
-        return infoBoxTranslationY;
     }
 
     public SimpleListProperty<UserExpressionViewModel> listExpressionStatusProperty() {
