@@ -543,11 +543,15 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
             return;
         }
 
-        //Analyse Bild
-        List<PointOfInterest> pois;
-        if (tensorflowClassifier != null && tensorflowClassifier.lastClassifiedPoi != null) {
-            pois = Collections.singletonList(tensorflowClassifier.lastClassifiedPoi);
-        } else {
+        List<PointOfInterest> pois = new ArrayList<>();
+
+        // try local classification first
+        if (tensorflowClassifier != null) {
+            pois = tensorflowClassifier.identifyPOIs(image);
+        }
+
+        // if not successful -> use cloud vision
+        if (pois.isEmpty()) {
             try {
                 pois = cloudVision.identifyPOIs(image);
                 setModuleStatus(ModuleErrors.NOINTERNET, true);
@@ -556,10 +560,6 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 setModuleStatus(ModuleErrors.NOINTERNET, false);
                 return;
             }
-        }
-
-        if (pois.isEmpty()) {
-            return;
         }
 
         getAbstract(pois);

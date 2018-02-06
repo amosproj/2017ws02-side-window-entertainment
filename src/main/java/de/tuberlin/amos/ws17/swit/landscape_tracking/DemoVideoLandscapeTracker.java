@@ -21,7 +21,7 @@ public class DemoVideoLandscapeTracker implements LandscapeTracker {
     private FFmpegFrameGrabber   grabber;
 
     private BufferedImage getFrame(double second) throws FrameGrabber.Exception {
-        System.out.println("Grabbing image at " + second + "s");
+//        System.out.println("Grabbing image at " + second + "s");
 
         double frameRate = grabber.getFrameRate();
         int frameNumber = (int) (frameRate * second);
@@ -29,7 +29,7 @@ public class DemoVideoLandscapeTracker implements LandscapeTracker {
         Frame frame = grabber.grab();
         BufferedImage image = converter.convert(frame);
         if (image == null) {
-            System.err.println("Failed to grad image at " + second + "s");
+            System.err.println("Failed to grab image at " + second + "s");
         }
         return image;
     }

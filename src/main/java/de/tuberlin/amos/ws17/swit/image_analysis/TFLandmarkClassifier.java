@@ -26,8 +26,6 @@ public class TFLandmarkClassifier implements LandmarkDetector {
     private       Graph        graph   = new Graph();
     private       Session      session = new Session(graph);
     private final List<String> labels  = loadLabels();
-    public PointOfInterest lastClassifiedPoi;
-    public float           lastClassifiedScore;
 
     public TFLandmarkClassifier() throws IOException {
         graph.importGraphDef(loadGraphDef());
@@ -101,14 +99,7 @@ public class TFLandmarkClassifier implements LandmarkDetector {
 
             // threshold
             if (bestScore >= 0.6) {
-                lastClassifiedScore = bestScore;
-                PointOfInterest poi = new PointOfInterest();
-                poi.setName(labels.get(sortedIndices[0]));
-                lastClassifiedPoi = poi;
                 return labels.get(sortedIndices[0]);
-            } else {
-                lastClassifiedScore = 0f;
-                lastClassifiedPoi = null;
             }
 
             return null;
