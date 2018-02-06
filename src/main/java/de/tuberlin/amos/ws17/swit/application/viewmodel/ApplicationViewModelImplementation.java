@@ -320,8 +320,8 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
             long lastMapsExecution = startTime;
             while (isRunning) {
                 long currentTime = new Date().getTime();
-                long expressionTimeDiff = currentTime - lastExpression;
-                long mapsTimeDiff = currentTime - lastMapsExecution;
+                long expressionTimeDiff = (currentTime - lastExpression) / 1000;
+                long mapsTimeDiff = (currentTime - lastMapsExecution) / 1000;
                 UserExpressions userExpressions;
                 if (userTracker.isUserTracked()) {
                     setExpressionStatus(ExpressionType.ISRACKED, true);
@@ -332,7 +332,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                         setExpressionStatus(ExpressionType.SMILE, userExpressions.isSmile());
                         setExpressionStatus(ExpressionType.TONGUEOUT, userExpressions.isTongueOut());
                     }
-                    if (userExpressions != null && userExpressions.isKiss() && expressionTimeDiff >= 30) {
+                    if (userExpressions != null && userExpressions.isKiss() && expressionTimeDiff >= 5) {
                         //System.out.println("ich mach expressions " + expressionTimeDiff);
                         if (cameraThread.getState() == Thread.State.NEW) {
                             lastExpression = currentTime;
@@ -346,7 +346,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 } else {
                     setExpressionStatus(ExpressionType.ISRACKED, false);
                 }
-                if (mapsTimeDiff >= 30) {
+                if (mapsTimeDiff >= 5) {
                     //System.out.println("ich mach maps " + mapsTimeDiff);
                     if (mapsThread.getState() == Thread.State.NEW) {
                         lastMapsExecution = currentTime;
@@ -357,11 +357,11 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                         mapsThread.start();
                     }
                 }
-                /*try {
-                    Thread.sleep(500);
+                try {
+                    Thread.sleep(75);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
-                }*/
+                }
 
                 updateBackgroundImage();
 
