@@ -612,6 +612,20 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         });
     }
 
+    private void updateInfoBox() {
+        if (userTracker.isUserTracked()) {
+            UserPosition userPosition = userTracker.getUserPosition();
+            infoBoxTranslationX.setValue(-userPosition.getHeadCenterPosition().getX());
+            infoBoxTranslationY.setValue(-userPosition.getHeadCenterPosition().getY());
+            infoBoxRotation.setValue(userPosition.getLineOfSight().getX()/1.5);
+        }
+        else {
+            infoBoxTranslationX.setValue(0);
+            infoBoxTranslationY.setValue(0);
+            infoBoxRotation.setValue(0);
+        }
+    }
+
     private void addCameraPoi(PointOfInterest poi) {
         PoiViewModel item = convertPoi(poi);
         if (!propertyPoiCamera.contains(poi)) {
@@ -762,6 +776,21 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     @Override
     public void setRunning(boolean running) {
 
+    }
+
+    @Override
+    public SimpleDoubleProperty getInfoBoxRotation() {
+        return infoBoxRotation;
+    }
+
+    @Override
+    public SimpleDoubleProperty getInfoBoxTranslationX() {
+        return infoBoxTranslationX;
+    }
+
+    @Override
+    public SimpleDoubleProperty getInfoBoxTranslationY() {
+        return infoBoxTranslationY;
     }
 
     public SimpleListProperty<UserExpressionViewModel> listExpressionStatusProperty() {
