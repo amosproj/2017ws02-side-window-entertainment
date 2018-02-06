@@ -1,6 +1,5 @@
 package de.tuberlin.amos.ws17.swit.image_analysis;
 
-import com.jayway.jsonpath.PathNotFoundException;
 import de.tuberlin.amos.ws17.swit.common.PointOfInterest;
 import org.junit.Before;
 import org.junit.Test;
@@ -21,6 +20,7 @@ public class TFLandmarkClassifierTest {
     @Before
     public void setUp() throws IOException {
         appUnderTest = new TFLandmarkClassifier();
+        TFLandmarkClassifier.debug = false;
     }
 
     @Test
@@ -29,13 +29,10 @@ public class TFLandmarkClassifierTest {
         assert pois.get(0).getName().equals("Fernsehturm Berlin");
 
         pois = appUnderTest.identifyPOIs(getImagePath("sieges-saeule.jpg"));
-        assert pois.get(0).getName().equals("Siegessäule");
+        assert pois.get(0).getName().equals("Siegessaeule");
 
         pois = appUnderTest.identifyPOIs(getImagePath("brandenburger-tor.jpg"));
         assert pois.get(0).getName().equals("Brandenburger Tor");
-
-        pois = appUnderTest.identifyPOIs(getImagePath("fernsehturm-2.jpg"));
-        assert pois.get(0).getName().equals("Fernsehturm Berlin");
 
         pois = appUnderTest.identifyPOIs(getImagePath("berliner-dom.jpg"));
         assert pois.get(0).getName().equals("Berliner Dom");
@@ -46,11 +43,8 @@ public class TFLandmarkClassifierTest {
         pois = appUnderTest.identifyPOIs(getImagePath("alexa.jpg"));
         assert pois.get(0).getName().equals("Alexa Einkaufszentrum");
 
-        pois = appUnderTest.identifyPOIs(getImagePath("cheops_pyramide.jpg"));
-        assert pois.isEmpty();
-
         pois = appUnderTest.identifyPOIs(getImagePath("olympia_stadion.jpg"));
-        assert pois.get(0).getName().equals("Olympia Stadio");
+        assert pois.get(0).getName().equals("Olympia Stadion");
     }
 
     @Test
