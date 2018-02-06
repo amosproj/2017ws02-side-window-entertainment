@@ -86,6 +86,11 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     private SimpleListProperty<UserExpressionViewModel>     listExpressionStatus = new SimpleListProperty<>();
     private List<Module>                                    moduleList           = new ArrayList<>();
 
+
+    private SimpleDoubleProperty                            infoBoxRotation =       new SimpleDoubleProperty();
+    private SimpleDoubleProperty                            infoBoxTranslationX =   new SimpleDoubleProperty();
+    private SimpleDoubleProperty                            infoBoxTranslationY =   new SimpleDoubleProperty();
+
     private int searchRadius = 1000;
     private GpsPosition lastRequestPosition;
 
@@ -332,7 +337,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                         setExpressionStatus(ExpressionType.SMILE, userExpressions.isSmile());
                         setExpressionStatus(ExpressionType.TONGUEOUT, userExpressions.isTongueOut());
                     }
-                    if (userExpressions != null && userExpressions.isKiss() && expressionTimeDiff >= 30) {
+                    if (userExpressions != null && userExpressions.isKiss() && expressionTimeDiff >= 3000) {
                         //System.out.println("ich mach expressions " + expressionTimeDiff);
                         if (cameraThread.getState() == Thread.State.NEW) {
                             lastExpression = currentTime;
@@ -346,7 +351,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 } else {
                     setExpressionStatus(ExpressionType.ISRACKED, false);
                 }
-                if (mapsTimeDiff >= 30) {
+                if (mapsTimeDiff >= 5000) {
                     //System.out.println("ich mach maps " + mapsTimeDiff);
                     if (mapsThread.getState() == Thread.State.NEW) {
                         lastMapsExecution = currentTime;
@@ -357,14 +362,14 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                         mapsThread.start();
                     }
                 }
-                /*try {
-                    Thread.sleep(500);
+                try {
+                    Thread.sleep(25);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
-                }*/
+                }
 
                 updateBackgroundImage();
-
+                updateInfoBox();
                 //iterations++;
             }
         });
@@ -607,6 +612,20 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         });
     }
 
+    private void updateInfoBox() {
+        if (userTracker.isUserTracked()) {
+            UserPosition userPosition = userTracker.getUserPosition();
+            infoBoxRotation.set(userPosition.getLineOfSight().getX()/1.5);
+            infoBoxTranslationX.set(-userPosition.getHeadCenterPosition().getX());
+            infoBoxTranslationY.set(-userPosition.getHeadCenterPosition().getY());
+        }
+        else {
+            infoBoxRotation.set(0);
+            infoBoxTranslationX.set(0);
+            infoBoxTranslationY.set(0);
+        }
+    }
+
     private void addCameraPoi(PointOfInterest poi) {
         PoiViewModel item = convertPoi(poi);
         if (!propertyPoiCamera.contains(poi)) {
@@ -757,6 +776,21 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     @Override
     public void setRunning(boolean running) {
 
+    }
+
+    @Override
+    public SimpleDoubleProperty getInfoBoxRotation() {
+        return infoBoxRotation;
+    }
+
+    @Override
+    public SimpleDoubleProperty getInfoBoxTranslationX() {
+        return infoBoxTranslationX;
+    }
+
+    @Override
+    public SimpleDoubleProperty getInfoBoxTranslationY() {
+        return infoBoxTranslationY;
     }
 
     public SimpleListProperty<UserExpressionViewModel> listExpressionStatusProperty() {

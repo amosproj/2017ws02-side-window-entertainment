@@ -172,7 +172,7 @@ public class ApplicationViewImplementation extends Application implements Applic
         expansionPane.setCenter(expansionImage);
         expansionPane.setBottom(expansionScrollPane);
         pnFoundation.setCenter(expansionPane);
-        BorderPane.setAlignment(expansionPane, Pos.CENTER_RIGHT);
+        BorderPane.setAlignment(expansionPane, Pos.CENTER);
         BorderPane.setAlignment(expansionImage, Pos.CENTER);
         expansionScrollPane.setFitToWidth(true);
     }
@@ -224,6 +224,9 @@ public class ApplicationViewImplementation extends Application implements Applic
                 pnFoundation.backgroundProperty().bindBidirectional(viewModel.getBackgroundProperty());
             }
 
+            expansionPane.rotateProperty().bindBidirectional(viewModel.getInfoBoxRotation());
+            expansionPane.translateXProperty().bindBidirectional(viewModel.getInfoBoxTranslationX());
+            expansionPane.translateYProperty().bindBidirectional(viewModel.getInfoBoxTranslationY());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -376,6 +379,9 @@ public class ApplicationViewImplementation extends Application implements Applic
         System.exit(0);
     }
 
+    private void moveInfoboxByUserPosition() {
+
+    }
 
     @Override
     public MediaView getMediaView() {

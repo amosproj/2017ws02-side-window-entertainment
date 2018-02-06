@@ -2,6 +2,7 @@ package de.tuberlin.amos.ws17.swit.application.viewmodel;
 
 import de.tuberlin.amos.ws17.swit.common.Module;
 import javafx.beans.property.Property;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -46,4 +47,8 @@ public interface ApplicationViewModel {
     List<Module> getModuleList();
 
     void setRunning(boolean running);
+
+    SimpleDoubleProperty getInfoBoxRotation();
+    SimpleDoubleProperty getInfoBoxTranslationX();
+    SimpleDoubleProperty getInfoBoxTranslationY();
 }

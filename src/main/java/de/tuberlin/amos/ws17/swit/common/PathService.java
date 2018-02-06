@@ -15,7 +15,7 @@ public class PathService {
 
             String pathName = ApplicationViewImplementation.class.getProtectionDomain().getCodeSource().getLocation().getPath();
             URLDecoder.decode(pathName,"utf-8");
-
+            //TODO: mac bridge einbauen?
             if (!System.getProperty("os.name").contains("Linux")) {
                 pathName = pathName.substring(1,pathName.lastIndexOf("/") );
             }
