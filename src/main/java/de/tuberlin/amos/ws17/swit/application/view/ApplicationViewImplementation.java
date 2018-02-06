@@ -84,6 +84,11 @@ public class ApplicationViewImplementation extends Application implements Applic
         stage.show();
     }
 
+    @Override
+    public void toggleTensorFlowDebugWindow() {
+        textTFDebug.setVisible(!textTFDebug.isVisible());
+    }
+
     private void initElements() {
         pnFoundation.setId("pnFoundation");
         pnFoundation.setTop(listPoiCamera);
@@ -134,6 +139,7 @@ public class ApplicationViewImplementation extends Application implements Applic
 
         listDebugLog.setId("listDebugLog");
         textTFDebug.setId("textTFDebug");
+        textTFDebug.setVisible(false);
         expansionPane.setId("expansionPane");
         expansionPane.setVisible(false);
         expansionTopPane.setId("expansionTopPane");
@@ -359,6 +365,7 @@ public class ApplicationViewImplementation extends Application implements Applic
         }
     }
 
+    @Override
     public void showExpandedPoi(boolean show) {
         expansionPane.setVisible(show);
     }

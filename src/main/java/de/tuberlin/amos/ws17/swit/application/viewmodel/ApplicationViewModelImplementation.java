@@ -131,12 +131,18 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     }
 
     private void initTFClassifier() {
+        view.toggleTensorFlowDebugWindow();
+        int intervalInSeconds = 5;
+        if (properties.useDemoVideo) {
+            // grab image every second if using video
+            intervalInSeconds = 1;
+        }
         scheduler.scheduleAtFixedRate(() -> {
             BufferedImage image = getLandscapeTrackerImage();
             if (image != null) {
                 tensorFlowClassifier.identifyPOIs(image);
             }
-        }, 3, 1, TimeUnit.SECONDS);
+        }, 3, intervalInSeconds, TimeUnit.SECONDS);
     }
 
     private void initObjects() {
@@ -414,6 +420,9 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 break;
             case L:
                 view.toggleLists();
+                break;
+            case T:
+                view.toggleTensorFlowDebugWindow();
                 break;
             default:
                 break;
