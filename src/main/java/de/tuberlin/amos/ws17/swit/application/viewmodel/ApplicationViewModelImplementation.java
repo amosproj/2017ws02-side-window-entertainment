@@ -49,14 +49,13 @@ import java.util.logging.Logger;
 
 public class ApplicationViewModelImplementation implements ApplicationViewModel {
 
-    private final static Logger LOGGER        = Logger.getLogger(ApplicationViewModel.class.getName());
-    public static final  String videoFileName = "Berlin.mp4";
+    public static final String videoFileName = "Berlin.mp4";
 
     //Module
     private ApplicationView      view;
     private LandmarkDetector     cloudVision;
     private LandscapeTracker     landscapeTracker;
-    private TFLandmarkClassifier tensorflowClassifier;
+    private TFLandmarkClassifier tensorFlowClassifier;
     private UserTracker          userTracker;
     private GpsTracker           gpsTracker;
     private AbstractProvider     abstractProvider;
@@ -135,7 +134,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         scheduler.scheduleAtFixedRate(() -> {
             BufferedImage image = getLandscapeTrackerImage();
             if (image != null) {
-                tensorflowClassifier.identifyPOIs(image);
+                tensorFlowClassifier.identifyPOIs(image);
             }
         }, 3, 1, TimeUnit.SECONDS);
     }
@@ -275,7 +274,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         if (properties.useTensorflow) {
             try {
                 System.out.println("loading Tensorflow model");
-                tensorflowClassifier = new TFLandmarkClassifier();
+                tensorFlowClassifier = new TFLandmarkClassifier();
             } catch (IOException e) {
                 System.out.println("Failed to load Tensorflow model graph");
             }
@@ -546,8 +545,8 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         List<PointOfInterest> pois = new ArrayList<>();
 
         // try local classification first
-        if (tensorflowClassifier != null) {
-            pois = tensorflowClassifier.identifyPOIs(image);
+        if (tensorFlowClassifier != null) {
+            pois = tensorFlowClassifier.identifyPOIs(image);
         }
 
         // if not successful -> use cloud vision

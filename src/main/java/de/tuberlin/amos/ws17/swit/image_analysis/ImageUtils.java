@@ -18,17 +18,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class ImageUtils {
 
-    @Nullable
-    public static BufferedImage createImageFromBytes(byte[] imageData) {
-        ByteArrayInputStream bais = new ByteArrayInputStream(imageData);
-        try {
-            return ImageIO.read(bais);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
+    @Nonnull
     public static Image convertToImage(BufferedImage bufferedImage) throws IOException {
         if (bufferedImage == null) {
             throw new IOException();
@@ -37,25 +27,6 @@ public class ImageUtils {
         ImageIO.write(bufferedImage, "jpg", baos);
         byte[] data = baos.toByteArray();
         return new Image().encodeContent(data);
-    }
-
-    @Nullable
-    public static BufferedImage convertToBufferedImage(Image image) {
-        return createImageFromBytes(image.decodeContent());
-    }
-
-    public static void showImage(BufferedImage img, JFrame frame) {
-        if (img == null) {
-            return;
-        }
-        ImageIcon icon = new ImageIcon(img);
-        frame.setLayout(new FlowLayout());
-        frame.setSize(img.getWidth() + 10, img.getHeight() + 20);
-        JLabel lbl = new JLabel();
-        lbl.setIcon(icon);
-        frame.add(lbl);
-        frame.setVisible(true);
-        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
     }
 
     @Nullable
@@ -112,12 +83,9 @@ public class ImageUtils {
     @Nonnull
     public static BufferedImage cropImage(BufferedImage image, Rectangle rect) {
         try {
-            BufferedImage img = image.getSubimage(rect.x, rect.y, rect.width, rect.height);
-//            BufferedImage copyOfImage = new BufferedImage(img.getWidth(), img.getHeight(), BufferedImage.TYPE_INT_RGB);
-//            Graphics g = copyOfImage.createGraphics();
-//            g.drawImage(img, 0, 0, null);
-            return img;
+            return image.getSubimage(rect.x, rect.y, rect.width, rect.height);
         } catch (RasterFormatException e) {
+            System.err.println("Failed to crop image");
             return image;
         }
     }

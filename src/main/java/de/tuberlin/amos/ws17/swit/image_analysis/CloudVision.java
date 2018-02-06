@@ -14,6 +14,7 @@ import de.tuberlin.amos.ws17.swit.common.DebugLog;
 import de.tuberlin.amos.ws17.swit.common.PointOfInterest;
 import org.apache.jena.base.Sys;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -64,6 +65,7 @@ public class CloudVision implements LandmarkDetector {
         this.vision = vision;
     }
 
+    @Nonnull
     private static Vision getVisionService() throws IOException, GeneralSecurityException {
         JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
         VisionRequestInitializer requestInitializer = new VisionRequestInitializer(CLOUD_VISION_API_KEY);
@@ -74,6 +76,7 @@ public class CloudVision implements LandmarkDetector {
                 .build();
     }
 
+    @Nonnull
     private List<LandmarkResult> identifyLandmarks(BufferedImage bufferedImage, int maxResults) throws IOException {
         Image image = ImageUtils.convertToImage(bufferedImage);
         return identifyLandmarks(image, maxResults);
@@ -101,6 +104,7 @@ public class CloudVision implements LandmarkDetector {
         return Collections.emptyList();
     }
 
+    @Nonnull
     private static PointOfInterest convertToPOI(LandmarkResult landmark) {
         PointOfInterest poi = new PointOfInterest();
         poi.setId(landmark.getId());
@@ -110,6 +114,7 @@ public class CloudVision implements LandmarkDetector {
         return poi;
     }
 
+    @Nonnull
     private List<LandmarkResult> identifyLandmarks(Image image, int maxResults) throws IOException {
         if (this.vision == null) {
             DebugLog.log("Cloud Vision service unavailable");
@@ -144,6 +149,7 @@ public class CloudVision implements LandmarkDetector {
         return convertToLandmarkResults(response.getLandmarkAnnotations());
     }
 
+    @Nonnull
     private List<LandmarkResult> convertToLandmarkResults(List<EntityAnnotation> annotations) {
         return annotations.stream()
                 .map(LandmarkResult::fromEntityAnnotation)
@@ -151,6 +157,7 @@ public class CloudVision implements LandmarkDetector {
                 .collect(Collectors.toList());
     }
 
+    @Nonnull
     private LandmarkResult setCroppedImage(LandmarkResult result) {
         float upScale = 2f;
 
@@ -163,10 +170,8 @@ public class CloudVision implements LandmarkDetector {
         int y = vertices.get(0).getY();
         int width = vertices.get(1).getX() - x;
         int height = vertices.get(3).getY() - y;
-//        System.out.println("Full image size: " + bufferedImage.getWidth() + "x" + bufferedImage.getHeight());
 
         Rectangle originalRect = new Rectangle(x, y, width, height);
-//        System.out.println("Original Rect: "+ originalRect.toString());
         int growWidth = (int) ((width * upScale - width) / 2);
         int growHeight = (int) ((height * upScale - height) / 2);
         Rectangle growRect = new Rectangle(originalRect);

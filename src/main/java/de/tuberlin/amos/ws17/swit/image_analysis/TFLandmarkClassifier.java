@@ -4,6 +4,7 @@ import com.google.common.io.ByteStreams;
 import de.tuberlin.amos.ws17.swit.common.DebugTF;
 import de.tuberlin.amos.ws17.swit.common.PointOfInterest;
 import javafx.application.Platform;
+import org.apache.commons.lang3.text.WordUtils;
 import org.apache.jena.base.Sys;
 import org.tensorflow.Graph;
 import org.tensorflow.Session;
@@ -23,9 +24,11 @@ import java.util.stream.IntStream;
 
 public class TFLandmarkClassifier implements LandmarkDetector {
 
-    private       Graph        graph   = new Graph();
-    private       Session      session = new Session(graph);
-    private final List<String> labels  = loadLabels();
+    public static       boolean      debug               = true;
+    public static final float        predictionThreshold = 0.5f;
+    private             Graph        graph               = new Graph();
+    private             Session      session             = new Session(graph);
+    private final       List<String> labels              = loadLabels();
 
     public TFLandmarkClassifier() throws IOException {
         graph.importGraphDef(loadGraphDef());
@@ -94,11 +97,15 @@ public class TFLandmarkClassifier implements LandmarkDetector {
                 int index = sortedIndices[i];
                 log.append(String.format("%-15s (%.2f%% likely)\n", labels.get(index), probabilities[index] * 100.0));
             }
-            Platform.runLater(() -> DebugTF.log(log.toString()));
+//            System.out.println(log);
+
+            if (debug) {
+                DebugTF.log(log.toString());
+            }
             float bestScore = probabilities[sortedIndices[0]];
 
             // threshold
-            if (bestScore >= 0.6) {
+            if (bestScore >= predictionThreshold) {
                 return labels.get(sortedIndices[0]);
             }
 
@@ -118,7 +125,7 @@ public class TFLandmarkClassifier implements LandmarkDetector {
         final InputStream is = TFLandmarkClassifier.class.getClassLoader().getResourceAsStream("labels.txt");
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
             while ((line = reader.readLine()) != null) {
-                labels.add(line);
+                labels.add(WordUtils.capitalize(line));
             }
         }
         return labels;
