@@ -3,8 +3,9 @@ Side Window Infotainment
 
 [![Build Status](https://travis-ci.org/cfengler/amos-ws17-proj2.svg?=branch=master)](https://travis-ci.org/cfengler/amos-ws17-proj2)
 
+Side Window Infotainment is a student project of the TU Berlin in cooperation with [IAV](https://www.iav.com/) as the industrial partner.
 
-A car infotainment system, which automatically displays information about Points of Interest to back-seat passengers.
+The goal is to build an infotainment system for car passengers which automatically captures points of interest in the field of view and displays relevant information on the side window.
 
 ## Getting Started
 
@@ -33,12 +34,12 @@ Google APIs:
 	* Places API
 	* Knowledge Graph Search API
 * You can create API keys for each service or use one for all
-* Insert your API keys in `api-config.cfg`
+* Insert your API keys in `src/main/resources/api-config.cfg`
 
 JavoNet:
 
 * Request a license at [JavoNet][javonet], you can also use the trial version for now
-* Insert the e-mail you have used for registration and the license key in `api-config.cfg`
+* Insert the email you have used for registration and the license key in `src/main/resources/api-config.cfg`
 
 [cloud-console]: https://console.cloud.google.com
 [vision-api]: https://console.cloud.google.com/apis/api/
