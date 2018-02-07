@@ -63,6 +63,14 @@
     -fx-background-color: rgba(0, 0, 0, 0.5);
 }
 
+#listPoiMaps .scroll-bar:vertical {
+    -fx-scale-x: 0;
+}
+
+#listPoiCamera .scroll-bar:vertical {
+    -fx-scale-x: 0;
+}
+
 #listPoiCamera {
     -fx-orientation: horizontal;
     -fx-background-color: rgba(0, 0, 0, 0.5);
@@ -170,4 +178,16 @@
 
 #togglePane .button {
     -fx-pref-width: 220px;
+}
+
+.scroll-bar {
+    -fx-background-color: rgba(0, 0, 0, 0);
+    -fx-background-insets: 0, 0, 0;
+    -fx-background-radius: 0em;
+}
+
+.scroll-bar .thumb {
+    -fx-background-color: rgba(0, 0, 0, 0.5);
+    -fx-background-insets: 0, 0, 0;
+    -fx-background-radius: 0em;
 }
