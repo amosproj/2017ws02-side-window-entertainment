@@ -80,7 +80,9 @@ public class ApplicationViewImplementation extends Application implements Applic
         scene.setOnKeyPressed(event -> viewModel.onKeyPressed(event.getCode()));
         scene.getStylesheets().add("/stylesheets/TransparentApplicationViewStylesheet.css");
         stage.setScene(scene);
-        stage.setFullScreen(true);
+        if (AppProperties.getInstance().fullscreen) {
+            stage.setFullScreen(true);
+        }
         stage.show();
     }
 
