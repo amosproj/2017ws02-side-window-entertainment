@@ -78,7 +78,7 @@ public class GooglePoiServiceTest {
 	@Test
 	public void loadVeryLargeRadiusTest() throws ModuleNotWorkingException{
 		List<GooglePoi> pois=loader.loadPlaceForCircle(TestData.TIERGARTEN_POSITION_1, 57000);
-		assertEquals(pois.size(), 60);
+		assertEquals(60, pois.size());
 	}
 	@Test
 	public void loadNoRadiusTest() {
