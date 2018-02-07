@@ -32,11 +32,13 @@ import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.embed.swing.SwingFXUtils;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.image.Image;
 import javafx.event.EventHandler;
 import javafx.event.ActionEvent;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
+import javafx.stage.Screen;
 import org.joda.time.DateTime;
 
 import java.awt.image.BufferedImage;
@@ -127,6 +129,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
             initTFClassifier();
         }
 
+        initInfoBoxMovement();
     }
 
     private void initTFClassifier() {
@@ -659,12 +662,40 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         });
     }
 
+    private double infoBoxMoveWidth = 300;
+    //private double infoBoxMoveHeight = 150;
+    //private double userPositionMinX = 0;
+    //private double userPositionMaxX = 0;
+
+    private void initInfoBoxMovement() {
+        Screen screen = Screen.getPrimary();
+        Rectangle2D screenVisualBounds = screen.getVisualBounds();
+
+        infoBoxMoveWidth = screenVisualBounds.getWidth() * 0.5;
+    }
+
     private void updateInfoBox() {
         if (userTracker.isUserTracked()) {
             UserPosition userPosition = userTracker.getUserPosition();
-            infoBoxTranslationX.setValue(-userPosition.getHeadCenterPosition().getX());
-            infoBoxTranslationY.setValue(-userPosition.getHeadCenterPosition().getY());
+            double headCenterX = Math.max(userPosition.getHeadCenterPosition().getX(), 150);
+            //double headCenterY = Math.max(userPosition.getHeadCenterPosition().getY(), 150);
+
+
+            infoBoxTranslationX.setValue(-infoBoxMoveWidth * 150 / headCenterX);
+            //infoBoxTranslationY.setValue(-userPosition.getHeadCenterPosition().getY());
             infoBoxRotation.setValue(userPosition.getLineOfSight().getX() / 1.5);
+
+//            if (userPositionMaxX < userPosition.getHeadCenterPosition().getX()) {
+//                userPositionMaxX = userPosition.getHeadCenterPosition().getX();
+//                System.out.println("userPositionMaxX " + userPositionMaxX);
+//                System.out.println("userPositionMinX " + userPositionMinX);
+//            }
+//
+//            if (userPositionMinX > userPosition.getHeadCenterPosition().getX()) {
+//                userPositionMinX = userPosition.getHeadCenterPosition().getX();
+//                System.out.println("userPositionMaxX " + userPositionMaxX);
+//                System.out.println("userPositionMinX " + userPositionMinX);
+//            }
         } else {
             infoBoxTranslationX.setValue(0);
             infoBoxTranslationY.setValue(0);
