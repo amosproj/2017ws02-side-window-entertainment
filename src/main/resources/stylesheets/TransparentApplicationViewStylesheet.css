@@ -23,11 +23,18 @@
 }
 
 #expansionPane {
-    -fx-padding: 16px;
+    -fx-padding: 0px;
     -fx-max-width: 400px;
     -fx-max-height: 500px;
     -fx-alignment: center-right;
     -fx-background-color: rgba(0, 0, 0, 0.7);
+    -fx-border-color: rgba(192,192,192,255);
+    -fx-border-width: 4px;
+}
+
+#expansionTopPane {
+    -fx-background-color: rgba(64,64,64,255);
+    -fx-padding: 8px;
 }
 
 #expansionName {
@@ -43,6 +50,7 @@
 
 #expansionInformation {
     -fx-wrap-text: true;
+    -fx-padding: 8px;
 }
 
 #expansionScrollPane {
@@ -53,6 +61,14 @@
 #listPoiMaps {
     -fx-orientation: horizontal;
     -fx-background-color: rgba(0, 0, 0, 0.5);
+}
+
+#listPoiMaps .scroll-bar:vertical {
+    -fx-scale-x: 0;
+}
+
+#listPoiCamera .scroll-bar:vertical {
+    -fx-scale-x: 0;
 }
 
 #listPoiCamera {
@@ -158,4 +174,20 @@
     -fx-max-width: 500px;
     -fx-max-height: 400px;
     -fx-background-color: rgba(0, 0, 0, 0.7);
+}
+
+#togglePane .button {
+    -fx-pref-width: 220px;
+}
+
+.scroll-bar {
+    -fx-background-color: rgba(0, 0, 0, 0);
+    -fx-background-insets: 0, 0, 0;
+    -fx-background-radius: 0em;
+}
+
+.scroll-bar .thumb {
+    -fx-background-color: rgba(0, 0, 0, 0.5);
+    -fx-background-insets: 0, 0, 0;
+    -fx-background-radius: 0em;
 }

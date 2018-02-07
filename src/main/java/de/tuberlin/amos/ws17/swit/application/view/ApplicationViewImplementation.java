@@ -2,13 +2,21 @@ package de.tuberlin.amos.ws17.swit.application.view;
 
 import de.tuberlin.amos.ws17.swit.application.AppProperties;
 import de.tuberlin.amos.ws17.swit.application.viewmodel.*;
+import de.tuberlin.amos.ws17.swit.common.DebugLog;
 import de.tuberlin.amos.ws17.swit.common.DebugTF;
 import de.tuberlin.amos.ws17.swit.common.Module;
 import de.tuberlin.amos.ws17.swit.image_analysis.ImageUtils;
+import javafx.animation.RotateTransition;
+import javafx.animation.ScaleTransition;
+import javafx.animation.TranslateTransition;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.DoubleProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -25,6 +33,7 @@ import javafx.scene.text.Font;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.util.Callback;
+import javafx.util.Duration;
 
 public class ApplicationViewImplementation extends Application implements ApplicationView {
 
@@ -66,7 +75,7 @@ public class ApplicationViewImplementation extends Application implements Applic
 
     public void init() {
         initElements();
-        initExpansion();
+        initInfobox();
         viewModel = new ApplicationViewModelImplementation(this);
 
         initBindings();
@@ -87,13 +96,14 @@ public class ApplicationViewImplementation extends Application implements Applic
 
     private void initFullscreenMode(Stage stage) {
         if (AppProperties.getInstance().useFullscreen) {
-            Screen screen = Screen.getPrimary();
-            Rectangle2D screenVisualBounds = screen.getVisualBounds();
-
-            stage.setX(screenVisualBounds.getMinX());
-            stage.setY(screenVisualBounds.getMinY());
-            stage.setWidth(screenVisualBounds.getWidth());
-            stage.setHeight(screenVisualBounds.getHeight());
+            stage.setMaximized(true);
+//            Screen screen = Screen.getPrimary();
+//            Rectangle2D screenVisualBounds = screen.getVisualBounds();
+//
+//            stage.setX(screenVisualBounds.getMinX());
+//            stage.setY(screenVisualBounds.getMinY());
+//            stage.setWidth(screenVisualBounds.getWidth());
+//            stage.setHeight(screenVisualBounds.getHeight());
         }
         else if (AppProperties.getInstance().useFullscreenWithoutWindowChrome) {
             stage.setFullScreen(true);
@@ -149,12 +159,19 @@ public class ApplicationViewImplementation extends Application implements Applic
 
         togglePane.setId("togglePane");
         toggleApplicationViewLog.setId("toggleApplicationView");
+        toggleApplicationViewLog.setOnMouseClicked(event -> toggleStyle("ApplicationView"));
         toggleImageAnalysisLog.setId("toggleImageAnalysis");
+        toggleImageAnalysisLog.setOnMouseClicked(event -> toggleStyle("ImageAnalysis"));
         toggleInformationSourceLog.setId("toggleInformationSource");
+        toggleInformationSourceLog.setOnMouseClicked(event -> toggleStyle("InformationSource"));
         toggleLandscapeTrackingLog.setId("toggleLandscapeTracking");
+        toggleLandscapeTrackingLog.setOnMouseClicked(event -> toggleStyle("LandscapeTracking"));
         togglePoiLog.setId("togglePoi");
+        togglePoiLog.setOnMouseClicked(event -> toggleStyle("POI"));
         toggleUserTrackingLog.setId("toggleUserTracking");
+        toggleUserTrackingLog.setOnMouseClicked(event -> toggleStyle("UserTracking"));
         toggleGpsLog.setId("toggleGpsLog");
+        toggleGpsLog.setOnMouseClicked(event -> toggleStyle("GPS"));
 
         //togglePane.getStyleClass().add("toggleButton");
         toggleApplicationViewLog.setId("toggleApplicationView");
@@ -213,12 +230,13 @@ public class ApplicationViewImplementation extends Application implements Applic
         StackPane.setMargin(textTFDebug, insets);
     }
 
-    private void initExpansion() {
+    private void initInfobox() {
         infoboxTitle.setAlignment(Pos.TOP_CENTER);
         infoboxInformation.setAlignment(Pos.TOP_CENTER);
         infoboxContentPane.setTop(infoboxImage);
         infoboxContentPane.setBottom(infoboxInformation);
         infoboxScrollPane.setContent(infoboxContentPane);
+
         infoboxImage.setPreserveRatio(true);
         infoboxImage.setFitHeight(150);
         infoboxImage.minHeight(0);
@@ -255,6 +273,10 @@ public class ApplicationViewImplementation extends Application implements Applic
         showDebugLog(!debugPane.isVisible());
     }
 
+    private RotateTransition infoboxRotateTransition = new RotateTransition(Duration.seconds(0.75), infoboxPane);
+    private TranslateTransition infoboxTranslateTransition = new TranslateTransition(Duration.seconds(2), infoboxPane);
+    //TODO : private ScaleTransition infoboxScaleTransition = new ScaleTransition(Duration.seconds(2), infoboxPane);
+
     private void initBindings() {
         ImageView cameraImage = new ImageView();
         cameraImage.imageProperty().bindBidirectional(viewModel.propertyCameraImageProperty());
@@ -283,9 +305,27 @@ public class ApplicationViewImplementation extends Application implements Applic
                 pnFoundation.backgroundProperty().bindBidirectional(viewModel.getBackgroundProperty());
             }
 
-            infoboxPane.rotateProperty().bindBidirectional(viewModel.getInfoBoxRotation());
-            infoboxPane.translateXProperty().bindBidirectional(viewModel.getInfoBoxTranslationX());
-            infoboxPane.translateYProperty().bindBidirectional(viewModel.getInfoBoxTranslationY());
+            infoboxRotateTransition.setOnFinished(new EventHandler<ActionEvent>(){
+                public void handle(ActionEvent AE){
+                    infoboxRotateTransition.setToAngle(viewModel.getInfoBoxRotation().doubleValue());
+                    infoboxRotateTransition.play();
+                }
+            });
+
+            infoboxRotateTransition.setToAngle(viewModel.getInfoBoxRotation().doubleValue());
+            infoboxRotateTransition.play();
+
+            infoboxTranslateTransition.setOnFinished(new EventHandler<ActionEvent>(){
+                public void handle(ActionEvent AE){
+                    infoboxTranslateTransition.setToX(viewModel.getInfoBoxTranslationX().doubleValue());
+                    infoboxTranslateTransition.setToY(viewModel.getInfoBoxTranslationY().doubleValue());
+                    infoboxTranslateTransition.play();
+                }
+            });
+
+            infoboxTranslateTransition.setToX(viewModel.getInfoBoxTranslationX().doubleValue());
+            infoboxTranslateTransition.setToY(viewModel.getInfoBoxTranslationY().doubleValue());
+            infoboxTranslateTransition.play();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -454,4 +494,37 @@ public class ApplicationViewImplementation extends Application implements Applic
             });
         }
     }
+
+    private void toggleStyle(String module){
+        boolean status = DebugLog.getModuleStatus(module);
+        if (module.equals("GPS")){
+            if (status) toggleGpsLog.setStyle("-fx-background-color: black");
+            else        toggleGpsLog.setStyle("-fx-background-color: dimgray");
+        }
+        if (module.equals("POI")){
+            if (status) togglePoiLog.setStyle("-fx-background-color: black");
+            else        togglePoiLog.setStyle("-fx-background-color: dimgray");
+        }
+        if (module.equals("UserTracking")){
+            if (status) toggleUserTrackingLog.setStyle("-fx-background-color: black");
+            else        toggleUserTrackingLog.setStyle("-fx-background-color: dimgray");
+        }
+        if (module.equals("LandscapeTracking")){
+            if (status) toggleLandscapeTrackingLog.setStyle("-fx-background-color: black");
+            else        toggleLandscapeTrackingLog.setStyle("-fx-background-color: dimgray");
+        }
+        if (module.equals("ImageAnalysis")){
+            if (status) toggleImageAnalysisLog.setStyle("-fx-background-color: black");
+            else        toggleImageAnalysisLog.setStyle("-fx-background-color: dimgray");
+        }
+        if (module.equals("ApplicationView")){
+            if (status) toggleApplicationViewLog.setStyle("-fx-background-color: black");
+            else        toggleApplicationViewLog.setStyle("-fx-background-color: dimgray");
+        }
+        if (module.equals("InformationSource")){
+            if (status) toggleInformationSourceLog.setStyle("-fx-background-color: black");
+            else        toggleInformationSourceLog.setStyle("-fx-background-color: dimgray");
+        }
+    }
+
 }

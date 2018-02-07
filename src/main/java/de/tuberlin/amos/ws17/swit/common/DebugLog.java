@@ -119,4 +119,15 @@ public class DebugLog {
             return message;
         }
     }
+
+    public static boolean getModuleStatus(String module){
+        if (module.equals("POI")) return showPoi;
+        if (module.equals("GPS")) return showGps;
+        if (module.equals("ApplicationView")) return showApplicationView;
+        if (module.equals("InformationSource")) return showInformationSource;
+        if (module.equals("LandscapeTracking")) return showLandscapeTracking;
+        if (module.equals("UserTracking")) return showUserTracking;
+        if (module.equals("ImageAnalysis")) return showImageAnalysis;
+        return false;
+    }
 }
