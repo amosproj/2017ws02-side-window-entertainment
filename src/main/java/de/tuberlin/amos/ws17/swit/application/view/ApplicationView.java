@@ -19,5 +19,7 @@ public interface ApplicationView {
     void showExpandedPoi(boolean show);
 
     void toggleLists();
+
+    void toggleTensorFlowDebugWindow();
 }
 

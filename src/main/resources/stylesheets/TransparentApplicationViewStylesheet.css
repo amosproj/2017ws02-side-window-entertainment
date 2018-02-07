@@ -1,6 +1,6 @@
 #listModuleNotWorking {
     -fx-pref-width: 70px;
-    -fx-max-width:70px;
+    -fx-max-width: 70px;
 }
 
 #listDebugLog {
@@ -12,6 +12,14 @@
 
 #listDebugLog .label {
     -fx-font-size: 12px;
+}
+
+#textTFDebug {
+    -fx-min-width: 200px;
+    -fx-max-width: 400px;
+    -fx-max-height: 120px;
+    -fx-background-color: rgba(0, 0, 0, 0.7);
+    -fx-padding: 10 10 10 10;
 }
 
 #expansionPane {
@@ -26,6 +34,7 @@
     -fx-font-size: 30px;
     -fx-font-weight: bold;
 }
+
 #expansionImage {
     -fx-fit-to-width: 150px;
     -fx-fit-to-height: 200px;
@@ -148,12 +157,9 @@
     -fx-background-color: transparent;
 }
 
-#togglePane{
-    -fx-font-size: 5 !important;
-    -fx-background-color: rgba(0,0,0,0.7);
-}
-
-#togglePane .button{
-    -fx-background-color: blue; !important;
-    -fx-font-size: 1;
+#togglePane {
+    -fx-min-width: 200px;
+    -fx-max-width: 500px;
+    -fx-max-height: 400px;
+    -fx-background-color: rgba(0, 0, 0, 0.7);
 }

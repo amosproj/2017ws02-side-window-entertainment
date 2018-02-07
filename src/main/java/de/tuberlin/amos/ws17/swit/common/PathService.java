@@ -1,5 +1,6 @@
 package de.tuberlin.amos.ws17.swit.common;
 
+import com.sun.javafx.PlatformUtil;
 import de.tuberlin.amos.ws17.swit.application.view.ApplicationViewImplementation;
 
 import java.io.UnsupportedEncodingException;
@@ -15,11 +16,11 @@ public class PathService {
 
             String pathName = ApplicationViewImplementation.class.getProtectionDomain().getCodeSource().getLocation().getPath();
             URLDecoder.decode(pathName,"utf-8");
-            //TODO: mac bridge einbauen?
-            if (!System.getProperty("os.name").contains("Linux")) {
-                pathName = pathName.substring(1,pathName.lastIndexOf("/") );
+            if (PlatformUtil.isWindows()) {
+                pathName = pathName.substring(1, pathName.lastIndexOf("/"));
+            } else {
+                pathName = pathName.substring(0, pathName.lastIndexOf("/"));
             }
-
             return pathName;
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();

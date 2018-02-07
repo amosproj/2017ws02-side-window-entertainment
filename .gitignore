@@ -16,3 +16,5 @@ log/
 target/
 
 api-config.cfg
+graph.pb
+labels.txt

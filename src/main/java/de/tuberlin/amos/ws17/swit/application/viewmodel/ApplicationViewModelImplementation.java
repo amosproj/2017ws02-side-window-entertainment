@@ -13,6 +13,7 @@ import de.tuberlin.amos.ws17.swit.image_analysis.CloudVision;
 import de.tuberlin.amos.ws17.swit.image_analysis.LandmarkDetector;
 import de.tuberlin.amos.ws17.swit.image_analysis.LandmarkDetectorMock;
 import de.tuberlin.amos.ws17.swit.information_source.AbstractProvider;
+import de.tuberlin.amos.ws17.swit.image_analysis.TFLandmarkClassifier;
 import de.tuberlin.amos.ws17.swit.information_source.InformationProviderMock;
 import de.tuberlin.amos.ws17.swit.landscape_tracking.DemoVideoLandscapeTracker;
 import de.tuberlin.amos.ws17.swit.landscape_tracking.LandscapeTracker;
@@ -36,27 +37,28 @@ import javafx.event.EventHandler;
 import javafx.event.ActionEvent;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
-import org.apache.jena.atlas.logging.Log;
 import org.joda.time.DateTime;
 
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class ApplicationViewModelImplementation implements ApplicationViewModel {
 
-    private final static Logger LOGGER = Logger.getLogger(ApplicationViewModel.class.getName());
+    public static final String videoFileName = "Berlin.mp4";
 
     //Module
-    private ApplicationView  view;
-    private LandmarkDetector cloudVision;
-    private LandscapeTracker landscapeTracker;
-    private UserTracker      userTracker;
-    private GpsTracker       gpsTracker;
-    private AbstractProvider abstractProvider;
-    private PoiService       poiService;
+    private ApplicationView      view;
+    private LandmarkDetector     cloudVision;
+    private LandscapeTracker     landscapeTracker;
+    private TFLandmarkClassifier tensorFlowClassifier;
+    private UserTracker          userTracker;
+    private GpsTracker           gpsTracker;
+    private AbstractProvider     abstractProvider;
+    private PoiService           poiService;
     private PoisInSightFinder sightFinder = new PoisInSightFinder(300, 200, 200);
 
     //Threads
@@ -66,40 +68,41 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     private Thread  mapsThread;
 
     //Listen und Binding
-    private List<PointOfInterest>                           pointsOfInterest     = new ArrayList<>();
-    private PoiViewModel                                    expandedPOI          = new PoiViewModel();
-    private UserPositionViewModel                           vmUserPosition       = new UserPositionViewModel();
-    private SimpleListProperty<PoiViewModel>                propertyPoiMaps      = new SimpleListProperty<>();
-    private SimpleListProperty<PoiViewModel>                propertyPoiCamera    = new SimpleListProperty<>();
-    private SimpleObjectProperty<EventHandler<ActionEvent>> propertyCloseButton  = new SimpleObjectProperty<>();
+    private List<PointOfInterest>                           pointsOfInterest    = new ArrayList<>();
+    private PoiViewModel                                    expandedPOI         = new PoiViewModel();
+    private UserPositionViewModel                           vmUserPosition      = new UserPositionViewModel();
+    private SimpleListProperty<PoiViewModel>                propertyPoiMaps     = new SimpleListProperty<>();
+    private SimpleListProperty<PoiViewModel>                propertyPoiCamera   = new SimpleListProperty<>();
+    private SimpleObjectProperty<EventHandler<ActionEvent>> propertyCloseButton = new SimpleObjectProperty<>();
 
-    private SimpleObjectProperty<EventHandler<ActionEvent>> propertyToggleGpsButton  = new SimpleObjectProperty<>();
-    private SimpleObjectProperty<EventHandler<ActionEvent>> propertyTogglePoiButton  = new SimpleObjectProperty<>();
-    private SimpleObjectProperty<EventHandler<ActionEvent>> propertyToggleUserTrackingButton  = new SimpleObjectProperty<>();
-    private SimpleObjectProperty<EventHandler<ActionEvent>> propertyToggleLandscapeTrackingButton  = new SimpleObjectProperty<>();
-    private SimpleObjectProperty<EventHandler<ActionEvent>> propertyToggleInformationSourceButton  = new SimpleObjectProperty<>();
-    private SimpleObjectProperty<EventHandler<ActionEvent>> propertyToggleImageAnalysisButton  = new SimpleObjectProperty<>();
-    private SimpleObjectProperty<EventHandler<ActionEvent>> propertyToggleApplicationViewButton  = new SimpleObjectProperty<>();
+    private SimpleObjectProperty<EventHandler<ActionEvent>> propertyToggleGpsButton               = new SimpleObjectProperty<>();
+    private SimpleObjectProperty<EventHandler<ActionEvent>> propertyTogglePoiButton               = new SimpleObjectProperty<>();
+    private SimpleObjectProperty<EventHandler<ActionEvent>> propertyToggleUserTrackingButton      = new SimpleObjectProperty<>();
+    private SimpleObjectProperty<EventHandler<ActionEvent>> propertyToggleLandscapeTrackingButton = new SimpleObjectProperty<>();
+    private SimpleObjectProperty<EventHandler<ActionEvent>> propertyToggleInformationSourceButton = new SimpleObjectProperty<>();
+    private SimpleObjectProperty<EventHandler<ActionEvent>> propertyToggleImageAnalysisButton     = new SimpleObjectProperty<>();
+    private SimpleObjectProperty<EventHandler<ActionEvent>> propertyToggleApplicationViewButton   = new SimpleObjectProperty<>();
 
-    private SimpleListProperty<String>                      propertyDebugLog     = new SimpleListProperty<>();
-    private SimpleListProperty<ModuleStatusViewModel>       listModuleStatus     = new SimpleListProperty<>();
-    private SimpleListProperty<UserExpressionViewModel>     listExpressionStatus = new SimpleListProperty<>();
-    private List<Module>                                    moduleList           = new ArrayList<>();
+    private SimpleListProperty<String>                  propertyDebugLog     = new SimpleListProperty<>();
+    private SimpleListProperty<ModuleStatusViewModel>   listModuleStatus     = new SimpleListProperty<>();
+    private SimpleListProperty<UserExpressionViewModel> listExpressionStatus = new SimpleListProperty<>();
 
 
-    private SimpleDoubleProperty                            infoBoxRotation =       new SimpleDoubleProperty();
-    private SimpleDoubleProperty                            infoBoxTranslationX =   new SimpleDoubleProperty();
-    private SimpleDoubleProperty                            infoBoxTranslationY =   new SimpleDoubleProperty();
+    private SimpleDoubleProperty infoBoxRotation     = new SimpleDoubleProperty();
+    private SimpleDoubleProperty infoBoxTranslationX = new SimpleDoubleProperty();
+    private SimpleDoubleProperty infoBoxTranslationY = new SimpleDoubleProperty();
 
     private int searchRadius = 1000;
     private GpsPosition lastRequestPosition;
+    private List<Module> moduleList = new ArrayList<>();
 
     private Property<Image> propertyCameraImage = new SimpleObjectProperty<>();
     private Image cameraImage;
-    public Property<Background> backgroundProperty = new SimpleObjectProperty<>();
+    private Property<Background> backgroundProperty = new SimpleObjectProperty<>();
 
     private BackgroundImage backgroundImage;
     private Background      background;
+    private ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
     private AppProperties properties = AppProperties.getInstance();
 
@@ -120,6 +123,25 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         updateBackgroundImage();
 
         updateThread.start();
+        if (properties.useTensorflow) {
+            initTFClassifier();
+        }
+
+    }
+
+    private void initTFClassifier() {
+        view.toggleTensorFlowDebugWindow();
+        int intervalInSeconds = 5;
+        if (properties.useDemoVideo) {
+            // grab image every second if using video
+            intervalInSeconds = 1;
+        }
+        scheduler.scheduleAtFixedRate(() -> {
+            BufferedImage image = getLandscapeTrackerImage();
+            if (image != null) {
+                tensorFlowClassifier.identifyPOIs(image);
+            }
+        }, 3, intervalInSeconds, TimeUnit.SECONDS);
     }
 
     private void initObjects() {
@@ -153,6 +175,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 propertyDebugLog.add(de.toString());
             }
         });
+
     }
 
     private void initModules() {
@@ -229,7 +252,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
             }
         } else if (properties.useDemoVideo) {
             System.out.println("loading " + currentModule + "Demo...");
-            landscapeTracker = new DemoVideoLandscapeTracker(view.getMediaView());
+            landscapeTracker = new DemoVideoLandscapeTracker(view.getMediaView(), videoFileName);
             moduleList.add(landscapeTracker);
             try {
                 landscapeTracker.startModule();
@@ -250,6 +273,15 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 System.out.println("unexpected error loading " + currentModule + "Mock");
                 e.printStackTrace();
                 setModuleStatus(ModuleErrors.NOCAMERA, false);
+            }
+        }
+
+        if (properties.useTensorflow) {
+            try {
+                System.out.println("loading Tensorflow model");
+                tensorFlowClassifier = new TFLandmarkClassifier();
+            } catch (IOException e) {
+                System.out.println("Failed to load Tensorflow model graph");
             }
         }
 
@@ -380,13 +412,16 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     public void onKeyPressed(KeyCode code) {
         switch (code) {
             case F:
-                analyzeImage();
+                new Thread(this::analyzeImage).start();
                 break;
             case D:
                 view.toggleDebugLog();
                 break;
             case L:
                 view.toggleLists();
+                break;
+            case T:
+                view.toggleTensorFlowDebugWindow();
                 break;
             default:
                 break;
@@ -497,40 +532,50 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         }
     }
 
-    public void analyzeImage() {
-        BufferedImage image;
+    private BufferedImage getLandscapeTrackerImage() {
+        BufferedImage image = null;
         try {
             image = landscapeTracker.getImage();
             setModuleStatus(ModuleErrors.NOCAMERA, true);
         } catch (Exception e) {
             e.printStackTrace();
             setModuleStatus(ModuleErrors.NOCAMERA, false);
-            return;
         }
+        return image;
+    }
+
+    private void analyzeImage() {
+        BufferedImage image = getLandscapeTrackerImage();
         if (image == null) {
             return;
         }
 
-        //Analyse Bild
-        List<PointOfInterest> pois;
-        try {
-            pois = cloudVision.identifyPOIs(image);
-            setModuleStatus(ModuleErrors.NOINTERNET, true);
-        } catch (Exception e) {
-            e.printStackTrace();
-            setModuleStatus(ModuleErrors.NOINTERNET, false);
-            return;
+        List<PointOfInterest> pois = new ArrayList<>();
+
+        // try local classification first
+        if (tensorFlowClassifier != null) {
+            pois = tensorFlowClassifier.identifyPOIs(image);
         }
 
+        // if not successful -> use cloud vision
         if (pois.isEmpty()) {
-            return;
+            try {
+                pois = cloudVision.identifyPOIs(image);
+                setModuleStatus(ModuleErrors.NOINTERNET, true);
+            } catch (Exception e) {
+                e.printStackTrace();
+                setModuleStatus(ModuleErrors.NOINTERNET, false);
+                return;
+            }
         }
-        clearDuplicates(pois, "camera");
 
         getAbstract(pois);
 
         for (PointOfInterest poi : pois) {
-            addCameraPoi(poi);
+            PoiViewModel item = convertPoi(poi);
+            if (!propertyPoiCamera.contains(item)) {
+                addCameraPoi(poi);
+            }
         }
     }
 
@@ -542,11 +587,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 return;
             }
 
-            if (properties.useDemoVideo) {
-                Platform.runLater(this::analyzeImage);
-            } else {
-                analyzeImage();
-            }
+            analyzeImage();
         });
 
         // thread will not prevent application shutdown
@@ -567,7 +608,11 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 }
             }
         }
-        pois.removeAll(list);
+        try {
+            pois.removeAll(list);
+        } catch (UnsupportedOperationException e) {
+            e.printStackTrace();
+        }
 
     }
 
@@ -593,7 +638,9 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     }
 
     private void updateBackgroundImage() {
-
+        if (AppProperties.getInstance().useDemoVideo) {
+            return;
+        }
         Platform.runLater(() -> {
             try {
                 if (landscapeTracker != null) {
@@ -617,9 +664,8 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
             UserPosition userPosition = userTracker.getUserPosition();
             infoBoxTranslationX.setValue(-userPosition.getHeadCenterPosition().getX());
             infoBoxTranslationY.setValue(-userPosition.getHeadCenterPosition().getY());
-            infoBoxRotation.setValue(userPosition.getLineOfSight().getX()/1.5);
-        }
-        else {
+            infoBoxRotation.setValue(userPosition.getLineOfSight().getX() / 1.5);
+        } else {
             infoBoxTranslationX.setValue(0);
             infoBoxTranslationY.setValue(0);
             infoBoxRotation.setValue(0);
@@ -733,25 +779,39 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     }
 
     @Override
-    public SimpleObjectProperty<EventHandler<ActionEvent>> propertyToggleGpsButtonProperty() { return propertyToggleGpsButton; }
+    public SimpleObjectProperty<EventHandler<ActionEvent>> propertyToggleGpsButtonProperty() {
+        return propertyToggleGpsButton;
+    }
 
     @Override
-    public SimpleObjectProperty<EventHandler<ActionEvent>> propertyTogglePoiButtonProperty() { return propertyTogglePoiButton; }
+    public SimpleObjectProperty<EventHandler<ActionEvent>> propertyTogglePoiButtonProperty() {
+        return propertyTogglePoiButton;
+    }
 
     @Override
-    public SimpleObjectProperty<EventHandler<ActionEvent>> propertyToggleUserTrackingButtonProperty() { return propertyToggleUserTrackingButton; }
+    public SimpleObjectProperty<EventHandler<ActionEvent>> propertyToggleUserTrackingButtonProperty() {
+        return propertyToggleUserTrackingButton;
+    }
 
     @Override
-    public SimpleObjectProperty<EventHandler<ActionEvent>> propertyToggleLandscapeTrackingButtonProperty() { return propertyToggleLandscapeTrackingButton; }
+    public SimpleObjectProperty<EventHandler<ActionEvent>> propertyToggleLandscapeTrackingButtonProperty() {
+        return propertyToggleLandscapeTrackingButton;
+    }
 
     @Override
-    public SimpleObjectProperty<EventHandler<ActionEvent>> propertyToggleInformationSourceButtonProperty() { return propertyToggleInformationSourceButton; }
+    public SimpleObjectProperty<EventHandler<ActionEvent>> propertyToggleInformationSourceButtonProperty() {
+        return propertyToggleInformationSourceButton;
+    }
 
     @Override
-    public SimpleObjectProperty<EventHandler<ActionEvent>> propertyToggleApplicationViewButtonProperty() { return propertyToggleApplicationViewButton; }
+    public SimpleObjectProperty<EventHandler<ActionEvent>> propertyToggleApplicationViewButtonProperty() {
+        return propertyToggleApplicationViewButton;
+    }
 
     @Override
-    public SimpleObjectProperty<EventHandler<ActionEvent>> propertyToggleImageAnalysisButtonProperty() { return propertyToggleImageAnalysisButton; }
+    public SimpleObjectProperty<EventHandler<ActionEvent>> propertyToggleImageAnalysisButtonProperty() {
+        return propertyToggleImageAnalysisButton;
+    }
 
     @Override
     public SimpleListProperty<String> propertyDebugLogProperty() {
@@ -775,7 +835,9 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
 
     @Override
     public void setRunning(boolean running) {
-
+        if (!running) {
+            scheduler.shutdown();
+        }
     }
 
     @Override

@@ -28,6 +28,7 @@ public class AppProperties extends Properties {
     public boolean useDebugLog;
     public boolean fullscreen;
     public int mapsPoisLoadDistance;
+    public boolean useTensorflow;
 
     public static AppProperties getInstance() {
         if (instance == null) {
@@ -75,6 +76,7 @@ public class AppProperties extends Properties {
         usePoiService = get("poi_analysis").equals("1");
         useDebugLog = get("debuglog").equals("1");
         fullscreen = get("fullscreen").equals("1");
+        useTensorflow = get("tensorflow").equals("1");
         mapsPoisLoadDistance = Integer.parseInt(get("mapsPoisLoadDistance").toString());
         System.out.println();
     }

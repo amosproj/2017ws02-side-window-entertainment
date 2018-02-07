@@ -114,5 +114,9 @@ public class DebugLog {
         public String toString() {
             return "[" + source + " " + timeStamp.toString("HH:mm:ss") + "]: " + message;
         }
+
+        public String getMessage() {
+            return message;
+        }
     }
 }
