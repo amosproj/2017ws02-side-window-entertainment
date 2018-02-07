@@ -52,15 +52,11 @@
 
 #listPoiMaps {
     -fx-orientation: horizontal;
-    -fx-pref-height: 150px;
-    -fx-max-height: 150px;
     -fx-background-color: rgba(0, 0, 0, 0.5);
 }
 
 #listPoiCamera {
     -fx-orientation: horizontal;
-    -fx-pref-height: 150px;
-    -fx-max-height: 150px;
     -fx-background-color: rgba(0, 0, 0, 0.5);
 }
 

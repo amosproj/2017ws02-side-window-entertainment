@@ -110,10 +110,14 @@ public class ApplicationViewImplementation extends Application implements Applic
         int numRows = 3;
         for(int i = 0;i < numRows;i++) {
             RowConstraints rc = new RowConstraints();
-            rc.setPercentHeight(-55.0*i*i + 110*i + 15.0);
+            rc.setPercentHeight(100.0 / numRows);//-55.0*i*i + 110*i + 15.0
             rc.setValignment(VPos.CENTER);
             lists.getRowConstraints().add(rc);
         }
+        lists.getRowConstraints().get(0).setPercentHeight(15.0);
+        lists.getRowConstraints().get(1).setPercentHeight(70.0);
+        lists.getRowConstraints().get(2).setPercentHeight(15.0);
+
         int numColumns = 3;
         for(int i = 0;i < numColumns;i++) {
             ColumnConstraints cc = new ColumnConstraints();
