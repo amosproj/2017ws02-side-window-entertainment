@@ -44,14 +44,14 @@ public class ApplicationViewImplementation extends Application implements Applic
     private Button toggleApplicationViewLog   = new Button("application_view");
     private Button toggleGpsLog               = new Button("GPS");
 
-    private BorderPane  expansionPane        = new BorderPane();
-    private BorderPane  expansionTopPane     = new BorderPane();
-    private BorderPane  expansionContentPane = new BorderPane();
-    private Button      expansionButton      = new Button("X");
-    private Label       expansionName        = new Label();
-    private Label       expansionInformation = new Label();
-    private ImageView   expansionImage       = new ImageView();
-    private ScrollPane  expansionScrollPane  = new ScrollPane();
+    private BorderPane  infoboxPane        = new BorderPane();
+    private BorderPane  infoboxTitlePane     = new BorderPane();
+    private BorderPane  infoboxContentPane = new BorderPane();
+    private Button      infoboxCloseButton      = new Button("X");
+    private Label       infoboxTitle        = new Label();
+    private Label       infoboxInformation = new Label();
+    private ImageView   infoboxImage       = new ImageView();
+    private ScrollPane  infoboxScrollPane  = new ScrollPane();
     private HBox        statusPane           = new HBox();
     private HBox        debugPane            = new HBox();
     private VBox        togglePane           = new VBox();
@@ -140,15 +140,15 @@ public class ApplicationViewImplementation extends Application implements Applic
         listDebugLog.setId("listDebugLog");
         textTFDebug.setId("textTFDebug");
         textTFDebug.setVisible(false);
-        expansionPane.setId("expansionPane");
-        expansionPane.setVisible(false);
-        expansionTopPane.setId("expansionTopPane");
-        expansionButton.setId("expansionButton");
-        expansionName.setId("expansionName");
-        expansionContentPane.setId("expansionContentPane");
-        expansionInformation.setId("expansionInformation");
-        expansionImage.setId("expansionImage");
-        expansionScrollPane.setId("expansionScrollPane");
+        infoboxPane.setId("expansionPane");
+        infoboxPane.setVisible(false);
+        infoboxTitlePane.setId("expansionTopPane");
+        infoboxCloseButton.setId("expansionButton");
+        infoboxTitle.setId("expansionName");
+        infoboxContentPane.setId("expansionContentPane");
+        infoboxInformation.setId("expansionInformation");
+        infoboxImage.setId("expansionImage");
+        infoboxScrollPane.setId("expansionScrollPane");
 
         mediaView = new MediaView(mediaPlayer);
         mediaView.setVisible(false);
@@ -172,25 +172,25 @@ public class ApplicationViewImplementation extends Application implements Applic
     }
 
     private void initExpansion() {
-        expansionName.setAlignment(Pos.TOP_CENTER);
-        expansionInformation.setAlignment(Pos.TOP_CENTER);
-        expansionContentPane.setTop(expansionImage);
-        expansionContentPane.setBottom(expansionInformation);
-        expansionScrollPane.setContent(expansionContentPane);
-        expansionImage.setPreserveRatio(true);
-        expansionImage.setFitHeight(150);
-        expansionImage.minHeight(0);
-        expansionImage.minWidth(0);
+        infoboxTitle.setAlignment(Pos.TOP_CENTER);
+        infoboxInformation.setAlignment(Pos.TOP_CENTER);
+        infoboxContentPane.setTop(infoboxImage);
+        infoboxContentPane.setBottom(infoboxInformation);
+        infoboxScrollPane.setContent(infoboxContentPane);
+        infoboxImage.setPreserveRatio(true);
+        infoboxImage.setFitHeight(150);
+        infoboxImage.minHeight(0);
+        infoboxImage.minWidth(0);
 
-        expansionTopPane.setLeft(expansionName);
-        expansionTopPane.setRight(expansionButton);
-        expansionPane.setTop(expansionTopPane);
-        expansionPane.setCenter(expansionImage);
-        expansionPane.setBottom(expansionScrollPane);
-        pnFoundation.setCenter(expansionPane);
-        BorderPane.setAlignment(expansionPane, Pos.CENTER);
-        BorderPane.setAlignment(expansionImage, Pos.CENTER);
-        expansionScrollPane.setFitToWidth(true);
+        infoboxTitlePane.setLeft(infoboxTitle);
+        infoboxTitlePane.setRight(infoboxCloseButton);
+        infoboxPane.setTop(infoboxTitlePane);
+        infoboxPane.setCenter(infoboxImage);
+        infoboxPane.setBottom(infoboxScrollPane);
+        pnFoundation.setCenter(infoboxPane);
+        BorderPane.setAlignment(infoboxPane, Pos.CENTER);
+        BorderPane.setAlignment(infoboxImage, Pos.CENTER);
+        infoboxScrollPane.setFitToWidth(true);
     }
 
     @Override
@@ -218,8 +218,8 @@ public class ApplicationViewImplementation extends Application implements Applic
         cameraImage.imageProperty().bindBidirectional(viewModel.propertyCameraImageProperty());
 
         try {
-            expansionButton.visibleProperty().bind(Bindings.equal(viewModel.getExpandedPOI().nameProperty(), "").not());
-            expansionButton.onActionProperty().bindBidirectional(viewModel.propertyCloseButtonProperty());
+            infoboxCloseButton.visibleProperty().bind(Bindings.equal(viewModel.getExpandedPOI().nameProperty(), "").not());
+            infoboxCloseButton.onActionProperty().bindBidirectional(viewModel.propertyCloseButtonProperty());
             toggleGpsLog.onActionProperty().bindBidirectional(viewModel.propertyToggleGpsButtonProperty());
             togglePoiLog.onActionProperty().bindBidirectional(viewModel.propertyTogglePoiButtonProperty());
             toggleUserTrackingLog.onActionProperty().bindBidirectional(viewModel.propertyToggleUserTrackingButtonProperty());
@@ -227,9 +227,9 @@ public class ApplicationViewImplementation extends Application implements Applic
             toggleImageAnalysisLog.onActionProperty().bindBidirectional(viewModel.propertyToggleImageAnalysisButtonProperty());
             toggleInformationSourceLog.onActionProperty().bindBidirectional(viewModel.propertyToggleInformationSourceButtonProperty());
             toggleApplicationViewLog.onActionProperty().bindBidirectional(viewModel.propertyToggleApplicationViewButtonProperty());
-            expansionName.textProperty().bindBidirectional(viewModel.getExpandedPOI().nameProperty());
-            expansionImage.imageProperty().bindBidirectional(viewModel.getExpandedPOI().imageProperty());
-            expansionInformation.textProperty().bindBidirectional(viewModel.getExpandedPOI().informationAbstractProperty());
+            infoboxTitle.textProperty().bindBidirectional(viewModel.getExpandedPOI().nameProperty());
+            infoboxImage.imageProperty().bindBidirectional(viewModel.getExpandedPOI().imageProperty());
+            infoboxInformation.textProperty().bindBidirectional(viewModel.getExpandedPOI().informationAbstractProperty());
             listModuleStatus.itemsProperty().bindBidirectional(viewModel.listModuleStatusProperty());
             listExpressionStatus.itemsProperty().bindBidirectional(viewModel.listExpressionStatusProperty());
             listPoiCamera.itemsProperty().bindBidirectional(viewModel.propertyPoiCameraProperty());
@@ -241,9 +241,9 @@ public class ApplicationViewImplementation extends Application implements Applic
                 pnFoundation.backgroundProperty().bindBidirectional(viewModel.getBackgroundProperty());
             }
 
-            expansionPane.rotateProperty().bindBidirectional(viewModel.getInfoBoxRotation());
-            expansionPane.translateXProperty().bindBidirectional(viewModel.getInfoBoxTranslationX());
-            expansionPane.translateYProperty().bindBidirectional(viewModel.getInfoBoxTranslationY());
+            infoboxPane.rotateProperty().bindBidirectional(viewModel.getInfoBoxRotation());
+            infoboxPane.translateXProperty().bindBidirectional(viewModel.getInfoBoxTranslationX());
+            infoboxPane.translateYProperty().bindBidirectional(viewModel.getInfoBoxTranslationY());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -367,7 +367,7 @@ public class ApplicationViewImplementation extends Application implements Applic
 
     @Override
     public void showExpandedPoi(boolean show) {
-        expansionPane.setVisible(show);
+        infoboxPane.setVisible(show);
     }
 
     @Override
