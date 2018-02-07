@@ -129,6 +129,7 @@ public class ApplicationViewImplementation extends Application implements Applic
         lists.add(listPoiMaps, 0,2, 3, 1);
         lists.add(statusPane, 0, 1);
         lists.add(infoboxPane, 1, 1);
+        lists.add(debugPane, 2, 1);
 
         /*pnFoundation.setId("pnFoundation");
         pnFoundation.setTop(listPoiCamera);
@@ -204,8 +205,8 @@ public class ApplicationViewImplementation extends Application implements Applic
         root.getChildren().add(lists);
         // root.getChildren().add(listDebugLog);
         // StackPane.setAlignment(listDebugLog, Pos.TOP_RIGHT);
-        root.getChildren().add(debugPane);
-        StackPane.setAlignment(debugPane, Pos.TOP_RIGHT);
+        //root.getChildren().add(debugPane);
+        //StackPane.setAlignment(debugPane, Pos.TOP_RIGHT);
         root.getChildren().add(textTFDebug);
         StackPane.setAlignment(textTFDebug, Pos.BOTTOM_RIGHT);
         Insets insets = new Insets(0, 0, 150, 0);
@@ -303,15 +304,17 @@ public class ApplicationViewImplementation extends Application implements Applic
                             setGraphic(null);
                             setText(null);
                         } else {
+                            BorderPane pane = new BorderPane();
                             ImageView imageView = new ImageView(item.getImage());
                             imageView.setPreserveRatio(true);
                             imageView.setFitHeight(100);
                             Label lblName = new Label(item.getName());
                             lblName.setFont(new Font(FONTNAME, 13));
-                            BorderPane pane = new BorderPane();
                             pane.setTop(lblName);
                             pane.setCenter(imageView);
                             pane.setOnMouseClicked(event -> viewModel.expandPoi(item.getId()));
+                            pane.setBorder(new Border(new BorderStroke(Color.DARKGRAY, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
+                            pane.setPadding(new Insets(5, 0, 5, 0));
                             setGraphic(pane);
                             listPoiCamera.refresh();
                             listPoiMaps.refresh();
