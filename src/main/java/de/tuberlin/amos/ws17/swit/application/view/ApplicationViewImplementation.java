@@ -74,7 +74,7 @@ public class ApplicationViewImplementation extends Application implements Applic
 
     public void init() {
         initElements();
-        initExpansion();
+        initInfobox();
         viewModel = new ApplicationViewModelImplementation(this);
 
         initBindings();
@@ -95,13 +95,14 @@ public class ApplicationViewImplementation extends Application implements Applic
 
     private void initFullscreenMode(Stage stage) {
         if (AppProperties.getInstance().useFullscreen) {
-            Screen screen = Screen.getPrimary();
-            Rectangle2D screenVisualBounds = screen.getVisualBounds();
-
-            stage.setX(screenVisualBounds.getMinX());
-            stage.setY(screenVisualBounds.getMinY());
-            stage.setWidth(screenVisualBounds.getWidth());
-            stage.setHeight(screenVisualBounds.getHeight());
+            stage.setMaximized(true);
+//            Screen screen = Screen.getPrimary();
+//            Rectangle2D screenVisualBounds = screen.getVisualBounds();
+//
+//            stage.setX(screenVisualBounds.getMinX());
+//            stage.setY(screenVisualBounds.getMinY());
+//            stage.setWidth(screenVisualBounds.getWidth());
+//            stage.setHeight(screenVisualBounds.getHeight());
         }
         else if (AppProperties.getInstance().useFullscreenWithoutWindowChrome) {
             stage.setFullScreen(true);
@@ -221,12 +222,13 @@ public class ApplicationViewImplementation extends Application implements Applic
         StackPane.setMargin(textTFDebug, insets);
     }
 
-    private void initExpansion() {
+    private void initInfobox() {
         infoboxTitle.setAlignment(Pos.TOP_CENTER);
         infoboxInformation.setAlignment(Pos.TOP_CENTER);
         infoboxContentPane.setTop(infoboxImage);
         infoboxContentPane.setBottom(infoboxInformation);
         infoboxScrollPane.setContent(infoboxContentPane);
+
         infoboxImage.setPreserveRatio(true);
         infoboxImage.setFitHeight(150);
         infoboxImage.minHeight(0);
