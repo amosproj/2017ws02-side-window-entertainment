@@ -302,7 +302,7 @@ public class ApplicationViewImplementation extends Application implements Applic
             listDebugLog.itemsProperty().bindBidirectional(viewModel.propertyDebugLogProperty());
             textTFDebug.textProperty().bindBidirectional(DebugTF.logString);
             if (!AppProperties.getInstance().useDemoVideo) {
-                pnFoundation.backgroundProperty().bindBidirectional(viewModel.getBackgroundProperty());
+                root.backgroundProperty().bindBidirectional(viewModel.getBackgroundProperty());
             }
 
             infoboxRotateTransition.setOnFinished(new EventHandler<ActionEvent>(){
