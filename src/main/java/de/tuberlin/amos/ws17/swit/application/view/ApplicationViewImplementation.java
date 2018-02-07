@@ -9,16 +9,15 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.DoubleProperty;
+import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
+import javafx.geometry.VPos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
 import javafx.scene.paint.Color;
@@ -107,10 +106,30 @@ public class ApplicationViewImplementation extends Application implements Applic
     }
 
     private void initElements() {
-        pnFoundation.setId("pnFoundation");
+        GridPane lists = new GridPane();
+        int numRows = 3;
+        for(int i = 0;i < numRows;i++) {
+            RowConstraints rc = new RowConstraints();
+            rc.setPercentHeight(-55.0*i*i + 110*i + 15.0);
+            rc.setValignment(VPos.CENTER);
+            lists.getRowConstraints().add(rc);
+        }
+        int numColumns = 3;
+        for(int i = 0;i < numColumns;i++) {
+            ColumnConstraints cc = new ColumnConstraints();
+            cc.setPercentWidth(100.0 / numColumns);
+            cc.setHalignment(HPos.CENTER);
+            lists.getColumnConstraints().add(cc);
+        }
+        lists.add(listPoiCamera, 0, 0, 3, 1);
+        lists.add(listPoiMaps, 0,2, 3, 1);
+        lists.add(statusPane, 0, 1);
+        lists.add(infoboxPane, 1, 1);
+
+        /*pnFoundation.setId("pnFoundation");
         pnFoundation.setTop(listPoiCamera);
         pnFoundation.setBottom(listPoiMaps);
-        pnFoundation.setLeft(statusPane);
+        pnFoundation.setLeft(statusPane);*/
 
         listPoiCamera.setId("listPoiCamera");
         listPoiMaps.setId("listPoiMaps");
@@ -177,7 +196,8 @@ public class ApplicationViewImplementation extends Application implements Applic
         mediaView.setPreserveRatio(true);
 
         root.getChildren().add(mediaView);
-        root.getChildren().add(pnFoundation);
+        //root.getChildren().add(pnFoundation);
+        root.getChildren().add(lists);
         // root.getChildren().add(listDebugLog);
         // StackPane.setAlignment(listDebugLog, Pos.TOP_RIGHT);
         root.getChildren().add(debugPane);
@@ -204,7 +224,7 @@ public class ApplicationViewImplementation extends Application implements Applic
         infoboxPane.setTop(infoboxTitlePane);
         infoboxPane.setCenter(infoboxImage);
         infoboxPane.setBottom(infoboxScrollPane);
-        pnFoundation.setCenter(infoboxPane);
+        //pnFoundation.setCenter(infoboxPane);
         BorderPane.setAlignment(infoboxPane, Pos.CENTER);
         BorderPane.setAlignment(infoboxImage, Pos.CENTER);
         infoboxScrollPane.setFitToWidth(true);
