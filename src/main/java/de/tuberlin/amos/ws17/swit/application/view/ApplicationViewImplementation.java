@@ -304,16 +304,28 @@ public class ApplicationViewImplementation extends Application implements Applic
                             setGraphic(null);
                             setText(null);
                         } else {
-                            BorderPane pane = new BorderPane();
+                            GridPane pane = new GridPane();
                             ImageView imageView = new ImageView(item.getImage());
                             imageView.setPreserveRatio(true);
-                            imageView.setFitHeight(100);
+                            imageView.fitHeightProperty().bind(listPoiCamera.heightProperty().subtract(25));
+                            RowConstraints rc = new RowConstraints();
+                            rc.setPercentHeight(100.0);
+                            rc.setValignment(VPos.TOP);
+                            pane.getRowConstraints().add(rc);
+                            ColumnConstraints cc = new ColumnConstraints();
+                            cc.setPercentWidth(100.0);
+                            cc.setHalignment(HPos.CENTER);
+                            pane.getColumnConstraints().add(cc);
                             Label lblName = new Label(item.getName());
+                            lblName.setPadding(new Insets(0, 5, 0, 5));
                             lblName.setFont(new Font(FONTNAME, 13));
-                            pane.setTop(lblName);
-                            pane.setCenter(imageView);
+                            lblName.setStyle("-fx-text-fill: black;" +
+                                    "-fx-background-color: transparent; -fx-effect: dropshadow( gaussian , white , 2, 1.0 , 0 , 0 );");
+                            pane.add(imageView, 0, 0);
+                            pane.add(lblName, 0,0);
                             pane.setOnMouseClicked(event -> viewModel.expandPoi(item.getId()));
                             pane.setBorder(new Border(new BorderStroke(Color.DARKGRAY, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
+                            pane.setStyle("-fx-border-color: darkgrey; -fx-border-width: 3px;");
                             pane.setPadding(new Insets(5, 0, 5, 0));
                             setGraphic(pane);
                             listPoiCamera.refresh();
