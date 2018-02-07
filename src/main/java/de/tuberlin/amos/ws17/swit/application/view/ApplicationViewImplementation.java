@@ -2,6 +2,7 @@ package de.tuberlin.amos.ws17.swit.application.view;
 
 import de.tuberlin.amos.ws17.swit.application.AppProperties;
 import de.tuberlin.amos.ws17.swit.application.viewmodel.*;
+import de.tuberlin.amos.ws17.swit.common.DebugLog;
 import de.tuberlin.amos.ws17.swit.common.DebugTF;
 import de.tuberlin.amos.ws17.swit.common.Module;
 import de.tuberlin.amos.ws17.swit.image_analysis.ImageUtils;
@@ -158,12 +159,19 @@ public class ApplicationViewImplementation extends Application implements Applic
 
         togglePane.setId("togglePane");
         toggleApplicationViewLog.setId("toggleApplicationView");
+        toggleApplicationViewLog.setOnMouseClicked(event -> toggleStyle("ApplicationView"));
         toggleImageAnalysisLog.setId("toggleImageAnalysis");
+        toggleImageAnalysisLog.setOnMouseClicked(event -> toggleStyle("ImageAnalysis"));
         toggleInformationSourceLog.setId("toggleInformationSource");
+        toggleInformationSourceLog.setOnMouseClicked(event -> toggleStyle("InformationSource"));
         toggleLandscapeTrackingLog.setId("toggleLandscapeTracking");
+        toggleLandscapeTrackingLog.setOnMouseClicked(event -> toggleStyle("LandscapeTracking"));
         togglePoiLog.setId("togglePoi");
+        togglePoiLog.setOnMouseClicked(event -> toggleStyle("POI"));
         toggleUserTrackingLog.setId("toggleUserTracking");
+        toggleUserTrackingLog.setOnMouseClicked(event -> toggleStyle("UserTracking"));
         toggleGpsLog.setId("toggleGpsLog");
+        toggleGpsLog.setOnMouseClicked(event -> toggleStyle("GPS"));
 
         //togglePane.getStyleClass().add("toggleButton");
         toggleApplicationViewLog.setId("toggleApplicationView");
@@ -486,4 +494,37 @@ public class ApplicationViewImplementation extends Application implements Applic
             });
         }
     }
+
+    private void toggleStyle(String module){
+        boolean status = DebugLog.getModuleStatus(module);
+        if (module.equals("GPS")){
+            if (status) toggleGpsLog.setStyle("-fx-background-color: black");
+            else        toggleGpsLog.setStyle("-fx-background-color: dimgray");
+        }
+        if (module.equals("POI")){
+            if (status) togglePoiLog.setStyle("-fx-background-color: black");
+            else        togglePoiLog.setStyle("-fx-background-color: dimgray");
+        }
+        if (module.equals("UserTracking")){
+            if (status) toggleUserTrackingLog.setStyle("-fx-background-color: black");
+            else        toggleUserTrackingLog.setStyle("-fx-background-color: dimgray");
+        }
+        if (module.equals("LandscapeTracking")){
+            if (status) toggleLandscapeTrackingLog.setStyle("-fx-background-color: black");
+            else        toggleLandscapeTrackingLog.setStyle("-fx-background-color: dimgray");
+        }
+        if (module.equals("ImageAnalysis")){
+            if (status) toggleImageAnalysisLog.setStyle("-fx-background-color: black");
+            else        toggleImageAnalysisLog.setStyle("-fx-background-color: dimgray");
+        }
+        if (module.equals("ApplicationView")){
+            if (status) toggleApplicationViewLog.setStyle("-fx-background-color: black");
+            else        toggleApplicationViewLog.setStyle("-fx-background-color: dimgray");
+        }
+        if (module.equals("InformationSource")){
+            if (status) toggleInformationSourceLog.setStyle("-fx-background-color: black");
+            else        toggleInformationSourceLog.setStyle("-fx-background-color: dimgray");
+        }
+    }
+
 }
