@@ -36,13 +36,13 @@ public class ApplicationViewImplementation extends Application implements Applic
     private ListView<UserExpressionViewModel> listExpressionStatus = new ListView<>();
 
     // DebugLog Buttons
-    private Button toggleUserTrackingLog       = new Button("user_tracking");
-    private Button toggleLandscapeTrackingLog  = new Button("landscape_tracking");
-    private Button togglePoiLog                = new Button("POI");
-    private Button toggleInformationSourceLog  = new Button("information_source");
-    private Button toggleImageAnalysisLog      = new Button("image_analysis");
-    private Button toggleApplicationViewLog    = new Button("application_view");
-    private Button toggleGpsLog                = new Button("GPS");
+    private Button toggleUserTrackingLog      = new Button("user_tracking");
+    private Button toggleLandscapeTrackingLog = new Button("landscape_tracking");
+    private Button togglePoiLog               = new Button("POI");
+    private Button toggleInformationSourceLog = new Button("information_source");
+    private Button toggleImageAnalysisLog     = new Button("image_analysis");
+    private Button toggleApplicationViewLog   = new Button("application_view");
+    private Button toggleGpsLog               = new Button("GPS");
 
     private BorderPane  expansionPane        = new BorderPane();
     private BorderPane  expansionTopPane     = new BorderPane();
@@ -161,8 +161,8 @@ public class ApplicationViewImplementation extends Application implements Applic
 
         root.getChildren().add(mediaView);
         root.getChildren().add(pnFoundation);
-       // root.getChildren().add(listDebugLog);
-       // StackPane.setAlignment(listDebugLog, Pos.TOP_RIGHT);
+        // root.getChildren().add(listDebugLog);
+        // StackPane.setAlignment(listDebugLog, Pos.TOP_RIGHT);
         root.getChildren().add(debugPane);
         StackPane.setAlignment(debugPane, Pos.TOP_RIGHT);
         root.getChildren().add(textTFDebug);
@@ -195,7 +195,7 @@ public class ApplicationViewImplementation extends Application implements Applic
 
     @Override
     public void showDebugLog(boolean show) {
-        listDebugLog.setVisible(show);
+        debugPane.setVisible(show);
     }
 
     @Override
@@ -210,7 +210,7 @@ public class ApplicationViewImplementation extends Application implements Applic
 
     @Override
     public void toggleDebugLog() {
-        listDebugLog.setVisible(!listDebugLog.isVisible());
+        showDebugLog(!debugPane.isVisible());
     }
 
     private void initBindings() {

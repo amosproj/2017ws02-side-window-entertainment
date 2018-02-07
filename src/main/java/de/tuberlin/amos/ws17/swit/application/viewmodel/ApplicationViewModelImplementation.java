@@ -45,7 +45,6 @@ import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Logger;
 
 public class ApplicationViewModelImplementation implements ApplicationViewModel {
 
@@ -69,29 +68,29 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     private Thread  mapsThread;
 
     //Listen und Binding
-    private List<PointOfInterest>                           pointsOfInterest     = new ArrayList<>();
-    private PoiViewModel                                    expandedPOI          = new PoiViewModel();
-    private UserPositionViewModel                           vmUserPosition       = new UserPositionViewModel();
-    private SimpleListProperty<PoiViewModel>                propertyPoiMaps      = new SimpleListProperty<>();
-    private SimpleListProperty<PoiViewModel>                propertyPoiCamera    = new SimpleListProperty<>();
-    private SimpleObjectProperty<EventHandler<ActionEvent>> propertyCloseButton  = new SimpleObjectProperty<>();
+    private List<PointOfInterest>                           pointsOfInterest    = new ArrayList<>();
+    private PoiViewModel                                    expandedPOI         = new PoiViewModel();
+    private UserPositionViewModel                           vmUserPosition      = new UserPositionViewModel();
+    private SimpleListProperty<PoiViewModel>                propertyPoiMaps     = new SimpleListProperty<>();
+    private SimpleListProperty<PoiViewModel>                propertyPoiCamera   = new SimpleListProperty<>();
+    private SimpleObjectProperty<EventHandler<ActionEvent>> propertyCloseButton = new SimpleObjectProperty<>();
 
-    private SimpleObjectProperty<EventHandler<ActionEvent>> propertyToggleGpsButton  = new SimpleObjectProperty<>();
-    private SimpleObjectProperty<EventHandler<ActionEvent>> propertyTogglePoiButton  = new SimpleObjectProperty<>();
-    private SimpleObjectProperty<EventHandler<ActionEvent>> propertyToggleUserTrackingButton  = new SimpleObjectProperty<>();
-    private SimpleObjectProperty<EventHandler<ActionEvent>> propertyToggleLandscapeTrackingButton  = new SimpleObjectProperty<>();
-    private SimpleObjectProperty<EventHandler<ActionEvent>> propertyToggleInformationSourceButton  = new SimpleObjectProperty<>();
-    private SimpleObjectProperty<EventHandler<ActionEvent>> propertyToggleImageAnalysisButton  = new SimpleObjectProperty<>();
-    private SimpleObjectProperty<EventHandler<ActionEvent>> propertyToggleApplicationViewButton  = new SimpleObjectProperty<>();
+    private SimpleObjectProperty<EventHandler<ActionEvent>> propertyToggleGpsButton               = new SimpleObjectProperty<>();
+    private SimpleObjectProperty<EventHandler<ActionEvent>> propertyTogglePoiButton               = new SimpleObjectProperty<>();
+    private SimpleObjectProperty<EventHandler<ActionEvent>> propertyToggleUserTrackingButton      = new SimpleObjectProperty<>();
+    private SimpleObjectProperty<EventHandler<ActionEvent>> propertyToggleLandscapeTrackingButton = new SimpleObjectProperty<>();
+    private SimpleObjectProperty<EventHandler<ActionEvent>> propertyToggleInformationSourceButton = new SimpleObjectProperty<>();
+    private SimpleObjectProperty<EventHandler<ActionEvent>> propertyToggleImageAnalysisButton     = new SimpleObjectProperty<>();
+    private SimpleObjectProperty<EventHandler<ActionEvent>> propertyToggleApplicationViewButton   = new SimpleObjectProperty<>();
 
-    private SimpleListProperty<String>                      propertyDebugLog     = new SimpleListProperty<>();
-    private SimpleListProperty<ModuleStatusViewModel>       listModuleStatus     = new SimpleListProperty<>();
-    private SimpleListProperty<UserExpressionViewModel>     listExpressionStatus = new SimpleListProperty<>();
+    private SimpleListProperty<String>                  propertyDebugLog     = new SimpleListProperty<>();
+    private SimpleListProperty<ModuleStatusViewModel>   listModuleStatus     = new SimpleListProperty<>();
+    private SimpleListProperty<UserExpressionViewModel> listExpressionStatus = new SimpleListProperty<>();
 
 
-    private SimpleDoubleProperty                            infoBoxRotation =       new SimpleDoubleProperty();
-    private SimpleDoubleProperty                            infoBoxTranslationX =   new SimpleDoubleProperty();
-    private SimpleDoubleProperty                            infoBoxTranslationY =   new SimpleDoubleProperty();
+    private SimpleDoubleProperty infoBoxRotation     = new SimpleDoubleProperty();
+    private SimpleDoubleProperty infoBoxTranslationX = new SimpleDoubleProperty();
+    private SimpleDoubleProperty infoBoxTranslationY = new SimpleDoubleProperty();
 
     private int searchRadius = 1000;
     private GpsPosition lastRequestPosition;
@@ -665,9 +664,8 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
             UserPosition userPosition = userTracker.getUserPosition();
             infoBoxTranslationX.setValue(-userPosition.getHeadCenterPosition().getX());
             infoBoxTranslationY.setValue(-userPosition.getHeadCenterPosition().getY());
-            infoBoxRotation.setValue(userPosition.getLineOfSight().getX()/1.5);
-        }
-        else {
+            infoBoxRotation.setValue(userPosition.getLineOfSight().getX() / 1.5);
+        } else {
             infoBoxTranslationX.setValue(0);
             infoBoxTranslationY.setValue(0);
             infoBoxRotation.setValue(0);
@@ -781,25 +779,39 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     }
 
     @Override
-    public SimpleObjectProperty<EventHandler<ActionEvent>> propertyToggleGpsButtonProperty() { return propertyToggleGpsButton; }
+    public SimpleObjectProperty<EventHandler<ActionEvent>> propertyToggleGpsButtonProperty() {
+        return propertyToggleGpsButton;
+    }
 
     @Override
-    public SimpleObjectProperty<EventHandler<ActionEvent>> propertyTogglePoiButtonProperty() { return propertyTogglePoiButton; }
+    public SimpleObjectProperty<EventHandler<ActionEvent>> propertyTogglePoiButtonProperty() {
+        return propertyTogglePoiButton;
+    }
 
     @Override
-    public SimpleObjectProperty<EventHandler<ActionEvent>> propertyToggleUserTrackingButtonProperty() { return propertyToggleUserTrackingButton; }
+    public SimpleObjectProperty<EventHandler<ActionEvent>> propertyToggleUserTrackingButtonProperty() {
+        return propertyToggleUserTrackingButton;
+    }
 
     @Override
-    public SimpleObjectProperty<EventHandler<ActionEvent>> propertyToggleLandscapeTrackingButtonProperty() { return propertyToggleLandscapeTrackingButton; }
+    public SimpleObjectProperty<EventHandler<ActionEvent>> propertyToggleLandscapeTrackingButtonProperty() {
+        return propertyToggleLandscapeTrackingButton;
+    }
 
     @Override
-    public SimpleObjectProperty<EventHandler<ActionEvent>> propertyToggleInformationSourceButtonProperty() { return propertyToggleInformationSourceButton; }
+    public SimpleObjectProperty<EventHandler<ActionEvent>> propertyToggleInformationSourceButtonProperty() {
+        return propertyToggleInformationSourceButton;
+    }
 
     @Override
-    public SimpleObjectProperty<EventHandler<ActionEvent>> propertyToggleApplicationViewButtonProperty() { return propertyToggleApplicationViewButton; }
+    public SimpleObjectProperty<EventHandler<ActionEvent>> propertyToggleApplicationViewButtonProperty() {
+        return propertyToggleApplicationViewButton;
+    }
 
     @Override
-    public SimpleObjectProperty<EventHandler<ActionEvent>> propertyToggleImageAnalysisButtonProperty() { return propertyToggleImageAnalysisButton; }
+    public SimpleObjectProperty<EventHandler<ActionEvent>> propertyToggleImageAnalysisButtonProperty() {
+        return propertyToggleImageAnalysisButton;
+    }
 
     @Override
     public SimpleListProperty<String> propertyDebugLogProperty() {
