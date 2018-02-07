@@ -13,25 +13,31 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class DemoVideoLandscapeTracker implements LandscapeTracker {
-
+    private static final Logger LOGGER = Logger.getLogger(DemoVideoLandscapeTracker.class.getName());
     private MediaView mediaView;
     private Java2DFrameConverter converter = new Java2DFrameConverter();
-    private FFmpegFrameGrabber   grabber;
+    private FFmpegFrameGrabber grabber;
 
     private BufferedImage getFrame(double second) throws FrameGrabber.Exception {
-//        System.out.println("Grabbing image at " + second + "s");
-
-        double frameRate = grabber.getFrameRate();
-        int frameNumber = (int) (frameRate * second);
-        grabber.setFrameNumber(frameNumber);
-        Frame frame = grabber.grab();
-        BufferedImage image = converter.convert(frame);
-        if (image == null) {
-            System.err.println("Failed to grab image at " + second + "s");
+        synchronized (grabber) {
+            double frameRate = grabber.getFrameRate();
+            if (second >= grabber.getLengthInTime()) {
+                LOGGER.log(Level.INFO, "Frame outside of video");
+                return null;
+            }
+            int frameNumber = (int) (frameRate * second);
+            grabber.setFrameNumber(frameNumber);
+            Frame frame = grabber.grab();
+            BufferedImage image = converter.convert(frame);
+            if (image == null) {
+                LOGGER.log(Level.WARNING, "Failed to grab image at " + second + "s");
+            }
+            return image;
         }
-        return image;
     }
 
     public DemoVideoLandscapeTracker(MediaView mediaView, String videoName) {

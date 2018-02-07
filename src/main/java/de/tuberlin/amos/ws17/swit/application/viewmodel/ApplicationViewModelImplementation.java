@@ -134,17 +134,17 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
 
     private void initTFClassifier() {
         view.toggleTensorFlowDebugWindow();
-        int intervalInSeconds = 5;
+        int intervalInMillis = 5000;
         if (properties.useDemoVideo) {
             // grab image every second if using video
-            intervalInSeconds = 1;
+            intervalInMillis = 1000;
         }
         scheduler.scheduleAtFixedRate(() -> {
             BufferedImage image = getLandscapeTrackerImage();
             if (image != null) {
                 tensorFlowClassifier.identifyPOIs(image);
             }
-        }, 3, intervalInSeconds, TimeUnit.SECONDS);
+        }, 1000, intervalInMillis, TimeUnit.MILLISECONDS);
     }
 
     private void initObjects() {
