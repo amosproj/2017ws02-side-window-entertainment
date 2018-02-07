@@ -6,10 +6,17 @@ import de.tuberlin.amos.ws17.swit.common.DebugLog;
 import de.tuberlin.amos.ws17.swit.common.DebugTF;
 import de.tuberlin.amos.ws17.swit.common.Module;
 import de.tuberlin.amos.ws17.swit.image_analysis.ImageUtils;
+import javafx.animation.RotateTransition;
+import javafx.animation.ScaleTransition;
+import javafx.animation.TranslateTransition;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.DoubleProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -26,6 +33,7 @@ import javafx.scene.text.Font;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.util.Callback;
+import javafx.util.Duration;
 
 public class ApplicationViewImplementation extends Application implements ApplicationView {
 
@@ -263,6 +271,10 @@ public class ApplicationViewImplementation extends Application implements Applic
         showDebugLog(!debugPane.isVisible());
     }
 
+    private RotateTransition infoboxRotateTransition = new RotateTransition(Duration.seconds(0.75), infoboxPane);
+    private TranslateTransition infoboxTranslateTransition = new TranslateTransition(Duration.seconds(2), infoboxPane);
+    //TODO : private ScaleTransition infoboxScaleTransition = new ScaleTransition(Duration.seconds(2), infoboxPane);
+
     private void initBindings() {
         ImageView cameraImage = new ImageView();
         cameraImage.imageProperty().bindBidirectional(viewModel.propertyCameraImageProperty());
@@ -291,9 +303,27 @@ public class ApplicationViewImplementation extends Application implements Applic
                 pnFoundation.backgroundProperty().bindBidirectional(viewModel.getBackgroundProperty());
             }
 
-            infoboxPane.rotateProperty().bindBidirectional(viewModel.getInfoBoxRotation());
-            infoboxPane.translateXProperty().bindBidirectional(viewModel.getInfoBoxTranslationX());
-            infoboxPane.translateYProperty().bindBidirectional(viewModel.getInfoBoxTranslationY());
+            infoboxRotateTransition.setOnFinished(new EventHandler<ActionEvent>(){
+                public void handle(ActionEvent AE){
+                    infoboxRotateTransition.setToAngle(viewModel.getInfoBoxRotation().doubleValue());
+                    infoboxRotateTransition.play();
+                }
+            });
+
+            infoboxRotateTransition.setToAngle(viewModel.getInfoBoxRotation().doubleValue());
+            infoboxRotateTransition.play();
+
+            infoboxTranslateTransition.setOnFinished(new EventHandler<ActionEvent>(){
+                public void handle(ActionEvent AE){
+                    infoboxTranslateTransition.setToX(viewModel.getInfoBoxTranslationX().doubleValue());
+                    infoboxTranslateTransition.setToY(viewModel.getInfoBoxTranslationY().doubleValue());
+                    infoboxTranslateTransition.play();
+                }
+            });
+
+            infoboxTranslateTransition.setToX(viewModel.getInfoBoxTranslationX().doubleValue());
+            infoboxTranslateTransition.setToY(viewModel.getInfoBoxTranslationY().doubleValue());
+            infoboxTranslateTransition.play();
         } catch (Exception e) {
             e.printStackTrace();
         }
