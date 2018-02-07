@@ -11,6 +11,7 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.property.DoubleProperty;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
@@ -22,6 +23,7 @@ import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 
@@ -80,10 +82,23 @@ public class ApplicationViewImplementation extends Application implements Applic
         scene.setOnKeyPressed(event -> viewModel.onKeyPressed(event.getCode()));
         scene.getStylesheets().add("/stylesheets/TransparentApplicationViewStylesheet.css");
         stage.setScene(scene);
-        if (AppProperties.getInstance().fullscreen) {
+        initFullscreenMode(stage);
+        stage.show();
+    }
+
+    private void initFullscreenMode(Stage stage) {
+        if (AppProperties.getInstance().useFullscreen) {
+            Screen screen = Screen.getPrimary();
+            Rectangle2D screenVisualBounds = screen.getVisualBounds();
+
+            stage.setX(screenVisualBounds.getMinX());
+            stage.setY(screenVisualBounds.getMinY());
+            stage.setWidth(screenVisualBounds.getWidth());
+            stage.setHeight(screenVisualBounds.getHeight());
+        }
+        else if (AppProperties.getInstance().useFullscreenWithoutWindowChrome) {
             stage.setFullScreen(true);
         }
-        stage.show();
     }
 
     @Override

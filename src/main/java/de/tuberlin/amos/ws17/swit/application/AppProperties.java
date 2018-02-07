@@ -26,7 +26,8 @@ public class AppProperties extends Properties {
     public boolean useCloudVision;
     public boolean useGpsModule;
     public boolean useDebugLog;
-    public boolean fullscreen;
+    public boolean useFullscreen;
+    public boolean useFullscreenWithoutWindowChrome;
     public int mapsPoisLoadDistance;
     public boolean useTensorflow;
 
@@ -55,7 +56,8 @@ public class AppProperties extends Properties {
         useKnowledgeGraph = false;
         usePoiService = false;
         useDebugLog = true;
-        fullscreen = false;
+        useFullscreen = true;
+        useFullscreenWithoutWindowChrome = false;
         mapsPoisLoadDistance = 300;
     }
 
@@ -75,7 +77,8 @@ public class AppProperties extends Properties {
         useKnowledgeGraph = get("information_source").equals("1");
         usePoiService = get("poi_analysis").equals("1");
         useDebugLog = get("debuglog").equals("1");
-        fullscreen = get("fullscreen").equals("1");
+        useFullscreen = get("fullscreen").equals("1");
+        useFullscreenWithoutWindowChrome = get("fullscreen").equals("2");
         useTensorflow = get("tensorflow").equals("1");
         mapsPoisLoadDistance = Integer.parseInt(get("mapsPoisLoadDistance").toString());
         System.out.println();
