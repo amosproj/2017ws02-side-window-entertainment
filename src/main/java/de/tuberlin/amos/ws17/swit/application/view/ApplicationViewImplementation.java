@@ -604,37 +604,43 @@ public class ApplicationViewImplementation extends Application implements Applic
         }
     }
 
-    public void fadeDebugLayer(boolean fade) {
+    public void showDebugLayer() {
         FadeTransition ft = new FadeTransition(Duration.millis(1500), debugLayer);
         ft.setAutoReverse(false);
-        if(fade) {
-            ft.setFromValue(1.0);
-            ft.setToValue(0.0);
-            ft.setOnFinished(event -> {
-                debugLayer.setVisible(false);
-            });
-        } else {
-            ft.setFromValue(0.0);
-            ft.setToValue(1.0);
-            debugLayer.setVisible(true);
-        }
+        ft.setFromValue(0.0);
+        ft.setToValue(1.0);
+        debugLayer.setVisible(true);
         ft.play();
     }
 
-    public void fadeApplicationLayer(boolean fade) {
+    public void hideDebugLayer() {
+        FadeTransition ft = new FadeTransition(Duration.millis(1500), debugLayer);
+        ft.setAutoReverse(false);
+        ft.setFromValue(1.0);
+        ft.setToValue(0.0);
+        ft.setOnFinished(event -> {
+            debugLayer.setVisible(false);
+        });
+        ft.play();
+    }
+
+    public void showApplicationLayer() {
         FadeTransition ft = new FadeTransition(Duration.millis(1500), applicationLayer);
         ft.setAutoReverse(false);
-        if(fade) {
-            ft.setFromValue(1.0);
-            ft.setToValue(0.0);
-            ft.setOnFinished(event -> {
-                applicationLayer.setVisible(false);
-            });
-        } else {
-            ft.setFromValue(0.0);
-            ft.setToValue(1.0);
-            applicationLayer.setVisible(true);
-        }
+        ft.setFromValue(0.0);
+        ft.setToValue(1.0);
+        applicationLayer.setVisible(true);
+        ft.play();
+    }
+
+    public void hideApplicationLayer() {
+        FadeTransition ft = new FadeTransition(Duration.millis(1500), applicationLayer);
+        ft.setAutoReverse(false);
+        ft.setFromValue(1.0);
+        ft.setToValue(0.0);
+        ft.setOnFinished(event -> {
+            applicationLayer.setVisible(false);
+        });
         ft.play();
     }
 
