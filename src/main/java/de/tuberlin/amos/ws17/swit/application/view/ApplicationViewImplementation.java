@@ -2,6 +2,7 @@ package de.tuberlin.amos.ws17.swit.application.view;
 
 import de.tuberlin.amos.ws17.swit.application.AppProperties;
 import de.tuberlin.amos.ws17.swit.application.viewmodel.*;
+import de.tuberlin.amos.ws17.swit.common.AnimationUtils;
 import de.tuberlin.amos.ws17.swit.common.DebugLog;
 import de.tuberlin.amos.ws17.swit.common.DebugTF;
 import de.tuberlin.amos.ws17.swit.common.Module;
@@ -377,8 +378,15 @@ public class ApplicationViewImplementation extends Application implements Applic
     }
 
     private void showPoiLists(boolean show) {
-        listPoiCamera.setVisible(show);
-        listPoiMaps.setVisible(show);
+        if (listPoiCamera.isVisible() == show) { return; } // nothing to do
+        int animationDuration = 1000;
+        if (!show) {
+            AnimationUtils.slideUp(listPoiCamera, listPoiCamera.getHeight(), animationDuration, false);
+            AnimationUtils.slideDown(listPoiMaps, listPoiMaps.getHeight(), animationDuration, false);
+        } else {
+            AnimationUtils.slideUp(listPoiMaps, listPoiMaps.getHeight(), animationDuration, true);
+            AnimationUtils.slideDown(listPoiCamera, listPoiCamera.getHeight(), animationDuration, true);
+        }
     }
 
     @Override
@@ -584,7 +592,12 @@ public class ApplicationViewImplementation extends Application implements Applic
 
     @Override
     public void showExpandedPoi(boolean show) {
-        infoboxPane.setVisible(show);
+        if (show) {
+            if (infoboxPane.isVisible()) { return; } // already visible, nothing to do
+            AnimationUtils.scaleUp(infoboxPane, 0, 1f, 0, 1f, 1000, true);
+        } else {
+            AnimationUtils.scaleDown(infoboxPane, 0, 0, 1000, false);
+        }
     }
 
     @Override
@@ -616,37 +629,43 @@ public class ApplicationViewImplementation extends Application implements Applic
         }
     }
 
-    public void fadeDebugLayer(boolean fade) {
+    public void showDebugLayer() {
         FadeTransition ft = new FadeTransition(Duration.millis(1500), debugLayer);
         ft.setAutoReverse(false);
-        if(fade) {
-            ft.setFromValue(1.0);
-            ft.setToValue(0.0);
-            ft.setOnFinished(event -> {
-                debugLayer.setVisible(false);
-            });
-        } else {
-            ft.setFromValue(0.0);
-            ft.setToValue(1.0);
-            debugLayer.setVisible(true);
-        }
+        ft.setFromValue(0.0);
+        ft.setToValue(1.0);
+        debugLayer.setVisible(true);
         ft.play();
     }
 
-    public void fadeApplicationLayer(boolean fade) {
+    public void hideDebugLayer() {
+        FadeTransition ft = new FadeTransition(Duration.millis(1500), debugLayer);
+        ft.setAutoReverse(false);
+        ft.setFromValue(1.0);
+        ft.setToValue(0.0);
+        ft.setOnFinished(event -> {
+            debugLayer.setVisible(false);
+        });
+        ft.play();
+    }
+
+    public void showApplicationLayer() {
         FadeTransition ft = new FadeTransition(Duration.millis(1500), applicationLayer);
         ft.setAutoReverse(false);
-        if(fade) {
-            ft.setFromValue(1.0);
-            ft.setToValue(0.0);
-            ft.setOnFinished(event -> {
-                applicationLayer.setVisible(false);
-            });
-        } else {
-            ft.setFromValue(0.0);
-            ft.setToValue(1.0);
-            applicationLayer.setVisible(true);
-        }
+        ft.setFromValue(0.0);
+        ft.setToValue(1.0);
+        applicationLayer.setVisible(true);
+        ft.play();
+    }
+
+    public void hideApplicationLayer() {
+        FadeTransition ft = new FadeTransition(Duration.millis(1500), applicationLayer);
+        ft.setAutoReverse(false);
+        ft.setFromValue(1.0);
+        ft.setToValue(0.0);
+        ft.setOnFinished(event -> {
+            applicationLayer.setVisible(false);
+        });
         ft.play();
     }
 

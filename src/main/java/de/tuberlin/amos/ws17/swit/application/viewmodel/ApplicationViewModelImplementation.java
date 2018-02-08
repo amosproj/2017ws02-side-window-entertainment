@@ -94,8 +94,8 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     private SimpleDoubleProperty infoBoxTranslationX = new SimpleDoubleProperty();
     private SimpleDoubleProperty infoBoxTranslationY = new SimpleDoubleProperty();
 
-    private SimpleBooleanProperty debugLayerFaded = new SimpleBooleanProperty(false);
-    private SimpleBooleanProperty applicationLayerFaded = new SimpleBooleanProperty(false);
+    private SimpleBooleanProperty debugLayerVisible = new SimpleBooleanProperty(false);
+    private SimpleBooleanProperty applicationLayerVisible = new SimpleBooleanProperty(false);
 
     private int searchRadius = 1000;
     private GpsPosition lastRequestPosition;
@@ -134,14 +134,26 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
 
         initInfoBoxMovement();
 
-        debugLayerFaded.addListener(event -> {
+        debugLayerVisible.addListener(event -> {
             if(properties.useAnimations) {
-                Platform.runLater(() -> view.fadeDebugLayer(debugLayerFaded.get()));
+                Platform.runLater(() -> {
+                        if(debugLayerVisible.get()) {
+                            view.showDebugLayer();
+                        } else {
+                            view.hideDebugLayer();
+                        }
+                });
             }
         });
-        applicationLayerFaded.addListener(event -> {
+        applicationLayerVisible.addListener(event -> {
             if(properties.useAnimations) {
-                Platform.runLater(() -> view.fadeApplicationLayer(applicationLayerFaded.get()));
+                Platform.runLater(() -> {
+                    if(applicationLayerVisible.get()) {
+                        view.showApplicationLayer();
+                    } else {
+                        view.hideApplicationLayer();
+                    }
+                });
             }
         });
     }
@@ -404,7 +416,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                         }
                     }
                     if(userExpressions != null && userExpressions.isMouthOpen() && mouthOpenDiff >= 5) {
-                        applicationLayerFaded.set(!applicationLayerFaded.get());
+                        applicationLayerVisible.set(!applicationLayerVisible.get());
                         lastMouthOpen = currentTime;
                     }
                     if(userExpressions != null && userExpressions.isSmile() && smileDiff >= 5) {
@@ -412,12 +424,12 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                         lastSmile = currentTime;
                     }
                     if(userExpressions != null && userExpressions.isTongueOut() && tongueOutDiff >= 5) {
-                        debugLayerFaded.set(!debugLayerFaded.get());
+                        debugLayerVisible.set(!debugLayerVisible.get());
                         lastTongueOut = currentTime;
                     }
                 } else {
-                    debugLayerFaded.set(true);
-                    applicationLayerFaded.set(true);
+                    debugLayerVisible.set(false);
+                    applicationLayerVisible.set(false);
                     setExpressionStatus(ExpressionType.ISRACKED, false);
                 }
                 if (mapsTimeDiff >= 5) {
