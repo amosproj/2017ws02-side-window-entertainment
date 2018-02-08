@@ -73,10 +73,6 @@
     -fx-background-color: rgba(0, 0, 0, 0.5);
 }
 
-#pnFoundation {
-    -fx-background-color: transparent;
-}
-
 #listModuleStatus {
     -fx-pref-width: 70px;
     -fx-max-width: 70px;
@@ -167,9 +163,6 @@
 }
 
 #togglePane {
-    -fx-min-width: 200px;
-    -fx-max-width: 500px;
-    -fx-max-height: 400px;
     -fx-background-color: rgba(0, 0, 0, 0.7);
 }
 
