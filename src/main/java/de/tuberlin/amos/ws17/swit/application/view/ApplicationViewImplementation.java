@@ -88,14 +88,20 @@ public class ApplicationViewImplementation extends Application implements Applic
 
     private static final String FONTNAME = "Helvetica Neue";
     private static double fontSizeTitle = 12;
-    private static double fontSizeLabel = 12;
+    private static double fontSizeItem = 12;
     private static double fontSizeText = 12;
+
+    private static double itemWidth = 0;
+
+    private static Font fontTitle = null;
+    private static Font fontItem = null;
+    private static Font fontText = null;
 
     private static ApplicationViewModel viewModel;
 
     public void init() {
 
-        initFontSizes();
+        initFonts();
         initRootStackPane();
 
         viewModel = new ApplicationViewModelImplementation(this);
@@ -104,13 +110,19 @@ public class ApplicationViewImplementation extends Application implements Applic
         initCellFactories();
     }
 
-    private void initFontSizes() {
+    private void initFonts() {
         Screen screen = Screen.getPrimary();
         Rectangle2D screenVisualBounds = screen.getVisualBounds();
 
-        fontSizeTitle = screenVisualBounds.getHeight() * 0.04;
-        fontSizeLabel = screenVisualBounds.getHeight() * 0.03;
-        fontSizeText = screenVisualBounds.getHeight() * 0.02;
+        itemWidth = screenVisualBounds.getWidth() * 0.18;
+
+        fontSizeTitle = screenVisualBounds.getHeight() * 0.03;
+        fontSizeItem = screenVisualBounds.getHeight() * 0.02;
+        fontSizeText = screenVisualBounds.getHeight() * 0.015;
+
+        fontTitle = new Font(FONTNAME, fontSizeTitle);
+        fontItem = new Font(FONTNAME, fontSizeItem);
+        fontText = new Font(FONTNAME, fontSizeText);
     }
 
     private void initRootStackPane() {
@@ -205,7 +217,7 @@ public class ApplicationViewImplementation extends Application implements Applic
         infoboxTitle = new Label();
         infoboxTitle.setId("expansionName");
         infoboxTitle.setAlignment(Pos.TOP_CENTER);
-        infoboxTitle.setFont(new Font(FONTNAME, fontSizeTitle));
+        infoboxTitle.setFont(fontTitle);
 
         infoboxCloseButton = new Button("X");
         infoboxCloseButton.setId("expansionButton");
@@ -226,7 +238,7 @@ public class ApplicationViewImplementation extends Application implements Applic
         infoboxInformation = new Label();
         infoboxInformation.setId("expansionInformation");
         infoboxInformation.setAlignment(Pos.TOP_CENTER);
-        infoboxInformation.setFont(new Font(FONTNAME, fontSizeText));
+        infoboxInformation.setFont(fontText);
 
         infoboxContentPane = new BorderPane();
         infoboxContentPane.setId("expansionContentPane");
@@ -266,10 +278,12 @@ public class ApplicationViewImplementation extends Application implements Applic
         buttonUserTrackingLog = new Button("user_tracking");
         buttonUserTrackingLog.setId("toggleUserTracking");
         buttonUserTrackingLog.setOnMouseClicked(event -> toggleStyle("UserTracking"));
+        buttonUserTrackingLog.setFont(fontItem);
 
         buttonLandscapeTrackingLog = new Button("landscape_tracking");
         buttonLandscapeTrackingLog.setId("toggleLandscapeTracking");
         buttonLandscapeTrackingLog.setOnMouseClicked(event -> toggleStyle("LandscapeTracking"));
+        buttonLandscapeTrackingLog.setFont(fontItem);
 
         buttonPoiLog = new Button("POI");
         buttonPoiLog.setId("togglePoi");
@@ -306,21 +320,13 @@ public class ApplicationViewImplementation extends Application implements Applic
 
         listDebugLog = new ListView<>();
         listDebugLog.setId("listDebugLog");
-        //listDebugLog.setMinWidth(Double.MAX_VALUE);
-        //GridPane.setHgrow(listDebugLog, Priority.ALWAYS);
-        //listDebugLog.setMaxWidth(Double.MAX_VALUE);
-        //listDebugLog.setPrefWidth(Double.MAX_VALUE);
 
         debugLogPane = new GridPane();
         debugLogPane.setId("debugPane");
-        //GridPane.setHalignment(debugLogPane, HPos.RIGHT);
-
-        //debugLogPane.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 
         debugLogPane.getColumnConstraints().add(new ColumnConstraints());
         debugLogPane.getColumnConstraints().add(new ColumnConstraints());
         debugLogPane.getColumnConstraints().get(0).setPercentWidth(25);
-        //debugLogPane.getColumnConstraints().get(0).setHgrow(Priority.ALWAYS);
         debugLogPane.getColumnConstraints().get(1).setPercentWidth(75);
 
         debugLogPane.add(debugLogVBoxButtons, 0, 0);
@@ -453,24 +459,31 @@ public class ApplicationViewImplementation extends Application implements Applic
                             setGraphic(null);
                             setText(null);
                         } else {
-                            GridPane pane = new GridPane();
-                            ImageView imageView = new ImageView(item.getImage());
-                            imageView.setPreserveRatio(true);
-                            imageView.fitHeightProperty().bind(listPoiCamera.heightProperty().subtract(25));
-                            RowConstraints rc = new RowConstraints();
-                            rc.setPercentHeight(100.0);
-                            rc.setValignment(VPos.TOP);
-                            pane.getRowConstraints().add(rc);
-                            ColumnConstraints cc = new ColumnConstraints();
-                            cc.setPercentWidth(100.0);
-                            cc.setHalignment(HPos.CENTER);
-                            pane.getColumnConstraints().add(cc);
                             Label lblName = new Label(item.getName());
-                            lblName.setPadding(new Insets(0, 5, 0, 5));
-                            lblName.setFont(new Font(FONTNAME, 13));
+                            lblName.setPadding(new Insets(4, 4, 0, 4));
+                            lblName.setFont(fontItem);
+                            //lblName.setTextFill(Color.BLACK);
+                            //lblName.setBackground(new BackgroundFill(Color.TRANSPARENT, null, null));
+
                             lblName.setStyle("-fx-text-fill: black;" +
                                     "-fx-background-color: transparent; -fx-effect: dropshadow( gaussian , white , 2, 1.0 , 0 , 0 );");
-                            pane.add(imageView, 0, 0);
+
+                            GridPane pane = new GridPane();
+                            pane.setMinWidth(itemWidth);
+                            pane.setMaxWidth(itemWidth);
+
+                            if (item.getImage() != null) {
+                                pane.setBackground(new Background(new BackgroundImage(item.getImage(),
+                                    BackgroundRepeat.NO_REPEAT,
+                                    BackgroundRepeat.NO_REPEAT,
+                                    BackgroundPosition.CENTER,
+                                    new BackgroundSize(100, 100,
+                                        true,
+                                        true,
+                                        true,
+                                        true))));
+                            }
+
                             pane.add(lblName, 0,0);
                             pane.setOnMouseClicked(event -> viewModel.expandPoi(item.getId()));
                             pane.setBorder(new Border(new BorderStroke(Color.DARKGRAY, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
@@ -523,7 +536,6 @@ public class ApplicationViewImplementation extends Application implements Applic
         });
 
         listExpressionStatus.setCellFactory(new Callback<ListView<UserExpressionViewModel>, ListCell<UserExpressionViewModel>>()
-
         {
             @Override
             public ListCell<UserExpressionViewModel> call(ListView<UserExpressionViewModel> param) {
