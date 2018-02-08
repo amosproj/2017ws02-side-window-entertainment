@@ -1,7 +1,6 @@
 package de.tuberlin.amos.ws17.swit.application;
 
 import de.tuberlin.amos.ws17.swit.common.PathService;
-import org.apache.jena.base.Sys;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -30,7 +29,7 @@ public class AppProperties extends Properties {
     public boolean useFullscreenWithoutWindowChrome;
     public int mapsPoisLoadDistance;
     public boolean useTensorflow;
-    public boolean animations;
+    public boolean useAnimations;
 
     public static AppProperties getInstance() {
         if (instance == null) {
@@ -60,7 +59,7 @@ public class AppProperties extends Properties {
         useFullscreen = true;
         useFullscreenWithoutWindowChrome = false;
         mapsPoisLoadDistance = 300;
-        animations = false;
+        useAnimations = false;
     }
 
     private AppProperties(String propertyFilePath) throws IOException {
@@ -83,7 +82,7 @@ public class AppProperties extends Properties {
         useFullscreenWithoutWindowChrome = get("fullscreen").equals("2");
         useTensorflow = get("tensorflow").equals("1");
         mapsPoisLoadDistance = Integer.parseInt(get("mapsPoisLoadDistance").toString());
-        animations = get("animations").equals("1");
+        useAnimations = get("animations").equals("1");
         System.out.println();
     }
 }

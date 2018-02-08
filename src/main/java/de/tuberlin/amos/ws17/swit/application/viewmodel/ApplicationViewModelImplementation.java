@@ -135,12 +135,12 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         initInfoBoxMovement();
 
         debugLayerFaded.addListener(event -> {
-            if(properties.animations) {
+            if(properties.useAnimations) {
                 Platform.runLater(() -> view.fadeDebugLayer(debugLayerFaded.get()));
             }
         });
         applicationLayerFaded.addListener(event -> {
-            if(properties.animations) {
+            if(properties.useAnimations) {
                 Platform.runLater(() -> view.fadeApplicationLayer(applicationLayerFaded.get()));
             }
         });

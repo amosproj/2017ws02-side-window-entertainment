@@ -52,14 +52,14 @@ public class DebugLog {
         if (module == "ApplicationView") showApplicationView = !showApplicationView;
 
 
-            debugLogFiltered.setPredicate(debugEntry ->
-                (showUserTracking && (debugEntry.source.equals("JavoNetUserTracker") || debugEntry.source.equals("UserTrackerMock")))
-                    || (showGps && (debugEntry.source.equals("GpsTrackerMock") || debugEntry.source.equals("GpsPortReader") || debugEntry.source.equals("GpsTrackerImplementation")))
-                    || (showImageAnalysis && debugEntry.source.equals("CloudVision"))
-                    || (showInformationSource && (debugEntry.source.equals("AbstractProvider") || debugEntry.source.equals("InformationProviderMock")))
-                    || (showLandscapeTracking && (debugEntry.source.equals("LandscapeTrackerMock") || debugEntry.source.equals("LandscapeTrackerImplementation")))
-                    // || showPoi && *No class uses DebugLog yet*
-                    || (showApplicationView && debugEntry.source.equals("ApplicationViewModelImplementation")));
+        debugLogFiltered.setPredicate(debugEntry ->
+            (showUserTracking && (debugEntry.source.equals("JavoNetUserTracker") || debugEntry.source.equals("UserTrackerMock")))
+                || (showGps && (debugEntry.source.equals("GpsTrackerMock") || debugEntry.source.equals("GpsPortReader") || debugEntry.source.equals("GpsTrackerImplementation")))
+                || (showImageAnalysis && debugEntry.source.equals("CloudVision"))
+                || (showInformationSource && (debugEntry.source.equals("AbstractProvider") || debugEntry.source.equals("InformationProviderMock")))
+                || (showLandscapeTracking && (debugEntry.source.equals("LandscapeTrackerMock") || debugEntry.source.equals("LandscapeTrackerImplementation")))
+                // || showPoi && *No class uses DebugLog yet*
+                || (showApplicationView && debugEntry.source.equals("ApplicationViewModelImplementation")));
         //});
 
         System.out.println("toggleModule: " + module + " -> " + showGps);
@@ -76,7 +76,7 @@ public class DebugLog {
 
         public DebugEntry(String message) {
             timeStamp = new LocalDateTime();
-            String temp = sun.reflect.Reflection.getCallerClass(3).getName();
+            String temp = sun.reflect.Reflection.getCallerClass(4).getName();
             source = temp.substring(temp.lastIndexOf(".") + 1);
             this.message = message;
         }
