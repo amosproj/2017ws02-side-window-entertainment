@@ -6,6 +6,8 @@ import de.tuberlin.amos.ws17.swit.common.DebugLog;
 import de.tuberlin.amos.ws17.swit.common.DebugTF;
 import de.tuberlin.amos.ws17.swit.common.Module;
 import de.tuberlin.amos.ws17.swit.image_analysis.ImageUtils;
+import javafx.animation.FadeTransition;
+import javafx.animation.ParallelTransition;
 import javafx.animation.RotateTransition;
 import javafx.animation.TranslateTransition;
 import javafx.application.Application;
@@ -600,6 +602,40 @@ public class ApplicationViewImplementation extends Application implements Applic
                 setGraphic(debugText);
             });
         }
+    }
+
+    public void fadeDebugLayer(boolean fade) {
+        FadeTransition ft = new FadeTransition(Duration.millis(1500), debugLayer);
+        ft.setAutoReverse(false);
+        if(fade) {
+            ft.setFromValue(1.0);
+            ft.setToValue(0.0);
+            ft.setOnFinished(event -> {
+                debugLayer.setVisible(false);
+            });
+        } else {
+            ft.setFromValue(0.0);
+            ft.setToValue(1.0);
+            debugLayer.setVisible(true);
+        }
+        ft.play();
+    }
+
+    public void fadeApplicationLayer(boolean fade) {
+        FadeTransition ft = new FadeTransition(Duration.millis(1500), applicationLayer);
+        ft.setAutoReverse(false);
+        if(fade) {
+            ft.setFromValue(1.0);
+            ft.setToValue(0.0);
+            ft.setOnFinished(event -> {
+                applicationLayer.setVisible(false);
+            });
+        } else {
+            ft.setFromValue(0.0);
+            ft.setToValue(1.0);
+            applicationLayer.setVisible(true);
+        }
+        ft.play();
     }
 
     private void toggleStyle(String module){

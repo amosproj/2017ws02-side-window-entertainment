@@ -21,5 +21,9 @@ public interface ApplicationView {
     void toggleLists();
 
     void toggleTensorFlowDebugWindow();
+
+    public void fadeDebugLayer(boolean fade);
+
+    public void fadeApplicationLayer(boolean fade);
 }
 

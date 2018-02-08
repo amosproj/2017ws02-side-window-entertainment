@@ -30,6 +30,7 @@ public class AppProperties extends Properties {
     public boolean useFullscreenWithoutWindowChrome;
     public int mapsPoisLoadDistance;
     public boolean useTensorflow;
+    public boolean animations;
 
     public static AppProperties getInstance() {
         if (instance == null) {
@@ -59,6 +60,7 @@ public class AppProperties extends Properties {
         useFullscreen = true;
         useFullscreenWithoutWindowChrome = false;
         mapsPoisLoadDistance = 300;
+        animations = false;
     }
 
     private AppProperties(String propertyFilePath) throws IOException {
@@ -81,6 +83,7 @@ public class AppProperties extends Properties {
         useFullscreenWithoutWindowChrome = get("fullscreen").equals("2");
         useTensorflow = get("tensorflow").equals("1");
         mapsPoisLoadDistance = Integer.parseInt(get("mapsPoisLoadDistance").toString());
+        animations = get("animations").equals("1");
         System.out.println();
     }
 }

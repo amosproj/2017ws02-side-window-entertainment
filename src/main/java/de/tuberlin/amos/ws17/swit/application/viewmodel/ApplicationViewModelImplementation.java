@@ -94,6 +94,9 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     private SimpleDoubleProperty infoBoxTranslationX = new SimpleDoubleProperty();
     private SimpleDoubleProperty infoBoxTranslationY = new SimpleDoubleProperty();
 
+    private SimpleBooleanProperty debugLayerFaded = new SimpleBooleanProperty(false);
+    private SimpleBooleanProperty applicationLayerFaded = new SimpleBooleanProperty(false);
+
     private int searchRadius = 1000;
     private GpsPosition lastRequestPosition;
     private List<Module> moduleList = new ArrayList<>();
@@ -130,6 +133,17 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         }
 
         initInfoBoxMovement();
+
+        debugLayerFaded.addListener(event -> {
+            if(properties.animations) {
+                Platform.runLater(() -> view.fadeDebugLayer(debugLayerFaded.get()));
+            }
+        });
+        applicationLayerFaded.addListener(event -> {
+            if(properties.animations) {
+                Platform.runLater(() -> view.fadeApplicationLayer(applicationLayerFaded.get()));
+            }
+        });
     }
 
     private void initTFClassifier() {
@@ -358,10 +372,16 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
             long lastExpression = startTime;
             //int lastCameraExecution = 0;
             long lastMapsExecution = startTime;
+            long lastMouthOpen = startTime;
+            long lastSmile = startTime;
+            long lastTongueOut = startTime;
             while (isRunning) {
                 long currentTime = new Date().getTime();
                 long expressionTimeDiff = (currentTime - lastExpression) / 1000;
                 long mapsTimeDiff = (currentTime - lastMapsExecution) / 1000;
+                long mouthOpenDiff = (currentTime - lastMouthOpen) / 1000;
+                long smileDiff = (currentTime - lastSmile) / 1000;
+                long tongueOutDiff = (currentTime - lastTongueOut) / 1000;
                 UserExpressions userExpressions;
                 if (userTracker.isUserTracked()) {
                     setExpressionStatus(ExpressionType.ISRACKED, true);
@@ -383,7 +403,21 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                             cameraThread.start();
                         }
                     }
+                    if(userExpressions != null && userExpressions.isMouthOpen() && mouthOpenDiff >= 5) {
+                        applicationLayerFaded.set(!applicationLayerFaded.get());
+                        lastMouthOpen = currentTime;
+                    }
+                    if(userExpressions != null && userExpressions.isSmile() && smileDiff >= 5) {
+
+                        lastSmile = currentTime;
+                    }
+                    if(userExpressions != null && userExpressions.isTongueOut() && tongueOutDiff >= 5) {
+                        debugLayerFaded.set(!debugLayerFaded.get());
+                        lastTongueOut = currentTime;
+                    }
                 } else {
+                    debugLayerFaded.set(true);
+                    applicationLayerFaded.set(true);
                     setExpressionStatus(ExpressionType.ISRACKED, false);
                 }
                 if (mapsTimeDiff >= 5) {
