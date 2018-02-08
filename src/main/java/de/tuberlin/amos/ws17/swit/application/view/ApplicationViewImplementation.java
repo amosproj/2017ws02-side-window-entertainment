@@ -7,14 +7,11 @@ import de.tuberlin.amos.ws17.swit.common.DebugTF;
 import de.tuberlin.amos.ws17.swit.common.Module;
 import de.tuberlin.amos.ws17.swit.image_analysis.ImageUtils;
 import javafx.animation.RotateTransition;
-import javafx.animation.ScaleTransition;
 import javafx.animation.TranslateTransition;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.DoubleProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.HPos;
@@ -36,57 +33,293 @@ import javafx.util.Callback;
 import javafx.util.Duration;
 
 public class ApplicationViewImplementation extends Application implements ApplicationView {
+    //##### layer container #####
+    private StackPane stackPaneRoot = null;
+    //##########
 
-    private BorderPane                        pnFoundation         = new BorderPane();
-    private ListView<PoiViewModel>            listPoiCamera        = new ListView<>();
-    private ListView<PoiViewModel>            listPoiMaps          = new ListView<>();
-    private ListView<String>                  listDebugLog         = new ListView<>();
-    private Label                             textTFDebug          = new Label();
-    private ListView<ModuleStatusViewModel>   listModuleStatus     = new ListView<>();
+    //##### media layer #####
+    private MediaView mediaLayer = null;
+    private MediaPlayer mediaPlayer = null;
+    //##########
+
+    //##### application layer #####
+    private GridPane applicationLayer = null;
+    //### infobox
+    private BorderPane infoboxPane = null;
+    private BorderPane infoboxTitlePane = null;
+    private BorderPane infoboxContentPane = null;
+    private Button infoboxCloseButton = null;
+    private Label infoboxTitle = null;
+    private Label infoboxInformation = null;
+    private ImageView infoboxImage = null;
+    private ScrollPane infoboxScrollPane = null;
+
+    //### Poi Lists
+    private ListView<PoiViewModel> listPoiCamera = null;
+    private ListView<PoiViewModel> listPoiMaps = new ListView<>();
+
+    //### Status: expressions and module status
+    private HBox statusPane = null;
+    private ListView<ModuleStatusViewModel> listModuleStatus = new ListView<>();
     private ListView<UserExpressionViewModel> listExpressionStatus = new ListView<>();
+    //##########
 
-    // DebugLog Buttons
-    private Button toggleUserTrackingLog      = new Button("user_tracking");
-    private Button toggleLandscapeTrackingLog = new Button("landscape_tracking");
-    private Button togglePoiLog               = new Button("POI");
-    private Button toggleInformationSourceLog = new Button("information_source");
-    private Button toggleImageAnalysisLog     = new Button("image_analysis");
-    private Button toggleApplicationViewLog   = new Button("application_view");
-    private Button toggleGpsLog               = new Button("GPS");
+    //##### debug layer #####
+    private GridPane debugLayer = null;
+    //### DebugLog
+    private ListView<String> listDebugLog = new ListView<>();
 
-    private BorderPane  infoboxPane        = new BorderPane();
-    private BorderPane  infoboxTitlePane     = new BorderPane();
-    private BorderPane  infoboxContentPane = new BorderPane();
-    private Button      infoboxCloseButton      = new Button("X");
-    private Label       infoboxTitle        = new Label();
-    private Label       infoboxInformation = new Label();
-    private ImageView   infoboxImage       = new ImageView();
-    private ScrollPane  infoboxScrollPane  = new ScrollPane();
-    private HBox        statusPane           = new HBox();
-    private HBox        debugPane            = new HBox();
-    private VBox        togglePane           = new VBox();
-    private StackPane   root                 = new StackPane();
-    private MediaPlayer mediaPlayer          = new MediaPlayer(ImageUtils.getTestVideo(ApplicationViewModelImplementation.videoFileName));
-    private MediaView mediaView;
+    private HBox debugLogPane = null;
+    private VBox debugLogVBoxButtons = null;
+
+    private Button buttonUserTrackingLog = null;
+    private Button buttonLandscapeTrackingLog = null;
+    private Button buttonPoiLog = null;
+    private Button buttonInformationSourceLog = null;
+    private Button buttonImageAnalysisLog = null;
+    private Button buttonApplicationViewLog = null;
+    private Button buttonGpsLog = null;
+    //### TensorFlow Debug
+    private Label labelTensorFlowDebug = new Label();
+    //##########
 
     private static final String FONTNAME = "Helvetica Neue";
+    private static double fontSizeTitle = 12;
+    private static double fontSizeLabel = 12;
+    private static double fontSizeText = 12;
 
     private static ApplicationViewModel viewModel;
 
     public void init() {
-        initElements();
-        initInfobox();
+
+        initFontSizes();
+        initRootStackPane();
+
         viewModel = new ApplicationViewModelImplementation(this);
 
         initBindings();
         initCellFactories();
     }
 
+    private void initFontSizes() {
+        Screen screen = Screen.getPrimary();
+        Rectangle2D screenVisualBounds = screen.getVisualBounds();
+
+        fontSizeTitle = screenVisualBounds.getHeight() * 0.04;
+        fontSizeLabel = screenVisualBounds.getHeight() * 0.03;
+        fontSizeText = screenVisualBounds.getHeight() * 0.02;
+    }
+
+    private void initRootStackPane() {
+        stackPaneRoot = new StackPane();
+
+        initMediaLayer();
+        initApplicationLayer();
+        initDebugLayer();
+
+        if (mediaLayer != null) {
+            stackPaneRoot.getChildren().add(mediaLayer);
+        }
+
+        stackPaneRoot.getChildren().add(applicationLayer);
+        stackPaneRoot.getChildren().add(debugLayer);
+    }
+
+    private void initMediaLayer() {
+        try {
+            mediaPlayer = new MediaPlayer(ImageUtils.getTestVideo(ApplicationViewModelImplementation.videoFileName));
+            mediaLayer = new MediaView(mediaPlayer);
+            mediaLayer.setVisible(false);
+            final DoubleProperty width = mediaLayer.fitWidthProperty();
+            final DoubleProperty height = mediaLayer.fitHeightProperty();
+
+            width.bind(Bindings.selectDouble(mediaLayer.sceneProperty(), "width"));
+            height.bind(Bindings.selectDouble(mediaLayer.sceneProperty(), "height"));
+            mediaLayer.setPreserveRatio(true);
+        }
+        catch (Exception e) {
+            DebugLog.log("MediaPlayer kann nicht initialisiert werden");
+        }
+    }
+
+    private void initApplicationLayer() {
+        applicationLayer = new GridPane();
+        applicationLayer.getRowConstraints().add(new RowConstraints());
+        applicationLayer.getRowConstraints().get(0).setPercentHeight(15.0);
+        applicationLayer.getRowConstraints().get(0).setValignment(VPos.CENTER);
+
+        applicationLayer.getRowConstraints().add(new RowConstraints());
+        applicationLayer.getRowConstraints().get(1).setPercentHeight(70.0);
+        applicationLayer.getRowConstraints().get(1).setValignment(VPos.CENTER);
+
+        applicationLayer.getRowConstraints().add(new RowConstraints());
+        applicationLayer.getRowConstraints().get(2).setPercentHeight(15.0);
+        applicationLayer.getRowConstraints().get(2).setValignment(VPos.CENTER);
+
+        int numColumns = 3;
+        for(int i = 0;i < numColumns;i++) {
+            ColumnConstraints cc = new ColumnConstraints();
+            cc.setPercentWidth(100.0 / numColumns);
+            cc.setHalignment(HPos.CENTER);
+            applicationLayer.getColumnConstraints().add(cc);
+        }
+
+        initListPoiCamera();
+        initListPoiMaps();
+        initStatusPane();
+        initInfoboxPane();
+
+        applicationLayer.add(listPoiCamera, 0, 0, 3, 1);
+        applicationLayer.add(listPoiMaps, 0,2, 3, 1);
+        applicationLayer.add(statusPane, 0, 1);
+        applicationLayer.add(infoboxPane, 1, 1);
+    }
+
+    private void initListPoiCamera() {
+        listPoiCamera = new ListView<>();
+        listPoiCamera.setId("listPoiCamera");
+    }
+
+    private void initListPoiMaps() {
+        listPoiMaps = new ListView<>();
+        listPoiMaps.setId("listPoiMaps");
+    }
+
+    private void initStatusPane() {
+        listModuleStatus = new ListView<>();
+        listModuleStatus.setId("listModuleStatus");
+
+        listExpressionStatus = new ListView<>();
+        listExpressionStatus.setId("listExpressionStatus");
+
+        statusPane = new HBox();
+        statusPane.setId("statusPane");
+        statusPane.getChildren().add(listModuleStatus);
+        statusPane.getChildren().add(listExpressionStatus);
+    }
+
+    private void initInfoboxPane() {
+        infoboxTitle = new Label();
+        infoboxTitle.setId("expansionName");
+        infoboxTitle.setAlignment(Pos.TOP_CENTER);
+        infoboxTitle.setFont(new Font(FONTNAME, fontSizeTitle));
+
+        infoboxCloseButton = new Button("X");
+        infoboxCloseButton.setId("expansionButton");
+
+        infoboxTitlePane = new BorderPane();
+        infoboxTitlePane.setId("expansionTopPane");
+        infoboxTitlePane.setLeft(infoboxTitle);
+        infoboxTitlePane.setRight(infoboxCloseButton);
+
+        infoboxImage = new ImageView();
+        infoboxImage.setId("expansionImage");
+        BorderPane.setAlignment(infoboxImage, Pos.CENTER);
+        infoboxImage.setPreserveRatio(true);
+        infoboxImage.setFitHeight(150);
+        infoboxImage.minHeight(0);
+        infoboxImage.minWidth(0);
+
+        infoboxInformation = new Label();
+        infoboxInformation.setId("expansionInformation");
+        infoboxInformation.setAlignment(Pos.TOP_CENTER);
+        infoboxInformation.setFont(new Font(FONTNAME, fontSizeText));
+
+        infoboxContentPane = new BorderPane();
+        infoboxContentPane.setId("expansionContentPane");
+        infoboxContentPane.setTop(infoboxImage);
+        infoboxContentPane.setBottom(infoboxInformation);
+
+        infoboxScrollPane = new ScrollPane();
+        infoboxScrollPane.setId("expansionScrollPane");
+        infoboxScrollPane.setContent(infoboxContentPane);
+        infoboxScrollPane.setFitToWidth(true);
+
+        infoboxPane = new BorderPane();
+        infoboxPane.setId("expansionPane");
+        infoboxPane.setVisible(false);
+        BorderPane.setAlignment(infoboxPane, Pos.CENTER);
+        infoboxPane.setTop(infoboxTitlePane);
+        infoboxPane.setCenter(infoboxImage);
+        infoboxPane.setBottom(infoboxScrollPane);
+    }
+
+    private void initDebugLayer() {
+        debugLayer = new GridPane();
+        debugLayer.getRowConstraints().addAll(applicationLayer.getRowConstraints());
+        debugLayer.getColumnConstraints().addAll(applicationLayer.getColumnConstraints());
+        debugLayer.setPickOnBounds(false);
+
+        initDebugLog();
+
+        initDebugTensorFlow();
+
+        applicationLayer.add(debugLogPane, 2, 1, 2, 1);
+        applicationLayer.add(labelTensorFlowDebug, 2, 2);
+    }
+
+    private void initDebugLog() {
+        debugLogVBoxButtons = new VBox();
+        debugLogVBoxButtons.setId("togglePane");
+
+        buttonUserTrackingLog = new Button("user_tracking");
+        buttonUserTrackingLog.setId("toggleUserTracking");
+        buttonUserTrackingLog.setOnMouseClicked(event -> toggleStyle("UserTracking"));
+
+        buttonLandscapeTrackingLog = new Button("landscape_tracking");
+        buttonLandscapeTrackingLog.setId("toggleLandscapeTracking");
+        buttonLandscapeTrackingLog.setOnMouseClicked(event -> toggleStyle("LandscapeTracking"));
+
+        buttonPoiLog = new Button("POI");
+        buttonPoiLog.setId("togglePoi");
+        buttonPoiLog.setOnMouseClicked(event -> toggleStyle("POI"));
+
+        buttonInformationSourceLog = new Button("information_source");
+        buttonInformationSourceLog.setId("toggleInformationSource");
+        buttonInformationSourceLog.setOnMouseClicked(event -> toggleStyle("InformationSource"));
+
+        buttonImageAnalysisLog = new Button("image_analysis");
+        buttonImageAnalysisLog.setId("toggleImageAnalysis");
+        buttonImageAnalysisLog.setOnMouseClicked(event -> toggleStyle("ImageAnalysis"));
+
+        buttonApplicationViewLog = new Button("application_view");
+        buttonApplicationViewLog.setId("toggleApplicationView");
+        buttonApplicationViewLog.setOnMouseClicked(event -> toggleStyle("ApplicationView"));
+        buttonApplicationViewLog.getStyleClass().add("toggleButton");
+
+        buttonGpsLog = new Button("GPS");
+        buttonGpsLog.setId("toggleGpsLog");
+        buttonGpsLog.setOnMouseClicked(event -> toggleStyle("GPS"));
+
+        debugLogVBoxButtons.getChildren().add(buttonApplicationViewLog);
+        debugLogVBoxButtons.getChildren().add(buttonGpsLog);
+        debugLogVBoxButtons.getChildren().add(buttonImageAnalysisLog);
+        debugLogVBoxButtons.getChildren().add(buttonInformationSourceLog);
+        debugLogVBoxButtons.getChildren().add(buttonLandscapeTrackingLog);
+        debugLogVBoxButtons.getChildren().add(buttonPoiLog);
+        debugLogVBoxButtons.getChildren().add(buttonUserTrackingLog);
+
+        listDebugLog = new ListView<>();
+        listDebugLog.setId("listDebugLog");
+
+        debugLogPane = new HBox();
+        debugLogPane.setId("debugPane");
+
+        debugLogPane.getChildren().add(debugLogVBoxButtons);
+        debugLogPane.getChildren().add(listDebugLog);
+    }
+
+    private void initDebugTensorFlow() {
+        labelTensorFlowDebug = new Label();
+        labelTensorFlowDebug.setId("textTFDebug");
+        labelTensorFlowDebug.setVisible(false);
+    }
+
     @Override
     public void start(Stage stage) {
         stage.setTitle("Side Window Infotainment");
 
-        Scene scene = new Scene(root, 800, 600, Color.WHITE);
+        Scene scene = new Scene(stackPaneRoot, 800, 600, Color.WHITE);
         scene.setOnKeyPressed(event -> viewModel.onKeyPressed(event.getCode()));
         scene.getStylesheets().add("/stylesheets/TransparentApplicationViewStylesheet.css");
         stage.setScene(scene);
@@ -97,13 +330,6 @@ public class ApplicationViewImplementation extends Application implements Applic
     private void initFullscreenMode(Stage stage) {
         if (AppProperties.getInstance().useFullscreen) {
             stage.setMaximized(true);
-//            Screen screen = Screen.getPrimary();
-//            Rectangle2D screenVisualBounds = screen.getVisualBounds();
-//
-//            stage.setX(screenVisualBounds.getMinX());
-//            stage.setY(screenVisualBounds.getMinY());
-//            stage.setWidth(screenVisualBounds.getWidth());
-//            stage.setHeight(screenVisualBounds.getHeight());
         }
         else if (AppProperties.getInstance().useFullscreenWithoutWindowChrome) {
             stage.setFullScreen(true);
@@ -112,150 +338,12 @@ public class ApplicationViewImplementation extends Application implements Applic
 
     @Override
     public void toggleTensorFlowDebugWindow() {
-        textTFDebug.setVisible(!textTFDebug.isVisible());
-    }
-
-    private void initElements() {
-        GridPane lists = new GridPane();
-        int numRows = 3;
-        for(int i = 0;i < numRows;i++) {
-            RowConstraints rc = new RowConstraints();
-            rc.setPercentHeight(100.0 / numRows);//-55.0*i*i + 110*i + 15.0
-            rc.setValignment(VPos.CENTER);
-            lists.getRowConstraints().add(rc);
-        }
-        lists.getRowConstraints().get(0).setPercentHeight(15.0);
-        lists.getRowConstraints().get(1).setPercentHeight(70.0);
-        lists.getRowConstraints().get(2).setPercentHeight(15.0);
-
-        int numColumns = 3;
-        for(int i = 0;i < numColumns;i++) {
-            ColumnConstraints cc = new ColumnConstraints();
-            cc.setPercentWidth(100.0 / numColumns);
-            cc.setHalignment(HPos.CENTER);
-            lists.getColumnConstraints().add(cc);
-        }
-        lists.add(listPoiCamera, 0, 0, 3, 1);
-        lists.add(listPoiMaps, 0,2, 3, 1);
-        lists.add(statusPane, 0, 1);
-        lists.add(infoboxPane, 1, 1);
-        lists.add(debugPane, 2, 1);
-
-        /*pnFoundation.setId("pnFoundation");
-        pnFoundation.setTop(listPoiCamera);
-        pnFoundation.setBottom(listPoiMaps);
-        pnFoundation.setLeft(statusPane);*/
-
-        listPoiCamera.setId("listPoiCamera");
-        listPoiMaps.setId("listPoiMaps");
-
-        statusPane.setId("statusPane");
-        statusPane.getChildren().add(listModuleStatus);
-        statusPane.getChildren().add(listExpressionStatus);
-
-        listModuleStatus.setId("listModuleStatus");
-
-        listExpressionStatus.setId("listExpressionStatus");
-
-        togglePane.setId("togglePane");
-        toggleApplicationViewLog.setId("toggleApplicationView");
-        toggleApplicationViewLog.setOnMouseClicked(event -> toggleStyle("ApplicationView"));
-        toggleImageAnalysisLog.setId("toggleImageAnalysis");
-        toggleImageAnalysisLog.setOnMouseClicked(event -> toggleStyle("ImageAnalysis"));
-        toggleInformationSourceLog.setId("toggleInformationSource");
-        toggleInformationSourceLog.setOnMouseClicked(event -> toggleStyle("InformationSource"));
-        toggleLandscapeTrackingLog.setId("toggleLandscapeTracking");
-        toggleLandscapeTrackingLog.setOnMouseClicked(event -> toggleStyle("LandscapeTracking"));
-        togglePoiLog.setId("togglePoi");
-        togglePoiLog.setOnMouseClicked(event -> toggleStyle("POI"));
-        toggleUserTrackingLog.setId("toggleUserTracking");
-        toggleUserTrackingLog.setOnMouseClicked(event -> toggleStyle("UserTracking"));
-        toggleGpsLog.setId("toggleGpsLog");
-        toggleGpsLog.setOnMouseClicked(event -> toggleStyle("GPS"));
-
-        //togglePane.getStyleClass().add("toggleButton");
-        toggleApplicationViewLog.setId("toggleApplicationView");
-        toggleApplicationViewLog.getStyleClass().add("toggleButton");
-        toggleImageAnalysisLog.setId("toggleImageAnalysis");
-        toggleInformationSourceLog.setId("toggleInformationSource");
-        toggleLandscapeTrackingLog.setId("toggleLandscapeTracking");
-        togglePoiLog.setId("togglePoi");
-        toggleUserTrackingLog.setId("toggleUserTracking");
-        toggleGpsLog.setId("toggleGpsLog");
-
-        togglePane.getChildren().add(toggleApplicationViewLog);
-        togglePane.getChildren().add(toggleGpsLog);
-        togglePane.getChildren().add(toggleImageAnalysisLog);
-        togglePane.getChildren().add(toggleInformationSourceLog);
-        togglePane.getChildren().add(toggleLandscapeTrackingLog);
-        togglePane.getChildren().add(togglePoiLog);
-        togglePane.getChildren().add(toggleUserTrackingLog);
-
-        debugPane.setId("debugPane");
-        debugPane.getChildren().add(togglePane);
-        debugPane.getChildren().add(listDebugLog);
-
-        listDebugLog.setId("listDebugLog");
-        textTFDebug.setId("textTFDebug");
-        textTFDebug.setVisible(false);
-        infoboxPane.setId("expansionPane");
-        infoboxPane.setVisible(false);
-        infoboxTitlePane.setId("expansionTopPane");
-        infoboxCloseButton.setId("expansionButton");
-        infoboxTitle.setId("expansionName");
-        infoboxContentPane.setId("expansionContentPane");
-        infoboxInformation.setId("expansionInformation");
-        infoboxImage.setId("expansionImage");
-        infoboxScrollPane.setId("expansionScrollPane");
-
-        mediaView = new MediaView(mediaPlayer);
-        mediaView.setVisible(false);
-        final DoubleProperty width = mediaView.fitWidthProperty();
-        final DoubleProperty height = mediaView.fitHeightProperty();
-
-        width.bind(Bindings.selectDouble(mediaView.sceneProperty(), "width"));
-        height.bind(Bindings.selectDouble(mediaView.sceneProperty(), "height"));
-        mediaView.setPreserveRatio(true);
-
-        root.getChildren().add(mediaView);
-        //root.getChildren().add(pnFoundation);
-        root.getChildren().add(lists);
-        // root.getChildren().add(listDebugLog);
-        // StackPane.setAlignment(listDebugLog, Pos.TOP_RIGHT);
-        //root.getChildren().add(debugPane);
-        //StackPane.setAlignment(debugPane, Pos.TOP_RIGHT);
-        root.getChildren().add(textTFDebug);
-        StackPane.setAlignment(textTFDebug, Pos.BOTTOM_RIGHT);
-        Insets insets = new Insets(0, 0, 150, 0);
-        StackPane.setMargin(textTFDebug, insets);
-    }
-
-    private void initInfobox() {
-        infoboxTitle.setAlignment(Pos.TOP_CENTER);
-        infoboxInformation.setAlignment(Pos.TOP_CENTER);
-        infoboxContentPane.setTop(infoboxImage);
-        infoboxContentPane.setBottom(infoboxInformation);
-        infoboxScrollPane.setContent(infoboxContentPane);
-
-        infoboxImage.setPreserveRatio(true);
-        infoboxImage.setFitHeight(150);
-        infoboxImage.minHeight(0);
-        infoboxImage.minWidth(0);
-
-        infoboxTitlePane.setLeft(infoboxTitle);
-        infoboxTitlePane.setRight(infoboxCloseButton);
-        infoboxPane.setTop(infoboxTitlePane);
-        infoboxPane.setCenter(infoboxImage);
-        infoboxPane.setBottom(infoboxScrollPane);
-        //pnFoundation.setCenter(infoboxPane);
-        BorderPane.setAlignment(infoboxPane, Pos.CENTER);
-        BorderPane.setAlignment(infoboxImage, Pos.CENTER);
-        infoboxScrollPane.setFitToWidth(true);
+        labelTensorFlowDebug.setVisible(!labelTensorFlowDebug.isVisible());
     }
 
     @Override
     public void showDebugLog(boolean show) {
-        debugPane.setVisible(show);
+        debugLogPane.setVisible(show);
     }
 
     @Override
@@ -270,11 +358,11 @@ public class ApplicationViewImplementation extends Application implements Applic
 
     @Override
     public void toggleDebugLog() {
-        showDebugLog(!debugPane.isVisible());
+        showDebugLog(!debugLogPane.isVisible());
     }
 
-    private RotateTransition infoboxRotateTransition = new RotateTransition(Duration.seconds(0.75), infoboxPane);
-    private TranslateTransition infoboxTranslateTransition = new TranslateTransition(Duration.seconds(2), infoboxPane);
+    private RotateTransition infoboxRotateTransition = null;
+    private TranslateTransition infoboxTranslateTransition = null;
     //TODO : private ScaleTransition infoboxScaleTransition = new ScaleTransition(Duration.seconds(2), infoboxPane);
 
     private void initBindings() {
@@ -284,13 +372,13 @@ public class ApplicationViewImplementation extends Application implements Applic
         try {
             infoboxCloseButton.visibleProperty().bind(Bindings.equal(viewModel.getExpandedPOI().nameProperty(), "").not());
             infoboxCloseButton.onActionProperty().bindBidirectional(viewModel.propertyCloseButtonProperty());
-            toggleGpsLog.onActionProperty().bindBidirectional(viewModel.propertyToggleGpsButtonProperty());
-            togglePoiLog.onActionProperty().bindBidirectional(viewModel.propertyTogglePoiButtonProperty());
-            toggleUserTrackingLog.onActionProperty().bindBidirectional(viewModel.propertyToggleUserTrackingButtonProperty());
-            toggleLandscapeTrackingLog.onActionProperty().bindBidirectional(viewModel.propertyToggleLandscapeTrackingButtonProperty());
-            toggleImageAnalysisLog.onActionProperty().bindBidirectional(viewModel.propertyToggleImageAnalysisButtonProperty());
-            toggleInformationSourceLog.onActionProperty().bindBidirectional(viewModel.propertyToggleInformationSourceButtonProperty());
-            toggleApplicationViewLog.onActionProperty().bindBidirectional(viewModel.propertyToggleApplicationViewButtonProperty());
+            buttonGpsLog.onActionProperty().bindBidirectional(viewModel.propertyToggleGpsButtonProperty());
+            buttonPoiLog.onActionProperty().bindBidirectional(viewModel.propertyTogglePoiButtonProperty());
+            buttonUserTrackingLog.onActionProperty().bindBidirectional(viewModel.propertyToggleUserTrackingButtonProperty());
+            buttonLandscapeTrackingLog.onActionProperty().bindBidirectional(viewModel.propertyToggleLandscapeTrackingButtonProperty());
+            buttonImageAnalysisLog.onActionProperty().bindBidirectional(viewModel.propertyToggleImageAnalysisButtonProperty());
+            buttonInformationSourceLog.onActionProperty().bindBidirectional(viewModel.propertyToggleInformationSourceButtonProperty());
+            buttonApplicationViewLog.onActionProperty().bindBidirectional(viewModel.propertyToggleApplicationViewButtonProperty());
             infoboxTitle.textProperty().bindBidirectional(viewModel.getExpandedPOI().nameProperty());
             infoboxImage.imageProperty().bindBidirectional(viewModel.getExpandedPOI().imageProperty());
             infoboxInformation.textProperty().bindBidirectional(viewModel.getExpandedPOI().informationAbstractProperty());
@@ -300,11 +388,12 @@ public class ApplicationViewImplementation extends Application implements Applic
             listPoiMaps.itemsProperty().bindBidirectional(viewModel.propertyPoiMapsProperty());
 
             listDebugLog.itemsProperty().bindBidirectional(viewModel.propertyDebugLogProperty());
-            textTFDebug.textProperty().bindBidirectional(DebugTF.logString);
+            labelTensorFlowDebug.textProperty().bindBidirectional(DebugTF.logString);
             if (!AppProperties.getInstance().useDemoVideo) {
-                root.backgroundProperty().bindBidirectional(viewModel.getBackgroundProperty());
+                stackPaneRoot.backgroundProperty().bindBidirectional(viewModel.getBackgroundProperty());
             }
 
+            infoboxRotateTransition = new RotateTransition(Duration.seconds(0.75), infoboxPane);
             infoboxRotateTransition.setOnFinished(new EventHandler<ActionEvent>(){
                 public void handle(ActionEvent AE){
                     infoboxRotateTransition.setToAngle(viewModel.getInfoBoxRotation().doubleValue());
@@ -315,6 +404,7 @@ public class ApplicationViewImplementation extends Application implements Applic
             infoboxRotateTransition.setToAngle(viewModel.getInfoBoxRotation().doubleValue());
             infoboxRotateTransition.play();
 
+            infoboxTranslateTransition = new TranslateTransition(Duration.seconds(2), infoboxPane);
             infoboxTranslateTransition.setOnFinished(new EventHandler<ActionEvent>(){
                 public void handle(ActionEvent AE){
                     infoboxTranslateTransition.setToX(viewModel.getInfoBoxTranslationX().doubleValue());
@@ -481,7 +571,7 @@ public class ApplicationViewImplementation extends Application implements Applic
 
     @Override
     public MediaView getMediaView() {
-        return mediaView;
+        return mediaLayer;
     }
 
     static class LogTextCell extends ListCell<String> {
@@ -498,32 +588,32 @@ public class ApplicationViewImplementation extends Application implements Applic
     private void toggleStyle(String module){
         boolean status = DebugLog.getModuleStatus(module);
         if (module.equals("GPS")){
-            if (status) toggleGpsLog.setStyle("-fx-background-color: black");
-            else        toggleGpsLog.setStyle("-fx-background-color: dimgray");
+            if (status) buttonGpsLog.setStyle("-fx-background-color: black");
+            else        buttonGpsLog.setStyle("-fx-background-color: dimgray");
         }
         if (module.equals("POI")){
-            if (status) togglePoiLog.setStyle("-fx-background-color: black");
-            else        togglePoiLog.setStyle("-fx-background-color: dimgray");
+            if (status) buttonPoiLog.setStyle("-fx-background-color: black");
+            else        buttonPoiLog.setStyle("-fx-background-color: dimgray");
         }
         if (module.equals("UserTracking")){
-            if (status) toggleUserTrackingLog.setStyle("-fx-background-color: black");
-            else        toggleUserTrackingLog.setStyle("-fx-background-color: dimgray");
+            if (status) buttonUserTrackingLog.setStyle("-fx-background-color: black");
+            else        buttonUserTrackingLog.setStyle("-fx-background-color: dimgray");
         }
         if (module.equals("LandscapeTracking")){
-            if (status) toggleLandscapeTrackingLog.setStyle("-fx-background-color: black");
-            else        toggleLandscapeTrackingLog.setStyle("-fx-background-color: dimgray");
+            if (status) buttonLandscapeTrackingLog.setStyle("-fx-background-color: black");
+            else        buttonLandscapeTrackingLog.setStyle("-fx-background-color: dimgray");
         }
         if (module.equals("ImageAnalysis")){
-            if (status) toggleImageAnalysisLog.setStyle("-fx-background-color: black");
-            else        toggleImageAnalysisLog.setStyle("-fx-background-color: dimgray");
+            if (status) buttonImageAnalysisLog.setStyle("-fx-background-color: black");
+            else        buttonImageAnalysisLog.setStyle("-fx-background-color: dimgray");
         }
         if (module.equals("ApplicationView")){
-            if (status) toggleApplicationViewLog.setStyle("-fx-background-color: black");
-            else        toggleApplicationViewLog.setStyle("-fx-background-color: dimgray");
+            if (status) buttonApplicationViewLog.setStyle("-fx-background-color: black");
+            else        buttonApplicationViewLog.setStyle("-fx-background-color: dimgray");
         }
         if (module.equals("InformationSource")){
-            if (status) toggleInformationSourceLog.setStyle("-fx-background-color: black");
-            else        toggleInformationSourceLog.setStyle("-fx-background-color: dimgray");
+            if (status) buttonInformationSourceLog.setStyle("-fx-background-color: black");
+            else        buttonInformationSourceLog.setStyle("-fx-background-color: dimgray");
         }
     }
 
