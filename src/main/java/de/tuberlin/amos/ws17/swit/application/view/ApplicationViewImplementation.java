@@ -464,21 +464,23 @@ public class ApplicationViewImplementation extends Application implements Applic
                             setGraphic(null);
                             setText(null);
                         } else {
+
                             Label lblName = new Label(item.getName());
-                            lblName.setPadding(new Insets(4, 4, 0, 4));
-                            lblName.setFont(fontItem);
-                            //lblName.setTextFill(Color.BLACK);
-                            //lblName.setBackground(new BackgroundFill(Color.TRANSPARENT, null, null));
+                            lblName.setStyle("-fx-text-fill: white;" +
+                                "-fx-background-color: transparent; -fx-effect: dropshadow( gaussian , black , 4, 0.95 , 0 , 0 );");
+                            BorderPane.setMargin(lblName, new Insets(4,0,0,0));
+                            BorderPane.setAlignment(lblName, Pos.TOP_CENTER);
 
-                            lblName.setStyle("-fx-text-fill: black;" +
-                                    "-fx-background-color: transparent; -fx-effect: dropshadow( gaussian , white , 2, 1.0 , 0 , 0 );");
-
-                            GridPane pane = new GridPane();
-                            pane.setMinWidth(itemWidth);
-                            pane.setMaxWidth(itemWidth);
+                            BorderPane border = new BorderPane();
+                            border.setMinWidth(itemWidth);
+                            border.setMaxWidth(itemWidth);
+                            border.setOnMouseClicked(event -> viewModel.expandPoi(item.getId()));
+                            border.setBorder(new Border(new BorderStroke(Color.DARKGRAY, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
+                            border.setStyle("-fx-border-color: darkgrey; -fx-border-width: 4px;");
+                            //border.setPadding(new Insets(4, 0, 4, 0));
 
                             if (item.getImage() != null) {
-                                pane.setBackground(new Background(new BackgroundImage(item.getImage(),
+                                border.setBackground(new Background(new BackgroundImage(item.getImage(),
                                     BackgroundRepeat.NO_REPEAT,
                                     BackgroundRepeat.NO_REPEAT,
                                     BackgroundPosition.CENTER,
@@ -489,14 +491,36 @@ public class ApplicationViewImplementation extends Application implements Applic
                                         true))));
                             }
 
-                            pane.add(lblName, 0,0);
-                            pane.setOnMouseClicked(event -> viewModel.expandPoi(item.getId()));
-                            pane.setBorder(new Border(new BorderStroke(Color.DARKGRAY, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
-                            pane.setStyle("-fx-border-color: darkgrey; -fx-border-width: 4px;");
-                            pane.setPadding(new Insets(5, 0, 5, 0));
-                            setGraphic(pane);
-                            listPoiCamera.refresh();
-                            listPoiMaps.refresh();
+
+                            border.setTop(lblName);
+
+                            setGraphic(border);
+
+
+//                            Label lblName = new Label(item.getName());
+//                            GridPane.setFillWidth(lblName, true);
+//                            lblName.setMaxWidth(Double.MAX_VALUE);
+//                            lblName.setAlignment(Pos.CENTER_RIGHT);
+//                            lblName.setPadding(new Insets(4, 4, 0, 4));
+//                            lblName.setFont(fontItem);
+//                            //lblName.setTextFill(Color.BLACK);
+//                            //lblName.setBackground(new BackgroundFill(Color.TRANSPARENT, null, null));
+//
+//                            lblName.setStyle("-fx-text-fill: black;" +
+//                                    "-fx-background-color: red; -fx-effect: dropshadow( gaussian , white , 2, 1.0 , 0 , 0 );");
+//
+//                            GridPane pane = new GridPane();
+//                            //GridPane.setHalignment(lblName, HPos.CENTER);
+//                            pane.setMinWidth(itemWidth);
+//                            pane.setMaxWidth(itemWidth);
+//
+
+//
+//                            pane.add(lblName, 0,0);
+
+//                            setGraphic(pane);
+//                            listPoiCamera.refresh();
+//                            listPoiMaps.refresh();
                         }
                     }
                 };
