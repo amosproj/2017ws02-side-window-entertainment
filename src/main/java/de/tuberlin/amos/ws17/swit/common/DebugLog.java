@@ -32,7 +32,9 @@ public class DebugLog {
     }
 
     public static void log(String s) {
-        debugLog.add(new DebugEntry(s));
+        Platform.runLater(() -> {
+            debugLog.add(new DebugEntry(s));
+        });
     }
 
     public static ObservableList<DebugEntry> getDebugLog() {
@@ -49,7 +51,7 @@ public class DebugLog {
         if (module == "GPS") showGps = !showGps;
         if (module == "ApplicationView") showApplicationView = !showApplicationView;
 
-        Platform.runLater(() -> {
+
             debugLogFiltered.setPredicate(debugEntry ->
                 (showUserTracking && (debugEntry.source.equals("JavoNetUserTracker") || debugEntry.source.equals("UserTrackerMock")))
                     || (showGps && (debugEntry.source.equals("GpsTrackerMock") || debugEntry.source.equals("GpsPortReader") || debugEntry.source.equals("GpsTrackerImplementation")))
@@ -58,7 +60,7 @@ public class DebugLog {
                     || (showLandscapeTracking && (debugEntry.source.equals("LandscapeTrackerMock") || debugEntry.source.equals("LandscapeTrackerImplementation")))
                     // || showPoi && *No class uses DebugLog yet*
                     || (showApplicationView && debugEntry.source.equals("ApplicationViewModelImplementation")));
-        });
+        //});
 
         System.out.println("toggleModule: " + module + " -> " + showGps);
     }

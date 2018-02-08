@@ -26,6 +26,7 @@ import javafx.scene.layout.*;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
@@ -56,20 +57,18 @@ public class ApplicationViewImplementation extends Application implements Applic
 
     //### Poi Lists
     private ListView<PoiViewModel> listPoiCamera = null;
-    private ListView<PoiViewModel> listPoiMaps = new ListView<>();
+    private ListView<PoiViewModel> listPoiMaps = null;
 
     //### Status: expressions and module status
     private HBox statusPane = null;
-    private ListView<ModuleStatusViewModel> listModuleStatus = new ListView<>();
-    private ListView<UserExpressionViewModel> listExpressionStatus = new ListView<>();
+    private ListView<ModuleStatusViewModel> listModuleStatus = null;
+    private ListView<UserExpressionViewModel> listExpressionStatus = null;
     //##########
 
     //##### debug layer #####
     private GridPane debugLayer = null;
     //### DebugLog
-    private ListView<String> listDebugLog = new ListView<>();
-
-    private HBox debugLogPane = null;
+    private GridPane debugLogPane = null;
     private VBox debugLogVBoxButtons = null;
 
     private Button buttonUserTrackingLog = null;
@@ -79,8 +78,10 @@ public class ApplicationViewImplementation extends Application implements Applic
     private Button buttonImageAnalysisLog = null;
     private Button buttonApplicationViewLog = null;
     private Button buttonGpsLog = null;
+
+    private ListView<String> listDebugLog = null;
     //### TensorFlow Debug
-    private Label labelTensorFlowDebug = new Label();
+    private Label labelTensorFlowDebug = null;
     //##########
 
     private static final String FONTNAME = "Helvetica Neue";
@@ -249,6 +250,7 @@ public class ApplicationViewImplementation extends Application implements Applic
         debugLayer.getRowConstraints().addAll(applicationLayer.getRowConstraints());
         debugLayer.getColumnConstraints().addAll(applicationLayer.getColumnConstraints());
         debugLayer.setPickOnBounds(false);
+        debugLayer.setAlignment(Pos.CENTER);
 
         initDebugLog();
 
@@ -259,9 +261,6 @@ public class ApplicationViewImplementation extends Application implements Applic
     }
 
     private void initDebugLog() {
-        debugLogVBoxButtons = new VBox();
-        debugLogVBoxButtons.setId("togglePane");
-
         buttonUserTrackingLog = new Button("user_tracking");
         buttonUserTrackingLog.setId("toggleUserTracking");
         buttonUserTrackingLog.setOnMouseClicked(event -> toggleStyle("UserTracking"));
@@ -291,6 +290,10 @@ public class ApplicationViewImplementation extends Application implements Applic
         buttonGpsLog.setId("toggleGpsLog");
         buttonGpsLog.setOnMouseClicked(event -> toggleStyle("GPS"));
 
+        debugLogVBoxButtons = new VBox();
+        debugLogVBoxButtons.setId("togglePane");
+        //debugLogVBoxButtons.setPrefWidth(Double.MAX_VALUE);
+
         debugLogVBoxButtons.getChildren().add(buttonApplicationViewLog);
         debugLogVBoxButtons.getChildren().add(buttonGpsLog);
         debugLogVBoxButtons.getChildren().add(buttonImageAnalysisLog);
@@ -301,12 +304,25 @@ public class ApplicationViewImplementation extends Application implements Applic
 
         listDebugLog = new ListView<>();
         listDebugLog.setId("listDebugLog");
+        //listDebugLog.setMinWidth(Double.MAX_VALUE);
+        //GridPane.setHgrow(listDebugLog, Priority.ALWAYS);
+        //listDebugLog.setMaxWidth(Double.MAX_VALUE);
+        //listDebugLog.setPrefWidth(Double.MAX_VALUE);
 
-        debugLogPane = new HBox();
+        debugLogPane = new GridPane();
         debugLogPane.setId("debugPane");
 
-        debugLogPane.getChildren().add(debugLogVBoxButtons);
-        debugLogPane.getChildren().add(listDebugLog);
+        //debugLogPane.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+
+        debugLogPane.getColumnConstraints().add(new ColumnConstraints());
+        debugLogPane.getColumnConstraints().add(new ColumnConstraints());
+        debugLogPane.getColumnConstraints().get(0).setPercentWidth(25);
+        //debugLogPane.getColumnConstraints().get(0).setHgrow(Priority.ALWAYS);
+        debugLogPane.getColumnConstraints().get(1).setPercentWidth(75);
+
+        debugLogPane.add(debugLogVBoxButtons, 0, 0);
+        debugLogPane.add(listDebugLog, 1, 0);
+
     }
 
     private void initDebugTensorFlow() {
@@ -319,7 +335,7 @@ public class ApplicationViewImplementation extends Application implements Applic
     public void start(Stage stage) {
         stage.setTitle("Side Window Infotainment");
 
-        Scene scene = new Scene(stackPaneRoot, 800, 600, Color.WHITE);
+        Scene scene = new Scene(stackPaneRoot, 1280, 720, Color.WHITE);
         scene.setOnKeyPressed(event -> viewModel.onKeyPressed(event.getCode()));
         scene.getStylesheets().add("/stylesheets/TransparentApplicationViewStylesheet.css");
         stage.setScene(scene);
@@ -455,7 +471,7 @@ public class ApplicationViewImplementation extends Application implements Applic
                             pane.add(lblName, 0,0);
                             pane.setOnMouseClicked(event -> viewModel.expandPoi(item.getId()));
                             pane.setBorder(new Border(new BorderStroke(Color.DARKGRAY, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
-                            pane.setStyle("-fx-border-color: darkgrey; -fx-border-width: 3px;");
+                            pane.setStyle("-fx-border-color: darkgrey; -fx-border-width: 4px;");
                             pane.setPadding(new Insets(5, 0, 5, 0));
                             setGraphic(pane);
                             listPoiCamera.refresh();

@@ -3,15 +3,6 @@
     -fx-max-width:70px;
 }
 
-#listDebugLog {
-    -fx-min-width: 250px;
-    -fx-max-width: 250px;
-}
-
-#listDebugLog .label {
-    -fx-font-size: 15px;
-}
-
 #expansionPane {
     -fx-max-width: 500px;
     -fx-max-height: 400px;
