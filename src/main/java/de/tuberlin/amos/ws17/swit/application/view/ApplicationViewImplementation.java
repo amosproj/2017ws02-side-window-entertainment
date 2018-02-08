@@ -7,10 +7,7 @@ import de.tuberlin.amos.ws17.swit.common.DebugLog;
 import de.tuberlin.amos.ws17.swit.common.DebugTF;
 import de.tuberlin.amos.ws17.swit.common.Module;
 import de.tuberlin.amos.ws17.swit.image_analysis.ImageUtils;
-import javafx.animation.FadeTransition;
-import javafx.animation.ParallelTransition;
-import javafx.animation.RotateTransition;
-import javafx.animation.TranslateTransition;
+import javafx.animation.*;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -592,12 +589,31 @@ public class ApplicationViewImplementation extends Application implements Applic
 
     @Override
     public void showExpandedPoi(boolean show) {
+        ScaleTransition scaleTransition = new ScaleTransition(Duration.millis(350), infoboxPane);
+
         if (show) {
             if (infoboxPane.isVisible()) { return; } // already visible, nothing to do
-            AnimationUtils.scaleUp(infoboxPane, 0, 1f, 0, 1f, 1000, true);
+
+            scaleTransition.setFromX(0);
+            scaleTransition.setToX(1);
+            scaleTransition.setFromY(0);
+            scaleTransition.setToY(1);
+
+            infoboxPane.setVisible(true);
         } else {
-            AnimationUtils.scaleDown(infoboxPane, 0, 0, 1000, false);
+            scaleTransition.setFromX(1);
+            scaleTransition.setToX(0);
+            scaleTransition.setFromY(1);
+            scaleTransition.setToY(0);
+
+            scaleTransition.setOnFinished(new EventHandler<ActionEvent>(){
+                public void handle(ActionEvent AE){
+                    infoboxPane.setVisible(false);
+                }
+            });
         }
+
+        scaleTransition.play();
     }
 
     @Override
@@ -607,10 +623,6 @@ public class ApplicationViewImplementation extends Application implements Applic
             m.stopModule();
         }
         System.exit(0);
-    }
-
-    private void moveInfoboxByUserPosition() {
-
     }
 
     @Override
