@@ -250,14 +250,14 @@ public class ApplicationViewImplementation extends Application implements Applic
         debugLayer.getRowConstraints().addAll(applicationLayer.getRowConstraints());
         debugLayer.getColumnConstraints().addAll(applicationLayer.getColumnConstraints());
         debugLayer.setPickOnBounds(false);
-        debugLayer.setAlignment(Pos.CENTER);
+        //debugLayer.setAlignment(Pos.CENTER_RIGHT);
 
         initDebugLog();
 
         initDebugTensorFlow();
 
-        applicationLayer.add(debugLogPane, 2, 1, 2, 1);
-        applicationLayer.add(labelTensorFlowDebug, 2, 2);
+        debugLayer.add(debugLogPane, 2, 1);
+        debugLayer.add(labelTensorFlowDebug, 2, 2);
     }
 
     private void initDebugLog() {
@@ -311,6 +311,7 @@ public class ApplicationViewImplementation extends Application implements Applic
 
         debugLogPane = new GridPane();
         debugLogPane.setId("debugPane");
+        //GridPane.setHalignment(debugLogPane, HPos.RIGHT);
 
         //debugLogPane.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 

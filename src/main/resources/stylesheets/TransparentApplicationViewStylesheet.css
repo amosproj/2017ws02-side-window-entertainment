@@ -4,9 +4,6 @@
 }
 
 #listDebugLog {
-    -fx-min-width: 200px;
-    -fx-max-width: 500px;
-    -fx-max-height: 400px;
     -fx-background-color: rgba(0, 0, 0, 0.7);
 }
 
