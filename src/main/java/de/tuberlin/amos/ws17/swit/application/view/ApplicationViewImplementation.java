@@ -2,6 +2,7 @@ package de.tuberlin.amos.ws17.swit.application.view;
 
 import de.tuberlin.amos.ws17.swit.application.AppProperties;
 import de.tuberlin.amos.ws17.swit.application.viewmodel.*;
+import de.tuberlin.amos.ws17.swit.common.AnimationUtils;
 import de.tuberlin.amos.ws17.swit.common.DebugLog;
 import de.tuberlin.amos.ws17.swit.common.DebugTF;
 import de.tuberlin.amos.ws17.swit.common.Module;
@@ -371,8 +372,15 @@ public class ApplicationViewImplementation extends Application implements Applic
     }
 
     private void showPoiLists(boolean show) {
-        listPoiCamera.setVisible(show);
-        listPoiMaps.setVisible(show);
+        if (listPoiCamera.isVisible() == show) { return; } // nothing to do
+        int animationDuration = 1000;
+        if (!show) {
+            AnimationUtils.slideUp(listPoiCamera, listPoiCamera.getHeight(), animationDuration, false);
+            AnimationUtils.slideDown(listPoiMaps, listPoiMaps.getHeight(), animationDuration, false);
+        } else {
+            AnimationUtils.slideUp(listPoiMaps, listPoiMaps.getHeight(), animationDuration, true);
+            AnimationUtils.slideDown(listPoiCamera, listPoiCamera.getHeight(), animationDuration, true);
+        }
     }
 
     @Override
@@ -572,7 +580,12 @@ public class ApplicationViewImplementation extends Application implements Applic
 
     @Override
     public void showExpandedPoi(boolean show) {
-        infoboxPane.setVisible(show);
+        if (show) {
+            if (infoboxPane.isVisible()) { return; } // already visible, nothing to do
+            AnimationUtils.scaleUp(infoboxPane, 0, 1f, 0, 1f, 1000, true);
+        } else {
+            AnimationUtils.scaleDown(infoboxPane, 0, 0, 1000, false);
+        }
     }
 
     @Override
