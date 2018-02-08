@@ -467,7 +467,7 @@ public class ApplicationViewImplementation extends Application implements Applic
 
                             Label lblName = new Label(item.getName());
                             lblName.setStyle("-fx-text-fill: white;" +
-                                "-fx-background-color: transparent; -fx-effect: dropshadow( gaussian , black , 4, 0.95 , 0 , 0 );");
+                                "-fx-background-color: transparent; -fx-effect: dropshadow( gaussian , black , 8, 0.90 , 0 , 0 );");
                             BorderPane.setMargin(lblName, new Insets(4,0,0,0));
                             BorderPane.setAlignment(lblName, Pos.TOP_CENTER);
 
