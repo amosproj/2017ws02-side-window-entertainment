@@ -49,19 +49,22 @@ JavoNet:
 
 There a additional steps needed to setup your development environment.
 
-1. In order to make the GPS module work, you need to download the **RXTX Windows x64 binaries** from [here](http://fizzed.com/oss/rxtx-for-java)
+1. Import the project as a Maven project to your IDE (e.g. Intellij IDEA)
+2. In order to make the GPS module work, you need to download the **RXTX Windows x64 binaries** from [here](http://fizzed.com/oss/rxtx-for-java)
   * Copy `RXTXcomm.jar` to `<JAVA_HOME>\jre\lib\ext`
   * Copy `rxtxSerial.dll` to `<JAVA_HOME>\jre\bin`
   * Copy `rxtxParallel.dll` to `<JAVA_HOME>\jre\bin`
-2. The model graph and labels of the classifier are not bundled into the repository, you can download them using Maven:
+3. The model graph and labels of the classifier are not bundled into the repository, you can download them using Maven:
 
 	```
 	mvn compile
 	```
-	
+4. Run ``ApplicationViewImplementation.java`` to start the app
+
 ## Deployment
 
 Build and deploy the `jar` using Maven
+
 ```
 mvn package
 ```
@@ -69,6 +72,8 @@ mvn package
 ## Built With
 
 * [Maven](https://maven.apache.org/) - Dependency Management
+* [JavaFX](http://www.oracle.com/technetwork/java/javase/overview/javafx-overview-2158620.html) - standard GUI libra ry for Java SE
+* [JavoNet](javonet) - Java to .NET Bridge
 * [Tensorflow](https://www.tensorflow.org/) - Machine Learning Framework
 * [JavaCV](https://github.com/bytedeco/javacv) - Java Interface to OpenCV
 * [Google API Client](https://developers.google.com/api-client-library/) - API Client for Google Services

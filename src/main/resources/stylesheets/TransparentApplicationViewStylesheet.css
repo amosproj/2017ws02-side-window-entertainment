@@ -28,7 +28,7 @@
 
 #expansionTopPane {
     -fx-background-color: rgba(64,64,64,255);
-    -fx-padding: 8px;
+
 }
 
 #expansionName {
@@ -86,9 +86,10 @@
 
 .button {
     -fx-font-size: 20px;
-
     -fx-text-fill: white;
     -fx-background-color: black;
+    -fx-border-radius: 0 0 0 0;
+    -fx-background-radius: 0 0 0 0;
 }
 
 .button:hover {
