@@ -74,7 +74,7 @@ public class AbstractProvider implements InformationProvider, Module{
         if (poi != null) {
             try {
             String wikiUrl = poi.getWikiUrl();
-                DebugLog.log("Fetching Wiki-Article...");
+                DebugLog.log("InformationSource","Fetching Wiki-Article...");
             if (wikiUrl==null){
 
                 String abstractInfo= getAbstract(poi.getName(), LANGUAGE);

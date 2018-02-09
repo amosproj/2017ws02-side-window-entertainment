@@ -79,7 +79,7 @@ public class ApplicationViewImplementation extends Application implements Applic
     private Button buttonApplicationViewLog = null;
     private Button buttonGpsLog = null;
 
-    private ListView<String> listDebugLog = null;
+    private ListView<DebugLog.DebugEntry> listDebugLog = null;
     //### TensorFlow Debug
     private Label labelTensorFlowDebug = null;
     //##########
@@ -151,7 +151,7 @@ public class ApplicationViewImplementation extends Application implements Applic
             mediaLayer.setPreserveRatio(true);
         }
         catch (Exception e) {
-            DebugLog.log("MediaPlayer kann nicht initialisiert werden");
+            DebugLog.log(DebugLog.SOURCE_VIEW,"MediaPlayer kann nicht initialisiert werden");
         }
     }
 
@@ -227,7 +227,6 @@ public class ApplicationViewImplementation extends Application implements Applic
         infoboxTitle.setStyle("" +
             "-fx-fill: white;" +
             "-fx-effect: dropshadow( gaussian , black , 8, 0.90 , 0 , 0 );");
-        //infoboxTitle.set
         BorderPane.setAlignment(infoboxTitle, Pos.CENTER_LEFT);
         BorderPane.setMargin(infoboxTitle, new Insets(4));
 
@@ -243,13 +242,13 @@ public class ApplicationViewImplementation extends Application implements Applic
         infoboxCloseButton.setId("expansionButton");
         infoboxCloseButton.setMinHeight(64);
         infoboxCloseButton.setMinWidth(64);
-        //infoboxCloseButton.setBackground(new Background(new BackgroundFill(Color.TRANSPARENT, CornerRadii.EMPTY, Insets.EMPTY)));
 
         infoboxTitlePane = new BorderPane();
         infoboxTitlePane.setId("expansionTopPane");
         infoboxTitlePane.setLeft(infoboxTitle);
         infoboxTitlePane.setRight(infoboxCloseButton);
-        infoboxTitlePane.setStyle("-fx-background-color: rgba(255, 255, 255, 0.25);");
+        infoboxTitlePane.setStyle("" +
+            "-fx-background-color: rgba(255, 255, 255, 0.25); ");
 
         infoboxImage = new ImageView();
         infoboxImage.setId("expansionImage");
@@ -284,20 +283,6 @@ public class ApplicationViewImplementation extends Application implements Applic
         infoboxPane.setTop(infoboxTitlePane);
         infoboxPane.setCenter(infoboxImage);
         infoboxPane.setBottom(infoboxScrollPane);
-
-        //infobox
-//        infoboxPane.getColumnConstraints().add(new ColumnConstraints());
-//        infoboxPane.getColumnConstraints().get(0).setPercentWidth(100);
-//        infoboxPane.getRowConstraints().add(new RowConstraints());
-//        infoboxPane.getRowConstraints().add(new RowConstraints());
-//        infoboxPane.getRowConstraints().add(new RowConstraints());
-//        infoboxPane.getRowConstraints().get(0).setPercentHeight(5);
-//        infoboxPane.getRowConstraints().get(1).setPercentHeight(25);
-//        infoboxPane.getRowConstraints().get(2).setPercentHeight(70);
-//        infoboxPane.add(infoboxTitlePane, 0,0);
-//        infoboxPane.add(infoboxImage, 0, 1);
-//        infoboxPane.add(infoboxScrollPane,0,2);
-
     }
 
     private void initDebugLayer() {
@@ -315,40 +300,45 @@ public class ApplicationViewImplementation extends Application implements Applic
     }
 
     private void initDebugLog() {
-        buttonUserTrackingLog = new Button("user_tracking");
-        buttonUserTrackingLog.setId("toggleUserTracking");
-        buttonUserTrackingLog.setOnMouseClicked(event -> toggleStyle("UserTracking"));
-        buttonUserTrackingLog.setFont(fontItem);
-
-        buttonLandscapeTrackingLog = new Button("landscape_tracking");
-        buttonLandscapeTrackingLog.setId("toggleLandscapeTracking");
-        buttonLandscapeTrackingLog.setOnMouseClicked(event -> toggleStyle("LandscapeTracking"));
-        buttonLandscapeTrackingLog.setFont(fontItem);
-
-        buttonPoiLog = new Button("POI");
-        buttonPoiLog.setId("togglePoi");
-        buttonPoiLog.setOnMouseClicked(event -> toggleStyle("POI"));
-
-        buttonInformationSourceLog = new Button("information_source");
-        buttonInformationSourceLog.setId("toggleInformationSource");
-        buttonInformationSourceLog.setOnMouseClicked(event -> toggleStyle("InformationSource"));
-
-        buttonImageAnalysisLog = new Button("image_analysis");
-        buttonImageAnalysisLog.setId("toggleImageAnalysis");
-        buttonImageAnalysisLog.setOnMouseClicked(event -> toggleStyle("ImageAnalysis"));
 
         buttonApplicationViewLog = new Button("application_view");
         buttonApplicationViewLog.setId("toggleApplicationView");
         buttonApplicationViewLog.setOnMouseClicked(event -> toggleStyle("ApplicationView"));
         buttonApplicationViewLog.getStyleClass().add("toggleButton");
+        buttonApplicationViewLog.setMaxWidth(Double.MAX_VALUE);
 
         buttonGpsLog = new Button("GPS");
         buttonGpsLog.setId("toggleGpsLog");
         buttonGpsLog.setOnMouseClicked(event -> toggleStyle("GPS"));
+        buttonGpsLog.setMaxWidth(Double.MAX_VALUE);
+
+        buttonImageAnalysisLog = new Button("image_analysis");
+        buttonImageAnalysisLog.setId("toggleImageAnalysis");
+        buttonImageAnalysisLog.setOnMouseClicked(event -> toggleStyle("ImageAnalysis"));
+        buttonImageAnalysisLog.setMaxWidth(Double.MAX_VALUE);
+
+        buttonInformationSourceLog = new Button("information_source");
+        buttonInformationSourceLog.setId("toggleInformationSource");
+        buttonInformationSourceLog.setOnMouseClicked(event -> toggleStyle("InformationSource"));
+        buttonInformationSourceLog.setMaxWidth(Double.MAX_VALUE);
+
+        buttonLandscapeTrackingLog = new Button("landscape_tracking");
+        buttonLandscapeTrackingLog.setId("toggleLandscapeTracking");
+        buttonLandscapeTrackingLog.setOnMouseClicked(event -> toggleStyle("LandscapeTracking"));
+        buttonLandscapeTrackingLog.setMaxWidth(Double.MAX_VALUE);
+
+        buttonPoiLog = new Button("POI");
+        buttonPoiLog.setId("togglePoi");
+        buttonPoiLog.setOnMouseClicked(event -> toggleStyle("POI"));
+        buttonPoiLog.setMaxWidth(Double.MAX_VALUE);
+
+        buttonUserTrackingLog = new Button("user_tracking");
+        buttonUserTrackingLog.setId("toggleUserTracking");
+        buttonUserTrackingLog.setOnMouseClicked(event -> toggleStyle("UserTracking"));
+        buttonUserTrackingLog.setMaxWidth(Double.MAX_VALUE);
 
         debugLogVBoxButtons = new VBox();
         debugLogVBoxButtons.setId("togglePane");
-        //debugLogVBoxButtons.setPrefWidth(Double.MAX_VALUE);
 
         debugLogVBoxButtons.getChildren().add(buttonApplicationViewLog);
         debugLogVBoxButtons.getChildren().add(buttonGpsLog);
@@ -363,15 +353,15 @@ public class ApplicationViewImplementation extends Application implements Applic
 
         debugLogPane = new GridPane();
         debugLogPane.setId("debugPane");
+        debugLogPane.setVisible(AppProperties.getInstance().useDebugLog);
 
         debugLogPane.getColumnConstraints().add(new ColumnConstraints());
         debugLogPane.getColumnConstraints().add(new ColumnConstraints());
-        debugLogPane.getColumnConstraints().get(0).setPercentWidth(25);
-        debugLogPane.getColumnConstraints().get(1).setPercentWidth(75);
+        debugLogPane.getColumnConstraints().get(0).setPercentWidth(15);
+        debugLogPane.getColumnConstraints().get(1).setPercentWidth(85);
 
         debugLogPane.add(debugLogVBoxButtons, 0, 0);
         debugLogPane.add(listDebugLog, 1, 0);
-
     }
 
     private void initDebugTensorFlow() {
@@ -384,7 +374,7 @@ public class ApplicationViewImplementation extends Application implements Applic
     public void start(Stage stage) {
         stage.setTitle("Side Window Infotainment");
 
-        Scene scene = new Scene(stackPaneRoot, 1280, 720, Color.WHITE);
+        Scene scene = new Scene(stackPaneRoot, 1920, 1080, Color.WHITE);
         scene.setOnKeyPressed(event -> viewModel.onKeyPressed(event.getCode()));
         scene.getStylesheets().add("/stylesheets/TransparentApplicationViewStylesheet.css");
         stage.setScene(scene);
@@ -458,7 +448,7 @@ public class ApplicationViewImplementation extends Application implements Applic
             listPoiCamera.itemsProperty().bindBidirectional(viewModel.propertyPoiCameraProperty());
             listPoiMaps.itemsProperty().bindBidirectional(viewModel.propertyPoiMapsProperty());
 
-            listDebugLog.itemsProperty().bindBidirectional(viewModel.propertyDebugLogProperty());
+
             labelTensorFlowDebug.textProperty().bindBidirectional(DebugTF.logString);
             if (!AppProperties.getInstance().useDemoVideo) {
                 stackPaneRoot.backgroundProperty().bindBidirectional(viewModel.getBackgroundProperty());
@@ -487,6 +477,8 @@ public class ApplicationViewImplementation extends Application implements Applic
             infoboxTranslateTransition.setToX(viewModel.getInfoBoxTranslationX().doubleValue());
             infoboxTranslateTransition.setToY(viewModel.getInfoBoxTranslationY().doubleValue());
             infoboxTranslateTransition.play();
+
+            listDebugLog.itemsProperty().bind(viewModel.propertyDebugEntries());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -522,28 +514,8 @@ public class ApplicationViewImplementation extends Application implements Applic
                             border.setOnMouseClicked(event -> viewModel.expandPoi(item.getId()));
                             border.setBorder(new Border(new BorderStroke(Color.DARKGRAY, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
                             border.setStyle("-fx-border-color: aliceblue; -fx-border-width: 4px;");
-                            //border.setPadding(new Insets(4, 0, 4, 0));
 
                             if (item.getImage() != null) {
-//                                ImageView imageView = new ImageView(item.getImage());
-//
-//                                imageView.setPreserveRatio(true);
-//                                imageView.fitWidthProperty().bind(border.widthProperty());// ..setFitWidth(itemWidth - 8);
-//                                imageView.fitHeightProperty().bind(border.heightProperty());
-//
-//                                //imageView.translateYProperty().bind(border.heightProperty().subtract(8).divide(2).multiply(-1));
-//                                //HBox vBox = new HBox();
-//                                //vBox.setAlignment(Pos.CENTER);
-//                                //VBox.setVgrow(imageView, Priority.ALWAYS);
-//                                //vBox.getChildren().add(imageView);
-//
-//                                border.setCenter(imageView);
-//
-//
-//                                //imageView.setPreserveRatio(true);
-//                                //imageView.fitWidthProperty().bind(border.widthProperty());
-//
-//                                border.setCenter(imageView);
                                 Background background = new Background(new BackgroundImage(item.getImage(),
                                     BackgroundRepeat.NO_REPEAT,
                                     BackgroundRepeat.NO_REPEAT,
@@ -566,9 +538,12 @@ public class ApplicationViewImplementation extends Application implements Applic
         listPoiCamera.setCellFactory(callback);
         listPoiMaps.setCellFactory(callback);
 
-        Callback<ListView<String>, ListCell<String>> logCallBack = param -> new LogTextCell();
+        //Callback<ListView<String>, ListCell<String>> logCallBack = param -> new LogTextCell();
 
-        listDebugLog.setCellFactory(logCallBack);
+        Callback<ListView<DebugLog.DebugEntry>, ListCell<DebugLog.DebugEntry>> logCallBack2 = param -> new LogTextCell2();
+
+        //listDebugLog.setCellFactory(logCallBack);
+        listDebugLog.setCellFactory(logCallBack2);
 
         listModuleStatus.setCellFactory(new Callback<ListView<ModuleStatusViewModel>, ListCell<ModuleStatusViewModel>>() {
             @Override
@@ -691,12 +666,23 @@ public class ApplicationViewImplementation extends Application implements Applic
         return mediaLayer;
     }
 
-    static class LogTextCell extends ListCell<String> {
+//    static class LogTextCell extends ListCell<String> {
+//        @Override
+//        public void updateItem(String item, boolean empty) {
+//            super.updateItem(item, empty);
+//            Platform.runLater(() -> {
+//                Label debugText = new Label(item);
+//                setGraphic(debugText);
+//            });
+//        }
+//    }
+
+    static class LogTextCell2 extends ListCell<DebugLog.DebugEntry> {
         @Override
-        public void updateItem(String item, boolean empty) {
+        public void updateItem(DebugLog.DebugEntry item, boolean empty) {
             super.updateItem(item, empty);
             Platform.runLater(() -> {
-                Label debugText = new Label(item);
+                Label debugText = new Label(item.toString());
                 setGraphic(debugText);
             });
         }

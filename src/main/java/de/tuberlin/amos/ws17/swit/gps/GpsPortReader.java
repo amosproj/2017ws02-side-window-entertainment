@@ -79,7 +79,7 @@ public class GpsPortReader implements SentenceListener{
                     if (debug) System.out.println("latitude updated! (" + latitude + ")");
                     longitude = gga.getPosition().getLongitude();
                     if (debug) System.out.println("longitude updated! (" + longitude + ")");
-                    DebugLog.log("GPS: coordinate updated: " + latitude + ", " + longitude);
+                    DebugLog.log(DebugLog.SOURCE_GPS,"GPS: coordinate updated: " + latitude + ", " + longitude);
                     update = true;
 
                     // fill first GpsPosition, if it's empty
@@ -121,7 +121,7 @@ public class GpsPortReader implements SentenceListener{
                     // set 'course' for filling up KinematicProperties object
                     course = rmc.getCourse();
                     if (debug) System.out.println("course updated! (" + course + ")");
-                    DebugLog.log("GPS: course ");
+                    DebugLog.log(DebugLog.SOURCE_GPS,"GPS: course ");
                 }
             }
             catch (net.sf.marineapi.nmea.parser.DataNotAvailableException e){

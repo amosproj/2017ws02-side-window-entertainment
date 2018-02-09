@@ -38,7 +38,7 @@ public class LandscapeTrackerMock implements LandscapeTracker {
     private void loadImage() {
         currentImage = ImageUtils.getRandomTestImage();
         dateTimeLoadImage = new DateTime();
-        DebugLog.log("new random image loaded");
+        DebugLog.log(DebugLog.SOURCE_LANDSCAPETRACKING,"new random image loaded");
     }
 
     @Override

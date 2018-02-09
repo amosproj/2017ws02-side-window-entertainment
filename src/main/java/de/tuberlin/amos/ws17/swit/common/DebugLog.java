@@ -4,6 +4,7 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
+import org.apache.jena.base.Sys;
 import org.joda.time.LocalDateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -27,46 +28,58 @@ public class DebugLog {
     static {
         debugLog = FXCollections.observableArrayList();
         debugLogFiltered = new FilteredList<>(debugLog);
-
-
     }
 
-    public static void log(String s) {
+    public static void log(String source, String s) {
         Platform.runLater(() -> {
-            debugLog.add(new DebugEntry(s));
+            debugLog.add(new DebugEntry(source, s));
         });
     }
 
     public static ObservableList<DebugEntry> getDebugLog() {
         //return debugLog;
-        return debugLog;
+        return debugLogFiltered;
     }
+
+    public static final String SOURCE_USERTRACKING = "UserTracking";
+    public static final String SOURCE_LANDSCAPETRACKING = "LandscapeTracking";
+    //public static final String SOURCE_POI = "Poi";
+    public static final String SOURCE_INFORMATIONSOURCE = "InformationSource";
+    public static final String SOURCE_IMAGEANALYSIS = "ImageAnalysis";
+    public static final String SOURCE_GPS = "GPS";
+    public static final String SOURCE_VIEW = "View";
 
     public static void toggleModule(String module){
         if (module == "UserTracking")   showUserTracking = !showUserTracking;
         if (module == "LandscapeTracking") showLandscapeTracking = !showLandscapeTracking;
         if (module == "POI") showPoi = !showPoi;
         if (module == "InformationSource") showInformationSource = !showInformationSource;
-        if (module == "ImageAnalysis") showImageAnalysis = !showInformationSource;
+        if (module == "ImageAnalysis") showImageAnalysis = !showImageAnalysis;
         if (module == "GPS") showGps = !showGps;
         if (module == "ApplicationView") showApplicationView = !showApplicationView;
 
-
-        debugLogFiltered.setPredicate(debugEntry ->
-            (showUserTracking && (debugEntry.source.equals("JavoNetUserTracker") || debugEntry.source.equals("UserTrackerMock")))
-                || (showGps && (debugEntry.source.equals("GpsTrackerMock") || debugEntry.source.equals("GpsPortReader") || debugEntry.source.equals("GpsTrackerImplementation")))
-                || (showImageAnalysis && debugEntry.source.equals("CloudVision"))
-                || (showInformationSource && (debugEntry.source.equals("AbstractProvider") || debugEntry.source.equals("InformationProviderMock")))
-                || (showLandscapeTracking && (debugEntry.source.equals("LandscapeTrackerMock") || debugEntry.source.equals("LandscapeTrackerImplementation")))
-                // || showPoi && *No class uses DebugLog yet*
-                || (showApplicationView && debugEntry.source.equals("ApplicationViewModelImplementation")));
-        //});
-
+        debugLogFiltered.setPredicate(debugEntry -> {
+            if (debugEntry.source.equals(SOURCE_USERTRACKING)) {
+                return showUserTracking;
+            }
+            else if (debugEntry.source.equals(SOURCE_GPS)) {
+                return showGps;
+            }
+            else if (debugEntry.source.equals(SOURCE_IMAGEANALYSIS)) {
+                return showImageAnalysis;
+            }
+            else if (debugEntry.source.equals(SOURCE_INFORMATIONSOURCE)) {
+                return showInformationSource;
+            }
+            else if (debugEntry.source.equals(SOURCE_LANDSCAPETRACKING)) {
+                return showLandscapeTracking;
+            }
+            else if (debugEntry.source.equals(SOURCE_VIEW)) {
+                return showApplicationView;
+            }
+           return true;
+        });
         System.out.println("toggleModule: " + module + " -> " + showGps);
-    }
-
-    public static void setDebugLog(ObservableList<DebugEntry> debugLog) {
-        DebugLog.debugLog = debugLog;
     }
 
     public static class DebugEntry {
@@ -74,20 +87,25 @@ public class DebugLog {
         private String source;
         private String message;
 
-        public DebugEntry(String message) {
+//        public DebugEntry(String message) {
+//            timeStamp = new LocalDateTime();
+//
+//            String temp = sun.reflect.Reflection.getCallerClass(4).getName();
+//            source = temp.substring(temp.lastIndexOf(".") + 1);
+//            this.message = message;
+//        }
+
+        public DebugEntry(String source, String message) {
             timeStamp = new LocalDateTime();
-            String temp = sun.reflect.Reflection.getCallerClass(4).getName();
-            source = temp.substring(temp.lastIndexOf(".") + 1);
+
+            //String temp = sun.reflect.Reflection.getCallerClass(4).getName();
+            this.source = source;//temp.substring(temp.lastIndexOf(".") + 1);
             this.message = message;
         }
 
         @Override
         public String toString() {
             return "[" + source + " " + timeStamp.toString("HH:mm:ss") + "]: " + message;
-        }
-
-        public String getMessage() {
-            return message;
         }
     }
 

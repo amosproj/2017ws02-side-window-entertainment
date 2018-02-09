@@ -24,10 +24,10 @@ public class JavoNetCameraService implements CameraService {
             boolean result = JavoNetService.dotNetCameraService.invoke("SelectIntelRealSenseSR300");
 
             if (!result) {
-                DebugLog.log("Intel RealSenseSR300 found");
+                DebugLog.log(DebugLog.SOURCE_USERTRACKING,"Intel RealSenseSR300 found");
                 throw new CameraNotFoundException();
             }
-            DebugLog.log("Intel RealSenseSR300 not found");
+            DebugLog.log(DebugLog.SOURCE_USERTRACKING,"Intel RealSenseSR300 not found");
         } catch (JavonetException e) {
             e.printStackTrace();
         }

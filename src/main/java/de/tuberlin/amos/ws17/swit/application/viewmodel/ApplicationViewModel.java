@@ -1,5 +1,6 @@
 package de.tuberlin.amos.ws17.swit.application.viewmodel;
 
+import de.tuberlin.amos.ws17.swit.common.DebugLog;
 import de.tuberlin.amos.ws17.swit.common.Module;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -52,4 +53,6 @@ public interface ApplicationViewModel {
     SimpleDoubleProperty getInfoBoxRotation();
     SimpleDoubleProperty getInfoBoxTranslationX();
     SimpleDoubleProperty getInfoBoxTranslationY();
+
+    Property<ObservableList<DebugLog.DebugEntry>> propertyDebugEntries();
 }

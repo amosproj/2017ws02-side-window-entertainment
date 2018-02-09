@@ -98,7 +98,7 @@ public class CloudVision implements LandmarkDetector {
                     .map(CloudVision::convertToPOI)
                     .collect(Collectors.toList());
         } catch (IOException e) {
-            DebugLog.log("Could not identify POI on image");
+            DebugLog.log(DebugLog.SOURCE_IMAGEANALYSIS,"Could not identify POI on image");
         }
 
         return Collections.emptyList();
@@ -117,7 +117,7 @@ public class CloudVision implements LandmarkDetector {
     @Nonnull
     private List<LandmarkResult> identifyLandmarks(Image image, int maxResults) throws IOException {
         if (this.vision == null) {
-            DebugLog.log("Cloud Vision service unavailable");
+            DebugLog.log(DebugLog.SOURCE_IMAGEANALYSIS,"Cloud Vision service unavailable");
             return Collections.emptyList();
         }
         // TODO: reduce image size if necessary

@@ -66,7 +66,7 @@ public class GpsTrackerMock extends GpsTrackerImplementation {
         obj.setCourse(course);
         obj.setVelocity(velocity);
 
-        DebugLog.log("current position: (" + latitude + ", " + longitude + ")");
+        DebugLog.log(DebugLog.SOURCE_GPS,"current position: (" + latitude + ", " + longitude + ")");
         return obj;
 
     }

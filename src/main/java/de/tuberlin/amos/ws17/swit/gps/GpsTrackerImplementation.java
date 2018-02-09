@@ -49,24 +49,24 @@ public class GpsTrackerImplementation implements GpsTracker {
 		if (portReader.isUpdated()){
 			portReader.fillKinematicProperties(kinProp);
 			if (kinProp == null){
-				DebugLog.log("No new GPS data available.");
+				DebugLog.log("GPS","No new GPS data available.");
 				throw new ServiceNotAvailableException(); // later: throw noSignalException or something like that
 			}
 			return kinProp;
 		}
 		else {
-			DebugLog.log("No new GPS data available.");
+			DebugLog.log("GPS","No new GPS data available.");
 			throw new ServiceNotAvailableException();
 		}
 	}
 
 	public void startModule() throws GpsModuleNotAvailableException{
 		if (portReader.start() == false){
-			DebugLog.log("No GPS device could be found.");
+			DebugLog.log(DebugLog.SOURCE_GPS,"No GPS device could be found.");
 			throw new GpsModuleNotAvailableException();
 		}
 		else {
-			DebugLog.log("GPS module started.");
+			DebugLog.log(DebugLog.SOURCE_GPS,"GPS module started.");
 		}
 	}
 

@@ -50,7 +50,7 @@ public class LandscapeTrackerImplementation implements LandscapeTracker {
         }
 
         if (logitechC920webcam == null) {
-            DebugLog.log("Logitech HD Pro Webcam C920 not found");
+            DebugLog.log(DebugLog.SOURCE_LANDSCAPETRACKING,"Logitech HD Pro Webcam C920 not found");
             try {
                 List<Webcam> webcams = Webcam.getWebcams(2000);
                 logitechC920webcam = webcams.stream().findFirst().orElse(null);
@@ -59,15 +59,15 @@ public class LandscapeTrackerImplementation implements LandscapeTracker {
             }
         }
         else {
-            DebugLog.log("Logitech HD Pro Webcam C920 found");
+            DebugLog.log(DebugLog.SOURCE_LANDSCAPETRACKING,"Logitech HD Pro Webcam C920 found");
         }
 
         if (logitechC920webcam == null) {
-            DebugLog.log("webcam not found");
+            DebugLog.log(DebugLog.SOURCE_LANDSCAPETRACKING,"webcam not found");
             throw new ModuleNotWorkingException("Logitech Kamera nicht vorhanden.");
         }
         else {
-            DebugLog.log("webcam found");
+            DebugLog.log(DebugLog.SOURCE_LANDSCAPETRACKING,"webcam found");
         }
 
     }
@@ -85,11 +85,11 @@ public class LandscapeTrackerImplementation implements LandscapeTracker {
             logitechC920webcam.setCustomViewSizes(customViewSizes);
             logitechC920webcam.setViewSize(fullHD);
             if (!logitechC920webcam.open()) {
-                DebugLog.log("tracking started");
+                DebugLog.log(DebugLog.SOURCE_LANDSCAPETRACKING,"tracking started");
                 throw new ModuleNotWorkingException("Logitech Kamera konnte nicht gestartet werden.");
             }
             else {
-                DebugLog.log("tracking not started");
+                DebugLog.log(DebugLog.SOURCE_LANDSCAPETRACKING,"tracking not started");
             }
         }
     }
