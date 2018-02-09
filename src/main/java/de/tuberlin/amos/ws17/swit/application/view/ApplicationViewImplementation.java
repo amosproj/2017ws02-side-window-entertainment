@@ -238,6 +238,7 @@ public class ApplicationViewImplementation extends Application implements Applic
         infoboxTitlePane.setId("expansionTopPane");
         infoboxTitlePane.setLeft(infoboxTitle);
         infoboxTitlePane.setRight(infoboxCloseButton);
+        infoboxTitlePane.setStyle("-fx-background-color: rgba(255, 255, 255, 0.25);");
         //infoboxTitlePane.setCenter(text);
 
         infoboxImage = new ImageView();
@@ -270,6 +271,20 @@ public class ApplicationViewImplementation extends Application implements Applic
         infoboxPane.setTop(infoboxTitlePane);
         infoboxPane.setCenter(infoboxImage);
         infoboxPane.setBottom(infoboxScrollPane);
+
+        //infobox
+//        infoboxPane.getColumnConstraints().add(new ColumnConstraints());
+//        infoboxPane.getColumnConstraints().get(0).setPercentWidth(100);
+//        infoboxPane.getRowConstraints().add(new RowConstraints());
+//        infoboxPane.getRowConstraints().add(new RowConstraints());
+//        infoboxPane.getRowConstraints().add(new RowConstraints());
+//        infoboxPane.getRowConstraints().get(0).setPercentHeight(5);
+//        infoboxPane.getRowConstraints().get(1).setPercentHeight(25);
+//        infoboxPane.getRowConstraints().get(2).setPercentHeight(70);
+//        infoboxPane.add(infoboxTitlePane, 0,0);
+//        infoboxPane.add(infoboxImage, 0, 1);
+//        infoboxPane.add(infoboxScrollPane,0,2);
+
     }
 
     private void initDebugLayer() {
@@ -277,7 +292,6 @@ public class ApplicationViewImplementation extends Application implements Applic
         debugLayer.getRowConstraints().addAll(applicationLayer.getRowConstraints());
         debugLayer.getColumnConstraints().addAll(applicationLayer.getColumnConstraints());
         debugLayer.setPickOnBounds(false);
-        //debugLayer.setAlignment(Pos.CENTER_RIGHT);
 
         initDebugLog();
 

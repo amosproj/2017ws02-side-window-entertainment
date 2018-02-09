@@ -37,9 +37,6 @@
 }
 
 #expansionImage {
-    -fx-fit-to-width: 150px;
-    -fx-fit-to-height: 200px;
-    -fx-alignment: center;
 }
 
 #expansionInformation {
@@ -49,7 +46,6 @@
 
 #expansionScrollPane {
     -fx-background-color: transparent;
-    -fx-max-height: 250px;
 }
 
 #listPoiMaps {
@@ -164,7 +160,6 @@
 }
 
 #togglePane .button {
-    -fx-pref-width: 220px;
 }
 
 .scroll-bar {
