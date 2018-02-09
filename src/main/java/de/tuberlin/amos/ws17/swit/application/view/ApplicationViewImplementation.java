@@ -231,8 +231,23 @@ public class ApplicationViewImplementation extends Application implements Applic
         BorderPane.setAlignment(infoboxTitle, Pos.CENTER_LEFT);
         BorderPane.setMargin(infoboxTitle, new Insets(4));
 
-        infoboxCloseButton = new Button("X");
+        Text text = new Text();
+        text.setText("X");
+
+        text.setFont(fontTitle);
+        text.setStyle("" +
+            "-fx-fill: white;" +
+            "-fx-effect: dropshadow( gaussian , black , 8, 0.90 , 0 , 0 );");
+
+        //Button b = new Button(null, );
+        infoboxCloseButton = new Button(null, text);
         infoboxCloseButton.setId("expansionButton");
+        //infoboxCloseButton.setStyle("-fx-font-size: " + fontSizeTitle + "px;");
+        //infoboxCloseButton.setco
+        //infoboxCloseButton.
+        //infoboxCloseButton.setFont(fontTitle);
+        infoboxCloseButton.setMinHeight(64);
+        infoboxCloseButton.setMinWidth(64);
         //infoboxCloseButton.setStyle("-fx-border-color: aliceblue; -fx-border-width: 4px;");
         //BorderPane.setMargin(infoboxCloseButton, new Insets(4));
 
