@@ -227,13 +227,12 @@ public class ApplicationViewImplementation extends Application implements Applic
         infoboxTitle.setStyle("" +
             "-fx-fill: white;" +
             "-fx-effect: dropshadow( gaussian , black , 8, 0.90 , 0 , 0 );");
-
+        //infoboxTitle.set
         BorderPane.setAlignment(infoboxTitle, Pos.CENTER_LEFT);
         BorderPane.setMargin(infoboxTitle, new Insets(4));
 
         Text text = new Text();
         text.setText("X");
-
         text.setFont(fontTitle);
         text.setStyle("" +
             "-fx-fill: white;" +
@@ -242,21 +241,15 @@ public class ApplicationViewImplementation extends Application implements Applic
         //Button b = new Button(null, );
         infoboxCloseButton = new Button(null, text);
         infoboxCloseButton.setId("expansionButton");
-        //infoboxCloseButton.setStyle("-fx-font-size: " + fontSizeTitle + "px;");
-        //infoboxCloseButton.setco
-        //infoboxCloseButton.
-        //infoboxCloseButton.setFont(fontTitle);
         infoboxCloseButton.setMinHeight(64);
         infoboxCloseButton.setMinWidth(64);
-        //infoboxCloseButton.setStyle("-fx-border-color: aliceblue; -fx-border-width: 4px;");
-        //BorderPane.setMargin(infoboxCloseButton, new Insets(4));
+        //infoboxCloseButton.setBackground(new Background(new BackgroundFill(Color.TRANSPARENT, CornerRadii.EMPTY, Insets.EMPTY)));
 
         infoboxTitlePane = new BorderPane();
         infoboxTitlePane.setId("expansionTopPane");
         infoboxTitlePane.setLeft(infoboxTitle);
         infoboxTitlePane.setRight(infoboxCloseButton);
         infoboxTitlePane.setStyle("-fx-background-color: rgba(255, 255, 255, 0.25);");
-        //infoboxTitlePane.setCenter(text);
 
         infoboxImage = new ImageView();
         infoboxImage.setId("expansionImage");
