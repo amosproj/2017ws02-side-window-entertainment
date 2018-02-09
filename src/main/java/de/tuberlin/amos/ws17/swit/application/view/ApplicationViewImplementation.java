@@ -270,6 +270,9 @@ public class ApplicationViewImplementation extends Application implements Applic
         infoboxInformation.setId("expansionInformation");
         infoboxInformation.setAlignment(Pos.TOP_CENTER);
         infoboxInformation.setFont(fontText);
+        infoboxInformation.setStyle("" +
+                "-fx-fill: white;" +
+                "-fx-effect: dropshadow( gaussian , black , 4, 0.90 , 0 , 0 );");
 
         infoboxContentPane = new BorderPane();
         infoboxContentPane.setId("expansionContentPane");
