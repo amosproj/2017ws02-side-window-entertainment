@@ -153,7 +153,7 @@ public class ApplicationViewImplementation extends Application implements Applic
             mediaLayer.setPreserveRatio(true);
         }
         catch (Exception e) {
-            DebugLog.log("MediaPlayer kann nicht initialisiert werden");
+            DebugLog.log(DebugLog.SOURCE_VIEW, "MediaPlayer kann nicht initialisiert werden");
         }
     }
 
@@ -476,7 +476,8 @@ public class ApplicationViewImplementation extends Application implements Applic
             listPoiCamera.itemsProperty().bindBidirectional(viewModel.propertyPoiCameraProperty());
             listPoiMaps.itemsProperty().bindBidirectional(viewModel.propertyPoiMapsProperty());
 
-            listDebugLog.itemsProperty().bindBidirectional(viewModel.propertyDebugLogProperty());
+            //listDebugLog.itemsProperty().bindBidirectional(viewModel.propertyDebugLogProperty());
+            listDebugLog.itemsProperty().bind(viewModel.propertyDebugEntries());
             labelTensorFlowDebug.textProperty().bindBidirectional(DebugTF.logString);
             if (!AppProperties.getInstance().useDemoVideo) {
                 stackPaneRoot.backgroundProperty().bindBidirectional(viewModel.getBackgroundProperty());
@@ -543,25 +544,6 @@ public class ApplicationViewImplementation extends Application implements Applic
                             //border.setPadding(new Insets(4, 0, 4, 0));
 
                             if (item.getImage() != null) {
-//                                ImageView imageView = new ImageView(item.getImage());
-//
-//                                imageView.setPreserveRatio(true);
-//                                imageView.fitWidthProperty().bind(border.widthProperty());// ..setFitWidth(itemWidth - 8);
-//                                imageView.fitHeightProperty().bind(border.heightProperty());
-//
-//                                //imageView.translateYProperty().bind(border.heightProperty().subtract(8).divide(2).multiply(-1));
-//                                //HBox vBox = new HBox();
-//                                //vBox.setAlignment(Pos.CENTER);
-//                                //VBox.setVgrow(imageView, Priority.ALWAYS);
-//                                //vBox.getChildren().add(imageView);
-//
-//                                border.setCenter(imageView);
-//
-//
-//                                //imageView.setPreserveRatio(true);
-//                                //imageView.fitWidthProperty().bind(border.widthProperty());
-//
-//                                border.setCenter(imageView);
                                 Background background = new Background(new BackgroundImage(item.getImage(),
                                     BackgroundRepeat.NO_REPEAT,
                                     BackgroundRepeat.NO_REPEAT,
@@ -584,9 +566,12 @@ public class ApplicationViewImplementation extends Application implements Applic
         listPoiCamera.setCellFactory(callback);
         listPoiMaps.setCellFactory(callback);
 
-        Callback<ListView<String>, ListCell<String>> logCallBack = param -> new LogTextCell();
+        //Callback<ListView<String>, ListCell<String>> logCallBack = param -> new LogTextCell();
 
-        listDebugLog.setCellFactory(logCallBack);
+        //listDebugLog.setCellFactory(logCallBack);
+
+        Callback<ListView<DebugLog.DebugEntry>, ListCell<DebugLog.DebugEntry>> logCallBack2 = param -> new LogTextCell2();
+        listDebugLog.setCellFactory(logCallBack2);
 
         listModuleStatus.setCellFactory(new Callback<ListView<ModuleStatusViewModel>, ListCell<ModuleStatusViewModel>>() {
             @Override
@@ -709,12 +694,23 @@ public class ApplicationViewImplementation extends Application implements Applic
         return mediaLayer;
     }
 
-    static class LogTextCell extends ListCell<String> {
+//    static class LogTextCell extends ListCell<String> {
+//        @Override
+//        public void updateItem(String item, boolean empty) {
+//            super.updateItem(item, empty);
+//            Platform.runLater(() -> {
+//                Label debugText = new Label(item);
+//                setGraphic(debugText);
+//            });
+//        }
+//    }
+
+    static class LogTextCell2 extends ListCell<DebugLog.DebugEntry> {
         @Override
-        public void updateItem(String item, boolean empty) {
+        public void updateItem(DebugLog.DebugEntry item, boolean empty) {
             super.updateItem(item, empty);
             Platform.runLater(() -> {
-                Label debugText = new Label(item);
+                Label debugText = new Label(item.toString());
                 setGraphic(debugText);
             });
         }
