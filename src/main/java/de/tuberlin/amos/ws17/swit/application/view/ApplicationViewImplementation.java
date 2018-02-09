@@ -233,6 +233,7 @@ public class ApplicationViewImplementation extends Application implements Applic
 
         infoboxCloseButton = new Button("X");
         infoboxCloseButton.setId("expansionButton");
+        //infoboxCloseButton.setStyle("-fx-border-color: black; -fx-border-width: 4px;");
         BorderPane.setMargin(infoboxCloseButton, new Insets(4));
 
         infoboxTitlePane = new BorderPane();
