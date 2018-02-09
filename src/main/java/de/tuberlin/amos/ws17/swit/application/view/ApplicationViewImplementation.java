@@ -31,6 +31,7 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import javafx.util.Duration;
+import sun.security.ssl.Debug;
 
 public class ApplicationViewImplementation extends Application implements ApplicationView {
     //##### layer container #####
@@ -675,44 +676,24 @@ public class ApplicationViewImplementation extends Application implements Applic
         }
     }
 
+    @Override
     public void showDebugLayer() {
-        FadeTransition ft = new FadeTransition(Duration.millis(1500), debugLayer);
-        ft.setAutoReverse(false);
-        ft.setFromValue(0.0);
-        ft.setToValue(1.0);
-        debugLayer.setVisible(true);
-        ft.play();
+        AnimationUtils.fadeIn(debugLayer, 1500);
     }
 
+    @Override
     public void hideDebugLayer() {
-        FadeTransition ft = new FadeTransition(Duration.millis(1500), debugLayer);
-        ft.setAutoReverse(false);
-        ft.setFromValue(1.0);
-        ft.setToValue(0.0);
-        ft.setOnFinished(event -> {
-            debugLayer.setVisible(false);
-        });
-        ft.play();
+        AnimationUtils.fadeOut(debugLayer, 1500);
     }
 
+    @Override
     public void showApplicationLayer() {
-        FadeTransition ft = new FadeTransition(Duration.millis(1500), applicationLayer);
-        ft.setAutoReverse(false);
-        ft.setFromValue(0.0);
-        ft.setToValue(1.0);
-        applicationLayer.setVisible(true);
-        ft.play();
+        AnimationUtils.fadeIn(applicationLayer, 1500);
     }
 
+    @Override
     public void hideApplicationLayer() {
-        FadeTransition ft = new FadeTransition(Duration.millis(1500), applicationLayer);
-        ft.setAutoReverse(false);
-        ft.setFromValue(1.0);
-        ft.setToValue(0.0);
-        ft.setOnFinished(event -> {
-            applicationLayer.setVisible(false);
-        });
-        ft.play();
+        AnimationUtils.fadeOut(applicationLayer, 1500);
     }
 
     private void toggleStyle(String module){
