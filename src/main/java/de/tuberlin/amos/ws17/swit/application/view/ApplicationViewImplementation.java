@@ -45,6 +45,7 @@ public class ApplicationViewImplementation extends Application implements Applic
 
     //##### application layer #####
     private GridPane applicationLayer = null;
+    private BorderPane infoboxLayer = null;
     //### infobox
     private BorderPane infoboxPane = null;
     private BorderPane infoboxTitlePane = null;
@@ -136,6 +137,7 @@ public class ApplicationViewImplementation extends Application implements Applic
 
         stackPaneRoot.getChildren().add(applicationLayer);
         stackPaneRoot.getChildren().add(debugLayer);
+        stackPaneRoot.getChildren().add(infoboxLayer);
     }
 
     private void initMediaLayer() {
@@ -193,7 +195,7 @@ public class ApplicationViewImplementation extends Application implements Applic
         applicationLayer.add(listPoiCamera, 0, 0, numColumns, 1);
         applicationLayer.add(listPoiMaps, 0,4, numColumns, 1);
         applicationLayer.add(statusPane, 0, 2);
-        applicationLayer.add(infoboxPane, 2, 2);
+        //applicationLayer.add(infoboxPane, 2, 2);
     }
 
     private void initListPoiCamera() {
@@ -220,6 +222,7 @@ public class ApplicationViewImplementation extends Application implements Applic
     }
 
     private void initInfoboxPane() {
+        infoboxLayer = new BorderPane();
         infoboxTitle = new Text();
         infoboxTitle.setId("expansionName");
 
@@ -263,8 +266,8 @@ public class ApplicationViewImplementation extends Application implements Applic
         infoboxInformation.setId("expansionInformation");
         infoboxInformation.setAlignment(Pos.TOP_CENTER);
         infoboxInformation.setFont(fontText);
-        infoboxInformation.setStyle("" +
-                "-fx-fill: white;" +
+        //infoboxInformation.setPrefHeight(300);
+        infoboxInformation.setStyle("-fx-fill: white;" +
                 "-fx-effect: dropshadow( gaussian , black , 4, 0.90 , 0 , 0 );");
 
         infoboxContentPane = new BorderPane();
@@ -284,6 +287,15 @@ public class ApplicationViewImplementation extends Application implements Applic
         infoboxPane.setTop(infoboxTitlePane);
         infoboxPane.setCenter(infoboxImage);
         infoboxPane.setBottom(infoboxScrollPane);
+
+        Screen screen = Screen.getPrimary();
+        Rectangle2D screenVisualBounds = screen.getVisualBounds();
+        infoboxPane.setMaxWidth(screenVisualBounds.getWidth() * 0.3);
+        infoboxPane.setMaxHeight(screenVisualBounds.getHeight() * 0.6);
+        infoboxScrollPane.setMaxHeight(screenVisualBounds.getHeight() * 0.3);
+
+        infoboxLayer.setCenter(infoboxPane);
+        infoboxLayer.setPickOnBounds(false);
 
         //infobox
 //        infoboxPane.getColumnConstraints().add(new ColumnConstraints());
