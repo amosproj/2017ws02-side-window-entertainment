@@ -45,6 +45,7 @@ public class ApplicationViewImplementation extends Application implements Applic
 
     //##### application layer #####
     private GridPane applicationLayer = null;
+    private BorderPane infoboxLayer = null;
     //### infobox
     private BorderPane infoboxPane = null;
     private BorderPane infoboxTitlePane = null;
@@ -136,6 +137,7 @@ public class ApplicationViewImplementation extends Application implements Applic
 
         stackPaneRoot.getChildren().add(applicationLayer);
         stackPaneRoot.getChildren().add(debugLayer);
+        stackPaneRoot.getChildren().add(infoboxLayer);
     }
 
     private void initMediaLayer() {
@@ -151,7 +153,7 @@ public class ApplicationViewImplementation extends Application implements Applic
             mediaLayer.setPreserveRatio(true);
         }
         catch (Exception e) {
-            DebugLog.log(DebugLog.SOURCE_VIEW,"MediaPlayer kann nicht initialisiert werden");
+            DebugLog.log("MediaPlayer kann nicht initialisiert werden");
         }
     }
 
@@ -193,7 +195,7 @@ public class ApplicationViewImplementation extends Application implements Applic
         applicationLayer.add(listPoiCamera, 0, 0, numColumns, 1);
         applicationLayer.add(listPoiMaps, 0,4, numColumns, 1);
         applicationLayer.add(statusPane, 0, 2);
-        applicationLayer.add(infoboxPane, 2, 2);
+        //applicationLayer.add(infoboxPane, 2, 2);
     }
 
     private void initListPoiCamera() {
@@ -220,6 +222,7 @@ public class ApplicationViewImplementation extends Application implements Applic
     }
 
     private void initInfoboxPane() {
+        infoboxLayer = new BorderPane();
         infoboxTitle = new Text();
         infoboxTitle.setId("expansionName");
 
@@ -227,6 +230,7 @@ public class ApplicationViewImplementation extends Application implements Applic
         infoboxTitle.setStyle("" +
             "-fx-fill: white;" +
             "-fx-effect: dropshadow( gaussian , black , 8, 0.90 , 0 , 0 );");
+        //infoboxTitle.set
         BorderPane.setAlignment(infoboxTitle, Pos.CENTER_LEFT);
         BorderPane.setMargin(infoboxTitle, new Insets(4));
 
@@ -242,6 +246,7 @@ public class ApplicationViewImplementation extends Application implements Applic
         infoboxCloseButton.setId("expansionButton");
         infoboxCloseButton.setMinHeight(64);
         infoboxCloseButton.setMinWidth(64);
+        //infoboxCloseButton.setBackground(new Background(new BackgroundFill(Color.TRANSPARENT, CornerRadii.EMPTY, Insets.EMPTY)));
 
         infoboxTitlePane = new BorderPane();
         infoboxTitlePane.setId("expansionTopPane");
@@ -262,8 +267,8 @@ public class ApplicationViewImplementation extends Application implements Applic
         infoboxInformation.setId("expansionInformation");
         infoboxInformation.setAlignment(Pos.TOP_CENTER);
         infoboxInformation.setFont(fontText);
-        infoboxInformation.setStyle("" +
-                "-fx-fill: white;" +
+        //infoboxInformation.setPrefHeight(300);
+        infoboxInformation.setStyle("-fx-fill: white;" +
                 "-fx-effect: dropshadow( gaussian , black , 4, 0.90 , 0 , 0 );");
 
         infoboxContentPane = new BorderPane();
@@ -283,6 +288,29 @@ public class ApplicationViewImplementation extends Application implements Applic
         infoboxPane.setTop(infoboxTitlePane);
         infoboxPane.setCenter(infoboxImage);
         infoboxPane.setBottom(infoboxScrollPane);
+
+        Screen screen = Screen.getPrimary();
+        Rectangle2D screenVisualBounds = screen.getVisualBounds();
+        infoboxPane.setMaxWidth(screenVisualBounds.getWidth() * 0.3);
+        infoboxPane.setMaxHeight(screenVisualBounds.getHeight() * 0.6);
+        infoboxScrollPane.setMaxHeight(screenVisualBounds.getHeight() * 0.3);
+
+        infoboxLayer.setCenter(infoboxPane);
+        infoboxLayer.setPickOnBounds(false);
+
+        //infobox
+//        infoboxPane.getColumnConstraints().add(new ColumnConstraints());
+//        infoboxPane.getColumnConstraints().get(0).setPercentWidth(100);
+//        infoboxPane.getRowConstraints().add(new RowConstraints());
+//        infoboxPane.getRowConstraints().add(new RowConstraints());
+//        infoboxPane.getRowConstraints().add(new RowConstraints());
+//        infoboxPane.getRowConstraints().get(0).setPercentHeight(5);
+//        infoboxPane.getRowConstraints().get(1).setPercentHeight(25);
+//        infoboxPane.getRowConstraints().get(2).setPercentHeight(70);
+//        infoboxPane.add(infoboxTitlePane, 0,0);
+//        infoboxPane.add(infoboxImage, 0, 1);
+//        infoboxPane.add(infoboxScrollPane,0,2);
+
     }
 
     private void initDebugLayer() {
@@ -448,7 +476,7 @@ public class ApplicationViewImplementation extends Application implements Applic
             listPoiCamera.itemsProperty().bindBidirectional(viewModel.propertyPoiCameraProperty());
             listPoiMaps.itemsProperty().bindBidirectional(viewModel.propertyPoiMapsProperty());
 
-
+            listDebugLog.itemsProperty().bindBidirectional(viewModel.propertyDebugLogProperty());
             labelTensorFlowDebug.textProperty().bindBidirectional(DebugTF.logString);
             if (!AppProperties.getInstance().useDemoVideo) {
                 stackPaneRoot.backgroundProperty().bindBidirectional(viewModel.getBackgroundProperty());
@@ -477,8 +505,6 @@ public class ApplicationViewImplementation extends Application implements Applic
             infoboxTranslateTransition.setToX(viewModel.getInfoBoxTranslationX().doubleValue());
             infoboxTranslateTransition.setToY(viewModel.getInfoBoxTranslationY().doubleValue());
             infoboxTranslateTransition.play();
-
-            listDebugLog.itemsProperty().bind(viewModel.propertyDebugEntries());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -514,8 +540,28 @@ public class ApplicationViewImplementation extends Application implements Applic
                             border.setOnMouseClicked(event -> viewModel.expandPoi(item.getId()));
                             border.setBorder(new Border(new BorderStroke(Color.DARKGRAY, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
                             border.setStyle("-fx-border-color: aliceblue; -fx-border-width: 4px;");
+                            //border.setPadding(new Insets(4, 0, 4, 0));
 
                             if (item.getImage() != null) {
+//                                ImageView imageView = new ImageView(item.getImage());
+//
+//                                imageView.setPreserveRatio(true);
+//                                imageView.fitWidthProperty().bind(border.widthProperty());// ..setFitWidth(itemWidth - 8);
+//                                imageView.fitHeightProperty().bind(border.heightProperty());
+//
+//                                //imageView.translateYProperty().bind(border.heightProperty().subtract(8).divide(2).multiply(-1));
+//                                //HBox vBox = new HBox();
+//                                //vBox.setAlignment(Pos.CENTER);
+//                                //VBox.setVgrow(imageView, Priority.ALWAYS);
+//                                //vBox.getChildren().add(imageView);
+//
+//                                border.setCenter(imageView);
+//
+//
+//                                //imageView.setPreserveRatio(true);
+//                                //imageView.fitWidthProperty().bind(border.widthProperty());
+//
+//                                border.setCenter(imageView);
                                 Background background = new Background(new BackgroundImage(item.getImage(),
                                     BackgroundRepeat.NO_REPEAT,
                                     BackgroundRepeat.NO_REPEAT,
@@ -538,12 +584,9 @@ public class ApplicationViewImplementation extends Application implements Applic
         listPoiCamera.setCellFactory(callback);
         listPoiMaps.setCellFactory(callback);
 
-        //Callback<ListView<String>, ListCell<String>> logCallBack = param -> new LogTextCell();
+        Callback<ListView<String>, ListCell<String>> logCallBack = param -> new LogTextCell();
 
-        Callback<ListView<DebugLog.DebugEntry>, ListCell<DebugLog.DebugEntry>> logCallBack2 = param -> new LogTextCell2();
-
-        //listDebugLog.setCellFactory(logCallBack);
-        listDebugLog.setCellFactory(logCallBack2);
+        listDebugLog.setCellFactory(logCallBack);
 
         listModuleStatus.setCellFactory(new Callback<ListView<ModuleStatusViewModel>, ListCell<ModuleStatusViewModel>>() {
             @Override
@@ -666,23 +709,12 @@ public class ApplicationViewImplementation extends Application implements Applic
         return mediaLayer;
     }
 
-//    static class LogTextCell extends ListCell<String> {
-//        @Override
-//        public void updateItem(String item, boolean empty) {
-//            super.updateItem(item, empty);
-//            Platform.runLater(() -> {
-//                Label debugText = new Label(item);
-//                setGraphic(debugText);
-//            });
-//        }
-//    }
-
-    static class LogTextCell2 extends ListCell<DebugLog.DebugEntry> {
+    static class LogTextCell extends ListCell<String> {
         @Override
-        public void updateItem(DebugLog.DebugEntry item, boolean empty) {
+        public void updateItem(String item, boolean empty) {
             super.updateItem(item, empty);
             Platform.runLater(() -> {
-                Label debugText = new Label(item.toString());
+                Label debugText = new Label(item);
                 setGraphic(debugText);
             });
         }
