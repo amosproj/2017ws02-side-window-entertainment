@@ -830,10 +830,10 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     }
 
     private void minimizePoi() {
-        expandedPOI.setId("");
-        expandedPOI.setName("");
-        expandedPOI.setImage(null);
-        expandedPOI.setInformationAbstract("");
+        //expandedPOI.setId("");
+        //expandedPOI.setName("");
+        //expandedPOI.setImage(null);
+        //expandedPOI.setInformationAbstract("");
         view.showExpandedPoi(false);
     }
 

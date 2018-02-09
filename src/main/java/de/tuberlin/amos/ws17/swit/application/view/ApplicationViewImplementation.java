@@ -14,13 +14,11 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.property.DoubleProperty;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.geometry.HPos;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.geometry.Rectangle2D;
-import javafx.geometry.VPos;
+import javafx.geometry.*;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.effect.DropShadow;
+import javafx.scene.effect.GaussianBlur;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.media.MediaPlayer;
@@ -28,6 +26,7 @@ import javafx.scene.media.MediaView;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.util.Callback;
@@ -50,7 +49,7 @@ public class ApplicationViewImplementation extends Application implements Applic
     private BorderPane infoboxTitlePane = null;
     private BorderPane infoboxContentPane = null;
     private Button infoboxCloseButton = null;
-    private Label infoboxTitle = null;
+    private Text infoboxTitle = null;
     private Label infoboxInformation = null;
     private ImageView infoboxImage = null;
     private ScrollPane infoboxScrollPane = null;
@@ -84,7 +83,7 @@ public class ApplicationViewImplementation extends Application implements Applic
     private Label labelTensorFlowDebug = null;
     //##########
 
-    private static final String FONTNAME = "Helvetica Neue";
+    //private static final String FONTNAME = "Helvetica Neue";
     private static double fontSizeTitle = 12;
     private static double fontSizeItem = 12;
     private static double fontSizeText = 12;
@@ -118,9 +117,9 @@ public class ApplicationViewImplementation extends Application implements Applic
         fontSizeItem = screenVisualBounds.getHeight() * 0.02;
         fontSizeText = screenVisualBounds.getHeight() * 0.015;
 
-        fontTitle = new Font(FONTNAME, fontSizeTitle);
-        fontItem = new Font(FONTNAME, fontSizeItem);
-        fontText = new Font(FONTNAME, fontSizeText);
+        fontTitle = new Font(fontSizeTitle);
+        fontItem = new Font(fontSizeItem);
+        fontText = new Font(fontSizeText);
     }
 
     private void initRootStackPane() {
@@ -158,18 +157,26 @@ public class ApplicationViewImplementation extends Application implements Applic
     private void initApplicationLayer() {
         applicationLayer = new GridPane();
         applicationLayer.getRowConstraints().add(new RowConstraints());
-        applicationLayer.getRowConstraints().get(0).setPercentHeight(15.0);
+        applicationLayer.getRowConstraints().get(0).setPercentHeight(12.0);
         applicationLayer.getRowConstraints().get(0).setValignment(VPos.CENTER);
 
         applicationLayer.getRowConstraints().add(new RowConstraints());
-        applicationLayer.getRowConstraints().get(1).setPercentHeight(70.0);
+        applicationLayer.getRowConstraints().get(1).setPercentHeight(16.0);
         applicationLayer.getRowConstraints().get(1).setValignment(VPos.CENTER);
 
         applicationLayer.getRowConstraints().add(new RowConstraints());
-        applicationLayer.getRowConstraints().get(2).setPercentHeight(15.0);
+        applicationLayer.getRowConstraints().get(2).setPercentHeight(44.0);
         applicationLayer.getRowConstraints().get(2).setValignment(VPos.CENTER);
 
-        int numColumns = 3;
+        applicationLayer.getRowConstraints().add(new RowConstraints());
+        applicationLayer.getRowConstraints().get(3).setPercentHeight(16.0);
+        applicationLayer.getRowConstraints().get(3).setValignment(VPos.CENTER);
+
+        applicationLayer.getRowConstraints().add(new RowConstraints());
+        applicationLayer.getRowConstraints().get(4).setPercentHeight(12.0);
+        applicationLayer.getRowConstraints().get(4).setValignment(VPos.CENTER);
+
+        int numColumns = 5;
         for(int i = 0;i < numColumns;i++) {
             ColumnConstraints cc = new ColumnConstraints();
             cc.setPercentWidth(100.0 / numColumns);
@@ -182,10 +189,10 @@ public class ApplicationViewImplementation extends Application implements Applic
         initStatusPane();
         initInfoboxPane();
 
-        applicationLayer.add(listPoiCamera, 0, 0, 3, 1);
-        applicationLayer.add(listPoiMaps, 0,2, 3, 1);
-        applicationLayer.add(statusPane, 0, 1);
-        applicationLayer.add(infoboxPane, 1, 1);
+        applicationLayer.add(listPoiCamera, 0, 0, numColumns, 1);
+        applicationLayer.add(listPoiMaps, 0,4, numColumns, 1);
+        applicationLayer.add(statusPane, 0, 2);
+        applicationLayer.add(infoboxPane, 2, 2);
     }
 
     private void initListPoiCamera() {
@@ -212,18 +219,26 @@ public class ApplicationViewImplementation extends Application implements Applic
     }
 
     private void initInfoboxPane() {
-        infoboxTitle = new Label();
+        infoboxTitle = new Text();
         infoboxTitle.setId("expansionName");
-        infoboxTitle.setAlignment(Pos.TOP_CENTER);
+
         infoboxTitle.setFont(fontTitle);
+        infoboxTitle.setStyle("" +
+            "-fx-fill: white;" +
+            "-fx-effect: dropshadow( gaussian , black , 8, 0.90 , 0 , 0 );");
+
+        BorderPane.setAlignment(infoboxTitle, Pos.CENTER_LEFT);
+        BorderPane.setMargin(infoboxTitle, new Insets(4));
 
         infoboxCloseButton = new Button("X");
         infoboxCloseButton.setId("expansionButton");
+        BorderPane.setMargin(infoboxCloseButton, new Insets(4));
 
         infoboxTitlePane = new BorderPane();
         infoboxTitlePane.setId("expansionTopPane");
         infoboxTitlePane.setLeft(infoboxTitle);
         infoboxTitlePane.setRight(infoboxCloseButton);
+        //infoboxTitlePane.setCenter(text);
 
         infoboxImage = new ImageView();
         infoboxImage.setId("expansionImage");
@@ -268,8 +283,8 @@ public class ApplicationViewImplementation extends Application implements Applic
 
         initDebugTensorFlow();
 
-        debugLayer.add(debugLogPane, 2, 1);
-        debugLayer.add(labelTensorFlowDebug, 2, 2);
+        debugLayer.add(debugLogPane, 3, 1, 2, 2);
+        debugLayer.add(labelTensorFlowDebug, 4, 3);
     }
 
     private void initDebugLog() {
@@ -393,7 +408,6 @@ public class ApplicationViewImplementation extends Application implements Applic
 
     private RotateTransition infoboxRotateTransition = null;
     private TranslateTransition infoboxTranslateTransition = null;
-    //TODO : private ScaleTransition infoboxScaleTransition = new ScaleTransition(Duration.seconds(2), infoboxPane);
 
     private void initBindings() {
         ImageView cameraImage = new ImageView();
@@ -466,8 +480,12 @@ public class ApplicationViewImplementation extends Application implements Applic
                         } else {
 
                             Label lblName = new Label(item.getName());
-                            lblName.setStyle("-fx-text-fill: white;" +
-                                "-fx-background-color: transparent; -fx-effect: dropshadow( gaussian , black , 8, 0.90 , 0 , 0 );");
+                            lblName.setFont(fontItem);
+                            lblName.setStyle("" +
+                                "-fx-text-fill: white;" +
+                                "-fx-background-color: transparent; " +
+                                "-fx-effect: dropshadow( gaussian , black , 8, 0.90 , 0 , 0 );");
+
                             BorderPane.setMargin(lblName, new Insets(4,0,0,0));
                             BorderPane.setAlignment(lblName, Pos.TOP_CENTER);
 
@@ -476,11 +494,30 @@ public class ApplicationViewImplementation extends Application implements Applic
                             border.setMaxWidth(itemWidth);
                             border.setOnMouseClicked(event -> viewModel.expandPoi(item.getId()));
                             border.setBorder(new Border(new BorderStroke(Color.DARKGRAY, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
-                            border.setStyle("-fx-border-color: darkgrey; -fx-border-width: 4px;");
+                            border.setStyle("-fx-border-color: aliceblue; -fx-border-width: 4px;");
                             //border.setPadding(new Insets(4, 0, 4, 0));
 
                             if (item.getImage() != null) {
-                                border.setBackground(new Background(new BackgroundImage(item.getImage(),
+//                                ImageView imageView = new ImageView(item.getImage());
+//
+//                                imageView.setPreserveRatio(true);
+//                                imageView.fitWidthProperty().bind(border.widthProperty());// ..setFitWidth(itemWidth - 8);
+//                                imageView.fitHeightProperty().bind(border.heightProperty());
+//
+//                                //imageView.translateYProperty().bind(border.heightProperty().subtract(8).divide(2).multiply(-1));
+//                                //HBox vBox = new HBox();
+//                                //vBox.setAlignment(Pos.CENTER);
+//                                //VBox.setVgrow(imageView, Priority.ALWAYS);
+//                                //vBox.getChildren().add(imageView);
+//
+//                                border.setCenter(imageView);
+//
+//
+//                                //imageView.setPreserveRatio(true);
+//                                //imageView.fitWidthProperty().bind(border.widthProperty());
+//
+//                                border.setCenter(imageView);
+                                Background background = new Background(new BackgroundImage(item.getImage(),
                                     BackgroundRepeat.NO_REPEAT,
                                     BackgroundRepeat.NO_REPEAT,
                                     BackgroundPosition.CENTER,
@@ -488,39 +525,12 @@ public class ApplicationViewImplementation extends Application implements Applic
                                         true,
                                         true,
                                         true,
-                                        true))));
+                                        true)));
+                                border.setBackground(background);
                             }
 
-
                             border.setTop(lblName);
-
                             setGraphic(border);
-
-
-//                            Label lblName = new Label(item.getName());
-//                            GridPane.setFillWidth(lblName, true);
-//                            lblName.setMaxWidth(Double.MAX_VALUE);
-//                            lblName.setAlignment(Pos.CENTER_RIGHT);
-//                            lblName.setPadding(new Insets(4, 4, 0, 4));
-//                            lblName.setFont(fontItem);
-//                            //lblName.setTextFill(Color.BLACK);
-//                            //lblName.setBackground(new BackgroundFill(Color.TRANSPARENT, null, null));
-//
-//                            lblName.setStyle("-fx-text-fill: black;" +
-//                                    "-fx-background-color: red; -fx-effect: dropshadow( gaussian , white , 2, 1.0 , 0 , 0 );");
-//
-//                            GridPane pane = new GridPane();
-//                            //GridPane.setHalignment(lblName, HPos.CENTER);
-//                            pane.setMinWidth(itemWidth);
-//                            pane.setMaxWidth(itemWidth);
-//
-
-//
-//                            pane.add(lblName, 0,0);
-
-//                            setGraphic(pane);
-//                            listPoiCamera.refresh();
-//                            listPoiMaps.refresh();
                         }
                     }
                 };

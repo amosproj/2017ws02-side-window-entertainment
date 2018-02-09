@@ -21,11 +21,8 @@
 
 #expansionPane {
     -fx-padding: 0px;
-    -fx-max-width: 400px;
-    -fx-max-height: 500px;
-    -fx-alignment: center-right;
-    -fx-background-color: rgba(0, 0, 0, 0.7);
-    -fx-border-color: rgba(192,192,192,255);
+    -fx-background-color: rgba(0, 0, 0, 0.5);
+    -fx-border-color: aliceblue;
     -fx-border-width: 4px;
 }
 
@@ -87,15 +84,13 @@
 
 .label {
     -fx-font-size: 20px;
-    -fx-font-family: "Helvetica Neue";
     -fx-text-fill: white;
     -fx-background-color: transparent;
 }
 
 .button {
     -fx-font-size: 20px;
-    -fx-font-family: "Helvetica Neue";
-    -fx-font-weight: bold;
+
     -fx-text-fill: white;
     -fx-background-color: black;
 }
