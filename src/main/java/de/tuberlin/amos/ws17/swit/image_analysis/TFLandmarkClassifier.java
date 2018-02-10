@@ -95,9 +95,8 @@ public class TFLandmarkClassifier implements LandmarkDetector {
             StringBuilder log = new StringBuilder();
             for (int i = 0; i < 4; i++) {
                 int index = sortedIndices[i];
-                log.append(String.format("%-15s (%.2f%% likely)\n", labels.get(index), probabilities[index] * 100.0));
+                log.append(String.format("%.2f%%\t %s\n", probabilities[index] * 100.0, labels.get(index)));
             }
-//            System.out.println(log);
 
             if (debug) {
                 DebugTF.log(log.toString());

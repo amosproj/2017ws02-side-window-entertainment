@@ -2,7 +2,6 @@ package de.tuberlin.amos.ws17.swit.landscape_tracking;
 
 import de.tuberlin.amos.ws17.swit.image_analysis.ImageUtils;
 import javafx.scene.media.MediaView;
-import org.apache.jena.base.Sys;
 import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameGrabber;
