@@ -7,7 +7,9 @@ import de.tuberlin.amos.ws17.swit.common.DebugLog;
 import de.tuberlin.amos.ws17.swit.common.DebugTF;
 import de.tuberlin.amos.ws17.swit.common.Module;
 import de.tuberlin.amos.ws17.swit.image_analysis.ImageUtils;
-import javafx.animation.*;
+import javafx.animation.RotateTransition;
+import javafx.animation.ScaleTransition;
+import javafx.animation.TranslateTransition;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -17,21 +19,17 @@ import javafx.event.EventHandler;
 import javafx.geometry.*;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.effect.DropShadow;
-import javafx.scene.effect.GaussianBlur;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import javafx.util.Duration;
-import sun.security.ssl.Debug;
 
 public class ApplicationViewImplementation extends Application implements ApplicationView {
     //##### layer container #####
@@ -39,62 +37,62 @@ public class ApplicationViewImplementation extends Application implements Applic
     //##########
 
     //##### media layer #####
-    private MediaView mediaLayer = null;
+    private MediaView   mediaLayer  = null;
     private MediaPlayer mediaPlayer = null;
     //##########
 
     //##### application layer #####
-    private GridPane applicationLayer = null;
-    private BorderPane infoboxLayer = null;
+    private GridPane   applicationLayer   = null;
+    private BorderPane infoboxLayer       = null;
     //### infobox
-    private BorderPane infoboxPane = null;
-    private BorderPane infoboxTitlePane = null;
+    private BorderPane infoboxPane        = null;
+    private BorderPane infoboxTitlePane   = null;
     private BorderPane infoboxContentPane = null;
-    private Button infoboxCloseButton = null;
-    private Text infoboxTitle = null;
-    private Label infoboxInformation = null;
-    private ImageView infoboxImage = null;
-    private ScrollPane infoboxScrollPane = null;
+    private Button     infoboxCloseButton = null;
+    private Text       infoboxTitle       = null;
+    private Label      infoboxInformation = null;
+    private ImageView  infoboxImage       = null;
+    private ScrollPane infoboxScrollPane  = null;
 
     //### Poi Lists
     private ListView<PoiViewModel> listPoiCamera = null;
-    private ListView<PoiViewModel> listPoiMaps = null;
+    private ListView<PoiViewModel> listPoiMaps   = null;
 
     //### Status: expressions and module status
-    private HBox statusPane = null;
-    private ListView<ModuleStatusViewModel> listModuleStatus = null;
+    private HBox                              statusPane           = null;
+    private ListView<ModuleStatusViewModel>   listModuleStatus     = null;
     private ListView<UserExpressionViewModel> listExpressionStatus = null;
     //##########
 
     //##### debug layer #####
-    private GridPane debugLayer = null;
+    private GridPane debugLayer          = null;
     //### DebugLog
-    private GridPane debugLogPane = null;
-    private VBox debugLogVBoxButtons = null;
+    private GridPane debugLogPane        = null;
+    private VBox     debugLogVBoxButtons = null;
 
-    private Button buttonUserTrackingLog = null;
+    private Button buttonUserTrackingLog      = null;
     private Button buttonLandscapeTrackingLog = null;
-    private Button buttonPoiLog = null;
+    private Button buttonPoiLog               = null;
     private Button buttonInformationSourceLog = null;
-    private Button buttonImageAnalysisLog = null;
-    private Button buttonApplicationViewLog = null;
-    private Button buttonGpsLog = null;
+    private Button buttonImageAnalysisLog     = null;
+    private Button buttonApplicationViewLog   = null;
+    private Button buttonGpsLog               = null;
 
-    private ListView<DebugLog.DebugEntry> listDebugLog = null;
+    private ListView<DebugLog.DebugEntry> listDebugLog         = null;
     //### TensorFlow Debug
-    private Label labelTensorFlowDebug = null;
+    private Label                         labelTensorFlowDebug = null;
     //##########
 
     //private static final String FONTNAME = "Helvetica Neue";
     private static double fontSizeTitle = 12;
-    private static double fontSizeItem = 12;
-    private static double fontSizeText = 12;
+    private static double fontSizeItem  = 12;
+    private static double fontSizeText  = 12;
 
     private static double itemWidth = 0;
 
     private static Font fontTitle = null;
-    private static Font fontItem = null;
-    private static Font fontText = null;
+    private static Font fontItem  = null;
+    private static Font fontText  = null;
 
     private static ApplicationViewModel viewModel;
 
@@ -151,8 +149,7 @@ public class ApplicationViewImplementation extends Application implements Applic
             width.bind(Bindings.selectDouble(mediaLayer.sceneProperty(), "width"));
             height.bind(Bindings.selectDouble(mediaLayer.sceneProperty(), "height"));
             mediaLayer.setPreserveRatio(true);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             DebugLog.log(DebugLog.SOURCE_VIEW, "MediaPlayer kann nicht initialisiert werden");
         }
     }
@@ -180,7 +177,7 @@ public class ApplicationViewImplementation extends Application implements Applic
         applicationLayer.getRowConstraints().get(4).setValignment(VPos.CENTER);
 
         int numColumns = 5;
-        for(int i = 0;i < numColumns;i++) {
+        for (int i = 0; i < numColumns; i++) {
             ColumnConstraints cc = new ColumnConstraints();
             cc.setPercentWidth(100.0 / numColumns);
             cc.setHalignment(HPos.CENTER);
@@ -193,7 +190,7 @@ public class ApplicationViewImplementation extends Application implements Applic
         initInfoboxPane();
 
         applicationLayer.add(listPoiCamera, 0, 0, numColumns, 1);
-        applicationLayer.add(listPoiMaps, 0,4, numColumns, 1);
+        applicationLayer.add(listPoiMaps, 0, 4, numColumns, 1);
         applicationLayer.add(statusPane, 0, 2);
         //applicationLayer.add(infoboxPane, 2, 2);
     }
@@ -228,8 +225,8 @@ public class ApplicationViewImplementation extends Application implements Applic
 
         infoboxTitle.setFont(fontTitle);
         infoboxTitle.setStyle("" +
-            "-fx-fill: white;" +
-            "-fx-effect: dropshadow( gaussian , black , 8, 0.90 , 0 , 0 );");
+                "-fx-fill: white;" +
+                "-fx-effect: dropshadow( gaussian , black , 8, 0.90 , 0 , 0 );");
         //infoboxTitle.set
         BorderPane.setAlignment(infoboxTitle, Pos.CENTER_LEFT);
         BorderPane.setMargin(infoboxTitle, new Insets(4));
@@ -238,8 +235,8 @@ public class ApplicationViewImplementation extends Application implements Applic
         text.setText("X");
         text.setFont(fontTitle);
         text.setStyle("" +
-            "-fx-fill: white;" +
-            "-fx-effect: dropshadow( gaussian , black , 8, 0.90 , 0 , 0 );");
+                "-fx-fill: white;" +
+                "-fx-effect: dropshadow( gaussian , black , 8, 0.90 , 0 , 0 );");
 
         //Button b = new Button(null, );
         infoboxCloseButton = new Button(null, text);
@@ -253,7 +250,7 @@ public class ApplicationViewImplementation extends Application implements Applic
         infoboxTitlePane.setLeft(infoboxTitle);
         infoboxTitlePane.setRight(infoboxCloseButton);
         infoboxTitlePane.setStyle("" +
-            "-fx-background-color: rgba(255, 255, 255, 0.25); ");
+                "-fx-background-color: rgba(255, 255, 255, 0.25); ");
 
         infoboxImage = new ImageView();
         infoboxImage.setId("expansionImage");
@@ -413,8 +410,7 @@ public class ApplicationViewImplementation extends Application implements Applic
     private void initFullscreenMode(Stage stage) {
         if (AppProperties.getInstance().useFullscreen) {
             stage.setMaximized(true);
-        }
-        else if (AppProperties.getInstance().useFullscreenWithoutWindowChrome) {
+        } else if (AppProperties.getInstance().useFullscreenWithoutWindowChrome) {
             stage.setFullScreen(true);
         }
     }
@@ -435,7 +431,9 @@ public class ApplicationViewImplementation extends Application implements Applic
     }
 
     private void showPoiLists(boolean show) {
-        if (listPoiCamera.isVisible() == show) { return; } // nothing to do
+        if (listPoiCamera.isVisible() == show) {
+            return;
+        } // nothing to do
         int animationDuration = 1000;
         if (!show) {
             AnimationUtils.slideUp(listPoiCamera, listPoiCamera.getHeight(), animationDuration, false);
@@ -451,7 +449,7 @@ public class ApplicationViewImplementation extends Application implements Applic
         showDebugLog(!debugLogPane.isVisible());
     }
 
-    private RotateTransition infoboxRotateTransition = null;
+    private RotateTransition    infoboxRotateTransition    = null;
     private TranslateTransition infoboxTranslateTransition = null;
 
     private void initBindings() {
@@ -484,8 +482,8 @@ public class ApplicationViewImplementation extends Application implements Applic
             }
 
             infoboxRotateTransition = new RotateTransition(Duration.seconds(0.75), infoboxPane);
-            infoboxRotateTransition.setOnFinished(new EventHandler<ActionEvent>(){
-                public void handle(ActionEvent AE){
+            infoboxRotateTransition.setOnFinished(new EventHandler<ActionEvent>() {
+                public void handle(ActionEvent AE) {
                     infoboxRotateTransition.setToAngle(viewModel.getInfoBoxRotation().doubleValue());
                     infoboxRotateTransition.play();
                 }
@@ -495,8 +493,8 @@ public class ApplicationViewImplementation extends Application implements Applic
             infoboxRotateTransition.play();
 
             infoboxTranslateTransition = new TranslateTransition(Duration.seconds(2), infoboxPane);
-            infoboxTranslateTransition.setOnFinished(new EventHandler<ActionEvent>(){
-                public void handle(ActionEvent AE){
+            infoboxTranslateTransition.setOnFinished(new EventHandler<ActionEvent>() {
+                public void handle(ActionEvent AE) {
                     infoboxTranslateTransition.setToX(viewModel.getInfoBoxTranslationX().doubleValue());
                     infoboxTranslateTransition.setToY(viewModel.getInfoBoxTranslationY().doubleValue());
                     infoboxTranslateTransition.play();
@@ -528,11 +526,11 @@ public class ApplicationViewImplementation extends Application implements Applic
                             Label lblName = new Label(item.getName());
                             lblName.setFont(fontItem);
                             lblName.setStyle("" +
-                                "-fx-text-fill: white;" +
-                                "-fx-background-color: transparent; " +
-                                "-fx-effect: dropshadow( gaussian , black , 8, 0.90 , 0 , 0 );");
+                                    "-fx-text-fill: white;" +
+                                    "-fx-background-color: transparent; " +
+                                    "-fx-effect: dropshadow( gaussian , black , 8, 0.90 , 0 , 0 );");
 
-                            BorderPane.setMargin(lblName, new Insets(4,0,0,0));
+                            BorderPane.setMargin(lblName, new Insets(4, 0, 0, 0));
                             BorderPane.setAlignment(lblName, Pos.TOP_CENTER);
 
                             BorderPane border = new BorderPane();
@@ -545,14 +543,14 @@ public class ApplicationViewImplementation extends Application implements Applic
 
                             if (item.getImage() != null) {
                                 Background background = new Background(new BackgroundImage(item.getImage(),
-                                    BackgroundRepeat.NO_REPEAT,
-                                    BackgroundRepeat.NO_REPEAT,
-                                    BackgroundPosition.CENTER,
-                                    new BackgroundSize(100, 100,
-                                        true,
-                                        true,
-                                        true,
-                                        true)));
+                                        BackgroundRepeat.NO_REPEAT,
+                                        BackgroundRepeat.NO_REPEAT,
+                                        BackgroundPosition.CENTER,
+                                        new BackgroundSize(100, 100,
+                                                true,
+                                                true,
+                                                true,
+                                                true)));
                                 border.setBackground(background);
                             }
 
@@ -604,8 +602,7 @@ public class ApplicationViewImplementation extends Application implements Applic
             }
         });
 
-        listExpressionStatus.setCellFactory(new Callback<ListView<UserExpressionViewModel>, ListCell<UserExpressionViewModel>>()
-        {
+        listExpressionStatus.setCellFactory(new Callback<ListView<UserExpressionViewModel>, ListCell<UserExpressionViewModel>>() {
             @Override
             public ListCell<UserExpressionViewModel> call(ListView<UserExpressionViewModel> param) {
                 return new ListCell<UserExpressionViewModel>() {
@@ -653,31 +650,14 @@ public class ApplicationViewImplementation extends Application implements Applic
 
     @Override
     public void showExpandedPoi(boolean show) {
-        ScaleTransition scaleTransition = new ScaleTransition(Duration.millis(350), infoboxPane);
-
         if (show) {
-            if (infoboxPane.isVisible()) { return; } // already visible, nothing to do
-
-            scaleTransition.setFromX(0);
-            scaleTransition.setToX(1);
-            scaleTransition.setFromY(0);
-            scaleTransition.setToY(1);
-
-            infoboxPane.setVisible(true);
+            if (infoboxPane.isVisible()) {
+                return;
+            } // already visible, nothing to do
+            AnimationUtils.scaleUp(infoboxPane, 0, 1, 0 ,1, 350, true);
         } else {
-            scaleTransition.setFromX(1);
-            scaleTransition.setToX(0);
-            scaleTransition.setFromY(1);
-            scaleTransition.setToY(0);
-
-            scaleTransition.setOnFinished(new EventHandler<ActionEvent>(){
-                public void handle(ActionEvent AE){
-                    infoboxPane.setVisible(false);
-                }
-            });
+            AnimationUtils.scaleDown(infoboxPane, 0, 0, 350, false);
         }
-
-        scaleTransition.play();
     }
 
     @Override
@@ -736,35 +716,35 @@ public class ApplicationViewImplementation extends Application implements Applic
         AnimationUtils.fadeOut(applicationLayer, 1500);
     }
 
-    private void toggleStyle(String module){
+    private void toggleStyle(String module) {
         boolean status = DebugLog.getModuleStatus(module);
-        if (module.equals("GPS")){
+        if (module.equals("GPS")) {
             if (status) buttonGpsLog.setStyle("-fx-background-color: black");
-            else        buttonGpsLog.setStyle("-fx-background-color: dimgray");
+            else buttonGpsLog.setStyle("-fx-background-color: dimgray");
         }
-        if (module.equals("POI")){
+        if (module.equals("POI")) {
             if (status) buttonPoiLog.setStyle("-fx-background-color: black");
-            else        buttonPoiLog.setStyle("-fx-background-color: dimgray");
+            else buttonPoiLog.setStyle("-fx-background-color: dimgray");
         }
-        if (module.equals("UserTracking")){
+        if (module.equals("UserTracking")) {
             if (status) buttonUserTrackingLog.setStyle("-fx-background-color: black");
-            else        buttonUserTrackingLog.setStyle("-fx-background-color: dimgray");
+            else buttonUserTrackingLog.setStyle("-fx-background-color: dimgray");
         }
-        if (module.equals("LandscapeTracking")){
+        if (module.equals("LandscapeTracking")) {
             if (status) buttonLandscapeTrackingLog.setStyle("-fx-background-color: black");
-            else        buttonLandscapeTrackingLog.setStyle("-fx-background-color: dimgray");
+            else buttonLandscapeTrackingLog.setStyle("-fx-background-color: dimgray");
         }
-        if (module.equals("ImageAnalysis")){
+        if (module.equals("ImageAnalysis")) {
             if (status) buttonImageAnalysisLog.setStyle("-fx-background-color: black");
-            else        buttonImageAnalysisLog.setStyle("-fx-background-color: dimgray");
+            else buttonImageAnalysisLog.setStyle("-fx-background-color: dimgray");
         }
-        if (module.equals("ApplicationView")){
+        if (module.equals("ApplicationView")) {
             if (status) buttonApplicationViewLog.setStyle("-fx-background-color: black");
-            else        buttonApplicationViewLog.setStyle("-fx-background-color: dimgray");
+            else buttonApplicationViewLog.setStyle("-fx-background-color: dimgray");
         }
-        if (module.equals("InformationSource")){
+        if (module.equals("InformationSource")) {
             if (status) buttonInformationSourceLog.setStyle("-fx-background-color: black");
-            else        buttonInformationSourceLog.setStyle("-fx-background-color: dimgray");
+            else buttonInformationSourceLog.setStyle("-fx-background-color: dimgray");
         }
     }
 

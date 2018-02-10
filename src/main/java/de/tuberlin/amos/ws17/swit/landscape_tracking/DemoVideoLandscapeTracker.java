@@ -26,7 +26,6 @@ public class DemoVideoLandscapeTracker implements LandscapeTracker {
         synchronized (grabber) {
             double frameRate = grabber.getFrameRate();
             double lengthInSeconds = grabber.getLengthInTime() / 1000000f;
-            System.out.println("Second: " + second + "/" + lengthInSeconds);
             if (second >= lengthInSeconds) {
                 LOGGER.log(Level.INFO, "Frame outside of video");
                 return null;

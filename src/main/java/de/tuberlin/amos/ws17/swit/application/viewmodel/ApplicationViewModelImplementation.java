@@ -6,6 +6,7 @@ import de.tuberlin.amos.ws17.swit.application.view.ApplicationViewImplementation
 import de.tuberlin.amos.ws17.swit.common.*;
 import de.tuberlin.amos.ws17.swit.common.Module;
 import de.tuberlin.amos.ws17.swit.common.exceptions.ModuleNotWorkingException;
+import de.tuberlin.amos.ws17.swit.gps.DemoVideoGpsTracker;
 import de.tuberlin.amos.ws17.swit.gps.GpsTracker;
 import de.tuberlin.amos.ws17.swit.gps.GpsTrackerImplementation;
 import de.tuberlin.amos.ws17.swit.gps.GpsTrackerMock;
@@ -40,8 +41,10 @@ import javafx.event.ActionEvent;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
 import javafx.stage.Screen;
+import org.apache.jena.base.Sys;
 import org.joda.time.DateTime;
 
+import javax.sound.midi.SysexMessage;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.*;
@@ -51,7 +54,7 @@ import java.util.concurrent.TimeUnit;
 
 public class ApplicationViewModelImplementation implements ApplicationViewModel {
 
-    public static final String videoFileName = "Berlin.mp4";
+    public static final String videoFileName = "amos.mp4";
 
     //Module
     private ApplicationView      view;
@@ -214,28 +217,43 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         String currentModule;
         //GPS
         currentModule = "GpsTracker";
-        if (properties.useGpsModule) {
-            try {
-                System.out.println("loading " + currentModule + "...");
-                gpsTracker = new GpsTrackerImplementation();
-                moduleList.add(gpsTracker);
-                gpsTracker.startModule();
-                setModuleStatus(ModuleErrors.NOGPSHARDWARE, true);
-            } catch (ModuleNotWorkingException e) {
-                setModuleStatus(ModuleErrors.NOGPSHARDWARE, false);
-            } catch (Exception e) {
-                System.out.println("unexpected error loading " + currentModule);
-                e.printStackTrace();
-                setModuleStatus(ModuleErrors.NOGPSHARDWARE, false);
+        if (!properties.useDemoVideo) {
+            if (properties.useGpsModule) {
+                try {
+                    System.out.println("loading " + currentModule + "...");
+                    gpsTracker = new GpsTrackerImplementation();
+                    moduleList.add(gpsTracker);
+                    gpsTracker.startModule();
+                    setModuleStatus(ModuleErrors.NOGPSHARDWARE, true);
+                } catch (ModuleNotWorkingException e) {
+                    setModuleStatus(ModuleErrors.NOGPSHARDWARE, false);
+                } catch (Exception e) {
+                    System.out.println("unexpected error loading " + currentModule);
+                    e.printStackTrace();
+                    setModuleStatus(ModuleErrors.NOGPSHARDWARE, false);
+                }
+            } else {
+                try {
+                    System.out.println("loading " + currentModule + "Mock...");
+                    gpsTracker = new GpsTrackerMock();
+                    moduleList.add(gpsTracker);
+                    gpsTracker.startModule();
+                    setModuleStatus(ModuleErrors.NOGPSHARDWARE, true);
+                } catch (ModuleNotWorkingException e) {
+                    setModuleStatus(ModuleErrors.NOGPSHARDWARE, false);
+                }
             }
         } else {
             try {
-                System.out.println("loading " + currentModule + "Mock...");
-                gpsTracker = new GpsTrackerMock();
+                System.out.println("loading " + currentModule + " for demo video...");
+                gpsTracker = new DemoVideoGpsTracker();
                 moduleList.add(gpsTracker);
                 gpsTracker.startModule();
                 setModuleStatus(ModuleErrors.NOGPSHARDWARE, true);
             } catch (ModuleNotWorkingException e) {
+                setModuleStatus(ModuleErrors.NOGPSHARDWARE, false);
+            } catch (IOException e) {
+                System.out.println("could not load json file " + currentModule);
                 setModuleStatus(ModuleErrors.NOGPSHARDWARE, false);
             }
         }
@@ -436,15 +454,15 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                     setExpressionStatus(ExpressionType.ISRACKED, false);
                 }
                 if (mapsTimeDiff >= 5) {
-                    //System.out.println("ich mach maps " + mapsTimeDiff);
+                    lastMapsExecution = currentTime;
+                    System.out.println("Get GPS: " + System.currentTimeMillis() / 1000 + " mapsTimeDiff= " + mapsTimeDiff);
                     if (mapsThread.getState() == Thread.State.NEW) {
-                        lastMapsExecution = currentTime;
                         mapsThread.start();
                     } else if (mapsThread.getState() == Thread.State.TERMINATED) {
-                        lastMapsExecution = currentTime;
                         initMapsThread();
                         mapsThread.start();
                     }
+
                 }
                 try {
                     Thread.sleep(75);
