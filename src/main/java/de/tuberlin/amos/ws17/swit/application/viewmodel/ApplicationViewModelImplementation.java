@@ -488,7 +488,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
             }
 
             //GPS
-            KinematicProperties kinematicProperties = null;
+            KinematicProperties kinematicProperties = new KinematicProperties();
             List<KinematicProperties> history = null;
             try {
                 kinematicProperties = gpsTracker.fillDumpObject(kinematicProperties);
@@ -501,6 +501,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                         latitude + ", Lng: " + longitude);
             } catch (ModuleNotWorkingException e) {
                 setModuleStatus(ModuleErrors.NOGPSHARDWARE, false);
+                kinematicProperties = null;
             } catch (Exception e) {
                 e.printStackTrace();
                 setModuleStatus(ModuleErrors.NOGPSHARDWARE, false);
