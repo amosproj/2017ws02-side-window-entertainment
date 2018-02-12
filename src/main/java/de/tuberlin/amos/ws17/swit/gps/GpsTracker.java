@@ -3,7 +3,7 @@ package de.tuberlin.amos.ws17.swit.gps;
 import de.tuberlin.amos.ws17.swit.common.KinematicProperties;
 import de.tuberlin.amos.ws17.swit.common.Module;
 import de.tuberlin.amos.ws17.swit.common.exceptions.InformationNotAvailableException;
-import org.joda.time.DateTime;
+import de.tuberlin.amos.ws17.swit.common.GpsPosition;
 
 import java.util.LinkedList;
 

@@ -2,6 +2,7 @@ package de.tuberlin.amos.ws17.swit.gps;
 
 import de.tuberlin.amos.ws17.swit.common.DebugLog;
 import de.tuberlin.amos.ws17.swit.common.KinematicProperties;
+import de.tuberlin.amos.ws17.swit.common.GpsPosition;
 
 import java.awt.image.BufferedImage;
 import java.io.*;
@@ -69,6 +70,11 @@ public class GpsTrackerMock extends GpsTrackerImplementation {
         DebugLog.log(DebugLog.SOURCE_GPS,"Current position: (" + latitude + ", " + longitude + ")");
         return obj;
 
+    }
+
+    @Override
+    public GpsPosition getCurrentPosition() {
+        return null;
     }
 
     public void startModule() {

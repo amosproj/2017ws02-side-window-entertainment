@@ -61,6 +61,17 @@ public class GpsPortReader implements SentenceListener{
     public void readingStopped(){
     }
 
+    public GpsPosition getCurrentPosition(){
+        if (latitude == -1 || longitude == -1)
+            return null;
+        else{
+            GpsPosition pos = new GpsPosition();
+            pos.setLatitude(latitude);
+            pos.setLongitude(longitude);
+            return pos;
+        }
+    }
+
     // fires every time new data is received over the observed port
     public void sentenceRead(SentenceEvent event){
         Sentence s = event.getSentence();

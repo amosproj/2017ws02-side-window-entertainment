@@ -10,7 +10,6 @@ import java.util.LinkedList;
 
 import de.tuberlin.amos.ws17.swit.common.exceptions.GpsModuleNotAvailableException;
 import de.tuberlin.amos.ws17.swit.common.exceptions.InformationNotAvailableException;
-import de.tuberlin.amos.ws17.swit.common.exceptions.ServiceNotAvailableException;
 
 
 import javax.imageio.ImageIO;
@@ -72,6 +71,10 @@ public class GpsTrackerImplementation implements GpsTracker {
 	public boolean stopModule(){
 		portReader = null;
 		return true;
+	}
+
+	public GpsPosition getCurrentPosition() {
+		return portReader.getCurrentPosition();
 	}
 
 	public LinkedList<KinematicProperties> getGpsTrack(int count) {
