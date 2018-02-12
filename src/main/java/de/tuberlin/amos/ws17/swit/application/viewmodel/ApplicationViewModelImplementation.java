@@ -125,9 +125,9 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         initMapsThread();
         initCameraThread();
 
-        //if (properties.useDebugLog) {
-        //    initDebugLog();
-        //}
+        if (properties.useDebugLog) {
+            initDebugLog();
+        }
 
         updateBackgroundImage();
 
@@ -184,34 +184,34 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         propertyPoiCamera.set(FXCollections.observableList(new ArrayList<>()));
         propertyDebugLog.set(FXCollections.observableList(new ArrayList<>()));
         propertyCloseButton.set(event -> minimizePoi());
-        propertyToggleGpsButton.set(event -> DebugLog.toggleModule("GPS"));
-        propertyTogglePoiButton.set(event -> DebugLog.toggleModule("POI"));
-        propertyToggleUserTrackingButton.set(event -> DebugLog.toggleModule("UserTracking"));
-        propertyToggleLandscapeTrackingButton.set(event -> DebugLog.toggleModule("LandscapeTracking"));
-        propertyToggleImageAnalysisButton.set(event -> DebugLog.toggleModule("ImageAnalysis"));
-        propertyToggleApplicationViewButton.set(event -> DebugLog.toggleModule("ApplicationView"));
-        propertyToggleInformationSourceButton.set(event -> DebugLog.toggleModule("InformationSource"));
+        propertyToggleGpsButton.set(event -> DebugLog.toggleModule(DebugLog.gps));
+        propertyTogglePoiButton.set(event -> DebugLog.toggleModule(DebugLog.poi));
+        propertyToggleUserTrackingButton.set(event -> DebugLog.toggleModule(DebugLog.userTracking));
+        propertyToggleLandscapeTrackingButton.set(event -> DebugLog.toggleModule(DebugLog.landscapeTracking));
+        propertyToggleImageAnalysisButton.set(event -> DebugLog.toggleModule(DebugLog.imageAnalysis));
+        propertyToggleApplicationViewButton.set(event -> DebugLog.toggleModule(DebugLog.applicationView));
+        propertyToggleInformationSourceButton.set(event -> DebugLog.toggleModule(DebugLog.informationSource));
 
         debugEntries.set(DebugLog.getDebugLog());
     }
 
-    //private void initDebugLog() {
-    //    view.showDebugLog(true);
-    //    System.out.println("loading DebugLog...");
+    private void initDebugLog() {
+        view.showDebugLog(true);
+        System.out.println("loading DebugLog...");
 
-//        for (DebugLog.DebugEntry debugEntry : DebugLog.getDebugLog()) {
-//            propertyDebugLog.add(debugEntry.toString());
-//        }
-//
-//        DebugLog.getDebugLog().addListener((ListChangeListener<DebugLog.DebugEntry>) c -> {
-//            c.next();
-//            propertyDebugLog.clear();
-//            for (DebugLog.DebugEntry de : c.getList()) {
-//                propertyDebugLog.add(de.toString());
-//            }
-//        });
+        for (DebugLog.DebugEntry debugEntry : DebugLog.getDebugLog()) {
+            propertyDebugLog.add(debugEntry.toString());
+        }
 
-    //}
+        DebugLog.getDebugLog().addListener((ListChangeListener<DebugLog.DebugEntry>) c -> {
+            c.next();
+            propertyDebugLog.clear();
+            for (DebugLog.DebugEntry de : c.getList()) {
+                propertyDebugLog.add(de.toString());
+            }
+        });
+
+    }
 
     private void initModules() {
         String currentModule;
@@ -515,8 +515,8 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 DateTime timeStamp = kinematicProperties.getTimeStamp();
                 Double latitude = kinematicProperties.getLatitude();
                 Double longitude = kinematicProperties.getLongitude();
-                DebugLog.log(DebugLog.SOURCE_VIEW, "Lat: " +
-                        latitude + ", Lng: " + longitude);
+                DebugLog.log(DebugLog.SOURCE_GPS, "Current Position: (" +
+                        latitude + ", " + longitude + ")");
             } catch (ModuleNotWorkingException e) {
                 setModuleStatus(ModuleErrors.NOGPSHARDWARE, false);
                 kinematicProperties = null;

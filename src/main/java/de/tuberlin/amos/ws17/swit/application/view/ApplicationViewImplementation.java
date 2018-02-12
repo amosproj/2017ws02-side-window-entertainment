@@ -78,7 +78,7 @@ public class ApplicationViewImplementation extends Application implements Applic
     private Button buttonApplicationViewLog   = null;
     private Button buttonGpsLog               = null;
 
-    private ListView<DebugLog.DebugEntry> listDebugLog         = null;
+    private ListView<String> listDebugLog         = null;
     //### TensorFlow Debug
     private Label                         labelTensorFlowDebug = null;
     //##########
@@ -328,38 +328,38 @@ public class ApplicationViewImplementation extends Application implements Applic
 
         buttonApplicationViewLog = new Button("application_view");
         buttonApplicationViewLog.setId("toggleApplicationView");
-        buttonApplicationViewLog.setOnMouseClicked(event -> toggleStyle("ApplicationView"));
+        buttonApplicationViewLog.setOnMouseClicked(event -> toggleStyle(DebugLog.applicationView));
         buttonApplicationViewLog.getStyleClass().add("toggleButton");
         buttonApplicationViewLog.setMaxWidth(Double.MAX_VALUE);
 
         buttonGpsLog = new Button("GPS");
         buttonGpsLog.setId("toggleGpsLog");
-        buttonGpsLog.setOnMouseClicked(event -> toggleStyle("GPS"));
+        buttonGpsLog.setOnMouseClicked(event -> toggleStyle(DebugLog.gps));
         buttonGpsLog.setMaxWidth(Double.MAX_VALUE);
 
         buttonImageAnalysisLog = new Button("image_analysis");
         buttonImageAnalysisLog.setId("toggleImageAnalysis");
-        buttonImageAnalysisLog.setOnMouseClicked(event -> toggleStyle("ImageAnalysis"));
+        buttonImageAnalysisLog.setOnMouseClicked(event -> toggleStyle(DebugLog.imageAnalysis));
         buttonImageAnalysisLog.setMaxWidth(Double.MAX_VALUE);
 
         buttonInformationSourceLog = new Button("information_source");
         buttonInformationSourceLog.setId("toggleInformationSource");
-        buttonInformationSourceLog.setOnMouseClicked(event -> toggleStyle("InformationSource"));
+        buttonInformationSourceLog.setOnMouseClicked(event -> toggleStyle(DebugLog.informationSource));
         buttonInformationSourceLog.setMaxWidth(Double.MAX_VALUE);
 
         buttonLandscapeTrackingLog = new Button("landscape_tracking");
         buttonLandscapeTrackingLog.setId("toggleLandscapeTracking");
-        buttonLandscapeTrackingLog.setOnMouseClicked(event -> toggleStyle("LandscapeTracking"));
+        buttonLandscapeTrackingLog.setOnMouseClicked(event -> toggleStyle(DebugLog.landscapeTracking));
         buttonLandscapeTrackingLog.setMaxWidth(Double.MAX_VALUE);
 
         buttonPoiLog = new Button("POI");
         buttonPoiLog.setId("togglePoi");
-        buttonPoiLog.setOnMouseClicked(event -> toggleStyle("POI"));
+        buttonPoiLog.setOnMouseClicked(event -> toggleStyle(DebugLog.poi));
         buttonPoiLog.setMaxWidth(Double.MAX_VALUE);
 
         buttonUserTrackingLog = new Button("user_tracking");
         buttonUserTrackingLog.setId("toggleUserTracking");
-        buttonUserTrackingLog.setOnMouseClicked(event -> toggleStyle("UserTracking"));
+        buttonUserTrackingLog.setOnMouseClicked(event -> toggleStyle(DebugLog.userTracking));
         buttonUserTrackingLog.setMaxWidth(Double.MAX_VALUE);
 
         debugLogVBoxButtons = new VBox();
@@ -400,7 +400,7 @@ public class ApplicationViewImplementation extends Application implements Applic
         stage.setTitle("Side Window Infotainment");
 
         Scene scene = new Scene(stackPaneRoot, 1920, 1080, Color.WHITE);
-        scene.setOnKeyPressed(event -> viewModel.onKeyPressed(event.getCode()));
+        scene.setOnKeyPressed(event -> viewModel.onKeyPressed(event.getCode())) ;
         scene.getStylesheets().add("/stylesheets/TransparentApplicationViewStylesheet.css");
         stage.setScene(scene);
         initFullscreenMode(stage);
@@ -475,7 +475,7 @@ public class ApplicationViewImplementation extends Application implements Applic
             listPoiMaps.itemsProperty().bindBidirectional(viewModel.propertyPoiMapsProperty());
 
             //listDebugLog.itemsProperty().bindBidirectional(viewModel.propertyDebugLogProperty());
-            listDebugLog.itemsProperty().bind(viewModel.propertyDebugEntries());
+            listDebugLog.itemsProperty().bind(viewModel.propertyDebugLogProperty());
             labelTensorFlowDebug.textProperty().bindBidirectional(DebugTF.logString);
             if (!AppProperties.getInstance().useDemoVideo) {
                 stackPaneRoot.backgroundProperty().bindBidirectional(viewModel.getBackgroundProperty());
@@ -568,8 +568,8 @@ public class ApplicationViewImplementation extends Application implements Applic
 
         //listDebugLog.setCellFactory(logCallBack);
 
-        Callback<ListView<DebugLog.DebugEntry>, ListCell<DebugLog.DebugEntry>> logCallBack2 = param -> new LogTextCell2();
-        listDebugLog.setCellFactory(logCallBack2);
+        Callback<ListView<String>, ListCell<String>> logCallBack = param -> new LogTextCell();
+        listDebugLog.setCellFactory(logCallBack);
 
         listModuleStatus.setCellFactory(new Callback<ListView<ModuleStatusViewModel>, ListCell<ModuleStatusViewModel>>() {
             @Override
@@ -674,27 +674,29 @@ public class ApplicationViewImplementation extends Application implements Applic
         return mediaLayer;
     }
 
-//    static class LogTextCell extends ListCell<String> {
-//        @Override
-//        public void updateItem(String item, boolean empty) {
-//            super.updateItem(item, empty);
-//            Platform.runLater(() -> {
-//                Label debugText = new Label(item);
-//                setGraphic(debugText);
-//            });
-//        }
-//    }
-
-    static class LogTextCell2 extends ListCell<DebugLog.DebugEntry> {
+    static class LogTextCell extends ListCell<String> {
         @Override
-        public void updateItem(DebugLog.DebugEntry item, boolean empty) {
+        public void updateItem(String item, boolean empty) {
             super.updateItem(item, empty);
             Platform.runLater(() -> {
-                Label debugText = new Label(item.toString());
+                Label debugText = new Label(item);
                 setGraphic(debugText);
             });
         }
     }
+
+//    static class LogTextCell2 extends ListCell<DebugLog.DebugEntry> {
+//        @Override
+//        public void updateItem(DebugLog.DebugEntry item, boolean empty) {
+//            super.updateItem(item, empty);
+//            Platform.runLater(() -> {
+//                if (item != null) {
+//                    Label debugText = new Label(item.toString());
+//                    setGraphic(debugText);
+//                }
+//            });
+//        }
+//    }
 
     @Override
     public void showDebugLayer() {
@@ -716,34 +718,34 @@ public class ApplicationViewImplementation extends Application implements Applic
         AnimationUtils.fadeOut(applicationLayer, 1500);
     }
 
-    private void toggleStyle(String module) {
+    private void toggleStyle(int module) {
         boolean status = DebugLog.getModuleStatus(module);
-        if (module.equals("GPS")) {
-            if (status) buttonGpsLog.setStyle("-fx-background-color: black");
+        if (module == DebugLog.gps) {
+            if (status) buttonGpsLog.setStyle("-fx-background-color: transparent");
             else buttonGpsLog.setStyle("-fx-background-color: dimgray");
         }
-        if (module.equals("POI")) {
-            if (status) buttonPoiLog.setStyle("-fx-background-color: black");
+        if (module == DebugLog.poi) {
+            if (status) buttonPoiLog.setStyle("-fx-background-color: transparent");
             else buttonPoiLog.setStyle("-fx-background-color: dimgray");
         }
-        if (module.equals("UserTracking")) {
-            if (status) buttonUserTrackingLog.setStyle("-fx-background-color: black");
+        if (module == DebugLog.userTracking) {
+            if (status) buttonUserTrackingLog.setStyle("-fx-background-color: transparent");
             else buttonUserTrackingLog.setStyle("-fx-background-color: dimgray");
         }
-        if (module.equals("LandscapeTracking")) {
-            if (status) buttonLandscapeTrackingLog.setStyle("-fx-background-color: black");
+        if (module == DebugLog.landscapeTracking) {
+            if (status) buttonLandscapeTrackingLog.setStyle("-fx-background-color: transparent");
             else buttonLandscapeTrackingLog.setStyle("-fx-background-color: dimgray");
         }
-        if (module.equals("ImageAnalysis")) {
-            if (status) buttonImageAnalysisLog.setStyle("-fx-background-color: black");
+        if (module == DebugLog.imageAnalysis) {
+            if (status) buttonImageAnalysisLog.setStyle("-fx-background-color: transparent");
             else buttonImageAnalysisLog.setStyle("-fx-background-color: dimgray");
         }
-        if (module.equals("ApplicationView")) {
-            if (status) buttonApplicationViewLog.setStyle("-fx-background-color: black");
+        if (module == DebugLog.applicationView) {
+            if (status) buttonApplicationViewLog.setStyle("-fx-background-color: transparent");
             else buttonApplicationViewLog.setStyle("-fx-background-color: dimgray");
         }
-        if (module.equals("InformationSource")) {
-            if (status) buttonInformationSourceLog.setStyle("-fx-background-color: black");
+        if (module == DebugLog.informationSource) {
+            if (status) buttonInformationSourceLog.setStyle("-fx-background-color: transparent");
             else buttonInformationSourceLog.setStyle("-fx-background-color: dimgray");
         }
     }
