@@ -2,6 +2,7 @@ package de.tuberlin.amos.ws17.swit.gps;
 
 import de.tuberlin.amos.ws17.swit.common.KinematicProperties;
 import de.tuberlin.amos.ws17.swit.common.Module;
+import de.tuberlin.amos.ws17.swit.common.GpsPosition;
 import de.tuberlin.amos.ws17.swit.common.exceptions.ModuleNotWorkingException;
 import org.joda.time.DateTime;
 
@@ -18,4 +19,7 @@ public interface GpsTracker extends Module {
 
 	// returns time passed since first gps fix
 	long getTimePassed();
+
+	// returns current gps position
+    GpsPosition getCurrentPosition();
 }
