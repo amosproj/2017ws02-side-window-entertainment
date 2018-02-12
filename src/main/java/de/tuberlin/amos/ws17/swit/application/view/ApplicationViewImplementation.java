@@ -20,6 +20,7 @@ import javafx.geometry.*;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.*;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
@@ -30,6 +31,7 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import javafx.util.Duration;
+import org.pdfsam.ui.RingProgressIndicator;
 
 public class ApplicationViewImplementation extends Application implements ApplicationView {
     //##### layer container #####
@@ -53,6 +55,8 @@ public class ApplicationViewImplementation extends Application implements Applic
     private Label      infoboxInformation = null;
     private ImageView  infoboxImage       = null;
     private ScrollPane infoboxScrollPane  = null;
+    RingProgressView indicator = new RingProgressView();
+
 
     //### Poi Lists
     private ListView<PoiViewModel> listPoiCamera = null;
@@ -249,6 +253,7 @@ public class ApplicationViewImplementation extends Application implements Applic
         infoboxTitlePane.setId("expansionTopPane");
         infoboxTitlePane.setLeft(infoboxTitle);
         infoboxTitlePane.setRight(infoboxCloseButton);
+        infoboxTitlePane.setCenter(indicator);
         infoboxTitlePane.setStyle("" +
                 "-fx-background-color: rgba(255, 255, 255, 0.25); ");
 
@@ -272,11 +277,16 @@ public class ApplicationViewImplementation extends Application implements Applic
         infoboxContentPane.setId("expansionContentPane");
         infoboxContentPane.setTop(infoboxImage);
         infoboxContentPane.setBottom(infoboxInformation);
+        infoboxContentPane.setOnScroll(event -> {
+            viewModel.onInfoTextScrolled();
+             indicator.setVisible(false);
+        });
 
         infoboxScrollPane = new ScrollPane();
         infoboxScrollPane.setId("expansionScrollPane");
         infoboxScrollPane.setContent(infoboxContentPane);
         infoboxScrollPane.setFitToWidth(true);
+
 
         infoboxPane = new BorderPane();
         infoboxPane.setId("expansionPane");
@@ -291,7 +301,6 @@ public class ApplicationViewImplementation extends Application implements Applic
         infoboxPane.setMaxWidth(screenVisualBounds.getWidth() * 0.3);
         infoboxPane.setMaxHeight(screenVisualBounds.getHeight() * 0.6);
         infoboxScrollPane.setMaxHeight(screenVisualBounds.getHeight() * 0.3);
-
         infoboxLayer.setCenter(infoboxPane);
         infoboxLayer.setPickOnBounds(false);
 
@@ -649,14 +658,34 @@ public class ApplicationViewImplementation extends Application implements Applic
     }
 
     @Override
+    public void showInfoBoxHideIndicator(int duration) {
+        indicator.setVisible(true);
+        new Thread(() -> {
+            int progress = 100;
+            while (progress > 0) {
+                int finalProgress = progress;
+                Platform.runLater(() -> indicator.setProgress(finalProgress));
+                progress -= 1;
+                try {
+                    Thread.sleep(duration / 100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+    }
+
+    @Override
     public void showExpandedPoi(boolean show) {
         if (show) {
             if (infoboxPane.isVisible()) {
                 return;
             } // already visible, nothing to do
+
             AnimationUtils.scaleUp(infoboxPane, 0, 1, 0 ,1, 350, true);
         } else {
             AnimationUtils.scaleDown(infoboxPane, 0, 0, 350, false);
+            indicator.setVisible(false);
         }
     }
 

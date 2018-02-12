@@ -4,7 +4,6 @@ import de.tuberlin.amos.ws17.swit.application.AppProperties;
 import de.tuberlin.amos.ws17.swit.application.view.ApplicationView;
 import de.tuberlin.amos.ws17.swit.application.view.ApplicationViewImplementation;
 import de.tuberlin.amos.ws17.swit.common.*;
-import de.tuberlin.amos.ws17.swit.common.Module;
 import de.tuberlin.amos.ws17.swit.common.exceptions.ModuleNotWorkingException;
 import de.tuberlin.amos.ws17.swit.gps.DemoVideoGpsTracker;
 import de.tuberlin.amos.ws17.swit.gps.GpsTracker;
@@ -13,8 +12,8 @@ import de.tuberlin.amos.ws17.swit.gps.GpsTrackerMock;
 import de.tuberlin.amos.ws17.swit.image_analysis.CloudVision;
 import de.tuberlin.amos.ws17.swit.image_analysis.LandmarkDetector;
 import de.tuberlin.amos.ws17.swit.image_analysis.LandmarkDetectorMock;
-import de.tuberlin.amos.ws17.swit.information_source.AbstractProvider;
 import de.tuberlin.amos.ws17.swit.image_analysis.TFLandmarkClassifier;
+import de.tuberlin.amos.ws17.swit.information_source.AbstractProvider;
 import de.tuberlin.amos.ws17.swit.information_source.InformationProviderMock;
 import de.tuberlin.amos.ws17.swit.landscape_tracking.DemoVideoLandscapeTracker;
 import de.tuberlin.amos.ws17.swit.landscape_tracking.LandscapeTracker;
@@ -32,29 +31,29 @@ import javafx.application.Platform;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
-import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.image.Image;
-import javafx.event.EventHandler;
-import javafx.event.ActionEvent;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
 import javafx.stage.Screen;
-import org.apache.jena.base.Sys;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 
-import javax.sound.midi.SysexMessage;
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 public class ApplicationViewModelImplementation implements ApplicationViewModel {
 
-    public static final String videoFileName = "amos.mp4";
+    public static final  String videoFileName       = "amos.mp4";
+    private static final int    HIDE_INFO_BOX_DELAY = 10000; // 10 seconds
 
     //Module
     private ApplicationView      view;
@@ -98,7 +97,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     private SimpleDoubleProperty infoBoxTranslationX = new SimpleDoubleProperty();
     private SimpleDoubleProperty infoBoxTranslationY = new SimpleDoubleProperty();
 
-    private SimpleBooleanProperty debugLayerVisible = new SimpleBooleanProperty(false);
+    private SimpleBooleanProperty debugLayerVisible       = new SimpleBooleanProperty(false);
     private SimpleBooleanProperty applicationLayerVisible = new SimpleBooleanProperty(false);
 
     private int searchRadius = 1000;
@@ -111,9 +110,9 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
 
     private BackgroundImage backgroundImage;
     private Background      background;
-    private ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
-
-    private AppProperties properties = AppProperties.getInstance();
+    private ScheduledExecutorService tensorFlowScheduler  = Executors.newSingleThreadScheduledExecutor();
+    private ScheduledExecutorService hideInfoBoxScheduler = Executors.newSingleThreadScheduledExecutor();
+    private AppProperties            properties           = AppProperties.getInstance();
 
     public ApplicationViewModelImplementation(ApplicationViewImplementation view) {
         this.view = view;
@@ -139,20 +138,20 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         initInfoBoxMovement();
 
         debugLayerVisible.addListener(event -> {
-            if(properties.useAnimations) {
+            if (properties.useAnimations) {
                 Platform.runLater(() -> {
-                        if(debugLayerVisible.get()) {
-                            view.showDebugLayer();
-                        } else {
-                            view.hideDebugLayer();
-                        }
+                    if (debugLayerVisible.get()) {
+                        view.showDebugLayer();
+                    } else {
+                        view.hideDebugLayer();
+                    }
                 });
             }
         });
         applicationLayerVisible.addListener(event -> {
-            if(properties.useAnimations) {
+            if (properties.useAnimations) {
                 Platform.runLater(() -> {
-                    if(applicationLayerVisible.get()) {
+                    if (applicationLayerVisible.get()) {
                         view.showApplicationLayer();
                     } else {
                         view.hideApplicationLayer();
@@ -169,7 +168,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
             // grab image every second if using video
             intervalInMillis = 1000;
         }
-        scheduler.scheduleAtFixedRate(() -> {
+        tensorFlowScheduler.scheduleAtFixedRate(() -> {
             BufferedImage image = getLandscapeTrackerImage();
             if (image != null) {
                 if (gpsTracker != null) {
@@ -440,15 +439,15 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                             cameraThread.start();
                         }
                     }
-                    if(userExpressions != null && userExpressions.isMouthOpen() && mouthOpenDiff >= 5) {
+                    if (userExpressions != null && userExpressions.isMouthOpen() && mouthOpenDiff >= 5) {
                         applicationLayerVisible.set(!applicationLayerVisible.get());
                         lastMouthOpen = currentTime;
                     }
-                    if(userExpressions != null && userExpressions.isSmile() && smileDiff >= 5) {
+                    if (userExpressions != null && userExpressions.isSmile() && smileDiff >= 5) {
 
                         lastSmile = currentTime;
                     }
-                    if(userExpressions != null && userExpressions.isTongueOut() && tongueOutDiff >= 5) {
+                    if (userExpressions != null && userExpressions.isTongueOut() && tongueOutDiff >= 5) {
                         debugLayerVisible.set(!debugLayerVisible.get());
                         lastTongueOut = currentTime;
                     }
@@ -498,6 +497,11 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
             default:
                 break;
         }
+    }
+
+    @Override
+    public void onInfoTextScrolled() {
+        hideInfoBoxScheduler.shutdown();
     }
 
     private void initMapsThread() {
@@ -736,12 +740,11 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     private double infoboxMoveMaxX = 0;
     private double infoboxMoveMaxY = 0;
 
-    private double infoboxMoveWidthFactor = 1;
+    private double infoboxMoveWidthFactor  = 1;
     private double infoboxMoveHeightFactor = 1;
 
     private double userPositionMinY = 0;
     private double userPositionMaxY = 0;
-
 
 
     private void initInfoBoxMovement() {
@@ -787,7 +790,17 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         PoiViewModel item = convertPoi(poi);
         if (!propertyPoiCamera.contains(poi)) {
             pointsOfInterest.add(poi);
-            Platform.runLater(() -> propertyPoiCamera.add(0, item));
+            Platform.runLater(() -> {
+                propertyPoiCamera.add(0, item);
+                // only show if info box is not filled
+                if (expandedPOI == null || StringUtils.isEmpty(expandedPOI.getName())) {
+                    setExpandedPoi(item);
+                    view.showExpandedPoi(true);
+                    view.showInfoBoxHideIndicator(HIDE_INFO_BOX_DELAY);
+                    hideInfoBoxScheduler = Executors.newSingleThreadScheduledExecutor();
+                    hideInfoBoxScheduler.scheduleAtFixedRate(this::minimizePoi, HIDE_INFO_BOX_DELAY, 1000, TimeUnit.MILLISECONDS);
+                }
+            });
         }
     }
 
@@ -854,11 +867,9 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     }
 
     private void minimizePoi() {
-        //expandedPOI.setId("");
-        //expandedPOI.setName("");
-        //expandedPOI.setImage(null);
-        //expandedPOI.setInformationAbstract("");
         view.showExpandedPoi(false);
+        hideInfoBoxScheduler.shutdown();
+        expandedPOI.setName("");
     }
 
     private void setExpandedPoi(PoiViewModel item) {
@@ -947,7 +958,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     @Override
     public void setRunning(boolean running) {
         if (!running) {
-            scheduler.shutdown();
+            tensorFlowScheduler.shutdown();
         }
     }
 

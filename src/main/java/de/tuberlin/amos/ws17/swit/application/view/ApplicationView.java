@@ -16,6 +16,8 @@ public interface ApplicationView {
 
     MediaView getMediaView();
 
+    void showInfoBoxHideIndicator(int duration);
+
     void showExpandedPoi(boolean show);
 
     void toggleLists();

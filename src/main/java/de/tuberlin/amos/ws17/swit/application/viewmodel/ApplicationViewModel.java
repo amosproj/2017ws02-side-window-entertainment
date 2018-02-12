@@ -44,6 +44,8 @@ public interface ApplicationViewModel {
 
     Property<Background> getBackgroundProperty();
 
+    void onInfoTextScrolled();
+
     boolean expandPoi(String id);
 
     List<Module> getModuleList();
