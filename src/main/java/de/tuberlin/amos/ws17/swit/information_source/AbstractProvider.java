@@ -30,6 +30,7 @@ import java.util.Arrays;
 
 public class AbstractProvider implements InformationProvider, Module{
 
+    // loads the Google API key via the ApiConfig class
     private static final String API_KEY = ApiConfig.getProperty("KnowledgeGraphSearch");
     private static final String LANGUAGE = "de";
 
@@ -42,6 +43,17 @@ public class AbstractProvider implements InformationProvider, Module{
         return instance;
     }
 
+
+    /**
+     *  Retrieves information of a point of interest with the help of the Google knowledge graph as
+     *  the Wikipedia API. The information retrieved are an abstract of the POI as well as the URL to
+     *  the Wikipedia article.
+     *  It gets the knowledge graph abstract information first and then tries to
+     *  retrieve an information abstract from Wikipedia.
+     * @param poi Point of interest of which you want to get the information from
+     * @return The point of interest now also containing an information abstract
+     * @throws ServiceNotAvailableException Thrown, when the knowledge graph is not available.
+     */
     public PointOfInterest setInfoAndUrl(PointOfInterest poi) throws ServiceNotAvailableException {
         if (poi != null) {
             AbstractProvider.Tuple<String, String> result = null;
@@ -69,7 +81,12 @@ public class AbstractProvider implements InformationProvider, Module{
         }
     }
 
-
+    /**
+     * Retrieves the abstract information belonging to a POI from Wikipedia and adds that data to the
+     * PointOfInterest object it was called with.
+     * @param poi Point of interest of which you want to retrieve the abstract from.
+     * @throws ServiceNotAvailableException Thrown, when the knowledge graph is not available.
+     */
     private void getWikiInformation (PointOfInterest poi) throws ServiceNotAvailableException {
         if (poi != null) {
             try {
@@ -102,6 +119,11 @@ public class AbstractProvider implements InformationProvider, Module{
         }
     }
 
+    /**
+     * Retrieves the abstract of a Wikipedia article belonging to the given URL.
+     * @param wikiUrl URL to a Wikipedia article
+     * @return The abstract of the Wikipedia article
+     */
     private static String getAbstract(String wikiUrl) {
         String wikiName = getNameFromUrl(wikiUrl);
         String wikiLanguage = getLanguageFromUrl(wikiUrl);
