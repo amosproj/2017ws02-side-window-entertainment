@@ -63,7 +63,7 @@ public class InfoBoxView extends BorderPane {
         titlePane.setId("expansionTopPane");
         titlePane.setLeft(title);
         titlePane.setRight(closeButton);
-        titlePane.setCenter(indicator);
+        BorderPane.setAlignment(closeButton, Pos.CENTER_LEFT);
         titlePane.setStyle("" +
                 "-fx-background-color: rgba(255, 255, 255, 0.25); ");
 
@@ -100,6 +100,7 @@ public class InfoBoxView extends BorderPane {
         setTop(titlePane);
         setCenter(image);
         setBottom(scrollPane);
+        setRight(indicator);
 
         Screen screen = Screen.getPrimary();
         Rectangle2D screenVisualBounds = screen.getVisualBounds();
