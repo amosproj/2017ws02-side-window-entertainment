@@ -8,7 +8,6 @@ import de.tuberlin.amos.ws17.swit.common.DebugTF;
 import de.tuberlin.amos.ws17.swit.common.Module;
 import de.tuberlin.amos.ws17.swit.image_analysis.ImageUtils;
 import javafx.animation.RotateTransition;
-import javafx.animation.ScaleTransition;
 import javafx.animation.TranslateTransition;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -26,12 +25,10 @@ import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
-import javafx.scene.text.Text;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import javafx.util.Duration;
-import org.pdfsam.ui.RingProgressIndicator;
 
 public class ApplicationViewImplementation extends Application implements ApplicationView {
     //##### layer container #####
@@ -44,19 +41,10 @@ public class ApplicationViewImplementation extends Application implements Applic
     //##########
 
     //##### application layer #####
-    private GridPane   applicationLayer   = null;
-    private BorderPane infoboxLayer       = null;
+    private GridPane   applicationLayer = null;
+    private BorderPane infoboxLayer     = null;
     //### infobox
-    private BorderPane infoboxPane        = null;
-    private BorderPane infoboxTitlePane   = null;
-    private BorderPane infoboxContentPane = null;
-    private Button     infoboxCloseButton = null;
-    private Text       infoboxTitle       = null;
-    private Label      infoboxInformation = null;
-    private ImageView  infoboxImage       = null;
-    private ScrollPane infoboxScrollPane  = null;
-    RingProgressView indicator = new RingProgressView();
-
+    private InfoBoxView infoBoxView      = null;
 
     //### Poi Lists
     private ListView<PoiViewModel> listPoiCamera = null;
@@ -84,7 +72,7 @@ public class ApplicationViewImplementation extends Application implements Applic
 
     private ListView<String> listDebugLog         = null;
     //### TensorFlow Debug
-    private Label                         labelTensorFlowDebug = null;
+    private Label            labelTensorFlowDebug = null;
     //##########
 
     //private static final String FONTNAME = "Helvetica Neue";
@@ -196,7 +184,6 @@ public class ApplicationViewImplementation extends Application implements Applic
         applicationLayer.add(listPoiCamera, 0, 0, numColumns, 1);
         applicationLayer.add(listPoiMaps, 0, 4, numColumns, 1);
         applicationLayer.add(statusPane, 0, 2);
-        //applicationLayer.add(infoboxPane, 2, 2);
     }
 
     private void initListPoiCamera() {
@@ -223,100 +210,14 @@ public class ApplicationViewImplementation extends Application implements Applic
     }
 
     private void initInfoboxPane() {
+        infoBoxView = new InfoBoxView();
         infoboxLayer = new BorderPane();
-        infoboxTitle = new Text();
-        infoboxTitle.setId("expansionName");
-
-        infoboxTitle.setFont(fontTitle);
-        infoboxTitle.setStyle("" +
-                "-fx-fill: white;" +
-                "-fx-effect: dropshadow( gaussian , black , 8, 0.90 , 0 , 0 );");
-        //infoboxTitle.set
-        BorderPane.setAlignment(infoboxTitle, Pos.CENTER_LEFT);
-        BorderPane.setMargin(infoboxTitle, new Insets(4));
-
-        Text text = new Text();
-        text.setText("X");
-        text.setFont(fontTitle);
-        text.setStyle("" +
-                "-fx-fill: white;" +
-                "-fx-effect: dropshadow( gaussian , black , 8, 0.90 , 0 , 0 );");
-
-        //Button b = new Button(null, );
-        infoboxCloseButton = new Button(null, text);
-        infoboxCloseButton.setId("expansionButton");
-        infoboxCloseButton.setMinHeight(64);
-        infoboxCloseButton.setMinWidth(64);
-        //infoboxCloseButton.setBackground(new Background(new BackgroundFill(Color.TRANSPARENT, CornerRadii.EMPTY, Insets.EMPTY)));
-
-        infoboxTitlePane = new BorderPane();
-        infoboxTitlePane.setId("expansionTopPane");
-        infoboxTitlePane.setLeft(infoboxTitle);
-        infoboxTitlePane.setRight(infoboxCloseButton);
-        infoboxTitlePane.setCenter(indicator);
-        infoboxTitlePane.setStyle("" +
-                "-fx-background-color: rgba(255, 255, 255, 0.25); ");
-
-        infoboxImage = new ImageView();
-        infoboxImage.setId("expansionImage");
-        BorderPane.setAlignment(infoboxImage, Pos.CENTER);
-        infoboxImage.setPreserveRatio(true);
-        infoboxImage.setFitHeight(150);
-        infoboxImage.minHeight(0);
-        infoboxImage.minWidth(0);
-
-        infoboxInformation = new Label();
-        infoboxInformation.setId("expansionInformation");
-        infoboxInformation.setAlignment(Pos.TOP_CENTER);
-        infoboxInformation.setFont(fontText);
-        //infoboxInformation.setPrefHeight(300);
-        infoboxInformation.setStyle("-fx-fill: white;" +
-                "-fx-effect: dropshadow( gaussian , black , 4, 0.90 , 0 , 0 );");
-
-        infoboxContentPane = new BorderPane();
-        infoboxContentPane.setId("expansionContentPane");
-        infoboxContentPane.setTop(infoboxImage);
-        infoboxContentPane.setBottom(infoboxInformation);
-        infoboxContentPane.setOnScroll(event -> {
-            viewModel.onInfoTextScrolled();
-             indicator.setVisible(false);
-        });
-
-        infoboxScrollPane = new ScrollPane();
-        infoboxScrollPane.setId("expansionScrollPane");
-        infoboxScrollPane.setContent(infoboxContentPane);
-        infoboxScrollPane.setFitToWidth(true);
-
-
-        infoboxPane = new BorderPane();
-        infoboxPane.setId("expansionPane");
-        infoboxPane.setVisible(false);
-        BorderPane.setAlignment(infoboxPane, Pos.CENTER);
-        infoboxPane.setTop(infoboxTitlePane);
-        infoboxPane.setCenter(infoboxImage);
-        infoboxPane.setBottom(infoboxScrollPane);
-
-        Screen screen = Screen.getPrimary();
-        Rectangle2D screenVisualBounds = screen.getVisualBounds();
-        infoboxPane.setMaxWidth(screenVisualBounds.getWidth() * 0.3);
-        infoboxPane.setMaxHeight(screenVisualBounds.getHeight() * 0.6);
-        infoboxScrollPane.setMaxHeight(screenVisualBounds.getHeight() * 0.3);
-        infoboxLayer.setCenter(infoboxPane);
+        infoboxLayer.setCenter(infoBoxView);
         infoboxLayer.setPickOnBounds(false);
-
-        //infobox
-//        infoboxPane.getColumnConstraints().add(new ColumnConstraints());
-//        infoboxPane.getColumnConstraints().get(0).setPercentWidth(100);
-//        infoboxPane.getRowConstraints().add(new RowConstraints());
-//        infoboxPane.getRowConstraints().add(new RowConstraints());
-//        infoboxPane.getRowConstraints().add(new RowConstraints());
-//        infoboxPane.getRowConstraints().get(0).setPercentHeight(5);
-//        infoboxPane.getRowConstraints().get(1).setPercentHeight(25);
-//        infoboxPane.getRowConstraints().get(2).setPercentHeight(70);
-//        infoboxPane.add(infoboxTitlePane, 0,0);
-//        infoboxPane.add(infoboxImage, 0, 1);
-//        infoboxPane.add(infoboxScrollPane,0,2);
-
+        infoBoxView.setOnScrollListener(event -> {
+            viewModel.onInfoTextScrolled();
+            infoBoxView.getIndicator().setVisible(false);
+        });
     }
 
     private void initDebugLayer() {
@@ -466,8 +367,8 @@ public class ApplicationViewImplementation extends Application implements Applic
         cameraImage.imageProperty().bindBidirectional(viewModel.propertyCameraImageProperty());
 
         try {
-            infoboxCloseButton.visibleProperty().bind(Bindings.equal(viewModel.getExpandedPOI().nameProperty(), "").not());
-            infoboxCloseButton.onActionProperty().bindBidirectional(viewModel.propertyCloseButtonProperty());
+            infoBoxView.getCloseButton().visibleProperty().bind(Bindings.equal(viewModel.getExpandedPOI().nameProperty(), "").not());
+            infoBoxView.getCloseButton().onActionProperty().bindBidirectional(viewModel.propertyCloseButtonProperty());
             buttonGpsLog.onActionProperty().bindBidirectional(viewModel.propertyToggleGpsButtonProperty());
             buttonPoiLog.onActionProperty().bindBidirectional(viewModel.propertyTogglePoiButtonProperty());
             buttonUserTrackingLog.onActionProperty().bindBidirectional(viewModel.propertyToggleUserTrackingButtonProperty());
@@ -475,9 +376,9 @@ public class ApplicationViewImplementation extends Application implements Applic
             buttonImageAnalysisLog.onActionProperty().bindBidirectional(viewModel.propertyToggleImageAnalysisButtonProperty());
             buttonInformationSourceLog.onActionProperty().bindBidirectional(viewModel.propertyToggleInformationSourceButtonProperty());
             buttonApplicationViewLog.onActionProperty().bindBidirectional(viewModel.propertyToggleApplicationViewButtonProperty());
-            infoboxTitle.textProperty().bindBidirectional(viewModel.getExpandedPOI().nameProperty());
-            infoboxImage.imageProperty().bindBidirectional(viewModel.getExpandedPOI().imageProperty());
-            infoboxInformation.textProperty().bindBidirectional(viewModel.getExpandedPOI().informationAbstractProperty());
+            infoBoxView.getTitle().textProperty().bindBidirectional(viewModel.getExpandedPOI().nameProperty());
+            infoBoxView.getImage().imageProperty().bindBidirectional(viewModel.getExpandedPOI().imageProperty());
+            infoBoxView.getInformation().textProperty().bindBidirectional(viewModel.getExpandedPOI().informationAbstractProperty());
             listModuleStatus.itemsProperty().bindBidirectional(viewModel.listModuleStatusProperty());
             listExpressionStatus.itemsProperty().bindBidirectional(viewModel.listExpressionStatusProperty());
             listPoiCamera.itemsProperty().bindBidirectional(viewModel.propertyPoiCameraProperty());
@@ -490,7 +391,7 @@ public class ApplicationViewImplementation extends Application implements Applic
                 stackPaneRoot.backgroundProperty().bindBidirectional(viewModel.getBackgroundProperty());
             }
 
-            infoboxRotateTransition = new RotateTransition(Duration.seconds(0.75), infoboxPane);
+            infoboxRotateTransition = new RotateTransition(Duration.seconds(0.75), infoBoxView);
             infoboxRotateTransition.setOnFinished(new EventHandler<ActionEvent>() {
                 public void handle(ActionEvent AE) {
                     infoboxRotateTransition.setToAngle(viewModel.getInfoBoxRotation().doubleValue());
@@ -501,7 +402,7 @@ public class ApplicationViewImplementation extends Application implements Applic
             infoboxRotateTransition.setToAngle(viewModel.getInfoBoxRotation().doubleValue());
             infoboxRotateTransition.play();
 
-            infoboxTranslateTransition = new TranslateTransition(Duration.seconds(2), infoboxPane);
+            infoboxTranslateTransition = new TranslateTransition(Duration.seconds(2), infoBoxView);
             infoboxTranslateTransition.setOnFinished(new EventHandler<ActionEvent>() {
                 public void handle(ActionEvent AE) {
                     infoboxTranslateTransition.setToX(viewModel.getInfoBoxTranslationX().doubleValue());
@@ -572,10 +473,6 @@ public class ApplicationViewImplementation extends Application implements Applic
         };
         listPoiCamera.setCellFactory(callback);
         listPoiMaps.setCellFactory(callback);
-
-        //Callback<ListView<String>, ListCell<String>> logCallBack = param -> new LogTextCell();
-
-        //listDebugLog.setCellFactory(logCallBack);
 
         Callback<ListView<String>, ListCell<String>> logCallBack = param -> new LogTextCell();
         listDebugLog.setCellFactory(logCallBack);
@@ -659,12 +556,12 @@ public class ApplicationViewImplementation extends Application implements Applic
 
     @Override
     public void showInfoBoxHideIndicator(int duration) {
-        indicator.setVisible(true);
+        infoBoxView.getIndicator().setVisible(true);
         new Thread(() -> {
             int progress = 100;
             while (progress > 0) {
                 int finalProgress = progress;
-                Platform.runLater(() -> indicator.setProgress(finalProgress));
+                Platform.runLater(() -> infoBoxView.getIndicator().setProgress(finalProgress));
                 progress -= 1;
                 try {
                     Thread.sleep(duration / 100);
@@ -678,14 +575,14 @@ public class ApplicationViewImplementation extends Application implements Applic
     @Override
     public void showExpandedPoi(boolean show) {
         if (show) {
-            if (infoboxPane.isVisible()) {
+            if (infoBoxView.isVisible()) {
                 return;
             } // already visible, nothing to do
 
-            AnimationUtils.scaleUp(infoboxPane, 0, 1, 0 ,1, 350, true);
+            AnimationUtils.scaleUp(infoBoxView, 0, 1, 0 ,1, 350, true);
         } else {
-            AnimationUtils.scaleDown(infoboxPane, 0, 0, 350, false);
-            indicator.setVisible(false);
+            AnimationUtils.scaleDown(infoBoxView, 0, 0, 350, false);
+            infoBoxView.getIndicator().setVisible(false);
         }
     }
 
@@ -713,19 +610,6 @@ public class ApplicationViewImplementation extends Application implements Applic
             });
         }
     }
-
-//    static class LogTextCell2 extends ListCell<DebugLog.DebugEntry> {
-//        @Override
-//        public void updateItem(DebugLog.DebugEntry item, boolean empty) {
-//            super.updateItem(item, empty);
-//            Platform.runLater(() -> {
-//                if (item != null) {
-//                    Label debugText = new Label(item.toString());
-//                    setGraphic(debugText);
-//                }
-//            });
-//        }
-//    }
 
     @Override
     public void showDebugLayer() {
