@@ -467,7 +467,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                     }
                 }
                 try {
-                    Thread.sleep(75);
+                    Thread.sleep(125);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
