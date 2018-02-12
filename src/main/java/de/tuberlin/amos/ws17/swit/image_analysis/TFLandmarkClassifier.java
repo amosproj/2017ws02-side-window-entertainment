@@ -2,21 +2,20 @@ package de.tuberlin.amos.ws17.swit.image_analysis;
 
 import com.google.common.io.ByteStreams;
 import de.tuberlin.amos.ws17.swit.common.DebugTF;
+import de.tuberlin.amos.ws17.swit.common.GpsPosition;
 import de.tuberlin.amos.ws17.swit.common.PointOfInterest;
-import javafx.application.Platform;
 import org.apache.commons.lang3.text.WordUtils;
-import org.apache.jena.base.Sys;
 import org.tensorflow.Graph;
 import org.tensorflow.Session;
 import org.tensorflow.Tensor;
 import org.tensorflow.Tensors;
 
+import javax.annotation.Nullable;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -24,11 +23,12 @@ import java.util.stream.IntStream;
 
 public class TFLandmarkClassifier implements LandmarkDetector {
 
-    public static       boolean      debug               = true;
-    public static final float        predictionThreshold = 0.5f;
-    private             Graph        graph               = new Graph();
-    private             Session      session             = new Session(graph);
-    private final       List<String> labels              = loadLabels();
+    public static        boolean           debug               = true;
+    private static final float             predictionThreshold = 0.5f;
+    private              Graph             graph               = new Graph();
+    private              Session           session             = new Session(graph);
+    private final        List<String>      labels              = loadLabels();
+    private final        List<GpsPosition> labelLocations      = loadLabelLocations();
 
     public TFLandmarkClassifier() throws IOException {
         graph.importGraphDef(loadGraphDef());
@@ -37,16 +37,15 @@ public class TFLandmarkClassifier implements LandmarkDetector {
     @Override
     public List<PointOfInterest> identifyPOIs(Path imagePath) throws IOException {
         byte[] data = Files.readAllBytes(imagePath);
-        return identifyPOIs(data);
+        return identifyPOIs(data, null);
     }
 
-    @Override
-    public List<PointOfInterest> identifyPOIs(BufferedImage image) {
+    public List<PointOfInterest> identifyPOIs(BufferedImage image, GpsPosition gpsPosition) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
             ImageIO.write(image, "png", baos);
             byte[] data = baos.toByteArray();
-            List<PointOfInterest> pois = identifyPOIs(data);
+            List<PointOfInterest> pois = identifyPOIs(data, gpsPosition);
             for (PointOfInterest p : pois) {
                 p.setImage(image);
             }
@@ -57,9 +56,25 @@ public class TFLandmarkClassifier implements LandmarkDetector {
         return Collections.emptyList();
     }
 
+    @Override
+    public List<PointOfInterest> identifyPOIs(BufferedImage image) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try {
+            ImageIO.write(image, "png", baos);
+            byte[] data = baos.toByteArray();
+            List<PointOfInterest> pois = identifyPOIs(data, null);
+            for (PointOfInterest p : pois) {
+                p.setImage(image);
+            }
+            return pois;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return Collections.emptyList();
+    }
 
-    private List<PointOfInterest> identifyPOIs(byte[] data) {
-        String name = labelImage(data);
+    private List<PointOfInterest> identifyPOIs(byte[] data, GpsPosition gpsPosition) {
+        String name = labelImage(data, gpsPosition);
         if (name != null) {
             PointOfInterest poi = new PointOfInterest();
             poi.setName(name);
@@ -68,12 +83,40 @@ public class TFLandmarkClassifier implements LandmarkDetector {
         return Collections.emptyList();
     }
 
-    public void labelImage(String filename) throws IOException {
-        byte[] bytes = Files.readAllBytes(Paths.get(filename));
-        labelImage(bytes);
+    private float[] appendLocationWeight(float[] probabilities, GpsPosition currentPos) {
+        // calculate distances
+        float[] distances = new float[probabilities.length];
+        for (int i = 0; i < labelLocations.size(); i++) {
+            float distance = labelLocations.get(i).distanceTo(currentPos);
+            distances[i] = distance;
+        }
+
+        int[] sortedIndices = IntStream.range(0, probabilities.length)
+                .boxed().sorted((i, j) -> Float.compare(distances[i], distances[j]))
+                .mapToInt(ele -> ele).toArray();
+
+        // if highest probability and closest to current position
+        // increase its probability
+        if (sortedIndices[0] == probabilities[0]) {
+            probabilities[0] *= 2;
+        }
+
+        // normalize
+        float sum = sum(probabilities);
+        for (int i = 0; i < probabilities.length; i++) {
+            probabilities[i] = probabilities[i] / sum;
+        }
+        return probabilities;
     }
 
-    private String labelImage(byte[] bytes) {
+    private static float sum(float... values) {
+        float result = 0;
+        for (float value : values)
+            result += value;
+        return result;
+    }
+
+    private String labelImage(byte[] bytes, @Nullable GpsPosition gpsPosition) {
         float[][] probabilitiesArray;
 
         try (Tensor<String> input = Tensors.create(bytes);
@@ -88,8 +131,15 @@ public class TFLandmarkClassifier implements LandmarkDetector {
             output.copyTo(probabilitiesArray);
             float[] probabilities = probabilitiesArray[0];
 
+            if (gpsPosition != null) {
+                // add location weight
+                probabilities = appendLocationWeight(probabilities, gpsPosition);
+
+            }
+
+            float[] finalProbabilities = probabilities;
             int[] sortedIndices = IntStream.range(0, probabilities.length)
-                    .boxed().sorted((i, j) -> Float.compare(probabilities[j], probabilities[i]))
+                    .boxed().sorted((i, j) -> Float.compare(finalProbabilities[j], finalProbabilities[i]))
                     .mapToInt(ele -> ele).toArray();
 
             StringBuilder log = new StringBuilder();
@@ -128,5 +178,21 @@ public class TFLandmarkClassifier implements LandmarkDetector {
             }
         }
         return labels;
+    }
+
+    private static ArrayList<GpsPosition> loadLabelLocations() throws IOException {
+        ArrayList<GpsPosition> locations = new ArrayList<>();
+        String line;
+        final InputStream is = TFLandmarkClassifier.class.getClassLoader().getResourceAsStream("label_locations.txt");
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
+            while ((line = reader.readLine()) != null) {
+                String[] latLng = line.split(",");
+                double lat = Double.valueOf(latLng[0]);
+                double lng = Double.valueOf(latLng[1]);
+                locations.add(new GpsPosition(lng, lat));
+            }
+        }
+
+        return locations;
     }
 }

@@ -18,4 +18,7 @@ public interface GpsTracker extends Module {
 
 	// returns time passed since first gps fix
 	long getTimePassed();
+
+	// returns current gps position
+    GpsPosition getCurrentPosition();
 }

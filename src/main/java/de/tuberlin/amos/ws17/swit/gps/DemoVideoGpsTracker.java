@@ -1,5 +1,6 @@
 package de.tuberlin.amos.ws17.swit.gps;
 
+import de.tuberlin.amos.ws17.swit.common.GpsPosition;
 import de.tuberlin.amos.ws17.swit.common.KinematicProperties;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
@@ -15,6 +16,7 @@ public class DemoVideoGpsTracker implements GpsTracker {
 
     private Stack<KinematicProperties>      gpsStack = new Stack<>();
     private LinkedList<KinematicProperties> history  = new LinkedList<>();
+    private de.tuberlin.amos.ws17.swit.common.GpsPosition currentPosition;
 
     public DemoVideoGpsTracker() throws IOException {
         // read json
@@ -36,11 +38,19 @@ public class DemoVideoGpsTracker implements GpsTracker {
     }
 
     @Override
+    public GpsPosition getCurrentPosition() {
+        return currentPosition;
+    }
+
+    @Override
     public KinematicProperties fillDumpObject(KinematicProperties kinProps) {
         if (!gpsStack.isEmpty()) {
             kinProps = gpsStack.pop();
             history.add(kinProps);
+            currentPosition = new GpsPosition(kinProps.getLongitude(), kinProps.getLatitude());
             return kinProps;
+        } else {
+            System.out.println("gpsStack empty");
         }
         return null;
     }

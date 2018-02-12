@@ -172,7 +172,11 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         scheduler.scheduleAtFixedRate(() -> {
             BufferedImage image = getLandscapeTrackerImage();
             if (image != null) {
-                tensorFlowClassifier.identifyPOIs(image);
+                if (gpsTracker != null) {
+                    tensorFlowClassifier.identifyPOIs(image, gpsTracker.getCurrentPosition());
+                } else {
+                    tensorFlowClassifier.identifyPOIs(image);
+                }
             }
         }, 1000, intervalInMillis, TimeUnit.MILLISECONDS);
     }
@@ -455,14 +459,12 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 }
                 if (mapsTimeDiff >= 5) {
                     lastMapsExecution = currentTime;
-                    System.out.println("Get GPS: " + System.currentTimeMillis() / 1000 + " mapsTimeDiff= " + mapsTimeDiff);
                     if (mapsThread.getState() == Thread.State.NEW) {
                         mapsThread.start();
                     } else if (mapsThread.getState() == Thread.State.TERMINATED) {
                         initMapsThread();
                         mapsThread.start();
                     }
-
                 }
                 try {
                     Thread.sleep(75);
@@ -625,7 +627,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
 
         // try local classification first
         if (tensorFlowClassifier != null) {
-            pois = tensorFlowClassifier.identifyPOIs(image);
+            pois = tensorFlowClassifier.identifyPOIs(image, gpsTracker.getCurrentPosition());
         }
 
         // if not successful -> use cloud vision

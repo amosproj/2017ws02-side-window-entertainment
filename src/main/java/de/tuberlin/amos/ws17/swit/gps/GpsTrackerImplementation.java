@@ -1,6 +1,7 @@
 package de.tuberlin.amos.ws17.swit.gps;
 
 import de.tuberlin.amos.ws17.swit.common.DebugLog;
+import de.tuberlin.amos.ws17.swit.common.GpsPosition;
 import de.tuberlin.amos.ws17.swit.common.KinematicProperties;
 
 import java.awt.image.BufferedImage;
