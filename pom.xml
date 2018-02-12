@@ -288,6 +288,12 @@
             <version>1.1</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.pdfsam.ui</groupId>
+            <artifactId>progress-circle-indicator</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+
     </dependencies>
 
     <repositories>
