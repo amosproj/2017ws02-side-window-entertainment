@@ -8,22 +8,18 @@ import java.io.*;
 import java.util.LinkedList;
 
 import de.tuberlin.amos.ws17.swit.common.exceptions.GpsModuleNotAvailableException;
-import de.tuberlin.amos.ws17.swit.common.exceptions.HardwareNotAvailableException;
-import de.tuberlin.amos.ws17.swit.common.exceptions.ModuleNotWorkingException;
+import de.tuberlin.amos.ws17.swit.common.exceptions.InformationNotAvailableException;
 import de.tuberlin.amos.ws17.swit.common.exceptions.ServiceNotAvailableException;
-import org.joda.time.DateTime;
 
 
 import javax.imageio.ImageIO;
 
 public class GpsTrackerImplementation implements GpsTracker {
 
-//	private GpsFileReader fileReader;
 	private GpsPortReader portReader;
 
 	// constructor for port mode
 	public GpsTrackerImplementation() {
-		// start the port reader
 		portReader = new GpsPortReader();
 	}
 
@@ -41,25 +37,27 @@ public class GpsTrackerImplementation implements GpsTracker {
 		}
 		return null;
 	}
+
 	// returns an object filled with the current available information.
 	// Latitude and longitude are always updated values, the others may be outdated (but still the most actual)
 	// isUpdated() only is true, if latitude and longitude are new
-	// throws ModuleNotWorkingException, if no new data is available
-	public KinematicProperties fillDumpObject(KinematicProperties kinProp) throws ServiceNotAvailableException{
+	// throws InformationNotAvailableException, if no new data is available
+	public KinematicProperties fillDumpObject(KinematicProperties kinProp) throws InformationNotAvailableException{
 		if (portReader.isUpdated()){
 			portReader.fillKinematicProperties(kinProp);
 			if (kinProp == null){
 				DebugLog.log("GPS","No new GPS data available.");
-				throw new ServiceNotAvailableException(); // later: throw noSignalException or something like that
+				throw new InformationNotAvailableException();
 			}
 			return kinProp;
 		}
 		else {
 			DebugLog.log("GPS","No new GPS data available.");
-			throw new ServiceNotAvailableException();
+			throw new InformationNotAvailableException();
 		}
 	}
 
+	// starts the module and throws an exception, if no GPS hardware could be found
 	public void startModule() throws GpsModuleNotAvailableException{
 		if (portReader.start() == false){
 			DebugLog.log(DebugLog.SOURCE_GPS,"No GPS device could be found.");
@@ -75,17 +73,14 @@ public class GpsTrackerImplementation implements GpsTracker {
 		return true;
 	}
 
-	@Override
 	public LinkedList<KinematicProperties> getGpsTrack(int count) {
 		return portReader.getGpsTrack(count);
 	}
 
-	@Override
 	public double getDistanceTravelled() {
 		return portReader.getDistanceTravelled();
 	}
 
-	@Override
 	public long getTimePassed() {
 		return portReader.getTimePassed();
 	}

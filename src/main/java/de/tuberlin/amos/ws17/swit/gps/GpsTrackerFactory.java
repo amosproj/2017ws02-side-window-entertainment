@@ -1,5 +1,9 @@
 package de.tuberlin.amos.ws17.swit.gps;
 
+// ---------------------------------------------
+// ---------- module not used anymore ----------
+// ---------------------------------------------
+
 public class GpsTrackerFactory {
 	
 	private static GpsTracker gpsTracker = null;

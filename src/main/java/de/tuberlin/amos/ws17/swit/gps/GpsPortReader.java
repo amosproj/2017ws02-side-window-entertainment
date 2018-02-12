@@ -3,8 +3,6 @@ package de.tuberlin.amos.ws17.swit.gps;
 import de.tuberlin.amos.ws17.swit.common.GpsPosition;
 import de.tuberlin.amos.ws17.swit.common.KinematicProperties;
 import de.tuberlin.amos.ws17.swit.common.exceptions.GpsModuleNotAvailableException;
-import de.tuberlin.amos.ws17.swit.common.exceptions.HardwareNotAvailableException;
-import de.tuberlin.amos.ws17.swit.common.exceptions.ModuleNotWorkingException;
 import de.tuberlin.amos.ws17.swit.common.DebugLog;
 import gnu.io.SerialPort;
 import gnu.io.CommPortIdentifier;
@@ -22,13 +20,13 @@ import java.util.LinkedList;
 
 public class GpsPortReader implements SentenceListener{
 
-
-    private boolean debug = false;
+    // local variables used for internal processing
     private boolean running;
     private boolean update;
     private DateTime lastMessageReceived;
     private OwnExceptionListener exceptionListener;
 
+    // local data storage that is read when a position is requested
     private double latitude;
     private double longitude;
     private double course;
@@ -37,6 +35,7 @@ public class GpsPortReader implements SentenceListener{
     private GpsPosition firstPoint;
     private DateTime firstTime;
 
+    // init the reader of GPS data over a COP port
     public GpsPortReader(){
         update = false;
         running = false;
@@ -44,7 +43,7 @@ public class GpsPortReader implements SentenceListener{
         exceptionListener = new OwnExceptionListener();
         gpsTrack = new LinkedList<>();
 
-        // filler
+        // placeholder for location data
         latitude = -1;
         longitude = -1;
         course = -1;
@@ -52,33 +51,30 @@ public class GpsPortReader implements SentenceListener{
 
     }
 
+    // functions that need to be implemented but are not important
     public void readingStarted() {
-        if (debug) System.out.println("--- Started ---");
     }
 
     public void readingPaused(){
-        if (debug) System.out.println("--- Paused ---");
     }
 
     public void readingStopped(){
-        if (debug) System.out.println("--- Stopped ---");
     }
 
+    // fires every time new data is received over the observed port
     public void sentenceRead(SentenceEvent event){
         Sentence s = event.getSentence();
-        //System.out.println(s.toString());
+
         // Position and Time (not really necessary, since RMC has all the info and more)
+        // but RMC fires rather rarely
         if("GGA".equals(s.getSentenceId())){
             lastMessageReceived = new DateTime();
             GGASentence gga = (GGASentence) s;
             if (gga.isValid()){
-                if (debug) System.out.println("----- GGA Sentence -----");
                 try{
                     // set values 'latitude' and 'longitude' and set 'update' to true for filling up KinematicProperties object
                     latitude = gga.getPosition().getLatitude();
-                    if (debug) System.out.println("latitude updated! (" + latitude + ")");
                     longitude = gga.getPosition().getLongitude();
-                    if (debug) System.out.println("longitude updated! (" + longitude + ")");
                     DebugLog.log(DebugLog.SOURCE_GPS,"GPS: coordinate updated: " + latitude + ", " + longitude);
                     update = true;
 
@@ -111,17 +107,15 @@ public class GpsPortReader implements SentenceListener{
             }
         }
 
-        // time and date, position, speed, course
+        // RMC: time and date, position, speed, course. Fires rarely for some reason
         if("RMC".equals(s.getSentenceId())){
             lastMessageReceived = new DateTime();
             RMCSentence rmc = (RMCSentence) s;
             try{
                 if (rmc.isValid()){
-                    if (debug) System.out.println("----- RMC Sentence -----");
                     // set 'course' for filling up KinematicProperties object
                     course = rmc.getCourse();
-                    if (debug) System.out.println("course updated! (" + course + ")");
-                    DebugLog.log(DebugLog.SOURCE_GPS,"GPS: course ");
+                    DebugLog.log(DebugLog.SOURCE_GPS,"GPS: course updated");
                 }
             }
             catch (net.sf.marineapi.nmea.parser.DataNotAvailableException e){
@@ -129,16 +123,15 @@ public class GpsPortReader implements SentenceListener{
             }
         }
 
-        // course and speed (interesting: speed in km/h)
+        // VTG: course and speed (interesting: speed in km/h)
         if("VTG".equals(s.getSentenceId())){
             lastMessageReceived = new DateTime();
             VTGSentence vtg = (VTGSentence) s;
             try {
                 if (vtg.isValid()) {
-                    if (debug)  System.out.println("----- VTG Sentence -----");
                     // set 'velocity' for filling up KinematicProperties object
                     velocity = vtg.getSpeedKmh();
-                    if (debug) System.out.println("velocity updated! (" + velocity + ")");
+                    DebugLog.log(DebugLog.SOURCE_GPS,"GPS: speed updated");
                 }
             }
             catch(net.sf.marineapi.nmea.parser.DataNotAvailableException e){
@@ -147,6 +140,7 @@ public class GpsPortReader implements SentenceListener{
         }
     }
 
+    // finds a serial (COM) port that receives GPS messages
     private SerialPort getSerialPort(){
         try {
             Enumeration<?> e = CommPortIdentifier.getPortIdentifiers();
@@ -165,14 +159,14 @@ public class GpsPortReader implements SentenceListener{
                     InputStreamReader isr = new InputStreamReader(is);
                     BufferedReader buf = new BufferedReader(isr);
 
-                    System.out.println("Scanning port " + sp.getName());
+                    //System.out.println("Scanning port " + sp.getName());
 
                     // try each port few times before giving up
                     for (int i = 0; i < 50; i++) {
                         try {
                             String data = buf.readLine();
                             if (SentenceValidator.isValid(data)) {
-                                System.out.println("NMEA data found!");
+                                //System.out.println("NMEA data found!");
                                 return sp;
                             }
                         } catch (Exception ex) {
@@ -184,7 +178,7 @@ public class GpsPortReader implements SentenceListener{
                     buf.close();
                 }
             }
-            System.out.println("NMEA data was not found..");
+            //System.out.println("NMEA data was not found..");
         } catch (Exception e) {
             //e.printStackTrace();
         }
@@ -192,8 +186,10 @@ public class GpsPortReader implements SentenceListener{
         return null;
     }
 
+    // getter to find out, if the GPS data (latitude and longitude) were updated
     public boolean isUpdated(){ return update; }
 
+    // starts the port reader
     public boolean start() throws GpsModuleNotAvailableException{
         if (!running){
             try {
@@ -229,10 +225,10 @@ public class GpsPortReader implements SentenceListener{
         kinProp.setCourse(course);
         update = false;
 
-
         return kinProp;
     }
 
+    // returns a list with up to [int count] last received GPS points
     public LinkedList<KinematicProperties> getGpsTrack(int count){
         LinkedList<KinematicProperties> list = new LinkedList<>();
         for (int i = 1; (i <= count) || (i <= gpsTrack.size()); i++){
@@ -242,6 +238,7 @@ public class GpsPortReader implements SentenceListener{
         return list;
     }
 
+    // returns the travelled distance in meters since the first received GPS point
     public double getDistanceTravelled(){
         if (latitude != -1 && longitude != -1 && firstPoint != null){
             GpsPosition currentPos = new GpsPosition();
@@ -253,6 +250,7 @@ public class GpsPortReader implements SentenceListener{
             return -1;
     }
 
+    // returns the passed times in milliseconds since the first received GPS point
     public long getTimePassed(){
         if (firstTime != null){
             DateTime now = new DateTime();
