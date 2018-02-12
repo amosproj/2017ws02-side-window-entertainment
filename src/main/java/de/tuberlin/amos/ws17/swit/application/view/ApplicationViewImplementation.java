@@ -19,7 +19,6 @@ import javafx.geometry.*;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.*;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
@@ -41,8 +40,8 @@ public class ApplicationViewImplementation extends Application implements Applic
     //##########
 
     //##### application layer #####
-    private GridPane   applicationLayer = null;
-    private BorderPane infoboxLayer     = null;
+    private GridPane    applicationLayer = null;
+    private BorderPane  infoBoxLayer     = null;
     //### infobox
     private InfoBoxView infoBoxView      = null;
 
@@ -57,20 +56,10 @@ public class ApplicationViewImplementation extends Application implements Applic
     //##########
 
     //##### debug layer #####
-    private GridPane debugLayer          = null;
+    private GridPane debugLayer   = null;
     //### DebugLog
-    private GridPane debugLogPane        = null;
-    private VBox     debugLogVBoxButtons = null;
+    private DebugLogView debugLogView = null;
 
-    private Button buttonUserTrackingLog      = null;
-    private Button buttonLandscapeTrackingLog = null;
-    private Button buttonPoiLog               = null;
-    private Button buttonInformationSourceLog = null;
-    private Button buttonImageAnalysisLog     = null;
-    private Button buttonApplicationViewLog   = null;
-    private Button buttonGpsLog               = null;
-
-    private ListView<String> listDebugLog         = null;
     //### TensorFlow Debug
     private Label            labelTensorFlowDebug = null;
     //##########
@@ -127,7 +116,7 @@ public class ApplicationViewImplementation extends Application implements Applic
 
         stackPaneRoot.getChildren().add(applicationLayer);
         stackPaneRoot.getChildren().add(debugLayer);
-        stackPaneRoot.getChildren().add(infoboxLayer);
+        stackPaneRoot.getChildren().add(infoBoxLayer);
     }
 
     private void initMediaLayer() {
@@ -211,9 +200,9 @@ public class ApplicationViewImplementation extends Application implements Applic
 
     private void initInfoboxPane() {
         infoBoxView = new InfoBoxView();
-        infoboxLayer = new BorderPane();
-        infoboxLayer.setCenter(infoBoxView);
-        infoboxLayer.setPickOnBounds(false);
+        infoBoxLayer = new BorderPane();
+        infoBoxLayer.setCenter(infoBoxView);
+        infoBoxLayer.setPickOnBounds(false);
         infoBoxView.setOnScrollListener(event -> {
             viewModel.onInfoTextScrolled();
             infoBoxView.getIndicator().setVisible(false);
@@ -226,78 +215,12 @@ public class ApplicationViewImplementation extends Application implements Applic
         debugLayer.getColumnConstraints().addAll(applicationLayer.getColumnConstraints());
         debugLayer.setPickOnBounds(false);
 
-        initDebugLog();
-
         initDebugTensorFlow();
-
-        debugLayer.add(debugLogPane, 3, 1, 2, 2);
+        debugLogView = new DebugLogView();
+        debugLayer.add(debugLogView, 3, 1, 2, 2);
         debugLayer.add(labelTensorFlowDebug, 4, 3);
     }
 
-    private void initDebugLog() {
-
-        buttonApplicationViewLog = new Button("application_view");
-        buttonApplicationViewLog.setId("toggleApplicationView");
-        buttonApplicationViewLog.setOnMouseClicked(event -> toggleStyle(DebugLog.applicationView));
-        buttonApplicationViewLog.getStyleClass().add("toggleButton");
-        buttonApplicationViewLog.setMaxWidth(Double.MAX_VALUE);
-
-        buttonGpsLog = new Button("GPS");
-        buttonGpsLog.setId("toggleGpsLog");
-        buttonGpsLog.setOnMouseClicked(event -> toggleStyle(DebugLog.gps));
-        buttonGpsLog.setMaxWidth(Double.MAX_VALUE);
-
-        buttonImageAnalysisLog = new Button("image_analysis");
-        buttonImageAnalysisLog.setId("toggleImageAnalysis");
-        buttonImageAnalysisLog.setOnMouseClicked(event -> toggleStyle(DebugLog.imageAnalysis));
-        buttonImageAnalysisLog.setMaxWidth(Double.MAX_VALUE);
-
-        buttonInformationSourceLog = new Button("information_source");
-        buttonInformationSourceLog.setId("toggleInformationSource");
-        buttonInformationSourceLog.setOnMouseClicked(event -> toggleStyle(DebugLog.informationSource));
-        buttonInformationSourceLog.setMaxWidth(Double.MAX_VALUE);
-
-        buttonLandscapeTrackingLog = new Button("landscape_tracking");
-        buttonLandscapeTrackingLog.setId("toggleLandscapeTracking");
-        buttonLandscapeTrackingLog.setOnMouseClicked(event -> toggleStyle(DebugLog.landscapeTracking));
-        buttonLandscapeTrackingLog.setMaxWidth(Double.MAX_VALUE);
-
-        buttonPoiLog = new Button("POI");
-        buttonPoiLog.setId("togglePoi");
-        buttonPoiLog.setOnMouseClicked(event -> toggleStyle(DebugLog.poi));
-        buttonPoiLog.setMaxWidth(Double.MAX_VALUE);
-
-        buttonUserTrackingLog = new Button("user_tracking");
-        buttonUserTrackingLog.setId("toggleUserTracking");
-        buttonUserTrackingLog.setOnMouseClicked(event -> toggleStyle(DebugLog.userTracking));
-        buttonUserTrackingLog.setMaxWidth(Double.MAX_VALUE);
-
-        debugLogVBoxButtons = new VBox();
-        debugLogVBoxButtons.setId("togglePane");
-
-        debugLogVBoxButtons.getChildren().add(buttonApplicationViewLog);
-        debugLogVBoxButtons.getChildren().add(buttonGpsLog);
-        debugLogVBoxButtons.getChildren().add(buttonImageAnalysisLog);
-        debugLogVBoxButtons.getChildren().add(buttonInformationSourceLog);
-        debugLogVBoxButtons.getChildren().add(buttonLandscapeTrackingLog);
-        debugLogVBoxButtons.getChildren().add(buttonPoiLog);
-        debugLogVBoxButtons.getChildren().add(buttonUserTrackingLog);
-
-        listDebugLog = new ListView<>();
-        listDebugLog.setId("listDebugLog");
-
-        debugLogPane = new GridPane();
-        debugLogPane.setId("debugPane");
-        debugLogPane.setVisible(AppProperties.getInstance().useDebugLog);
-
-        debugLogPane.getColumnConstraints().add(new ColumnConstraints());
-        debugLogPane.getColumnConstraints().add(new ColumnConstraints());
-        debugLogPane.getColumnConstraints().get(0).setPercentWidth(15);
-        debugLogPane.getColumnConstraints().get(1).setPercentWidth(85);
-
-        debugLogPane.add(debugLogVBoxButtons, 0, 0);
-        debugLogPane.add(listDebugLog, 1, 0);
-    }
 
     private void initDebugTensorFlow() {
         labelTensorFlowDebug = new Label();
@@ -332,7 +255,7 @@ public class ApplicationViewImplementation extends Application implements Applic
 
     @Override
     public void showDebugLog(boolean show) {
-        debugLogPane.setVisible(show);
+        debugLogView.setVisible(show);
     }
 
     @Override
@@ -356,7 +279,7 @@ public class ApplicationViewImplementation extends Application implements Applic
 
     @Override
     public void toggleDebugLog() {
-        showDebugLog(!debugLogPane.isVisible());
+        showDebugLog(!debugLogView.isVisible());
     }
 
     private RotateTransition    infoboxRotateTransition    = null;
@@ -369,13 +292,13 @@ public class ApplicationViewImplementation extends Application implements Applic
         try {
             infoBoxView.getCloseButton().visibleProperty().bind(Bindings.equal(viewModel.getExpandedPOI().nameProperty(), "").not());
             infoBoxView.getCloseButton().onActionProperty().bindBidirectional(viewModel.propertyCloseButtonProperty());
-            buttonGpsLog.onActionProperty().bindBidirectional(viewModel.propertyToggleGpsButtonProperty());
-            buttonPoiLog.onActionProperty().bindBidirectional(viewModel.propertyTogglePoiButtonProperty());
-            buttonUserTrackingLog.onActionProperty().bindBidirectional(viewModel.propertyToggleUserTrackingButtonProperty());
-            buttonLandscapeTrackingLog.onActionProperty().bindBidirectional(viewModel.propertyToggleLandscapeTrackingButtonProperty());
-            buttonImageAnalysisLog.onActionProperty().bindBidirectional(viewModel.propertyToggleImageAnalysisButtonProperty());
-            buttonInformationSourceLog.onActionProperty().bindBidirectional(viewModel.propertyToggleInformationSourceButtonProperty());
-            buttonApplicationViewLog.onActionProperty().bindBidirectional(viewModel.propertyToggleApplicationViewButtonProperty());
+            debugLogView.getButtonGpsLog().onActionProperty().bindBidirectional(viewModel.propertyToggleGpsButtonProperty());
+            debugLogView.getButtonPoiLog().onActionProperty().bindBidirectional(viewModel.propertyTogglePoiButtonProperty());
+            debugLogView.getButtonUserTrackingLog().onActionProperty().bindBidirectional(viewModel.propertyToggleUserTrackingButtonProperty());
+            debugLogView.getButtonLandscapeTrackingLog().onActionProperty().bindBidirectional(viewModel.propertyToggleLandscapeTrackingButtonProperty());
+            debugLogView.getButtonImageAnalysisLog().onActionProperty().bindBidirectional(viewModel.propertyToggleImageAnalysisButtonProperty());
+            debugLogView.getButtonInformationSourceLog().onActionProperty().bindBidirectional(viewModel.propertyToggleInformationSourceButtonProperty());
+            debugLogView.getButtonApplicationViewLog().onActionProperty().bindBidirectional(viewModel.propertyToggleApplicationViewButtonProperty());
             infoBoxView.getTitle().textProperty().bindBidirectional(viewModel.getExpandedPOI().nameProperty());
             infoBoxView.getImage().imageProperty().bindBidirectional(viewModel.getExpandedPOI().imageProperty());
             infoBoxView.getInformation().textProperty().bindBidirectional(viewModel.getExpandedPOI().informationAbstractProperty());
@@ -385,7 +308,7 @@ public class ApplicationViewImplementation extends Application implements Applic
             listPoiMaps.itemsProperty().bindBidirectional(viewModel.propertyPoiMapsProperty());
 
             //listDebugLog.itemsProperty().bindBidirectional(viewModel.propertyDebugLogProperty());
-            listDebugLog.itemsProperty().bind(viewModel.propertyDebugLogProperty());
+            debugLogView.getListView().itemsProperty().bind(viewModel.propertyDebugLogProperty());
             labelTensorFlowDebug.textProperty().bindBidirectional(DebugTF.logString);
             if (!AppProperties.getInstance().useDemoVideo) {
                 stackPaneRoot.backgroundProperty().bindBidirectional(viewModel.getBackgroundProperty());
@@ -475,7 +398,7 @@ public class ApplicationViewImplementation extends Application implements Applic
         listPoiMaps.setCellFactory(callback);
 
         Callback<ListView<String>, ListCell<String>> logCallBack = param -> new LogTextCell();
-        listDebugLog.setCellFactory(logCallBack);
+        debugLogView.getListView().setCellFactory(logCallBack);
 
         listModuleStatus.setCellFactory(new Callback<ListView<ModuleStatusViewModel>, ListCell<ModuleStatusViewModel>>() {
             @Override
@@ -631,36 +554,6 @@ public class ApplicationViewImplementation extends Application implements Applic
         AnimationUtils.fadeOut(applicationLayer, 1500);
     }
 
-    private void toggleStyle(int module) {
-        boolean status = DebugLog.getModuleStatus(module);
-        if (module == DebugLog.gps) {
-            if (status) buttonGpsLog.setStyle("-fx-background-color: transparent");
-            else buttonGpsLog.setStyle("-fx-background-color: dimgray");
-        }
-        if (module == DebugLog.poi) {
-            if (status) buttonPoiLog.setStyle("-fx-background-color: transparent");
-            else buttonPoiLog.setStyle("-fx-background-color: dimgray");
-        }
-        if (module == DebugLog.userTracking) {
-            if (status) buttonUserTrackingLog.setStyle("-fx-background-color: transparent");
-            else buttonUserTrackingLog.setStyle("-fx-background-color: dimgray");
-        }
-        if (module == DebugLog.landscapeTracking) {
-            if (status) buttonLandscapeTrackingLog.setStyle("-fx-background-color: transparent");
-            else buttonLandscapeTrackingLog.setStyle("-fx-background-color: dimgray");
-        }
-        if (module == DebugLog.imageAnalysis) {
-            if (status) buttonImageAnalysisLog.setStyle("-fx-background-color: transparent");
-            else buttonImageAnalysisLog.setStyle("-fx-background-color: dimgray");
-        }
-        if (module == DebugLog.applicationView) {
-            if (status) buttonApplicationViewLog.setStyle("-fx-background-color: transparent");
-            else buttonApplicationViewLog.setStyle("-fx-background-color: dimgray");
-        }
-        if (module == DebugLog.informationSource) {
-            if (status) buttonInformationSourceLog.setStyle("-fx-background-color: transparent");
-            else buttonInformationSourceLog.setStyle("-fx-background-color: dimgray");
-        }
-    }
+
 
 }
