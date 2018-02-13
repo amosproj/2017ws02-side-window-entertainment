@@ -65,7 +65,8 @@ public class InfoBoxView extends BorderPane {
         titlePane.setRight(closeButton);
         BorderPane.setAlignment(closeButton, Pos.CENTER_LEFT);
         titlePane.setStyle("" +
-                "-fx-background-color: rgba(255, 255, 255, 0.25); ");
+                "-fx-background-color: rgba(255, 255, 255, 0.25); " +
+                "-fx-padding: 0 0 0 8");
 
         image = new ImageView();
         image.setId("expansionImage");

@@ -83,6 +83,5 @@ public class AppProperties extends Properties {
         useTensorflow = get("tensorflow").equals("1");
         mapsPoisLoadDistance = Integer.parseInt(get("mapsPoisLoadDistance").toString());
         useAnimations = get("animations").equals("1");
-        System.out.println();
     }
 }
