@@ -130,6 +130,13 @@ public class AbstractProvider implements InformationProvider, Module{
         return getAbstract(wikiName, wikiLanguage);
     }
 
+
+    /**
+     * Retrieves the abstract of a Wikipedia article of the given search term and in the given language.
+     * @param searchTerm The term for a Wikipedia article.
+     * @param language The language in which the abstract should be in.
+     * @return The abstract of the Wikipedia article.
+     */
     private static String getAbstract(String searchTerm, String language) {
         if (searchTerm == null) {
             return null;
@@ -149,8 +156,11 @@ public class AbstractProvider implements InformationProvider, Module{
         return StringEscapeUtils.unescapeJava(result);
     }
 
-
-
+    /**
+     * Retrieves the name of a Wikipedia article from a given URL.
+     * @param wikiUrl The URL to a Wikipedia article.
+     * @return The name of the article to which to URL leads.
+     */
     public static  String getNameFromUrl(String wikiUrl) {
         if (!wikiUrl.equals("")) {
             String[] temp = wikiUrl.split("/");
@@ -159,6 +169,11 @@ public class AbstractProvider implements InformationProvider, Module{
         return "";
     }
 
+    /**
+     * Retrieves the language of a Wikipedia article from a given URL.
+     * @param wikiUrl The URL to a Wikipedia article.
+     * @return The language of the article to which to URL leads.
+     */
     @Nullable
     public static String getLanguageFromUrl(String wikiUrl) {
         String[] temp = wikiUrl.split("/");
