@@ -790,17 +790,21 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         PoiViewModel item = convertPoi(poi);
         if (!propertyPoiCamera.contains(poi)) {
             pointsOfInterest.add(poi);
+            UserExpressions userExpressions = userTracker.getUserExpressions();
             Platform.runLater(() -> {
                 propertyPoiCamera.add(0, item);
-                // only show if info box is not filled
-                if (expandedPOI == null || StringUtils.isEmpty(expandedPOI.getName())) {
-                    setExpandedPoi(item);
-                    view.showExpandedPoi(true);
-                    view.showInfoBoxHideIndicator(HIDE_INFO_BOX_DELAY);
-                    hideInfoBoxScheduler = Executors.newSingleThreadScheduledExecutor();
-                    hideInfoBoxScheduler.scheduleAtFixedRate(this::minimizePoi, HIDE_INFO_BOX_DELAY, 1000, TimeUnit.MILLISECONDS);
+                if (userExpressions != null && userExpressions.isMouthOpen()) {
+                    // only show if info box is not filled
+                    if (expandedPOI == null || StringUtils.isEmpty(expandedPOI.getName())) {
+                        setExpandedPoi(item);
+                        view.showExpandedPoi(true);
+                        view.showInfoBoxHideIndicator(HIDE_INFO_BOX_DELAY);
+                        hideInfoBoxScheduler = Executors.newSingleThreadScheduledExecutor();
+                        hideInfoBoxScheduler.scheduleAtFixedRate(this::minimizePoi, HIDE_INFO_BOX_DELAY, 1000, TimeUnit.MILLISECONDS);
+                    }
                 }
             });
+
         }
     }
 
