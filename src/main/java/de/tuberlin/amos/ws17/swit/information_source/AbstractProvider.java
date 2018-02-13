@@ -169,7 +169,7 @@ public class AbstractProvider implements InformationProvider, Module{
         }
         return null;
     }
-    /*
+    /**
      * Reads the HTTP informations of a given URL and returns it as a string.
      */
     private static String readHTTP(String websiteURL) throws Exception {
@@ -186,6 +186,10 @@ public class AbstractProvider implements InformationProvider, Module{
         return result.toString();
     }
 
+    /**
+     *  Method for accessing the Google knowledge Graph API
+     * @return  an URL to call Knowledge Graph
+     */
     private GenericUrl createGenericUrl() {
         GenericUrl url = new GenericUrl("https://kgsearch.googleapis.com/v1/entities:search");
         url.put("limit", "10");
@@ -195,6 +199,11 @@ public class AbstractProvider implements InformationProvider, Module{
         return url;
     }
 
+    /**
+     * query by Id
+     * @param id
+     * @return detailled Description and WikiUrl of the found object
+     */
     @Nullable
     private AbstractProvider.Tuple<String, String> getInfoById(String id) {
         GenericUrl url = createGenericUrl();
@@ -202,6 +211,11 @@ public class AbstractProvider implements InformationProvider, Module{
         return getInfoAndWikiUrl(url);
     }
 
+    /**
+     * query by name
+     * @param name
+     * @return detailled Description and WikiUrl of the found object
+     */
     @Nullable
     private AbstractProvider.Tuple<String, String> getInfoByName(String name) {
         GenericUrl url = createGenericUrl();
@@ -209,6 +223,12 @@ public class AbstractProvider implements InformationProvider, Module{
         return getInfoAndWikiUrl(url);
     }
 
+
+    /**
+     *
+     * @param url takes in knowledge Graph Url
+     * @return  The detailed Description and Wiki URL of found object
+     */
     @Nullable
     private AbstractProvider.Tuple<String, String> getInfoAndWikiUrl(GenericUrl url) {
         try {
