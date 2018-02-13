@@ -4,15 +4,20 @@ import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollBar;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.InputEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Screen;
+
+import java.util.Set;
 
 public class InfoBoxView extends BorderPane {
 
@@ -23,7 +28,7 @@ public class InfoBoxView extends BorderPane {
     private Label      information;
     private ImageView  image;
     private ScrollPane scrollPane;
-    private RingProgressView indicator = new RingProgressView();
+    private RingProgressView indicator;
 
 
     private static Font fontTitle = new Font(12);
@@ -76,6 +81,8 @@ public class InfoBoxView extends BorderPane {
         image.minHeight(0);
         image.minWidth(0);
 
+        indicator = new RingProgressView();
+
         information = new Label();
         information.setId("expansionInformation");
         information.setAlignment(Pos.TOP_CENTER);
@@ -94,6 +101,7 @@ public class InfoBoxView extends BorderPane {
         scrollPane.setContent(contentPane);
         scrollPane.setFitToWidth(true);
 
+        findScrollBar();
 
         setId("expansionPane");
         setVisible(false);
@@ -110,9 +118,20 @@ public class InfoBoxView extends BorderPane {
         scrollPane.setMaxHeight(screenVisualBounds.getHeight() * 0.3);
     }
 
+    private ScrollBar findScrollBar() {
+        Set<Node> nodes = scrollPane.lookupAll(".scroll-bar");
+        for (final Node node : nodes) {
+            if (node instanceof ScrollBar) {
+                return (ScrollBar) node;
+            }
+        }
+        return null;
+    }
 
-    public void setOnScrollListener(EventHandler<ScrollEvent> eventHandler) {
+    public void setOnScrollListener(EventHandler<InputEvent> eventHandler) {
         contentPane.setOnScroll(eventHandler);
+        ScrollBar scrollBar = findScrollBar();
+        if (scrollBar != null) scrollBar.setOnDragDetected(eventHandler);
     }
 
     public Button getCloseButton() {

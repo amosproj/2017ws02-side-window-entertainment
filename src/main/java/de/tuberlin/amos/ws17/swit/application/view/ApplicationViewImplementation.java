@@ -203,10 +203,6 @@ public class ApplicationViewImplementation extends Application implements Applic
         infoBoxLayer = new BorderPane();
         infoBoxLayer.setCenter(infoBoxView);
         infoBoxLayer.setPickOnBounds(false);
-        infoBoxView.setOnScrollListener(event -> {
-            viewModel.onInfoTextScrolled();
-            infoBoxView.getIndicator().setVisible(false);
-        });
     }
 
     private void initDebugLayer() {
@@ -238,6 +234,12 @@ public class ApplicationViewImplementation extends Application implements Applic
         stage.setScene(scene);
         initFullscreenMode(stage);
         stage.show();
+
+        // need to be set here, because scrollbar can only be found after being added to stage
+        infoBoxView.setOnScrollListener(event -> {
+            viewModel.onInfoTextScrolled();
+            infoBoxView.getIndicator().setVisible(false);
+        });
     }
 
     private void initFullscreenMode(Stage stage) {
