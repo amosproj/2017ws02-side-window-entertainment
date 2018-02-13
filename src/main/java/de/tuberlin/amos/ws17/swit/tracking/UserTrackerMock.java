@@ -8,6 +8,8 @@ import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import org.joda.time.Seconds;
 
+//Diese Klasse stellt Test-Daten für das Nutzer-Tracking bereit.
+//Dafür muss in der app.properties die Einstellung usercamera=0 gesetzt sein.
 public class UserTrackerMock implements UserTracker, Runnable {
 
     private boolean isTracking = false;

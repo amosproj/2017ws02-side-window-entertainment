@@ -58,7 +58,7 @@ If a POI contains one of the strings, it is not displayed on the screen
 
 # mapsPoisLoadDistance
 parameters: [0, infinite[
-radius in which POIs are loaded around the vehicle
+radius in which POIs are loaded around the vehicle (unit? maybe meters?)
 
 # fullscreen
 parameters: {0, 1, 2}

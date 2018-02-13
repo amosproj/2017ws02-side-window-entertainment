@@ -9,6 +9,8 @@ import org.joda.time.Seconds;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
+//Diese Klasse stellt Test-Daten bereit um das System auch ohne eine WebCam testen zu können.
+//Dafür muss in der app.properties die Einstellung camera=0 gesetzt sein.
 public class LandscapeTrackerMock implements LandscapeTracker {
 
     private boolean isTracking = false;

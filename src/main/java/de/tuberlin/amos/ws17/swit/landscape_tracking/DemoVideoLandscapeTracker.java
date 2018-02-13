@@ -15,6 +15,12 @@ import java.net.URISyntaxException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+//Diese Klasse stellt auf Basis des LandscapeTracker-Interfaces
+//eine Mock-Klasse zum Testen bzw. Demonstrieren dar.
+//Sie hat Zugriff auf den MediaPlayer auf der Oberfläche (MVVM goodbye!)
+//um beim Aufruf der Methode getImage einen Snapshot des abgespielten Videos
+// als Bild zur Verfügung zu stellen.
+//Dafür muss in der app.properties die Einstellung camera=2 gesetzt sein.
 public class DemoVideoLandscapeTracker implements LandscapeTracker {
     private static final Logger LOGGER = Logger.getLogger(DemoVideoLandscapeTracker.class.getName());
     private MediaView mediaView;

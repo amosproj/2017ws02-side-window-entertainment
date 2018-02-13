@@ -9,6 +9,9 @@ import de.tuberlin.amos.ws17.swit.common.DebugLog;
 
 import java.nio.file.Paths;
 
+//Diese Klasse ist die zentrale Verwaltung mit Hilfe derer die Lizenz von JavoNet gestartet wird.
+//Dann werden instanzen des Kamera und UserTrackers auf der .NET Seite erstellt
+// um sie mit Hilfe der Wrapper ansprechen zu können.
 public class JavoNetService {
 
     private static boolean isInitialized = false;

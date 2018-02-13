@@ -9,6 +9,10 @@ import de.tuberlin.amos.ws17.swit.tracking.camera.CameraService;
 import de.tuberlin.amos.ws17.swit.tracking.camera.JavoNetCameraService;
 import de.tuberlin.amos.ws17.swit.tracking.javonet.JavoNetService;
 
+//Diese Klasse stellt die User-Tracking Funktionalität für Java bereit.
+//Sie ist ein Wrapper der .NET Assemblies mit Hilfe von JavoNet aufruft.
+//Als Hardware wird die IntelRealSense SR300 vorausgesetzt.
+//Dafür muss in der app.properties die Einstellung usercamera=1 gesetzt sein.
 public class JavoNetUserTracker implements UserTracker {
 
     private CameraService cameraService;
