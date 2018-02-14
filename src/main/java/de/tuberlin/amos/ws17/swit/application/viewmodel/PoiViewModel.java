@@ -77,9 +77,6 @@ public class PoiViewModel {
 
         PoiViewModel that = (PoiViewModel) o;
 
-        //System.out.println(this.id + " " + this.name + " compared to " + that.getId() + " " + that.getName());
-
-        if (this.getId() != null ? !this.getId().equals(that.getId()) : that.getId() != null) return false;
         return this.getName() != null ? this.getName().equals(that.getName()) : that.getName() != null;
     }
 
