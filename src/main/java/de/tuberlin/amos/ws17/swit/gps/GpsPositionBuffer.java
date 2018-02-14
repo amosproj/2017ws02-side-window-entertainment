@@ -7,6 +7,10 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import uk.me.jstott.jcoord.LatLng;
 import uk.me.jstott.jcoord.UTMRef;
 
+// ---------------------------------------------
+// ---------- module not used anymore ----------
+// ---------------------------------------------
+
 public class GpsPositionBuffer {
   public GpsPositionBuffer() {
     // keep GPS positions in cache for 30 seconds

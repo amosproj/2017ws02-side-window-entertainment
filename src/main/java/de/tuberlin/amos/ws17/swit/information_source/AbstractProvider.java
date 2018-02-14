@@ -30,6 +30,7 @@ import java.util.Arrays;
 
 public class AbstractProvider implements InformationProvider, Module{
 
+    // loads the Google API key via the ApiConfig class
     private static final String API_KEY = ApiConfig.getProperty("KnowledgeGraphSearch");
     private static final String LANGUAGE = "de";
 
@@ -42,6 +43,17 @@ public class AbstractProvider implements InformationProvider, Module{
         return instance;
     }
 
+
+    /**
+     *  Retrieves information of a point of interest with the help of the Google knowledge graph as
+     *  the Wikipedia API. The information retrieved are an abstract of the POI as well as the URL to
+     *  the Wikipedia article.
+     *  It gets the knowledge graph abstract information first and then tries to
+     *  retrieve an information abstract from Wikipedia.
+     * @param poi Point of interest of which you want to get the information from
+     * @return The point of interest now also containing an information abstract
+     * @throws ServiceNotAvailableException Thrown, when the knowledge graph is not available.
+     */
     public PointOfInterest setInfoAndUrl(PointOfInterest poi) throws ServiceNotAvailableException {
         if (poi != null) {
             AbstractProvider.Tuple<String, String> result = null;
@@ -69,12 +81,17 @@ public class AbstractProvider implements InformationProvider, Module{
         }
     }
 
-
+    /**
+     * Retrieves the abstract information belonging to a POI from Wikipedia and adds that data to the
+     * PointOfInterest object it was called with.
+     * @param poi Point of interest of which you want to retrieve the abstract from.
+     * @throws ServiceNotAvailableException Thrown, when the knowledge graph is not available.
+     */
     private void getWikiInformation (PointOfInterest poi) throws ServiceNotAvailableException {
         if (poi != null) {
             try {
             String wikiUrl = poi.getWikiUrl();
-                DebugLog.log("Fetching Wiki-Article...");
+                DebugLog.log("InformationSource","Fetching Wiki-Article...");
             if (wikiUrl==null){
 
                 String abstractInfo= getAbstract(poi.getName(), LANGUAGE);
@@ -102,12 +119,24 @@ public class AbstractProvider implements InformationProvider, Module{
         }
     }
 
+    /**
+     * Retrieves the abstract of a Wikipedia article belonging to the given URL.
+     * @param wikiUrl URL to a Wikipedia article
+     * @return The abstract of the Wikipedia article
+     */
     private static String getAbstract(String wikiUrl) {
         String wikiName = getNameFromUrl(wikiUrl);
         String wikiLanguage = getLanguageFromUrl(wikiUrl);
         return getAbstract(wikiName, wikiLanguage);
     }
 
+
+    /**
+     * Retrieves the abstract of a Wikipedia article of the given search term and in the given language.
+     * @param searchTerm The term for a Wikipedia article.
+     * @param language The language in which the abstract should be in.
+     * @return The abstract of the Wikipedia article.
+     */
     private static String getAbstract(String searchTerm, String language) {
         if (searchTerm == null) {
             return null;
@@ -127,8 +156,11 @@ public class AbstractProvider implements InformationProvider, Module{
         return StringEscapeUtils.unescapeJava(result);
     }
 
-
-
+    /**
+     * Retrieves the name of a Wikipedia article from a given URL.
+     * @param wikiUrl The URL to a Wikipedia article.
+     * @return The name of the article to which to URL leads.
+     */
     public static  String getNameFromUrl(String wikiUrl) {
         if (!wikiUrl.equals("")) {
             String[] temp = wikiUrl.split("/");
@@ -137,6 +169,11 @@ public class AbstractProvider implements InformationProvider, Module{
         return "";
     }
 
+    /**
+     * Retrieves the language of a Wikipedia article from a given URL.
+     * @param wikiUrl The URL to a Wikipedia article.
+     * @return The language of the article to which to URL leads.
+     */
     @Nullable
     public static String getLanguageFromUrl(String wikiUrl) {
         String[] temp = wikiUrl.split("/");
@@ -147,7 +184,7 @@ public class AbstractProvider implements InformationProvider, Module{
         }
         return null;
     }
-    /*
+    /**
      * Reads the HTTP informations of a given URL and returns it as a string.
      */
     private static String readHTTP(String websiteURL) throws Exception {
@@ -164,6 +201,10 @@ public class AbstractProvider implements InformationProvider, Module{
         return result.toString();
     }
 
+    /**
+     *  Method for accessing the Google knowledge Graph API
+     * @return  an URL to call Knowledge Graph
+     */
     private GenericUrl createGenericUrl() {
         GenericUrl url = new GenericUrl("https://kgsearch.googleapis.com/v1/entities:search");
         url.put("limit", "10");
@@ -173,6 +214,11 @@ public class AbstractProvider implements InformationProvider, Module{
         return url;
     }
 
+    /**
+     * query by Id
+     * @param id
+     * @return detailled Description and WikiUrl of the found object
+     */
     @Nullable
     private AbstractProvider.Tuple<String, String> getInfoById(String id) {
         GenericUrl url = createGenericUrl();
@@ -180,6 +226,11 @@ public class AbstractProvider implements InformationProvider, Module{
         return getInfoAndWikiUrl(url);
     }
 
+    /**
+     * query by name
+     * @param name
+     * @return detailled Description and WikiUrl of the found object
+     */
     @Nullable
     private AbstractProvider.Tuple<String, String> getInfoByName(String name) {
         GenericUrl url = createGenericUrl();
@@ -187,6 +238,12 @@ public class AbstractProvider implements InformationProvider, Module{
         return getInfoAndWikiUrl(url);
     }
 
+
+    /**
+     *
+     * @param url takes in knowledge Graph Url
+     * @return  The detailed Description and Wiki URL of found object
+     */
     @Nullable
     private AbstractProvider.Tuple<String, String> getInfoAndWikiUrl(GenericUrl url) {
         try {

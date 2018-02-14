@@ -16,10 +16,20 @@ public interface ApplicationView {
 
     MediaView getMediaView();
 
+    void showInfoBoxHideIndicator(int duration);
+
     void showExpandedPoi(boolean show);
 
     void toggleLists();
 
     void toggleTensorFlowDebugWindow();
+
+    void showDebugLayer();
+
+    void hideDebugLayer();
+
+    void showApplicationLayer();
+
+    void hideApplicationLayer();
 }
 

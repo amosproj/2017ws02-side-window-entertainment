@@ -2,6 +2,8 @@ package de.tuberlin.amos.ws17.swit.gps;
 
 import org.joda.time.DateTime;
 
+// not really used anymore, but kept, since (not used) GpsPositionBuffer uses it
+
 public class GpsPosition {
 	public GpsPosition(double latitude, double longitude, DateTime timeStamp) {
 		this.timeStamp = timeStamp;

@@ -9,6 +9,10 @@ import de.tuberlin.amos.ws17.swit.tracking.camera.CameraService;
 import de.tuberlin.amos.ws17.swit.tracking.camera.JavoNetCameraService;
 import de.tuberlin.amos.ws17.swit.tracking.javonet.JavoNetService;
 
+//Diese Klasse stellt die User-Tracking Funktionalität für Java bereit.
+//Sie ist ein Wrapper der .NET Assemblies mit Hilfe von JavoNet aufruft.
+//Als Hardware wird die IntelRealSense SR300 vorausgesetzt.
+//Dafür muss in der app.properties die Einstellung usercamera=1 gesetzt sein.
 public class JavoNetUserTracker implements UserTracker {
 
     private CameraService cameraService;
@@ -92,10 +96,10 @@ public class JavoNetUserTracker implements UserTracker {
         try {
             JavoNetService.dotNetUserTracker.invoke("StartTracking");
         } catch (JavonetException e) {
-            DebugLog.log("Tracking Thread not started");
+            DebugLog.log(DebugLog.SOURCE_USERTRACKING,"Tracking Thread not started");
             return false;
         }
-        DebugLog.log("Tracking Thread started");
+        DebugLog.log(DebugLog.SOURCE_USERTRACKING,"Tracking Thread started");
         return true;
     }
 
@@ -104,10 +108,10 @@ public class JavoNetUserTracker implements UserTracker {
         try {
             JavoNetService.dotNetUserTracker.invoke("StopTracking");
         } catch (JavonetException e) {
-            DebugLog.log("Tracking Thread not stopped");
+            DebugLog.log(DebugLog.SOURCE_USERTRACKING,"Tracking Thread not stopped");
             return false;
         }
-        DebugLog.log("Tracking Thread stopped");
+        DebugLog.log(DebugLog.SOURCE_USERTRACKING,"Tracking Thread stopped");
         return true;
     }
 }

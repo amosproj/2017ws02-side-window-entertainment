@@ -4,7 +4,7 @@ import de.tuberlin.amos.ws17.swit.common.exceptions.ModuleNotWorkingException;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-
+//TODO: delete?
 public class DemoLandscape implements LandscapeTracker {
 
     @Override

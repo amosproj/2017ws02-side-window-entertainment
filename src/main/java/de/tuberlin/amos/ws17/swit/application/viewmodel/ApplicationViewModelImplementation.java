@@ -4,16 +4,16 @@ import de.tuberlin.amos.ws17.swit.application.AppProperties;
 import de.tuberlin.amos.ws17.swit.application.view.ApplicationView;
 import de.tuberlin.amos.ws17.swit.application.view.ApplicationViewImplementation;
 import de.tuberlin.amos.ws17.swit.common.*;
-import de.tuberlin.amos.ws17.swit.common.Module;
 import de.tuberlin.amos.ws17.swit.common.exceptions.ModuleNotWorkingException;
+import de.tuberlin.amos.ws17.swit.gps.DemoVideoGpsTracker;
 import de.tuberlin.amos.ws17.swit.gps.GpsTracker;
 import de.tuberlin.amos.ws17.swit.gps.GpsTrackerImplementation;
 import de.tuberlin.amos.ws17.swit.gps.GpsTrackerMock;
 import de.tuberlin.amos.ws17.swit.image_analysis.CloudVision;
 import de.tuberlin.amos.ws17.swit.image_analysis.LandmarkDetector;
 import de.tuberlin.amos.ws17.swit.image_analysis.LandmarkDetectorMock;
-import de.tuberlin.amos.ws17.swit.information_source.AbstractProvider;
 import de.tuberlin.amos.ws17.swit.image_analysis.TFLandmarkClassifier;
+import de.tuberlin.amos.ws17.swit.information_source.AbstractProvider;
 import de.tuberlin.amos.ws17.swit.information_source.InformationProviderMock;
 import de.tuberlin.amos.ws17.swit.landscape_tracking.DemoVideoLandscapeTracker;
 import de.tuberlin.amos.ws17.swit.landscape_tracking.LandscapeTracker;
@@ -32,25 +32,28 @@ import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.embed.swing.SwingFXUtils;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.image.Image;
-import javafx.event.EventHandler;
-import javafx.event.ActionEvent;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
 import javafx.stage.Screen;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 public class ApplicationViewModelImplementation implements ApplicationViewModel {
 
-    public static final String videoFileName = "Berlin.mp4";
+    public static final  String videoFileName       = "amos.mp4";
+    private static final int    HIDE_INFO_BOX_DELAY = 10000; // 10 seconds
 
     //Module
     private ApplicationView      view;
@@ -94,6 +97,9 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     private SimpleDoubleProperty infoBoxTranslationX = new SimpleDoubleProperty();
     private SimpleDoubleProperty infoBoxTranslationY = new SimpleDoubleProperty();
 
+    private SimpleBooleanProperty debugLayerVisible       = new SimpleBooleanProperty(false);
+    private SimpleBooleanProperty applicationLayerVisible = new SimpleBooleanProperty(false);
+
     private int searchRadius = 1000;
     private GpsPosition lastRequestPosition;
     private List<Module> moduleList = new ArrayList<>();
@@ -104,9 +110,9 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
 
     private BackgroundImage backgroundImage;
     private Background      background;
-    private ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
-
-    private AppProperties properties = AppProperties.getInstance();
+    private ScheduledExecutorService tensorFlowScheduler  = Executors.newSingleThreadScheduledExecutor();
+    private ScheduledExecutorService hideInfoBoxScheduler = Executors.newSingleThreadScheduledExecutor();
+    private AppProperties            properties           = AppProperties.getInstance();
 
     public ApplicationViewModelImplementation(ApplicationViewImplementation view) {
         this.view = view;
@@ -130,21 +136,48 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         }
 
         initInfoBoxMovement();
+
+        debugLayerVisible.addListener(event -> {
+            if (properties.useAnimations) {
+                Platform.runLater(() -> {
+                    if (debugLayerVisible.get()) {
+                        view.showDebugLayer();
+                    } else {
+                        view.hideDebugLayer();
+                    }
+                });
+            }
+        });
+        applicationLayerVisible.addListener(event -> {
+            if (properties.useAnimations) {
+                Platform.runLater(() -> {
+                    if (applicationLayerVisible.get()) {
+                        view.showApplicationLayer();
+                    } else {
+                        view.hideApplicationLayer();
+                    }
+                });
+            }
+        });
     }
 
     private void initTFClassifier() {
         view.toggleTensorFlowDebugWindow();
-        int intervalInSeconds = 5;
+        int intervalInMillis = 5000;
         if (properties.useDemoVideo) {
             // grab image every second if using video
-            intervalInSeconds = 1;
+            intervalInMillis = 1000;
         }
-        scheduler.scheduleAtFixedRate(() -> {
+        tensorFlowScheduler.scheduleAtFixedRate(() -> {
             BufferedImage image = getLandscapeTrackerImage();
             if (image != null) {
-                tensorFlowClassifier.identifyPOIs(image);
+                if (gpsTracker != null) {
+                    tensorFlowClassifier.identifyPOIs(image, gpsTracker.getCurrentPosition());
+                } else {
+                    tensorFlowClassifier.identifyPOIs(image);
+                }
             }
-        }, 3, intervalInSeconds, TimeUnit.SECONDS);
+        }, 1000, intervalInMillis, TimeUnit.MILLISECONDS);
     }
 
     private void initObjects() {
@@ -154,13 +187,15 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         propertyPoiCamera.set(FXCollections.observableList(new ArrayList<>()));
         propertyDebugLog.set(FXCollections.observableList(new ArrayList<>()));
         propertyCloseButton.set(event -> minimizePoi());
-        propertyToggleGpsButton.set(event -> DebugLog.toggleModule("GPS"));
-        propertyTogglePoiButton.set(event -> DebugLog.toggleModule("POI"));
-        propertyToggleUserTrackingButton.set(event -> DebugLog.toggleModule("UserTracking"));
-        propertyToggleLandscapeTrackingButton.set(event -> DebugLog.toggleModule("LandscapeTracking"));
-        propertyToggleImageAnalysisButton.set(event -> DebugLog.toggleModule("ImageAnalysis"));
-        propertyToggleApplicationViewButton.set(event -> DebugLog.toggleModule("ApplicationView"));
-        propertyToggleInformationSourceButton.set(event -> DebugLog.toggleModule("InformationSource"));
+        propertyToggleGpsButton.set(event -> DebugLog.toggleModule(DebugLog.gps));
+        propertyTogglePoiButton.set(event -> DebugLog.toggleModule(DebugLog.poi));
+        propertyToggleUserTrackingButton.set(event -> DebugLog.toggleModule(DebugLog.userTracking));
+        propertyToggleLandscapeTrackingButton.set(event -> DebugLog.toggleModule(DebugLog.landscapeTracking));
+        propertyToggleImageAnalysisButton.set(event -> DebugLog.toggleModule(DebugLog.imageAnalysis));
+        propertyToggleApplicationViewButton.set(event -> DebugLog.toggleModule(DebugLog.applicationView));
+        propertyToggleInformationSourceButton.set(event -> DebugLog.toggleModule(DebugLog.informationSource));
+
+        debugEntries.set(DebugLog.getDebugLog());
     }
 
     private void initDebugLog() {
@@ -185,28 +220,43 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         String currentModule;
         //GPS
         currentModule = "GpsTracker";
-        if (properties.useGpsModule) {
-            try {
-                System.out.println("loading " + currentModule + "...");
-                gpsTracker = new GpsTrackerImplementation();
-                moduleList.add(gpsTracker);
-                gpsTracker.startModule();
-                setModuleStatus(ModuleErrors.NOGPSHARDWARE, true);
-            } catch (ModuleNotWorkingException e) {
-                setModuleStatus(ModuleErrors.NOGPSHARDWARE, false);
-            } catch (Exception e) {
-                System.out.println("unexpected error loading " + currentModule);
-                e.printStackTrace();
-                setModuleStatus(ModuleErrors.NOGPSHARDWARE, false);
+        if (!properties.useDemoVideo) {
+            if (properties.useGpsModule) {
+                try {
+                    System.out.println("loading " + currentModule + "...");
+                    gpsTracker = new GpsTrackerImplementation();
+                    moduleList.add(gpsTracker);
+                    gpsTracker.startModule();
+                    setModuleStatus(ModuleErrors.NOGPSHARDWARE, true);
+                } catch (ModuleNotWorkingException e) {
+                    setModuleStatus(ModuleErrors.NOGPSHARDWARE, false);
+                } catch (Exception e) {
+                    System.out.println("unexpected error loading " + currentModule);
+                    e.printStackTrace();
+                    setModuleStatus(ModuleErrors.NOGPSHARDWARE, false);
+                }
+            } else {
+                try {
+                    System.out.println("loading " + currentModule + "Mock...");
+                    gpsTracker = new GpsTrackerMock();
+                    moduleList.add(gpsTracker);
+                    gpsTracker.startModule();
+                    setModuleStatus(ModuleErrors.NOGPSHARDWARE, true);
+                } catch (ModuleNotWorkingException e) {
+                    setModuleStatus(ModuleErrors.NOGPSHARDWARE, false);
+                }
             }
         } else {
             try {
-                System.out.println("loading " + currentModule + "Mock...");
-                gpsTracker = new GpsTrackerMock();
+                System.out.println("loading " + currentModule + " for demo video...");
+                gpsTracker = new DemoVideoGpsTracker();
                 moduleList.add(gpsTracker);
                 gpsTracker.startModule();
                 setModuleStatus(ModuleErrors.NOGPSHARDWARE, true);
             } catch (ModuleNotWorkingException e) {
+                setModuleStatus(ModuleErrors.NOGPSHARDWARE, false);
+            } catch (IOException e) {
+                System.out.println("could not load json file " + currentModule);
                 setModuleStatus(ModuleErrors.NOGPSHARDWARE, false);
             }
         }
@@ -358,10 +408,16 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
             long lastExpression = startTime;
             //int lastCameraExecution = 0;
             long lastMapsExecution = startTime;
+            long lastMouthOpen = startTime;
+            long lastSmile = startTime;
+            long lastTongueOut = startTime;
             while (isRunning) {
                 long currentTime = new Date().getTime();
                 long expressionTimeDiff = (currentTime - lastExpression) / 1000;
                 long mapsTimeDiff = (currentTime - lastMapsExecution) / 1000;
+                long mouthOpenDiff = (currentTime - lastMouthOpen) / 1000;
+                long smileDiff = (currentTime - lastSmile) / 1000;
+                long tongueOutDiff = (currentTime - lastTongueOut) / 1000;
                 UserExpressions userExpressions;
                 if (userTracker.isUserTracked()) {
                     setExpressionStatus(ExpressionType.ISRACKED, true);
@@ -383,22 +439,34 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                             cameraThread.start();
                         }
                     }
+                    if (userExpressions != null && userExpressions.isMouthOpen() && mouthOpenDiff >= 5) {
+                        applicationLayerVisible.set(!applicationLayerVisible.get());
+                        lastMouthOpen = currentTime;
+                    }
+                    if (userExpressions != null && userExpressions.isSmile() && smileDiff >= 5) {
+
+                        lastSmile = currentTime;
+                    }
+                    if (userExpressions != null && userExpressions.isTongueOut() && tongueOutDiff >= 5) {
+                        debugLayerVisible.set(!debugLayerVisible.get());
+                        lastTongueOut = currentTime;
+                    }
                 } else {
+                    debugLayerVisible.set(false);
+                    applicationLayerVisible.set(false);
                     setExpressionStatus(ExpressionType.ISRACKED, false);
                 }
                 if (mapsTimeDiff >= 5) {
-                    //System.out.println("ich mach maps " + mapsTimeDiff);
+                    lastMapsExecution = currentTime;
                     if (mapsThread.getState() == Thread.State.NEW) {
-                        lastMapsExecution = currentTime;
                         mapsThread.start();
                     } else if (mapsThread.getState() == Thread.State.TERMINATED) {
-                        lastMapsExecution = currentTime;
                         initMapsThread();
                         mapsThread.start();
                     }
                 }
                 try {
-                    Thread.sleep(75);
+                    Thread.sleep(125);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -431,6 +499,11 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         }
     }
 
+    @Override
+    public void onInfoTextScrolled() {
+        hideInfoBoxScheduler.shutdown();
+    }
+
     private void initMapsThread() {
         mapsThread = new Thread(() -> {
             if (gpsTracker == null || poiService == null || abstractProvider == null) {
@@ -439,7 +512,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
             }
 
             //GPS
-            KinematicProperties kinematicProperties = null;
+            KinematicProperties kinematicProperties = new KinematicProperties();
             List<KinematicProperties> history = null;
             try {
                 kinematicProperties = gpsTracker.fillDumpObject(kinematicProperties);
@@ -448,10 +521,11 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 DateTime timeStamp = kinematicProperties.getTimeStamp();
                 Double latitude = kinematicProperties.getLatitude();
                 Double longitude = kinematicProperties.getLongitude();
-                DebugLog.log("Lat: " +
-                        latitude + ", Lng: " + longitude);
+                DebugLog.log(DebugLog.SOURCE_GPS, "Current Position: (" +
+                        latitude + ", " + longitude + ")");
             } catch (ModuleNotWorkingException e) {
                 setModuleStatus(ModuleErrors.NOGPSHARDWARE, false);
+                kinematicProperties = null;
             } catch (Exception e) {
                 e.printStackTrace();
                 setModuleStatus(ModuleErrors.NOGPSHARDWARE, false);
@@ -557,7 +631,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
 
         // try local classification first
         if (tensorFlowClassifier != null) {
-            pois = tensorFlowClassifier.identifyPOIs(image);
+            pois = tensorFlowClassifier.identifyPOIs(image, gpsTracker.getCurrentPosition());
         }
 
         // if not successful -> use cloud vision
@@ -666,12 +740,11 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     private double infoboxMoveMaxX = 0;
     private double infoboxMoveMaxY = 0;
 
-    private double infoboxMoveWidthFactor = 1;
+    private double infoboxMoveWidthFactor  = 1;
     private double infoboxMoveHeightFactor = 1;
 
     private double userPositionMinY = 0;
     private double userPositionMaxY = 0;
-
 
 
     private void initInfoBoxMovement() {
@@ -717,7 +790,21 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         PoiViewModel item = convertPoi(poi);
         if (!propertyPoiCamera.contains(poi)) {
             pointsOfInterest.add(poi);
-            Platform.runLater(() -> propertyPoiCamera.add(0, item));
+            UserExpressions userExpressions = userTracker.getUserExpressions();
+            Platform.runLater(() -> {
+                propertyPoiCamera.add(0, item);
+                if (userExpressions != null && userExpressions.isMouthOpen()) {
+                    // only show if info box is not filled
+                    if (expandedPOI == null || StringUtils.isEmpty(expandedPOI.getName())) {
+                        setExpandedPoi(item);
+                        view.showExpandedPoi(true);
+                        view.showInfoBoxHideIndicator(HIDE_INFO_BOX_DELAY);
+                        hideInfoBoxScheduler = Executors.newSingleThreadScheduledExecutor();
+                        hideInfoBoxScheduler.scheduleAtFixedRate(this::minimizePoi, HIDE_INFO_BOX_DELAY, 1000, TimeUnit.MILLISECONDS);
+                    }
+                }
+            });
+
         }
     }
 
@@ -784,11 +871,9 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     }
 
     private void minimizePoi() {
-        expandedPOI.setId("");
-        expandedPOI.setName("");
-        expandedPOI.setImage(null);
-        expandedPOI.setInformationAbstract("");
         view.showExpandedPoi(false);
+        hideInfoBoxScheduler.shutdown();
+        expandedPOI.setName("");
     }
 
     private void setExpandedPoi(PoiViewModel item) {
@@ -877,7 +962,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     @Override
     public void setRunning(boolean running) {
         if (!running) {
-            scheduler.shutdown();
+            tensorFlowScheduler.shutdown();
         }
     }
 
@@ -894,6 +979,12 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     @Override
     public SimpleDoubleProperty getInfoBoxTranslationY() {
         return infoBoxTranslationY;
+    }
+
+    private SimpleListProperty<DebugLog.DebugEntry> debugEntries = new SimpleListProperty<>();
+
+    public SimpleListProperty<DebugLog.DebugEntry> propertyDebugEntries() {
+        return debugEntries;
     }
 
     public SimpleListProperty<UserExpressionViewModel> listExpressionStatusProperty() {

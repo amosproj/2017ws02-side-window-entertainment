@@ -4,9 +4,6 @@
 }
 
 #listDebugLog {
-    -fx-min-width: 200px;
-    -fx-max-width: 500px;
-    -fx-max-height: 400px;
     -fx-background-color: rgba(0, 0, 0, 0.7);
 }
 
@@ -16,25 +13,23 @@
 
 #textTFDebug {
     -fx-min-width: 200px;
-    -fx-max-width: 400px;
-    -fx-max-height: 120px;
+    -fx-max-width: 500px;
+    -fx-max-height: 130px;
     -fx-background-color: rgba(0, 0, 0, 0.7);
-    -fx-padding: 10 10 10 10;
+    -fx-padding: 0 0 0 10;
+    -fx-font-size: 14pt;
 }
 
 #expansionPane {
     -fx-padding: 0px;
-    -fx-max-width: 400px;
-    -fx-max-height: 500px;
-    -fx-alignment: center-right;
-    -fx-background-color: rgba(0, 0, 0, 0.7);
-    -fx-border-color: rgba(192,192,192,255);
+    -fx-background-color: rgba(0, 0, 0, 0.5);
+    -fx-border-color: aliceblue;
     -fx-border-width: 4px;
 }
 
 #expansionTopPane {
     -fx-background-color: rgba(64,64,64,255);
-    -fx-padding: 8px;
+
 }
 
 #expansionName {
@@ -43,9 +38,6 @@
 }
 
 #expansionImage {
-    -fx-fit-to-width: 150px;
-    -fx-fit-to-height: 200px;
-    -fx-alignment: center;
 }
 
 #expansionInformation {
@@ -55,21 +47,26 @@
 
 #expansionScrollPane {
     -fx-background-color: transparent;
-    -fx-max-height: 250px;
 }
 
 #listPoiMaps {
     -fx-orientation: horizontal;
     -fx-background-color: rgba(0, 0, 0, 0.5);
+    -fx-padding: 4px 0px 4px 0px;
+}
+
+#listPoiMaps .scroll-bar:vertical {
+    -fx-scale-x: 0;
+}
+
+#listPoiCamera .scroll-bar:vertical {
+    -fx-scale-x: 0;
 }
 
 #listPoiCamera {
     -fx-orientation: horizontal;
     -fx-background-color: rgba(0, 0, 0, 0.5);
-}
-
-#pnFoundation {
-    -fx-background-color: transparent;
+    -fx-padding: 4px 0px 4px 0px;
 }
 
 #listModuleStatus {
@@ -84,21 +81,20 @@
 
 .label {
     -fx-font-size: 20px;
-    -fx-font-family: "Helvetica Neue";
     -fx-text-fill: white;
     -fx-background-color: transparent;
 }
 
 .button {
     -fx-font-size: 20px;
-    -fx-font-family: "Helvetica Neue";
-    -fx-font-weight: bold;
     -fx-text-fill: white;
-    -fx-background-color: black;
+    -fx-background-color: transparent;
+    -fx-border-radius: 0 0 0 0;
+    -fx-background-radius: 0 0 0 0;
 }
 
 .button:hover {
-    -fx-background-color: dimgrey;
+    -fx-background-color: dimgrey !important;
 }
 
 .scroll-pane > .viewport {
@@ -162,12 +158,20 @@
 }
 
 #togglePane {
-    -fx-min-width: 200px;
-    -fx-max-width: 500px;
-    -fx-max-height: 400px;
     -fx-background-color: rgba(0, 0, 0, 0.7);
 }
 
 #togglePane .button {
-    -fx-pref-width: 220px;
+}
+
+.scroll-bar {
+    -fx-background-color: rgba(0, 0, 0, 0);
+    -fx-background-insets: 0, 0, 0;
+    -fx-background-radius: 0em;
+}
+
+.scroll-bar .thumb {
+    -fx-background-color: rgba(0, 0, 0, 0.5);
+    -fx-background-insets: 0, 0, 0;
+    -fx-background-radius: 0em;
 }

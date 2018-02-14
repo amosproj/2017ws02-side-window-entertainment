@@ -19,7 +19,7 @@ public class InformationProviderMock extends AbstractProvider {
     public PointOfInterest setInfoAndUrl(PointOfInterest poi) {
         poi.setInformationAbstract(info);
         poi.setWikiUrl(wikiUrl);
-        DebugLog.log("Provided mock abstract");
+        DebugLog.log("InformationSource","Provided mock abstract");
         return poi;
     }
 }

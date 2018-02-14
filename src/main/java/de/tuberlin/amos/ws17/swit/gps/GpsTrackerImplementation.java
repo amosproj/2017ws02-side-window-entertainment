@@ -1,6 +1,7 @@
 package de.tuberlin.amos.ws17.swit.gps;
 
 import de.tuberlin.amos.ws17.swit.common.DebugLog;
+import de.tuberlin.amos.ws17.swit.common.GpsPosition;
 import de.tuberlin.amos.ws17.swit.common.KinematicProperties;
 
 import java.awt.image.BufferedImage;
@@ -8,22 +9,17 @@ import java.io.*;
 import java.util.LinkedList;
 
 import de.tuberlin.amos.ws17.swit.common.exceptions.GpsModuleNotAvailableException;
-import de.tuberlin.amos.ws17.swit.common.exceptions.HardwareNotAvailableException;
-import de.tuberlin.amos.ws17.swit.common.exceptions.ModuleNotWorkingException;
-import de.tuberlin.amos.ws17.swit.common.exceptions.ServiceNotAvailableException;
-import org.joda.time.DateTime;
+import de.tuberlin.amos.ws17.swit.common.exceptions.InformationNotAvailableException;
 
 
 import javax.imageio.ImageIO;
 
 public class GpsTrackerImplementation implements GpsTracker {
 
-//	private GpsFileReader fileReader;
 	private GpsPortReader portReader;
 
 	// constructor for port mode
 	public GpsTrackerImplementation() {
-		// start the port reader
 		portReader = new GpsPortReader();
 	}
 
@@ -41,32 +37,34 @@ public class GpsTrackerImplementation implements GpsTracker {
 		}
 		return null;
 	}
+
 	// returns an object filled with the current available information.
 	// Latitude and longitude are always updated values, the others may be outdated (but still the most actual)
 	// isUpdated() only is true, if latitude and longitude are new
-	// throws ModuleNotWorkingException, if no new data is available
-	public KinematicProperties fillDumpObject(KinematicProperties kinProp) throws ServiceNotAvailableException{
+	// throws InformationNotAvailableException, if no new data is available
+	public KinematicProperties fillDumpObject(KinematicProperties kinProp) throws InformationNotAvailableException{
 		if (portReader.isUpdated()){
 			portReader.fillKinematicProperties(kinProp);
 			if (kinProp == null){
-				DebugLog.log("No new GPS data available.");
-				throw new ServiceNotAvailableException(); // later: throw noSignalException or something like that
+				DebugLog.log("GPS","No new GPS data available.");
+				throw new InformationNotAvailableException();
 			}
 			return kinProp;
 		}
 		else {
-			DebugLog.log("No new GPS data available.");
-			throw new ServiceNotAvailableException();
+			DebugLog.log("GPS","No new GPS data available.");
+			throw new InformationNotAvailableException();
 		}
 	}
 
+	// starts the module and throws an exception, if no GPS hardware could be found
 	public void startModule() throws GpsModuleNotAvailableException{
 		if (portReader.start() == false){
-			DebugLog.log("No GPS device could be found.");
+			DebugLog.log(DebugLog.SOURCE_GPS,"No GPS device could be found.");
 			throw new GpsModuleNotAvailableException();
 		}
 		else {
-			DebugLog.log("GPS module started.");
+			DebugLog.log(DebugLog.SOURCE_GPS,"GPS module started.");
 		}
 	}
 
@@ -75,17 +73,18 @@ public class GpsTrackerImplementation implements GpsTracker {
 		return true;
 	}
 
-	@Override
+	public GpsPosition getCurrentPosition() {
+		return portReader.getCurrentPosition();
+	}
+
 	public LinkedList<KinematicProperties> getGpsTrack(int count) {
 		return portReader.getGpsTrack(count);
 	}
 
-	@Override
 	public double getDistanceTravelled() {
 		return portReader.getDistanceTravelled();
 	}
 
-	@Override
 	public long getTimePassed() {
 		return portReader.getTimePassed();
 	}

@@ -12,14 +12,11 @@ import com.google.common.collect.ImmutableList;
 import de.tuberlin.amos.ws17.swit.common.ApiConfig;
 import de.tuberlin.amos.ws17.swit.common.DebugLog;
 import de.tuberlin.amos.ws17.swit.common.PointOfInterest;
-import org.apache.jena.base.Sys;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.imageio.ImageIO;
-import javax.swing.*;
 import java.awt.*;
-import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -98,7 +95,7 @@ public class CloudVision implements LandmarkDetector {
                     .map(CloudVision::convertToPOI)
                     .collect(Collectors.toList());
         } catch (IOException e) {
-            DebugLog.log("Could not identify POI on image");
+            DebugLog.log(DebugLog.SOURCE_IMAGEANALYSIS,"Could not identify POI on image");
         }
 
         return Collections.emptyList();
@@ -117,7 +114,7 @@ public class CloudVision implements LandmarkDetector {
     @Nonnull
     private List<LandmarkResult> identifyLandmarks(Image image, int maxResults) throws IOException {
         if (this.vision == null) {
-            DebugLog.log("Cloud Vision service unavailable");
+            DebugLog.log(DebugLog.SOURCE_IMAGEANALYSIS,"Cloud Vision service unavailable");
             return Collections.emptyList();
         }
         // TODO: reduce image size if necessary

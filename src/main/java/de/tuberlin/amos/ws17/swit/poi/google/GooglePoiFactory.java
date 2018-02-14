@@ -14,12 +14,16 @@ class GooglePoiFactory {
 
     private List<String> forbiddenInPlacenames;
 
+    /**
+     * Create a {@link GooglePoiFactory} that creates new Pois after some implemented rules.
+     * @param forbiddenInPlacenames remove all POIs cointaining a String that is being contained here
+     */
     public GooglePoiFactory(List<String> forbiddenInPlacenames) {
         this.forbiddenInPlacenames = forbiddenInPlacenames;
     }
 
     private <T extends Collection<? extends PointOfInterest>> void removeForbiddenInPlacename(T places){
-        if(places!=null) {
+        if(places!=null&&forbiddenInPlacenames!=null) {
             Set<PointOfInterest> poisToRemove = new HashSet<>();
             for (PointOfInterest poi : places) {
                 for (String forbiddenInName : forbiddenInPlacenames) {

@@ -2,13 +2,13 @@ package de.tuberlin.amos.ws17.swit.gps;
 
 import de.tuberlin.amos.ws17.swit.common.DebugLog;
 import de.tuberlin.amos.ws17.swit.common.KinematicProperties;
+import de.tuberlin.amos.ws17.swit.common.GpsPosition;
 
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.LinkedList;
 import java.util.Random;
 
-import de.tuberlin.amos.ws17.swit.common.exceptions.ModuleNotWorkingException;
 import org.joda.time.DateTime;
 
 import javax.imageio.ImageIO;
@@ -29,9 +29,9 @@ public class GpsTrackerMock extends GpsTrackerImplementation {
     }
 
     // returns latest gps position from either the file reader or the port reader
-    public GpsPosition getGpsPosition(){
-        return null;
-    }
+    //public GpsPosition getGpsPosition(){
+    //    return null;
+    //}
 
     public String getModuleName(){ return "GpsModule"; }
 
@@ -46,8 +46,9 @@ public class GpsTrackerMock extends GpsTrackerImplementation {
         }
         return null;
     }
+
     // returns an object filled with the fake values (fot testing without hardware)
-    // for every second new request, a new coordinate is sent
+    // for every new request, a new coordinate is sent
     public KinematicProperties fillDumpObject(KinematicProperties kinProp) {
         DateTime now = new DateTime();
 
@@ -66,9 +67,14 @@ public class GpsTrackerMock extends GpsTrackerImplementation {
         obj.setCourse(course);
         obj.setVelocity(velocity);
 
-        DebugLog.log("current position: (" + latitude + ", " + longitude + ")");
+        DebugLog.log(DebugLog.SOURCE_GPS,"Current position: (" + latitude + ", " + longitude + ")");
         return obj;
 
+    }
+
+    @Override
+    public GpsPosition getCurrentPosition() {
+        return null;
     }
 
     public void startModule() {

@@ -2,7 +2,6 @@ package de.tuberlin.amos.ws17.swit.landscape_tracking;
 
 import de.tuberlin.amos.ws17.swit.image_analysis.ImageUtils;
 import javafx.scene.media.MediaView;
-import org.apache.jena.base.Sys;
 import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameGrabber;
@@ -13,25 +12,38 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+//Diese Klasse stellt auf Basis des LandscapeTracker-Interfaces
+//eine Mock-Klasse zum Testen bzw. Demonstrieren dar.
+//Sie hat Zugriff auf den MediaPlayer auf der Oberfläche (MVVM goodbye!)
+//um beim Aufruf der Methode getImage einen Snapshot des abgespielten Videos
+// als Bild zur Verfügung zu stellen.
+//Dafür muss in der app.properties die Einstellung camera=2 gesetzt sein.
 public class DemoVideoLandscapeTracker implements LandscapeTracker {
-
+    private static final Logger LOGGER = Logger.getLogger(DemoVideoLandscapeTracker.class.getName());
     private MediaView mediaView;
     private Java2DFrameConverter converter = new Java2DFrameConverter();
-    private FFmpegFrameGrabber   grabber;
+    private FFmpegFrameGrabber grabber;
 
     private BufferedImage getFrame(double second) throws FrameGrabber.Exception {
-//        System.out.println("Grabbing image at " + second + "s");
-
-        double frameRate = grabber.getFrameRate();
-        int frameNumber = (int) (frameRate * second);
-        grabber.setFrameNumber(frameNumber);
-        Frame frame = grabber.grab();
-        BufferedImage image = converter.convert(frame);
-        if (image == null) {
-            System.err.println("Failed to grab image at " + second + "s");
+        synchronized (grabber) {
+            double frameRate = grabber.getFrameRate();
+            double lengthInSeconds = grabber.getLengthInTime() / 1000000f;
+            if (second >= lengthInSeconds) {
+                LOGGER.log(Level.INFO, "Frame outside of video");
+                return null;
+            }
+            int frameNumber = (int) (frameRate * second);
+            grabber.setFrameNumber(frameNumber);
+            Frame frame = grabber.grab();
+            BufferedImage image = converter.convert(frame);
+            if (image == null) {
+                LOGGER.log(Level.WARNING, "Failed to grab image at " + second + "s");
+            }
+            return image;
         }
-        return image;
     }
 
     public DemoVideoLandscapeTracker(MediaView mediaView, String videoName) {

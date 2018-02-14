@@ -1,0 +1,72 @@
+# language
+parameters: {de}
+
+# gpsmodule
+parameters: {0, 1}
+0: mock module
+1: real module
+
+# usercamera (camera tracking the user)
+parameters: {0, 1}
+0: mock module
+1: real module
+
+# camera (camera recording )
+parameters: {0, 1, 2}
+0: mock module (images)
+1: real module
+2: mock module (video)
+
+# information_source (information extraction from POI names)
+parameters: {0, 1}
+0: mock module
+1: real module
+
+# image_analysis (recognition of POIs in images using Google)
+parameters: {0, 1}
+0: mock module
+1: real module
+
+# tensorflow (additional offline POI recognition in images)
+parameters: {0, 1}
+0: mock module
+1: real module
+
+# poi_analysis (extraction of POIs from GPS coordinates)
+parameters: {0, 1}
+0: mock module
+1: real module
+
+# debuglog
+parameters: {0, 1}
+0: hide
+1: show
+
+# calculatePoisInSight (only POIs sideways of the vehicle)
+parameters: {0, 1}
+0: disabled
+1: enabled
+
+# load_images (load images for POI preview from the web)
+parameters: {0, 1}
+0: disabled (saves google requests)
+1: enabled
+
+# places_to_ignore
+parameters: string list
+If a POI contains one of the strings, it is not displayed on the screen
+
+# mapsPoisLoadDistance
+parameters: [0, infinite[
+radius in which POIs are loaded around the vehicle (unit? maybe meters?)
+
+# fullscreen
+parameters: {0, 1, 2}
+0: window mode
+1: maximized window
+2: fullscreen
+
+# animations
+parameters: {0, 1}
+0: no animations
+1: enabled animations
