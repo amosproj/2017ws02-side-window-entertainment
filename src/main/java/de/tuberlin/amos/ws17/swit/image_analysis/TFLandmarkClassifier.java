@@ -79,6 +79,7 @@ public class TFLandmarkClassifier implements LandmarkDetector {
         if (name != null) {
             PointOfInterest poi = new PointOfInterest();
             poi.setId(UUID.randomUUID().toString());
+            poi.setLanguage("de");
             poi.setName(name);
             return Collections.singletonList(poi);
         }

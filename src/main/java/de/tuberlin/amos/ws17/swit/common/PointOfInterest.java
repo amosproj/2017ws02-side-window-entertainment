@@ -12,6 +12,7 @@ public class PointOfInterest {
     private GpsPosition gpsPosition;
     private BufferedImage image;
     private String informationAbstract;
+    private String language = "en";
 
     public PointOfInterest() {
         this("", "", new GpsPosition(), null, "");
@@ -75,6 +76,14 @@ public class PointOfInterest {
 
     public void setInformationAbstract(String informationAbstract) {
         this.informationAbstract = informationAbstract;
+    }
+
+    public String getLanguage() {
+        return language;
+    }
+
+    public void setLanguage(String language) {
+        this.language = language;
     }
 
     @Override
