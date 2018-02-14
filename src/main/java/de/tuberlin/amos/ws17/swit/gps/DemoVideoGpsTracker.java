@@ -20,6 +20,10 @@ public class DemoVideoGpsTracker implements GpsTracker {
 
     public DemoVideoGpsTracker() throws IOException {
         // read json
+        fillStack();
+    }
+
+    private void fillStack() throws IOException {
         InputStream is = DemoVideoGpsTracker.class.getClassLoader().getResourceAsStream("demo_video_gps.json");
         String jsonTxt = IOUtils.toString(is);
 
@@ -44,15 +48,17 @@ public class DemoVideoGpsTracker implements GpsTracker {
 
     @Override
     public KinematicProperties fillDumpObject(KinematicProperties kinProps) {
-        if (!gpsStack.isEmpty()) {
-            kinProps = gpsStack.pop();
-            history.add(kinProps);
-            currentPosition = new GpsPosition(kinProps.getLongitude(), kinProps.getLatitude());
-            return kinProps;
-        } else {
-            System.out.println("gpsStack empty");
+        if (gpsStack.isEmpty()) {
+            try {
+                fillStack();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
-        return null;
+        kinProps = gpsStack.pop();
+        history.add(kinProps);
+        currentPosition = new GpsPosition(kinProps.getLongitude(), kinProps.getLatitude());
+        return kinProps;
     }
 
     @Override
