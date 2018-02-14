@@ -90,11 +90,11 @@ public class LandscapeTrackerImplementation implements LandscapeTracker {
             logitechC920webcam.setCustomViewSizes(customViewSizes);
             logitechC920webcam.setViewSize(fullHD);
             if (!logitechC920webcam.open()) {
-                DebugLog.log(DebugLog.SOURCE_LANDSCAPETRACKING,"tracking started");
+                DebugLog.log(DebugLog.SOURCE_LANDSCAPETRACKING,"tracking not started");
                 throw new ModuleNotWorkingException("Logitech Kamera konnte nicht gestartet werden.");
             }
             else {
-                DebugLog.log(DebugLog.SOURCE_LANDSCAPETRACKING,"tracking not started");
+                DebugLog.log(DebugLog.SOURCE_LANDSCAPETRACKING,"tracking started");
             }
         }
     }

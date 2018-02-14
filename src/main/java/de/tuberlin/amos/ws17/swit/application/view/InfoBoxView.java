@@ -38,7 +38,16 @@ public class InfoBoxView extends BorderPane {
         setupViews();
     }
 
+    private void initFonts() {
+        Screen screen = Screen.getPrimary();
+        Rectangle2D screenVisualBounds = screen.getVisualBounds();
+
+        fontTitle = new Font(screenVisualBounds.getHeight() * 0.03);
+        fontText = new Font(screenVisualBounds.getHeight() * 0.015);
+    }
+
     private void setupViews() {
+        initFonts();
         title = new Text();
         title.setId("expansionName");
 
@@ -52,7 +61,7 @@ public class InfoBoxView extends BorderPane {
 
         Text text = new Text();
         text.setText("X");
-        text.setFont(new Font(30));
+        text.setFont(fontTitle);
         text.setStyle("" +
                 "-fx-fill: white;" +
                 "-fx-effect: dropshadow( gaussian , black , 8, 0.90 , 0 , 0 );");
@@ -77,7 +86,7 @@ public class InfoBoxView extends BorderPane {
         image.setId("expansionImage");
         BorderPane.setAlignment(image, Pos.CENTER);
         image.setPreserveRatio(true);
-        image.setFitHeight(150);
+
         image.minHeight(0);
         image.minWidth(0);
 
@@ -89,7 +98,8 @@ public class InfoBoxView extends BorderPane {
         information.setFont(fontText);
         //information.setPrefHeight(300);
         information.setStyle("-fx-fill: white;" +
-                "-fx-effect: dropshadow( gaussian , black , 4, 0.90 , 0 , 0 );");
+                "-fx-effect: dropshadow( gaussian , black , 4, 0.90 , 0 , 0 );" +
+                "-fx-font-size: " + fontText.getSize() + ";");
 
         contentPane = new BorderPane();
         contentPane.setId("expansionContentPane");
@@ -114,6 +124,7 @@ public class InfoBoxView extends BorderPane {
         Screen screen = Screen.getPrimary();
         Rectangle2D screenVisualBounds = screen.getVisualBounds();
         setMaxWidth(screenVisualBounds.getWidth() * 0.3);
+        image.setFitWidth(screenVisualBounds.getWidth() * 0.3 - 150);
         setMaxHeight(screenVisualBounds.getHeight() * 0.6);
         scrollPane.setMaxHeight(screenVisualBounds.getHeight() * 0.3);
     }
