@@ -145,11 +145,13 @@ public class AbstractProvider implements InformationProvider, Module{
         searchTerm=searchTerm.replaceAll(" ", "_");
         try {
             String json = readHTTP("https://"+ language + ".wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro=&explaintext=&titles=" + searchTerm);
+            DebugLog.log("InformationSource", "hab nen json " + json.length());
+            System.out.println(json);
             int idStartIndex = json.indexOf("extract\":\"") + 10;
             result = json.substring(idStartIndex);
             int idEndIndex = result.indexOf("\"}");
             result = result.substring(0, idEndIndex);
-
+            DebugLog.log("InformationSource", "hab nen abstract " + result.length());
         } catch (Exception e) {
             e.printStackTrace();
         }

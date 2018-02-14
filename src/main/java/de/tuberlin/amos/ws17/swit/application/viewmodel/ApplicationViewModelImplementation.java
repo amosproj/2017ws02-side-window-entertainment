@@ -137,28 +137,28 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
 
         initInfoBoxMovement();
 
-        debugLayerVisible.addListener(event -> {
-            if (properties.useAnimations) {
-                Platform.runLater(() -> {
-                    if (debugLayerVisible.get()) {
-                        view.showDebugLayer();
-                    } else {
-                        view.hideDebugLayer();
-                    }
-                });
-            }
-        });
-        applicationLayerVisible.addListener(event -> {
-            if (properties.useAnimations) {
-                Platform.runLater(() -> {
-                    if (applicationLayerVisible.get()) {
-                        view.showApplicationLayer();
-                    } else {
-                        view.hideApplicationLayer();
-                    }
-                });
-            }
-        });
+//        debugLayerVisible.addListener(event -> {
+//            if (properties.useAnimations) {
+//                Platform.runLater(() -> {
+//                    if (debugLayerVisible.get()) {
+//                        view.showDebugLayer();
+//                    } else {
+//                        view.hideDebugLayer();
+//                    }
+//                });
+//            }
+//        });
+//        applicationLayerVisible.addListener(event -> {
+//            if (properties.useAnimations) {
+//                Platform.runLater(() -> {
+//                    if (applicationLayerVisible.get()) {
+//                        view.showApplicationLayer();
+//                    } else {
+//                        view.hideApplicationLayer();
+//                    }
+//                });
+//            }
+//        });
     }
 
     private void initTFClassifier() {
@@ -440,7 +440,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                         }
                     }
                     if (userExpressions != null && userExpressions.isMouthOpen() && mouthOpenDiff >= 5) {
-                        applicationLayerVisible.set(!applicationLayerVisible.get());
+                        //applicationLayerVisible.set(!applicationLayerVisible.get());
                         lastMouthOpen = currentTime;
                     }
                     if (userExpressions != null && userExpressions.isSmile() && smileDiff >= 5) {
@@ -448,7 +448,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                         lastSmile = currentTime;
                     }
                     if (userExpressions != null && userExpressions.isTongueOut() && tongueOutDiff >= 5) {
-                        debugLayerVisible.set(!debugLayerVisible.get());
+                        //debugLayerVisible.set(!debugLayerVisible.get());
                         lastTongueOut = currentTime;
                     }
                 } else {
@@ -466,13 +466,13 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                     }
                 }
                 try {
-                    Thread.sleep(125);
+                    Thread.sleep(50);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
 
                 updateBackgroundImage();
-                updateInfoBox();
+                //updateInfoBox();
                 //iterations++;
             }
         });
@@ -790,10 +790,10 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         PoiViewModel item = convertPoi(poi);
         if (!propertyPoiCamera.contains(poi)) {
             pointsOfInterest.add(poi);
-            UserExpressions userExpressions = userTracker.getUserExpressions();
+            //UserExpressions userExpressions = userTracker.getUserExpressions();
             Platform.runLater(() -> {
                 propertyPoiCamera.add(0, item);
-                if (userExpressions != null && userExpressions.isMouthOpen()) {
+               // if (userExpressions != null) { // && userExpressions.isKiss()) {
                     // only show if info box is not filled
                     if (expandedPOI == null || StringUtils.isEmpty(expandedPOI.getName())) {
                         setExpandedPoi(item);
@@ -802,7 +802,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                         hideInfoBoxScheduler = Executors.newSingleThreadScheduledExecutor();
                         hideInfoBoxScheduler.scheduleAtFixedRate(this::minimizePoi, HIDE_INFO_BOX_DELAY, 1000, TimeUnit.MILLISECONDS);
                     }
-                }
+               // }
             });
 
         }
