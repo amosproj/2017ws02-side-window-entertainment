@@ -19,6 +19,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.IntStream;
 
 public class TFLandmarkClassifier implements LandmarkDetector {
@@ -27,7 +28,7 @@ public class TFLandmarkClassifier implements LandmarkDetector {
     private static final float             predictionThreshold = 0.5f;
     private              Graph             graph               = new Graph();
     private              Session           session             = new Session(graph);
-    private final        List<String>      labels              = loadLabels();
+    public final        List<String>      labels              = loadLabels();
     private final        List<GpsPosition> labelLocations      = loadLabelLocations();
 
     public TFLandmarkClassifier() throws IOException {
@@ -77,6 +78,7 @@ public class TFLandmarkClassifier implements LandmarkDetector {
         String name = labelImage(data, gpsPosition);
         if (name != null) {
             PointOfInterest poi = new PointOfInterest();
+            poi.setId(UUID.randomUUID().toString());
             poi.setName(name);
             return Collections.singletonList(poi);
         }
