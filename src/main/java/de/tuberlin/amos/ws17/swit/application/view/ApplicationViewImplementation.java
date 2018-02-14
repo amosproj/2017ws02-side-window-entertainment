@@ -316,29 +316,31 @@ public class ApplicationViewImplementation extends Application implements Applic
                 stackPaneRoot.backgroundProperty().bindBidirectional(viewModel.getBackgroundProperty());
             }
 
-            infoboxRotateTransition = new RotateTransition(Duration.seconds(0.75), infoBoxView);
-            infoboxRotateTransition.setOnFinished(new EventHandler<ActionEvent>() {
-                public void handle(ActionEvent AE) {
-                    infoboxRotateTransition.setToAngle(viewModel.getInfoBoxRotation().doubleValue());
-                    infoboxRotateTransition.play();
-                }
-            });
+            if (AppProperties.getInstance().useAnimations) {
+                infoboxRotateTransition = new RotateTransition(Duration.seconds(0.75), infoBoxView);
+                infoboxRotateTransition.setOnFinished(new EventHandler<ActionEvent>() {
+                    public void handle(ActionEvent AE) {
+                        infoboxRotateTransition.setToAngle(viewModel.getInfoBoxRotation().doubleValue());
+                        infoboxRotateTransition.play();
+                    }
+                });
 
-            infoboxRotateTransition.setToAngle(viewModel.getInfoBoxRotation().doubleValue());
-            infoboxRotateTransition.play();
+                infoboxRotateTransition.setToAngle(viewModel.getInfoBoxRotation().doubleValue());
+                infoboxRotateTransition.play();
 
-            infoboxTranslateTransition = new TranslateTransition(Duration.seconds(2), infoBoxView);
-            infoboxTranslateTransition.setOnFinished(new EventHandler<ActionEvent>() {
-                public void handle(ActionEvent AE) {
-                    infoboxTranslateTransition.setToX(viewModel.getInfoBoxTranslationX().doubleValue());
-                    infoboxTranslateTransition.setToY(viewModel.getInfoBoxTranslationY().doubleValue());
-                    infoboxTranslateTransition.play();
-                }
-            });
+                infoboxTranslateTransition = new TranslateTransition(Duration.seconds(2), infoBoxView);
+                infoboxTranslateTransition.setOnFinished(new EventHandler<ActionEvent>() {
+                    public void handle(ActionEvent AE) {
+                        infoboxTranslateTransition.setToX(viewModel.getInfoBoxTranslationX().doubleValue());
+                        infoboxTranslateTransition.setToY(viewModel.getInfoBoxTranslationY().doubleValue());
+                        infoboxTranslateTransition.play();
+                    }
+                });
 
-            infoboxTranslateTransition.setToX(viewModel.getInfoBoxTranslationX().doubleValue());
-            infoboxTranslateTransition.setToY(viewModel.getInfoBoxTranslationY().doubleValue());
-            infoboxTranslateTransition.play();
+                infoboxTranslateTransition.setToX(viewModel.getInfoBoxTranslationX().doubleValue());
+                infoboxTranslateTransition.setToY(viewModel.getInfoBoxTranslationY().doubleValue());
+                infoboxTranslateTransition.play();
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

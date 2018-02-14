@@ -128,7 +128,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
             initDebugLog();
         }
 
-        updateBackgroundImage();
+        //updateBackgroundImage();
 
         updateThread.start();
         if (properties.useTensorflow) {
@@ -466,7 +466,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                     }
                 }
                 try {
-                    Thread.sleep(50);
+                    Thread.sleep(100);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -718,22 +718,24 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         if (AppProperties.getInstance().useDemoVideo) {
             return;
         }
-        Platform.runLater(() -> {
-            try {
-                if (landscapeTracker != null) {
-                    cameraImage = SwingFXUtils.toFXImage(landscapeTracker.getImage(), null);
-                    backgroundImage = new BackgroundImage(cameraImage,
-                            BackgroundRepeat.NO_REPEAT,
-                            BackgroundRepeat.NO_REPEAT,
-                            BackgroundPosition.CENTER,
-                            new BackgroundSize(100, 100, true, true, false, true));
-                    background = new Background(backgroundImage);
+
+        try {
+            if (landscapeTracker != null) {
+                cameraImage = SwingFXUtils.toFXImage(landscapeTracker.getImage(), null);
+                backgroundImage = new BackgroundImage(cameraImage,
+                        BackgroundRepeat.NO_REPEAT,
+                        BackgroundRepeat.NO_REPEAT,
+                        BackgroundPosition.CENTER,
+                        new BackgroundSize(100, 100, true, true, false, true));
+                background = new Background(backgroundImage);
+                Platform.runLater(() -> {
                     backgroundProperty.setValue(background);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
+                });
             }
-        });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
     //private double infoBoxMoveWidth = 300;

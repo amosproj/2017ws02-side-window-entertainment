@@ -61,6 +61,7 @@ namespace DotNetTracking
                     {
                         ResetUserTrackData();
                         Console.WriteLine("SenseManager.AcquireFrame(true) error: " + acquireFrameStatus.ToString());
+                        Thread.Sleep(250);
                         continue;
                     }
 
@@ -70,6 +71,7 @@ namespace DotNetTracking
                     {
                         ResetUserTrackData();
                         SdkCommonHelper.SenseManager.ReleaseFrame();
+                        Thread.Sleep(250);
                         continue;
                     }
 
@@ -88,6 +90,12 @@ namespace DotNetTracking
 
         private void TrackUserPosition(PXCMFaceData.Face faceDataFace)
         {
+            if (faceDataFace == null)
+            {
+                ResetUserTrackData();
+                return;
+            } 
+
             PXCMFaceData.PoseData poseData = faceDataFace.QueryPose();
             PXCMFaceData.HeadPosition headPosition;
             PXCMFaceData.PoseEulerAngles poseAngles;
@@ -113,6 +121,12 @@ namespace DotNetTracking
 
         private void TrackUserExpressions(PXCMFaceData.Face faceDataFace)
         {
+            if (faceDataFace == null)
+            {
+                ResetUserTrackData();
+                return;
+            }
+
             PXCMFaceData.ExpressionsData expressionsData = faceDataFace.QueryExpressions();
             PXCMFaceData.ExpressionsData.FaceExpressionResult faceExpressionKiss;
             PXCMFaceData.ExpressionsData.FaceExpressionResult faceExpressionTongueOut;
