@@ -77,6 +77,9 @@ public class ApplicationViewImplementation extends Application implements Applic
 
     private static ApplicationViewModel viewModel;
 
+    /**
+     * initializes the UI
+     */
     public void init() {
 
         initFonts();
@@ -88,6 +91,9 @@ public class ApplicationViewImplementation extends Application implements Applic
         initCellFactories();
     }
 
+    /**
+     * initalizes font sizes and values to scale items to the monitors resolution
+     */
     private void initFonts() {
         Screen screen = Screen.getPrimary();
         Rectangle2D screenVisualBounds = screen.getVisualBounds();
@@ -103,6 +109,9 @@ public class ApplicationViewImplementation extends Application implements Applic
         fontText = new Font(fontSizeText);
     }
 
+    /**
+     * initializes base root element which is a stack pane that layers media, application and debug over each other
+     */
     private void initRootStackPane() {
         stackPaneRoot = new StackPane();
 
@@ -119,6 +128,9 @@ public class ApplicationViewImplementation extends Application implements Applic
         stackPaneRoot.getChildren().add(infoBoxLayer);
     }
 
+    /**
+     * initalizes media layer (first (lowest) layer)
+     */
     private void initMediaLayer() {
         try {
             mediaPlayer = new MediaPlayer(ImageUtils.getTestVideo(ApplicationViewModelImplementation.videoFileName));
@@ -135,6 +147,9 @@ public class ApplicationViewImplementation extends Application implements Applic
         }
     }
 
+    /**
+     * initalizes application layer (second layer)
+     */
     private void initApplicationLayer() {
         applicationLayer = new GridPane();
         applicationLayer.getRowConstraints().add(new RowConstraints());
@@ -175,16 +190,25 @@ public class ApplicationViewImplementation extends Application implements Applic
         applicationLayer.add(statusPane, 0, 2);
     }
 
+    /**
+     * initalizes the list at the top for camera POIs
+     */
     private void initListPoiCamera() {
         listPoiCamera = new ListView<>();
         listPoiCamera.setId("listPoiCamera");
     }
 
+    /**
+     * initalizes the list at the bottom for maps POIs
+     */
     private void initListPoiMaps() {
         listPoiMaps = new ListView<>();
         listPoiMaps.setId("listPoiMaps");
     }
 
+    /**
+     * initalizes the status pane on the left side which shows the status of expressions and of the modules
+     */
     private void initStatusPane() {
         listModuleStatus = new ListView<>();
         listModuleStatus.setId("listModuleStatus");
@@ -198,6 +222,9 @@ public class ApplicationViewImplementation extends Application implements Applic
         statusPane.getChildren().add(listExpressionStatus);
     }
 
+    /**
+     * initalizes the infobox which shows the information to a POI in the middle of the screen (infobox is in the highest layer (fourth))
+     */
     private void initInfoboxPane() {
         infoBoxView = new InfoBoxView();
         infoBoxLayer = new BorderPane();
@@ -205,6 +232,9 @@ public class ApplicationViewImplementation extends Application implements Applic
         infoBoxLayer.setPickOnBounds(false);
     }
 
+    /**
+     * initalizes the debug layer with the debug window on the right side
+     */
     private void initDebugLayer() {
         debugLayer = new GridPane();
         debugLayer.getRowConstraints().addAll(applicationLayer.getRowConstraints());
@@ -217,13 +247,18 @@ public class ApplicationViewImplementation extends Application implements Applic
         debugLayer.add(labelTensorFlowDebug, 4, 3);
     }
 
-
+    /**
+     * initalizes the tensor flow box in the right bottom corner
+     */
     private void initDebugTensorFlow() {
         labelTensorFlowDebug = new Label();
         labelTensorFlowDebug.setId("textTFDebug");
         labelTensorFlowDebug.setVisible(false);
     }
 
+    /**
+     * starting method forthe UI
+     */
     @Override
     public void start(Stage stage) {
         stage.setTitle("Side Window Infotainment");
@@ -242,6 +277,9 @@ public class ApplicationViewImplementation extends Application implements Applic
         });
     }
 
+    /**
+     * if fullscreen or maximized properties are set, they are being applied here
+     */
     private void initFullscreenMode(Stage stage) {
         if (AppProperties.getInstance().useFullscreen) {
             stage.setMaximized(true);
@@ -250,21 +288,33 @@ public class ApplicationViewImplementation extends Application implements Applic
         }
     }
 
+    /**
+     * switches the tensorflow window visibility on/off
+     */
     @Override
     public void toggleTensorFlowDebugWindow() {
         labelTensorFlowDebug.setVisible(!labelTensorFlowDebug.isVisible());
     }
 
+    /**
+     * sets the visibility of the debuglog
+     */
     @Override
     public void showDebugLog(boolean show) {
         debugLogView.setVisible(show);
     }
 
+    /**
+     * toggles the visibility of the lists at the top and at the bottom
+     */
     @Override
     public void toggleLists() {
         showPoiLists(!listPoiCamera.isVisible());
     }
 
+    /**
+     * shows the lists at the top and bottom with an animation
+     */
     private void showPoiLists(boolean show) {
         if (listPoiCamera.isVisible() == show) {
             return;
@@ -279,6 +329,9 @@ public class ApplicationViewImplementation extends Application implements Applic
         }
     }
 
+    /**
+     * toggles the visibility of the debuglog
+     */
     @Override
     public void toggleDebugLog() {
         showDebugLog(!debugLogView.isVisible());
@@ -287,6 +340,9 @@ public class ApplicationViewImplementation extends Application implements Applic
     private RotateTransition    infoboxRotateTransition    = null;
     private TranslateTransition infoboxTranslateTransition = null;
 
+    /**
+     * initalizes all bindings to the properties in the viewmodel
+     */
     private void initBindings() {
         ImageView cameraImage = new ImageView();
         cameraImage.imageProperty().bindBidirectional(viewModel.propertyCameraImageProperty());
@@ -347,7 +403,11 @@ public class ApplicationViewImplementation extends Application implements Applic
 
     }
 
+    /**
+     * initalizes cellfactories for all lists in the UI
+     */
     private void initCellFactories() {
+        //cell factory for the lists at the top and at the bottom
         Callback<ListView<PoiViewModel>, ListCell<PoiViewModel>> callback = new Callback<ListView<PoiViewModel>, ListCell<PoiViewModel>>() {
             @Override
             public ListCell<PoiViewModel> call(ListView<PoiViewModel> param) {
@@ -404,6 +464,7 @@ public class ApplicationViewImplementation extends Application implements Applic
         Callback<ListView<String>, ListCell<String>> logCallBack = param -> new LogTextCell();
         debugLogView.getListView().setCellFactory(logCallBack);
 
+        //cellfactory for the module status list on the outer left
         listModuleStatus.setCellFactory(new Callback<ListView<ModuleStatusViewModel>, ListCell<ModuleStatusViewModel>>() {
             @Override
             public ListCell<ModuleStatusViewModel> call(ListView<ModuleStatusViewModel> param) {
@@ -435,6 +496,7 @@ public class ApplicationViewImplementation extends Application implements Applic
             }
         });
 
+        //cellfactory for the list on the inner left
         listExpressionStatus.setCellFactory(new Callback<ListView<UserExpressionViewModel>, ListCell<UserExpressionViewModel>>() {
             @Override
             public ListCell<UserExpressionViewModel> call(ListView<UserExpressionViewModel> param) {
@@ -467,6 +529,9 @@ public class ApplicationViewImplementation extends Application implements Applic
         });
     }
 
+    /**
+     * creates the styles for the red cross and the green checkmarks for the status lists
+     */
     private void statusIcon(Label lbl, boolean status) {
         if (status) {
             String text = new String(Character.toChars(10003));
@@ -481,6 +546,9 @@ public class ApplicationViewImplementation extends Application implements Applic
         }
     }
 
+    /**
+     * creates a timeout indicator on the infobox
+     */
     @Override
     public void showInfoBoxHideIndicator(int duration) {
         infoBoxView.getIndicator().setVisible(true);
@@ -499,6 +567,9 @@ public class ApplicationViewImplementation extends Application implements Applic
         }).start();
     }
 
+    /**
+     * shows or hides the infobox in the middle of the screen with an animation
+     */
     @Override
     public void showExpandedPoi(boolean show) {
         if (show) {
@@ -513,6 +584,9 @@ public class ApplicationViewImplementation extends Application implements Applic
         }
     }
 
+    /**
+     * stops the program
+     */
     @Override
     public void stop() {
         viewModel.setRunning(false);
@@ -527,6 +601,9 @@ public class ApplicationViewImplementation extends Application implements Applic
         return mediaLayer;
     }
 
+    /**
+     * class for an entry in the debuglog
+     */
     static class LogTextCell extends ListCell<String> {
         @Override
         public void updateItem(String item, boolean empty) {

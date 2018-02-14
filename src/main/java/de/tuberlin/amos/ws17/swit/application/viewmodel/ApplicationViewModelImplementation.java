@@ -114,6 +114,9 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     private ScheduledExecutorService hideInfoBoxScheduler = Executors.newSingleThreadScheduledExecutor();
     private AppProperties            properties           = AppProperties.getInstance();
 
+    /**
+     * constructor that calls all initalizing methods
+     */
     public ApplicationViewModelImplementation(ApplicationViewImplementation view) {
         this.view = view;
         initObjects();
@@ -160,6 +163,9 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         }
     }
 
+    /**
+     * initalizes tensorflow
+     */
     private void initTFClassifier() {
         view.toggleTensorFlowDebugWindow();
         int intervalInMillis = 5000;
@@ -179,6 +185,9 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         }, 1000, intervalInMillis, TimeUnit.MILLISECONDS);
     }
 
+    /**
+     * initalizes various properties
+     */
     private void initObjects() {
         listModuleStatus.set(FXCollections.observableList(new ArrayList<>()));
         listExpressionStatus.set(FXCollections.observableList(new ArrayList<>()));
@@ -197,6 +206,9 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         debugEntries.set(DebugLog.getDebugLog());
     }
 
+    /**
+     * if the app.property for the debuglog is 1 the debuglog is initialized here
+     */
     private void initDebugLog() {
         view.showDebugLog(true);
         System.out.println("loading DebugLog...");
@@ -215,6 +227,11 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
 
     }
 
+    /**
+     * initializes all necessary modules, this can be controlle in the app.properties by setting them to 1 for activate or 0 for deactivate
+     * if a module is set to 1, it gets initalized and might require additional hardware
+     * if a module is set to 0, a mock class is instead initialized that sends test data
+     */
     private void initModules() {
         String currentModule;
         //GPS
@@ -400,6 +417,9 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         }
     }
 
+    /**
+     * this is the ain thread/heartbeat of the system
+     */
     private void initUpdateThread() {
         long startTime = new Date().getTime();
         updateThread = new Thread(() -> {
@@ -419,6 +439,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 long tongueOutDiff = (currentTime - lastTongueOut) / 1000;
                 UserExpressions userExpressions;
                 if (userTracker.isUserTracked()) {
+                    //Expressions get updated and processed
                     setExpressionStatus(ExpressionType.ISRACKED, true);
                     userExpressions = userTracker.getUserExpressions();
                     if (userExpressions != null) {
@@ -454,6 +475,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                     //applicationLayerVisible.set(false);
                     setExpressionStatus(ExpressionType.ISRACKED, false);
                 }
+                //if 5 seconds have passed, the mapsthread gets called, assuming it has already finished running
                 if (mapsTimeDiff >= 5) {
                     lastMapsExecution = currentTime;
                     if (mapsThread.getState() == Thread.State.NEW) {
@@ -477,6 +499,9 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         updateThread.setDaemon(true);
     }
 
+    /**
+     * keypressed processing
+     */
     @Override
     public void onKeyPressed(KeyCode code) {
         switch (code) {
@@ -497,11 +522,18 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         }
     }
 
+    /**
+     * if the infobox is automatically shown and the scrollbar is used, the timeout is cancelled
+     */
     @Override
     public void onInfoTextScrolled() {
         hideInfoBoxScheduler.shutdown();
     }
 
+    /**
+     * in the mapsthread the POIs for the bottom list get loaded
+     * GPS -> POI Analyzer -> information source -> added to list
+     */
     private void initMapsThread() {
         mapsThread = new Thread(() -> {
             if (gpsTracker == null || poiService == null || abstractProvider == null) {
@@ -596,6 +628,9 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         mapsThread.setDaemon(true);
     }
 
+    /**
+     * get an abstract from the abstractProvider class
+     */
     private void getAbstract(List<PointOfInterest> pois) {
         try {
             for (PointOfInterest poi : pois) {
@@ -607,6 +642,9 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         }
     }
 
+    /**
+     * get an image from the webcam for photographing the outside
+     */
     private BufferedImage getLandscapeTrackerImage() {
         BufferedImage image = null;
         try {
@@ -619,6 +657,9 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         return image;
     }
 
+    /**
+     * get image -> analyze it with tensorflow or cloudvision -> getabstract -> add to list at the top
+     */
     private void analyzeImage() {
         BufferedImage image = getLandscapeTrackerImage();
         if (image == null) {
@@ -654,6 +695,9 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         }
     }
 
+    /**
+     * camerathread to get POIs out of camera images from the webcam
+     */
     private void initCameraThread() {
         cameraThread = new Thread(() -> {
 
@@ -669,6 +713,9 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         cameraThread.setDaemon(true);
     }
 
+    /**
+     * method to prevent a POI from showing twice in one list
+     */
     private void clearDuplicates(Collection<PointOfInterest> pois, String propertyList) {
         ArrayList<PointOfInterest> list = new ArrayList<>();
         for (PointOfInterest poi : pois) {
@@ -691,7 +738,9 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
 
     }
 
-
+    /**
+     * updates the module status
+     */
     private void setModuleStatus(ModuleErrors type, boolean working) {
         for (ModuleStatusViewModel status : listModuleStatus) {
             if (status.getErrorType() == type) {
@@ -702,6 +751,9 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         listModuleStatus.add(new ModuleStatusViewModel(type, working));
     }
 
+    /**
+     * updates the expression status
+     */
     private void setExpressionStatus(ExpressionType type, boolean active) {
         for (UserExpressionViewModel expression : listExpressionStatus) {
             if (expression.getType() == type) {
@@ -712,6 +764,9 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         listExpressionStatus.add(new UserExpressionViewModel(type, active));
     }
 
+    /**
+     * updates the background image with an image from the webcam
+     */
     private void updateBackgroundImage() {
         if (AppProperties.getInstance().useDemoVideo) {
             return;
@@ -746,7 +801,9 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     private double userPositionMinY = 0;
     private double userPositionMaxY = 0;
 
-
+    /**
+     * set values to be able to move the infobox with the movement of the users head
+     */
     private void initInfoBoxMovement() {
         Screen screen = Screen.getPrimary();
         Rectangle2D screenVisualBounds = screen.getVisualBounds();
@@ -757,6 +814,9 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         infoboxMoveHeightFactor = infoboxMoveMaxY / 75;
     }
 
+    /**
+     * updates the position of the infobox based on the position of the users head
+     */
     private void updateInfoBox() {
         if (userTracker.isUserTracked()) {
             UserPosition userPosition = userTracker.getUserPosition();
@@ -786,6 +846,10 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         }
     }
 
+
+    /**
+     * adds a camera POI to the list at the top
+     */
     private void addCameraPoi(PointOfInterest poi) {
         PoiViewModel item = convertPoi(poi);
         if (!propertyPoiCamera.contains(poi)) {
@@ -836,6 +900,9 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         return false;
     }
 
+    /**
+     * converts a POI from the common (model) package to the POI from the viewmodel
+     */
     private PoiViewModel convertPoi(PointOfInterest poi) {
         PoiViewModel result = new PoiViewModel();
         if (poi.getId() != null) {
@@ -853,6 +920,9 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         return result;
     }
 
+    /**
+     * expands the POI that has the given id in the infobox in the middle
+     */
     @Override
     public boolean expandPoi(String id) {
         for (PoiViewModel item : propertyPoiCamera) {
@@ -870,12 +940,18 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
         return false;
     }
 
+    /**
+     * hides the infobox in the middle
+     */
     private void minimizePoi() {
         view.showExpandedPoi(false);
         hideInfoBoxScheduler.shutdown();
         expandedPOI.setName("");
     }
 
+    /**
+     * sets the POI that is being shown in the middle
+     */
     private void setExpandedPoi(PoiViewModel item) {
         expandedPOI.setId(item.getId());
         expandedPOI.setName(item.getName());
