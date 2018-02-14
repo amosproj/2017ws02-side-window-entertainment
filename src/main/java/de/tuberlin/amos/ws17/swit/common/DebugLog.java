@@ -75,6 +75,9 @@ public class DebugLog {
                 case SOURCE_VIEW:
                     currentModule = applicationView;
                     break;
+                case SOURCE_MAPS_POI:
+                    currentModule = poi;
+                    break;
             }
             return currentModule >= 0 && sourceFlags[currentModule];
         });
@@ -85,7 +88,7 @@ public class DebugLog {
         private String        source;
         private String        message;
 
-        public DebugEntry(String tag, String message) {
+        DebugEntry(String tag, String message) {
             timeStamp = new LocalDateTime();
             this.source = tag;
             this.message = message;
