@@ -16,13 +16,19 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 
+/**
+ * A test class for the google poi service
+ */
 public class GooglePoiServiceTest {
 
 
 	private GooglePoiService loader;
 
+	/**
+	 * Initialisation of each test
+	 */
 	@Before
-	public void constrution() throws ModuleNotWorkingException{
+	public void construction() {
 		try{
 			loader=new GooglePoiService(false, 100, 100, null);
 		} catch (ModuleNotWorkingException e){
@@ -32,6 +38,10 @@ public class GooglePoiServiceTest {
 		loadOneTypeTest();
 	}
 
+	/**
+	 * Testing the functionality of the fourth constructor parameter (forbidden Strings) of the {@link GooglePoiService}.
+	 * Therefore it does not use the {@link GooglePoiService} object that is being initialized in the construction (@before) method
+	 */
 	@Test
 	public void forbiddenInNameTest() {
 		String forbiddenLetter="a";
@@ -53,6 +63,9 @@ public class GooglePoiServiceTest {
 		}
 	}
 
+	/**
+	 * A simple test, loading just one area with no specific demands.
+	 */
 	@Test
 	public void loadOneTest() {
 		List<GooglePoi> pois=loader.loadPlaceForCircle(TestData.TIERGARTEN_POSITION_1, 50);
@@ -63,29 +76,49 @@ public class GooglePoiServiceTest {
 		System.out.println(pois.get(0).getPoiTypes());
 
 	}
+
+	/**
+	 *
+	 */
 	@Test
 	public void loadOneTypeTest() {
 		List<GooglePoi> pois=loader.loadPlaceForCircleAndType(TestData.TIERGARTEN_POSITION_1, 500, GoogleType.zoo);
 		assertTrue(pois.size()>1);
 
 	}
+
+	/**
+	 * Check that retrieval by {@link PoiType} works.
+	 */
 	@Test
 	public void loadPoiTypeTest() {
 		List<GooglePoi> pois=loader.loadPlaceForCircleAndPoiType(TestData.TIERGARTEN_POSITION_1, 	1000, PoiType.LEISURE);
 		assertTrue(pois.size()>0);
 
 	}
+
+	/**
+	 * Check that for a very large radius the maximum amount ouf pois per request is being received.
+	 * @throws ModuleNotWorkingException in case of failure
+	 */
 	@Test
-	public void loadVeryLargeRadiusTest() throws ModuleNotWorkingException{
+	public void loadVeryLargeRadiusTest() {
 		List<GooglePoi> pois=loader.loadPlaceForCircle(TestData.TIERGARTEN_POSITION_1, 57000);
 		assertEquals(60, pois.size());
 	}
+
+	/**
+	 * Check that no radius is possible but also that no poi is returned.
+	 */
 	@Test
 	public void loadNoRadiusTest() {
 		List<GooglePoi> pois=loader.loadPlaceForCircle(TestData.TIERGARTEN_POSITION_1, 0);
 		assertTrue(pois.isEmpty());
 	}
 
+	/**
+	 * Check the that the methode expandByMeters by the {@link GeographicCalculator} works correctly.
+	 */
 	@Test
 	public void expandByMetersTest(){
 		int distanceInMeters=400;
