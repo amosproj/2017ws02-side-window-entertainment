@@ -97,8 +97,8 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
     private SimpleDoubleProperty infoBoxTranslationX = new SimpleDoubleProperty();
     private SimpleDoubleProperty infoBoxTranslationY = new SimpleDoubleProperty();
 
-    private SimpleBooleanProperty debugLayerVisible       = new SimpleBooleanProperty(false);
-    private SimpleBooleanProperty applicationLayerVisible = new SimpleBooleanProperty(false);
+    private SimpleBooleanProperty debugLayerVisible       = new SimpleBooleanProperty(true);
+    private SimpleBooleanProperty applicationLayerVisible = new SimpleBooleanProperty(true);
 
     private int searchRadius = 1000;
     private GpsPosition lastRequestPosition;
@@ -137,28 +137,27 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
 
         initInfoBoxMovement();
 
-//        debugLayerVisible.addListener(event -> {
-//            if (properties.useAnimations) {
-//                Platform.runLater(() -> {
-//                    if (debugLayerVisible.get()) {
-//                        view.showDebugLayer();
-//                    } else {
-//                        view.hideDebugLayer();
-//                    }
-//                });
-//            }
-//        });
-//        applicationLayerVisible.addListener(event -> {
-//            if (properties.useAnimations) {
-//                Platform.runLater(() -> {
-//                    if (applicationLayerVisible.get()) {
-//                        view.showApplicationLayer();
-//                    } else {
-//                        view.hideApplicationLayer();
-//                    }
-//                });
-//            }
-//        });
+        if (properties.useAnimations) {
+            debugLayerVisible.addListener(event -> {
+                Platform.runLater(() -> {
+                    if (debugLayerVisible.get()) {
+                        view.showDebugLayer();
+                    } else {
+                        view.hideDebugLayer();
+                    }
+                });
+            });
+
+            applicationLayerVisible.addListener(event -> {
+                Platform.runLater(() -> {
+                    if (applicationLayerVisible.get()) {
+                        view.showApplicationLayer();
+                    } else {
+                        view.hideApplicationLayer();
+                    }
+                });
+            });
+        }
     }
 
     private void initTFClassifier() {
@@ -440,20 +439,19 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                         }
                     }
                     if (userExpressions != null && userExpressions.isMouthOpen() && mouthOpenDiff >= 5) {
-                        //applicationLayerVisible.set(!applicationLayerVisible.get());
                         lastMouthOpen = currentTime;
                     }
                     if (userExpressions != null && userExpressions.isSmile() && smileDiff >= 5) {
-
                         lastSmile = currentTime;
                     }
                     if (userExpressions != null && userExpressions.isTongueOut() && tongueOutDiff >= 5) {
-                        //debugLayerVisible.set(!debugLayerVisible.get());
+                        debugLayerVisible.set(!debugLayerVisible.get());
+                        applicationLayerVisible.set(!applicationLayerVisible.get());
                         lastTongueOut = currentTime;
                     }
                 } else {
-                    debugLayerVisible.set(false);
-                    applicationLayerVisible.set(false);
+                    //debugLayerVisible.set(false);
+                    //applicationLayerVisible.set(false);
                     setExpressionStatus(ExpressionType.ISRACKED, false);
                 }
                 if (mapsTimeDiff >= 5) {
@@ -472,7 +470,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
                 }
 
                 updateBackgroundImage();
-                //updateInfoBox();
+                updateInfoBox();
                 //iterations++;
             }
         });

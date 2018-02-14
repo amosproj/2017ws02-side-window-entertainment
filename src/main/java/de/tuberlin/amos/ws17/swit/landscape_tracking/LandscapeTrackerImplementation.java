@@ -83,7 +83,7 @@ public class LandscapeTrackerImplementation implements LandscapeTracker {
         }
 
         if (!logitechC920webcam.isOpen()) {
-            Dimension fullHD = new Dimension(800, 600);
+            Dimension fullHD = new Dimension(800, 500);
             Dimension[] customViewSizes = new Dimension[] {
                     fullHD
             };
