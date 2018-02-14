@@ -2,6 +2,7 @@ package de.tuberlin.amos.ws17.swit.landscape_tracking;
 
 import de.tuberlin.amos.ws17.swit.image_analysis.ImageUtils;
 import javafx.scene.media.MediaView;
+import javafx.util.Duration;
 import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameGrabber;
@@ -48,6 +49,7 @@ public class DemoVideoLandscapeTracker implements LandscapeTracker {
 
     public DemoVideoLandscapeTracker(MediaView mediaView, String videoName) {
         this.mediaView = mediaView;
+        mediaView.getMediaPlayer().setCycleCount(1000);
         try {
             grabber = new FFmpegFrameGrabber(ImageUtils.getTestVideoPath(videoName));
         } catch (URISyntaxException e) {
