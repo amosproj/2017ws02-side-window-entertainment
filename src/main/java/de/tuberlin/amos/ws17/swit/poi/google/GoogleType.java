@@ -141,4 +141,9 @@ public enum GoogleType {
 	 * Do NOT use for requests! Only required for received POIs
 	 */
 	place_of_worship,
+
+	/**
+	 * Do NOT use for requests! Only required for received POIs
+	 */
+	neighborhood
 }
