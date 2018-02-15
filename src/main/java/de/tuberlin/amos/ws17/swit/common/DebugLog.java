@@ -29,7 +29,12 @@ public class DebugLog {
     }
 
     public static void log(String source, String message) {
-        Platform.runLater(() -> debugLog.add(new DebugEntry(source, message)));
+        try {
+            Platform.runLater(() -> debugLog.add(new DebugEntry(source, message)));
+        }catch (IllegalStateException e){
+            System.out.println("                       (Toolkit of DebugLog not initialized, log message:)\n"+
+            message);
+        }
     }
 
     public static ObservableList<DebugEntry> getDebugLog() {
