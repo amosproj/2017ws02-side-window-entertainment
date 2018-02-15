@@ -47,7 +47,6 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 public class ApplicationViewModelImplementation implements ApplicationViewModel {
@@ -399,7 +398,7 @@ public class ApplicationViewModelImplementation implements ApplicationViewModel 
             try {
                 System.out.println("loading " + currentModule + "...");
                 //instantiate with the forbidden words from the properties file
-                poiService = new GooglePoiService(500, 800,
+                poiService = new GooglePoiService(ApiConfig.getProperty("GooglePlaces"), 500, 800,
                         Arrays.asList(properties.getProperty("places_to_ignore").split(",")));
                 setModuleStatus(ModuleErrors.NOINTERNET, true);
             } catch (ModuleNotWorkingException e) {

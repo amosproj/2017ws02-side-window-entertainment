@@ -1,10 +1,9 @@
 package de.tuberlin.amos.ws17.swit.poi.google;
 
-import de.tuberlin.amos.ws17.swit.common.ApiConfig;
 import de.tuberlin.amos.ws17.swit.common.DebugLog;
 import de.tuberlin.amos.ws17.swit.common.GpsPosition;
-import de.tuberlin.amos.ws17.swit.common.PointOfInterest;
 import de.tuberlin.amos.ws17.swit.common.exceptions.ModuleNotWorkingException;
+import de.tuberlin.amos.ws17.swit.common.exceptions.ModuleViolationException;
 import de.tuberlin.amos.ws17.swit.poi.PoiService;
 import de.tuberlin.amos.ws17.swit.poi.PoiType;
 import se.walkercrou.places.*;
@@ -36,8 +35,8 @@ public class GooglePoiService implements PoiService<GooglePoi> {
 	 * @param forbiddenPlacenames as a string (ignore case) that is not allowed within the POI name and so not further processed
 	 * @throws ModuleNotWorkingException in case of failure
 	 */
-	public GooglePoiService(int xResolution, int yResolution, List<String> forbiddenPlacenames) throws ModuleNotWorkingException{
-	    this(false, xResolution, yResolution, forbiddenPlacenames);
+	public GooglePoiService(String apiKey, int xResolution, int yResolution, List<String> forbiddenPlacenames) throws ModuleNotWorkingException{
+	    this(apiKey, false, xResolution, yResolution, forbiddenPlacenames);
 	}
 
 	/**
@@ -47,19 +46,22 @@ public class GooglePoiService implements PoiService<GooglePoi> {
 	 * @param forbiddenPlacenames as a string (ignore case) that is not allowed within the POI name and so not further processed
 	 * @throws ModuleNotWorkingException in case of failure
 	 */
-	public GooglePoiService(boolean enableLogging, int xResolution, int yResolution, List<String> forbiddenPlacenames) throws ModuleNotWorkingException{
-		client = new GooglePlaces(ApiConfig.getProperty("GooglePlaces"), rh);
+	public GooglePoiService(String apiKey, boolean enableLogging, int xResolution, int yResolution, List<String> forbiddenPlacenames) throws ModuleNotWorkingException{
+		client = new GooglePlaces(apiKey, rh);
 		client.setDebugModeEnabled(enableLogging);
 		this.xResolution=xResolution;
 		this.yResolution=yResolution;
 		poiFactory = new GooglePoiFactory(forbiddenPlacenames);
+		if(	checkAPIkey()==false)
+		  throw new ModuleNotWorkingException("Places API key is invalid");
+
 	}
 
     /**
      * Check if a certain POI can be loaded. No return.
 	 * @throws ModuleNotWorkingException is thrown in case of failure
 	 */
-    private void testFunctionality() throws ModuleNotWorkingException{
+    private boolean checkAPIkey() throws ModuleNotWorkingException{
 
         GoogleType zoo=GoogleType.zoo;
         Param[] params = new Param[1];
@@ -72,7 +74,7 @@ public class GooglePoiService implements PoiService<GooglePoi> {
             if(places!=null) {
                 if (places.size() > 0){
                     if (places.get(0).getName().contains("Zoo")){
-						return;
+						return true;
                     }else {
                         throw new ModuleNotWorkingException("Unexpected result when checking places API functionality for a zoo that has been requested.");
                     }
@@ -84,8 +86,19 @@ public class GooglePoiService implements PoiService<GooglePoi> {
             }
 
         }catch(GooglePlacesException e){
-            throw new ModuleNotWorkingException("Exception from used API with err msg: "+e.getErrorMessage(), e);
-        }
+        	try {
+				if (e.getCause().getMessage().toLowerCase().contains("key"))
+					return false;
+				else {
+					e.printStackTrace();
+					throw new ModuleNotWorkingException("Exception from used API with err msg: " + e.getErrorMessage(), e);
+				}
+			}catch (NullPointerException e1){
+        		e1.printStackTrace();
+				throw new ModuleNotWorkingException( e1);
+
+			}
+				}
 
     }
 
@@ -94,7 +107,7 @@ public class GooglePoiService implements PoiService<GooglePoi> {
 	 * @param circle the area in which the POIs shell be within
 	 * @return a Set of the retrieved POis, can be empty but not null
 	 */
-	public Set<GooglePoi> loadPlaceForCircleSearchGeometry(CircleSearchGeometry circle){
+	public Set<GooglePoi> loadPlaceForCircleSearchGeometry(CircleSearchGeometry circle) throws ModuleViolationException {
         Set<GooglePoi> pois=new HashSet<>();
 
         //if nothing definded load all
@@ -126,10 +139,10 @@ public class GooglePoiService implements PoiService<GooglePoi> {
 	 * @param center as the centerpoint
 	 * @param radius as the radius in meters
 	 * @return a Set of the retrieved POis, can be empty but not null
-	 * @throws InvalidRequestException in case an exception occurs
+	 * @throws ModuleViolationException in case an exception occurs
 	 */
 	@Override
-	public List<GooglePoi> loadPlaceForCircle(GpsPosition center, int radius) throws InvalidRequestException{
+	public List<GooglePoi> loadPlaceForCircle(GpsPosition center, int radius) throws ModuleViolationException{
 
 		DebugLog.log(DebugLog.SOURCE_MAPS_POI,"Places request for POI with center "+center.toString()+" and radius "+radius+" and no additional parameters.");
 
@@ -144,7 +157,7 @@ public class GooglePoiService implements PoiService<GooglePoi> {
 	 * @return a Set of the retrieved POis, can be empty but not null
 	 * @throws InvalidRequestException is thrown in case the request was not correct
 	 */
-	public List<GooglePoi> loadPlaceForCircleAndType(GpsPosition center, int radius, GoogleType... types) throws InvalidRequestException{
+	public List<GooglePoi> loadPlaceForCircleAndType(GpsPosition center, int radius, GoogleType... types) throws InvalidRequestException, ModuleViolationException {
 
 		DebugLog.log(DebugLog.SOURCE_MAPS_POI,"Places request for POI with center "+center.toString()+" and radius "+radius+" and params "+Arrays.toString(types));
 
@@ -173,10 +186,10 @@ public class GooglePoiService implements PoiService<GooglePoi> {
 	 * @param radius as the radius in meters
 	 * @param types  as the types to retrieve
 	 * @return a Set of the retrieved POis, can be empty but not null
-	 * @throws InvalidRequestException is thrown in case the request was not correct
+	 * @throws ModuleViolationException is thrown in case the request was not correct
 	 */
 	@Override
-	public List<GooglePoi> loadPlaceForCircleAndPoiType(GpsPosition center, int radius, PoiType... types) throws InvalidRequestException{
+	public List<GooglePoi> loadPlaceForCircleAndPoiType(GpsPosition center, int radius, PoiType... types) throws ModuleViolationException{
 
 		Set<GoogleType> gTypes=new HashSet<>();
 		for(PoiType type: types){
@@ -196,9 +209,9 @@ public class GooglePoiService implements PoiService<GooglePoi> {
 	 * @param radius as the radius in meters
 	 * @param params  as the types to retrieve
 	 * @return a List of the retrieved POis, can be empty but not null
-	 * @throws InvalidRequestException is thrown in case the request was not correct
+	 * @throws ModuleViolationException is thrown in case the request was not correct
 	 */
-	private List<GooglePoi> loadPlacesForEachParam(GpsPosition center, int radius, Param[] params) throws InvalidRequestException{
+	private List<GooglePoi> loadPlacesForEachParam(GpsPosition center, int radius, Param[] params) throws ModuleViolationException {
 
     	Set<GooglePoi> pois=new HashSet<>();
 
@@ -210,7 +223,7 @@ public class GooglePoiService implements PoiService<GooglePoi> {
 
 		return new ArrayList<>(pois);
 	}
-	private List<GooglePoi> loadPlaceForCircle(GpsPosition center, int radius, Param[] params) throws InvalidRequestException{
+	private List<GooglePoi> loadPlaceForCircle(GpsPosition center, int radius, Param[] params) throws ModuleViolationException {
 
 		try {
 			List<Place> places = client.getNearbyPlaces(center.getLatitude(), center.getLongitude(), radius, GooglePlaces.MAXIMUM_RESULTS, params);
@@ -218,10 +231,12 @@ public class GooglePoiService implements PoiService<GooglePoi> {
 
 			return poiFactory.createPOIsfromPlace(places);
 
+		}catch(InvalidRequestException e){
+			e.printStackTrace();
+			throw new ModuleViolationException(e.getErrorMessage()+ center.getLatitude() + center.getLongitude()+radius+ GooglePlaces.MAXIMUM_RESULTS+Arrays.toString(params), e);
 		}catch(GooglePlacesException e){
 			e.printStackTrace();
-			System.err.println(e.getErrorMessage()+ center.getLatitude() + center.getLongitude()+radius+ GooglePlaces.MAXIMUM_RESULTS+Arrays.toString(params));
-			return new ArrayList<>();
+			throw new ModuleViolationException(e.getErrorMessage()+ center.getLatitude() + center.getLongitude()+radius+ GooglePlaces.MAXIMUM_RESULTS+Arrays.toString(params), e);
 		}
 	}
 

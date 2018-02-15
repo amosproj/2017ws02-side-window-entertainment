@@ -1,6 +1,7 @@
 package de.tuberlin.amos.ws17.swit.poi.google;
 
 import de.tuberlin.amos.ws17.swit.common.exceptions.ModuleNotWorkingException;
+import de.tuberlin.amos.ws17.swit.common.exceptions.ModuleViolationException;
 import de.tuberlin.amos.ws17.swit.poi.PoiType;
 import org.junit.Before;
 import org.junit.Test;
@@ -21,7 +22,7 @@ public class TypeTest {
     @Before
     public void constrution() throws ModuleNotWorkingException{
         try{
-            loader=new GooglePoiService(false, 100, 100, null);
+            loader=new GooglePoiService(TestData.apiKey, false, 100, 100, null);
         } catch (ModuleNotWorkingException e){
             e.printStackTrace();
             fail();
@@ -29,7 +30,7 @@ public class TypeTest {
     }
 
     @Test
-    public void simpleGoogleTypeTest() {
+    public void simpleGoogleTypeTest() throws ModuleViolationException {
 
         List<GoogleType> typesToTest=new ArrayList<>();
         typesToTest.add(GoogleType.bank);
@@ -61,7 +62,7 @@ public class TypeTest {
     }
 
     @Test
-    public void simplePoiTypeTest() {
+    public void simplePoiTypeTest() throws ModuleViolationException {
 
         List<PoiType> typesToTest=new ArrayList<>();
         typesToTest.add(PoiType.TRANSPORT);

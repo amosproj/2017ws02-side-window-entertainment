@@ -2,13 +2,14 @@ package de.tuberlin.amos.ws17.swit.poi.google;
 
 import de.tuberlin.amos.ws17.swit.common.GpsPosition;
 import de.tuberlin.amos.ws17.swit.common.PointOfInterest;
+import de.tuberlin.amos.ws17.swit.common.exceptions.ModuleViolationException;
 import de.tuberlin.amos.ws17.swit.poi.MockedPoiService;
 import de.tuberlin.amos.ws17.swit.poi.PoiService;
 import org.junit.Test;
 
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 
 public class MockedPoiServiceTest {
@@ -17,7 +18,7 @@ public class MockedPoiServiceTest {
 	private PoiService loader=new MockedPoiService();
 
 	@Test
-	public void funcionalTest() {
+	public void funcionalTest() throws ModuleViolationException {
 		List<PointOfInterest> pois=loader.loadPlaceForCircle(new GpsPosition(0,0), 0);
 
 		assertTrue(pois.size()>1);

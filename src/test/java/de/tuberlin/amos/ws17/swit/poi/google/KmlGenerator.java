@@ -1,9 +1,10 @@
 package de.tuberlin.amos.ws17.swit.poi.google;
 
 import de.tuberlin.amos.ws17.swit.common.GpsPosition;
-import de.tuberlin.amos.ws17.swit.common.exceptions.ModuleNotWorkingException;
 import de.tuberlin.amos.ws17.swit.common.PoiVisualiser;
 import de.tuberlin.amos.ws17.swit.common.PointOfInterest;
+import de.tuberlin.amos.ws17.swit.common.exceptions.ModuleNotWorkingException;
+import de.tuberlin.amos.ws17.swit.common.exceptions.ModuleViolationException;
 import de.tuberlin.amos.ws17.swit.poi.PoisInSightFinder;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,20 +31,20 @@ public class KmlGenerator {
 
     @Before
     void construction() throws ModuleNotWorkingException {
-        loader=new GooglePoiService(true, 100, 100, null);
+        loader=new GooglePoiService(TestData.apiKey,true, 100, 100, null);
     }
 
     @Test
-    public void loadOneToKml() {
+    public void loadOneToKml() throws ModuleViolationException {
         List<PointOfInterest> pois2=(List) loader.loadPlaceForCircle(tiergarten1, 500);
 
         System.out.println(PoiVisualiser.getKmlForPois("loadOneToKml", pois2, null, null, null));
     }
 
     @Test
-    public void inRangeToKml() throws ModuleNotWorkingException{
+    public void inRangeToKml() throws ModuleNotWorkingException, ModuleViolationException {
 
-            GooglePoiService loader = new GooglePoiService(false, 100, 100, null);
+            GooglePoiService loader = new GooglePoiService(TestData.apiKey,false, 100, 100, null);
             PoisInSightFinder sightFinder = new PoisInSightFinder(500, 300, 500);
 
             List<GpsPosition> gpsPositions = new ArrayList<>();

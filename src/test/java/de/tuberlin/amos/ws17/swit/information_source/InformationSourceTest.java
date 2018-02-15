@@ -2,7 +2,7 @@ package de.tuberlin.amos.ws17.swit.information_source;
 
 import de.tuberlin.amos.ws17.swit.common.GpsPosition;
 import de.tuberlin.amos.ws17.swit.common.PointOfInterest;
-import de.tuberlin.amos.ws17.swit.common.exceptions.InformationNotAvailableException;
+import de.tuberlin.amos.ws17.swit.common.exceptions.ModuleViolationException;
 import de.tuberlin.amos.ws17.swit.common.exceptions.ServiceNotAvailableException;
 import de.tuberlin.amos.ws17.swit.poi.MockedPoiService;
 import de.tuberlin.amos.ws17.swit.poi.PoiService;
@@ -21,7 +21,7 @@ public class InformationSourceTest {
 
     // check whether Module could successfully fetch the accurate article
     @Test
-    public void getWikiArticle(){
+    public void getWikiArticle() throws ModuleViolationException {
         List<PointOfInterest> pois = poiService.loadPlaceForCircle(new GpsPosition(0,0), 0);
         for (PointOfInterest poi:pois ) {
             try {

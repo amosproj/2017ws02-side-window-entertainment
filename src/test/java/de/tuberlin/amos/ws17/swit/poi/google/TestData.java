@@ -1,5 +1,6 @@
 package de.tuberlin.amos.ws17.swit.poi.google;
 
+import de.tuberlin.amos.ws17.swit.common.ApiConfig;
 import de.tuberlin.amos.ws17.swit.common.GpsPosition;
 
 /**
@@ -13,5 +14,5 @@ public class TestData {
     final static double TIERGARTEN_LAT_2=52.5085468;
     final static GpsPosition TIERGARTEN_POSITION_1= new GpsPosition(TIERGARTEN_LNG, TIERGARTEN_LAT);
     final static GpsPosition TIERGARTEN_POSITION_2= new GpsPosition(TIERGARTEN_LNG_2, TIERGARTEN_LAT_2);
-
+    final static String apiKey= ApiConfig.getProperty("GooglePlaces");
 }
