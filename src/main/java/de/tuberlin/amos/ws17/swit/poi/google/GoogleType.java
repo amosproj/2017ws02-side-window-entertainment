@@ -98,6 +98,10 @@ public enum GoogleType {
 	zoo,
 
 	/**
+	 * In case of an type not provided by {@link GoogleType}
+	 */
+	UNKNOWN,
+	/**
 	 * Do NOT use for requests! Only required for received POIs
 	 */
 	health,
@@ -141,8 +145,7 @@ public enum GoogleType {
 	 * Do NOT use for requests! Only required for received POIs
 	 */
 	place_of_worship,
-
-	/**
+    /**
 	 * Do NOT use for requests! Only required for received POIs
 	 */
 	neighborhood

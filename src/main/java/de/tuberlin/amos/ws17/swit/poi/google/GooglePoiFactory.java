@@ -1,10 +1,9 @@
 package de.tuberlin.amos.ws17.swit.poi.google;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Iterables;
 import de.tuberlin.amos.ws17.swit.common.DebugLog;
 import de.tuberlin.amos.ws17.swit.common.GpsPosition;
 import de.tuberlin.amos.ws17.swit.common.PointOfInterest;
+import org.apache.commons.lang3.EnumUtils;
 import se.walkercrou.places.Place;
 import se.walkercrou.places.Status;
 
@@ -116,13 +115,16 @@ class GooglePoiFactory {
 
         for(String type: p.getTypes()){
 
-            try {
+            if(EnumUtils.isValidEnum(GoogleType.class, type)){
                 types.add(GoogleType.valueOf(type));
 
-            } catch (IllegalArgumentException ex) {
-                System.err.println("Enum of places Api does not match current google enums for enum: " +type);
-                ex.printStackTrace();
+            }else{
+
+                types.add(GoogleType.UNKNOWN);
+                System.err.println("Enum of places Api does not match current google enums for enum: " +type+
+                        "\n...to solve this issue add it to the Enum 'GoogleType'.");
             }
+
         }
 
         return types;
