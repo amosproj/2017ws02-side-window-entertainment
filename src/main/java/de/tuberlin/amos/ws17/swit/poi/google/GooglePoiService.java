@@ -1,6 +1,7 @@
 package de.tuberlin.amos.ws17.swit.poi.google;
 
 import de.tuberlin.amos.ws17.swit.common.ApiConfig;
+import de.tuberlin.amos.ws17.swit.common.DebugLog;
 import de.tuberlin.amos.ws17.swit.common.GpsPosition;
 import de.tuberlin.amos.ws17.swit.common.PointOfInterest;
 import de.tuberlin.amos.ws17.swit.common.exceptions.ModuleNotWorkingException;
@@ -37,7 +38,6 @@ public class GooglePoiService implements PoiService<GooglePoi> {
 	 */
 	public GooglePoiService(int xResolution, int yResolution, List<String> forbiddenPlacenames) throws ModuleNotWorkingException{
 	    this(false, xResolution, yResolution, forbiddenPlacenames);
-	    testFunctionality();
 	}
 
 	/**
@@ -52,7 +52,6 @@ public class GooglePoiService implements PoiService<GooglePoi> {
 		client.setDebugModeEnabled(enableLogging);
 		this.xResolution=xResolution;
 		this.yResolution=yResolution;
-		testFunctionality();
 		poiFactory = new GooglePoiFactory(forbiddenPlacenames);
 	}
 
@@ -132,6 +131,8 @@ public class GooglePoiService implements PoiService<GooglePoi> {
 	@Override
 	public List<GooglePoi> loadPlaceForCircle(GpsPosition center, int radius) throws InvalidRequestException{
 
+		DebugLog.log(DebugLog.SOURCE_MAPS_POI,"Places request for POI with center "+center.toString()+" and radius "+radius+" and no additional parameters.");
+
 		return loadPlaceForCircle(center, radius, new Param[0]);
 	}
 
@@ -145,7 +146,9 @@ public class GooglePoiService implements PoiService<GooglePoi> {
 	 */
 	public List<GooglePoi> loadPlaceForCircleAndType(GpsPosition center, int radius, GoogleType... types) throws InvalidRequestException{
 
-    	if(types.length>0) {
+		DebugLog.log(DebugLog.SOURCE_MAPS_POI,"Places request for POI with center "+center.toString()+" and radius "+radius+" and params "+Arrays.toString(types));
+
+		if(types.length>0) {
 
     		//concat the types
 			String concatTypes = "";
@@ -180,6 +183,8 @@ public class GooglePoiService implements PoiService<GooglePoi> {
 			gTypes.addAll(typeMap.getKeysByValue(type));
 		}
 
+		DebugLog.log(DebugLog.SOURCE_MAPS_POI,"Places request for POI with center "+center.toString()+" and radius "+radius+"\n..and params "+gTypes.toString());
+
 		return loadPlaceForCircleAndType(center, radius, gTypes.toArray(new GoogleType[gTypes.size()]));
 	}
 
@@ -200,7 +205,7 @@ public class GooglePoiService implements PoiService<GooglePoi> {
     	for(Param param: params){
     		Param[] single=new Param[1];
     		single[0]=param;
-    		pois.addAll(loadPlaceForCircle(center, radius, single));
+			pois.addAll(loadPlaceForCircle(center, radius, single));
 		}
 
 		return new ArrayList<>(pois);
@@ -220,6 +225,11 @@ public class GooglePoiService implements PoiService<GooglePoi> {
 		}
 	}
 
+	/**
+	 * The used API requires this step to completely resolve all parameters delivered by the places API.
+	 * @param places
+	 * @return the places with all possible fields filled
+	 */
 	private static List<Place> getPlacesDetails(List<Place> places){
 
     	if (places == null) {
@@ -258,13 +268,13 @@ public class GooglePoiService implements PoiService<GooglePoi> {
 
 		if(poi.getPhotoreference()!=null) {
 
-			System.out.print("Getting image for poi " +poi.getId()+" with ref " +poi.getPhotoreference().getReference()+
+			DebugLog.log(DebugLog.SOURCE_MAPS_POI,"Getting image for poi " +poi.getId()+" with ref " +poi.getPhotoreference().getReference()+
 					" ..."  );
 			Photo photo = poi.getPhotoreference();
 			BufferedImage image = photo.download(xResolution, yResolution).getImage();
 			poi.setImage(image);
 
-			System.out.println("...image added to poi." );
+			DebugLog.log(DebugLog.SOURCE_MAPS_POI,"...image added to poi." );
 		}
 	}
 

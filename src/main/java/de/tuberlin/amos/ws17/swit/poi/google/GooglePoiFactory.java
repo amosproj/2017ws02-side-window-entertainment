@@ -1,11 +1,15 @@
 package de.tuberlin.amos.ws17.swit.poi.google;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
+import de.tuberlin.amos.ws17.swit.common.DebugLog;
 import de.tuberlin.amos.ws17.swit.common.GpsPosition;
 import de.tuberlin.amos.ws17.swit.common.PointOfInterest;
 import se.walkercrou.places.Place;
 import se.walkercrou.places.Status;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * A Factory to create {@link GooglePoi}s from other datatypes
@@ -18,7 +22,8 @@ class GooglePoiFactory {
      * Create a {@link GooglePoiFactory} that creates new Pois after some implemented rules.
      * @param forbiddenInPlacenames remove all POIs cointaining a String that is being contained here
      */
-    public GooglePoiFactory(List<String> forbiddenInPlacenames) {
+    GooglePoiFactory(List<String> forbiddenInPlacenames) {
+
         this.forbiddenInPlacenames = forbiddenInPlacenames;
     }
 
@@ -31,7 +36,16 @@ class GooglePoiFactory {
                         poisToRemove.add(poi);
                 }
             }
+            DebugLog.log(DebugLog.SOURCE_MAPS_POI,"GooglePoiFactory: Removed "+poisToRemove.size()+
+                    " of former " +places.size()+
+                    " POIs with names " +
+                    poisToRemove.stream().map(mo -> mo.getName()).collect(Collectors.toList()).toString()+
+                    "\naccording to forbidden names: "+ forbiddenInPlacenames.toString()
+            );
+
             places.removeAll(poisToRemove);
+
+
         }
     }
 
@@ -53,7 +67,7 @@ class GooglePoiFactory {
      *
      * @return the created GooglePoi
      */
-    GooglePoi createPOIfromPlace(Place place){
+    private GooglePoi createPOIfromPlace(Place place){
 
         GooglePoi poi=new GooglePoi(
                 place.getPlaceId(),

@@ -13,8 +13,8 @@ public class CircleSearchGeometry {
 
     private int radiusInMeters;
     private GpsPosition center;
-    private Set<GoogleType> googletypes=null;
-    private Set<PoiType> poiTypes=null;
+    private Set<GoogleType> googletypes;
+    private Set<PoiType> poiTypes;
 
     CircleSearchGeometry(int radiusInMeters, GpsPosition center, Set<GoogleType> googletypes, Set<PoiType> poiTypes) {
         this.radiusInMeters = radiusInMeters;

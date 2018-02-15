@@ -1,5 +1,6 @@
 package de.tuberlin.amos.ws17.swit.poi;
 
+import de.tuberlin.amos.ws17.swit.common.DebugLog;
 import de.tuberlin.amos.ws17.swit.common.GpsPosition;
 import de.tuberlin.amos.ws17.swit.common.PointOfInterest;
 
@@ -28,17 +29,24 @@ public class PoisInSightFinder {
      */
     public  Map<PointOfInterest, Float> getPoisInViewAngle(GpsPosition oldPosition, GpsPosition currentPosition, Collection<PointOfInterest> pois){
 
-        if(oldPosition==null)
+        if(oldPosition==null || currentPosition==null)
             getPoisInRange(currentPosition, pois, -1);
-
-        if(oldPosition.equals(currentPosition)){
+        else if(oldPosition.equals(currentPosition)){
             getPoisInRange(currentPosition, pois, -1);
         }
 
         Polygon sight=calculateSight(currentPosition, oldPosition);
+        DebugLog.log(DebugLog.SOURCE_MAPS_POI,"Calculated sight polygon (int values): "+
+                sight.getBounds2D().toString()+
+        " ...");
+
         Map<PointOfInterest, Float> inViewRange=new HashMap<>();
 
         GpsPosition inDrivingDirection=GeographicCalculator.expandByMeters(oldPosition, currentPosition, metersInDrivinDirection);
+
+        DebugLog.log(DebugLog.SOURCE_MAPS_POI,"...number of POIs BEFORE sight filtering: "+
+                pois.size()+
+        " ...");
 
         for(PointOfInterest p: pois){
 
@@ -49,14 +57,15 @@ public class PoisInSightFinder {
         }
         //sort asc
         inViewRange=sortByComparator(inViewRange, true);
+        DebugLog.log(DebugLog.SOURCE_MAPS_POI,"...and AFTER sight filtering: "+inViewRange.size());
 
         return inViewRange;
     }
 
     /**
      * Calculate which pois are in range the default range is specified by the sum of the edges.
-     * @param currentPosition
-     * @param pois
+     * @param currentPosition as the position of the car
+     * @param pois as the pois to be thinned
      * @param range the maxrange, will be replaced by a default if 0
      */
     private void getPoisInRange(GpsPosition currentPosition, Collection<PointOfInterest> pois, int range) {

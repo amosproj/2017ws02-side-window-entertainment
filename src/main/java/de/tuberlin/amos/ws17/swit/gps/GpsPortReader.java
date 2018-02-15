@@ -36,7 +36,7 @@ public class GpsPortReader implements SentenceListener{
     private DateTime firstTime;
 
     // init the reader of GPS data over a COP port
-    public GpsPortReader(){
+    GpsPortReader(){
         update = false;
         running = false;
         lastMessageReceived = null;
@@ -72,7 +72,10 @@ public class GpsPortReader implements SentenceListener{
         }
     }
 
-    // fires every time new data is received over the observed port
+    /**
+     * fires every time new data is received over the observed port
+     * @param event as the event to ...
+     */
     public void sentenceRead(SentenceEvent event){
         Sentence s = event.getSentence();
 

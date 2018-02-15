@@ -4,6 +4,7 @@ import com.google.api.client.http.HttpMethods;
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpResponseException;
 import com.google.api.client.http.HttpTransport;
+import de.tuberlin.amos.ws17.swit.common.DebugLog;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -24,7 +25,6 @@ import java.util.logging.Logger;
  * An implementation of the {@link RequestHandler}  that works (fix)
  */
 public class FixedRequestHandler implements RequestHandler {
-
 	public static void enableLogging() {
 		  Logger logger = Logger.getLogger(HttpTransport.class.getName());
 		  logger.setLevel(Level.CONFIG);
@@ -61,14 +61,14 @@ public class FixedRequestHandler implements RequestHandler {
     *
     * @param characterEncoding to use
     */
-   FixedRequestHandler(String characterEncoding) {
+   private FixedRequestHandler(String characterEncoding) {
        this.characterEncoding = characterEncoding;
    }
 
    /**
     * Creates a new handler with UTF-8 character encoding.
     */
-   public FixedRequestHandler() {
+   FixedRequestHandler() {
        this(DEFAULT_CHARACTER_ENCODING);
    }
 
