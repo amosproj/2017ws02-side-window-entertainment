@@ -52,8 +52,14 @@ public class GooglePoiService implements PoiService<GooglePoi> {
 		this.xResolution=xResolution;
 		this.yResolution=yResolution;
 		poiFactory = new GooglePoiFactory(forbiddenPlacenames);
-		if(	checkAPIkey()==false)
-		  throw new ModuleNotWorkingException("Places API key is invalid");
+
+		//check api key
+		try {
+            if (checkAPIkey() == false)
+                throw new ModuleNotWorkingException("Places API key is invalid");
+        }catch (ModuleNotWorkingException e){
+		    e.printStackTrace();
+        }
 
 	}
 
